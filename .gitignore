@@ -1,4 +1,5 @@
 # Add locally ignored files
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

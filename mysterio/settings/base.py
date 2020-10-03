@@ -41,11 +41,15 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'mysterio.urls'
 
 FRONTEND_DIR = os.path.join(BASE_DIR, 'frontend')
+MYSTERIO_DIR = os.path.join(BASE_DIR, 'mysterio')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(FRONTEND_DIR, 'build')],
+        'DIRS': [
+            os.path.join(MYSTERIO_DIR, 'templates'),
+            os.path.join(FRONTEND_DIR, 'build')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

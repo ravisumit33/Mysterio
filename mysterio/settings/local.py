@@ -1,5 +1,5 @@
-from mysterio.settings.base import *
 from dotenv import load_dotenv
+from mysterio.settings.base import *
 
 env_path = Path('.') / '.env'
 load_dotenv(dotenv_path=env_path)

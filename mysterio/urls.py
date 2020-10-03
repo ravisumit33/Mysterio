@@ -17,6 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 import mysterio.views as RootView
 
+handler400 = RootView.handler400
+handler403 = RootView.handler403
+handler404 = RootView.handler404
+handler500 = RootView.handler500
+
 urlpatterns = [
     path('api/chat', include('chat.urls')),
     path('admin/', admin.site.urls),

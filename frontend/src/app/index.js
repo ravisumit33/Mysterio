@@ -1,14 +1,16 @@
 import React from 'react';
-import Box from '@material-ui/core/Box';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import './App.css';
+import { Box, CssBaseline } from '@material-ui/core';
+import { NavBar, Home, Footer } from 'components';
+import './index.css';
 
 class App extends React.Component {
   render() {
     return (
       <CssBaseline>
         <Box className="App">
-          Work in progress
+          <NavBar />
+          <Home />
+          <Footer />
         </Box>
       </CssBaseline>
     );

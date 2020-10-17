@@ -1,9 +1,9 @@
 from unittest.mock import patch
-from django.test import SimpleTestCase
+from django.test import TestCase
 from django.template.loader import get_template
 from django.template.exceptions import TemplateDoesNotExist
 
-class FrontendViewTests(SimpleTestCase):
+class FrontendViewTests(TestCase):
     """Tests for frontend view
     """
     def test_index_page_200(self):

@@ -4,3 +4,12 @@ repos:
     hooks:
     -    id: pylint
          language: system
+         verbose: true
+-   repo: local
+    hooks:
+    -    id: test
+         name: test
+         language: system
+         entry: ./manage.py test
+         pass_filenames: false
+         verbose: true

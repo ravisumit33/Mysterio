@@ -27,6 +27,9 @@ pyasn1-modules==0.2.8
 pycparser==2.20
 PyHamcrest==2.0.2
 pylint==2.6.0
+pylint-django==2.3.0
+pylint-plugin-utils==0.6
+pylint-runner==0.6.0
 pyOpenSSL==19.1.0
 python-dotenv==0.14.0
 pytz==2020.1

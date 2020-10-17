@@ -18,4 +18,8 @@ class IndividualChannel(Channel):
 class GroupChannel(IndividualChannel):
     """Channel for group chat
     """
-    group_room = models.ForeignKey('chat.GroupRoom', on_delete=models.CASCADE, related_name='group_channels')
+    group_room = models.ForeignKey(
+        'chat.GroupRoom',
+        on_delete=models.CASCADE,
+        related_name='group_channels'
+    )

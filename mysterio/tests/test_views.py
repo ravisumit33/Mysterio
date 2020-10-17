@@ -19,7 +19,7 @@ class FrontendViewTests(SimpleTestCase):
 
 
     @patch('mysterio.views.get_template', side_effect=TemplateDoesNotExist('index.html'))
-    def test_index_page_404(self, mock_get_template):
+    def test_index_page_404(self, mock_get_template): # pylint:disable=W0613
         """Test if 404 returned if index page not available
         """
         response = self.client.get('/')

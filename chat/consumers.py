@@ -1,7 +1,6 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
-from channels.db import database_sync_to_async
 from django.contrib.sessions.models import Session
 from django.core.exceptions import SuspiciousOperation
 import chat.models.channel as Channel
@@ -19,7 +18,10 @@ class ChatConsumer(WebsocketConsumer):
         session_instance = Session.objects.get(pk=session.session_key)
 
         # TODO: handle group chat instantiation
-        new_channel = Channel.IndividualChannel(channel_name=self.channel_name, session=session_instance)
+        new_channel = Channel.IndividualChannel(
+            channel_name=self.channel_name,
+            session=session_instance
+        )
         new_channel.save()
 
         # TODO: create one member channle group for indivial chat only

@@ -1,5 +1,4 @@
-import json
-from django.http import HttpResponse
+from django.http import JsonResponse
 
 def test_view(request):
     """Test chat api view
@@ -8,4 +7,4 @@ def test_view(request):
         'id': 4,
         'name': 'Hello world',
     }
-    return HttpResponse(json.dumps(response_data), content_type="application/json")
+    return JsonResponse(response_data)

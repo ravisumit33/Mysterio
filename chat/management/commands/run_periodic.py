@@ -12,7 +12,7 @@ def run_match():
     scheduer = BlockingScheduler()
     # TODO: set appropiate time interval
     @scheduer.scheduled_job('interval', seconds=3)
-    def timed_job():
+    def timed_job(): # pylint: disable=W0612
         match()
 
     scheduer.start()
@@ -21,5 +21,5 @@ class Command(BaseCommand):
     """Custom command to run periodic tasks
     """
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **options):
         run_match()

@@ -3,7 +3,6 @@ from django.views.generic.base import TemplateView
 from django.template.exceptions import TemplateDoesNotExist
 from django.http import Http404
 from django.template.loader import get_template
-from django.shortcuts import render
 
 logger = logging.getLogger("mysterio")
 
@@ -29,23 +28,3 @@ class FrontendView(TemplateView):
                 run 'npm run build' to test the production version.
                 """
             ) from exp
-
-def handler400(request, exception=None):
-    """Custom 400 error View
-    """
-    return render(request, '400.html', status=400)
-
-def handler403(request, exception=None):
-    """Custom 403 error View
-    """
-    return render(request, '403.html', status=403)
-
-def handler404(request, exception=None):
-    """Custom 404 error View
-    """
-    return render(request, '404.html', status=404)
-
-def handler500(request, exception=None):
-    """Custom 500 error View
-    """
-    return render(request, '500.html', status=500)

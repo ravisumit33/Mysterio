@@ -2,7 +2,7 @@ from django.test import SimpleTestCase, override_settings
 from django.http import Http404
 from django.core.exceptions import SuspiciousOperation, PermissionDenied
 from django.urls import path
-from mysterio.views import handler400, handler403, handler404, handler500
+from django.views.defaults import server_error
 
 def http_400_view(request):
     """Test view for 400
@@ -22,7 +22,7 @@ def http_404_view(request):
 def http_500_view(request):
     """Test view for 500
     """
-    return handler500(request)
+    return server_error(request)
 
 urlpatterns = [
     path('400/', http_400_view),

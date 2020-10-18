@@ -6,7 +6,6 @@ class Channel(models.Model):
     """
     channel_name = models.CharField(max_length=100)
     session = models.ForeignKey(Session, on_delete=models.CASCADE, null=False)
-
     class Meta:
         abstract = True
 

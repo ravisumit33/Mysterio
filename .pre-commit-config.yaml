@@ -4,6 +4,7 @@ repos:
     hooks:
     -    id: pylint
          language: system
+         entry: bash -c 'exec env DJANGO_SETTINGS_MODULE=mysterio.settings.local'
          verbose: true
 -   repo: local
     hooks:

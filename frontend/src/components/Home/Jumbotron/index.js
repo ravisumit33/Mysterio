@@ -2,6 +2,7 @@ import React from 'react';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import Box from '@material-ui/core/Box';
 import { Button, TextField } from '@material-ui/core';
+import { Message } from 'constants.js';
 
 
 class Jumbotron extends React.Component {
@@ -35,8 +36,25 @@ class Jumbotron extends React.Component {
     
     socket.addEventListener('message', (event) => {
       console.log('socket connection received msg', event);
-      const json_data = JSON.parse(event.data);
-      const message = json_data.message;
+      const payload = JSON.parse(event.data);
+      const message_type = payload.type;
+      const message_data = payload.data;
+      let message = '';
+      switch (message_type) {
+        case Message.PARTNER_JOINED:
+          message = 'Say hi to your anonymous friend';
+          break;
+        case Message.PARTNER_LEFT:
+          this.handleEndChat();
+          message = 'Your anonymous friend has left';
+          break;
+        case Message.TEXT:
+          message = message_data.text;
+          break;
+        default:
+          console.error('Unsupported message type', message_type);
+          break;
+      }
       const tempLocalMessage = [...this.state.localMessage, message];
       console.log('socket connection received msg', this.state.localMessage, tempLocalMessage);
       this.setState({
@@ -47,10 +65,13 @@ class Jumbotron extends React.Component {
 
   handleSocketSend() {
     console.log('chekc receive');
-    const data = {
-      message: this.state.currentMessage,
+    const payload = {
+      type: Message.TEXT,
+      data: {
+        text: this.state.currentMessage,
+      },
     };
-    this.state.chatSocket.send(JSON.stringify(data));
+    this.state.chatSocket.send(JSON.stringify(payload));
     this.setState({
       currentMessage: '',
     });
@@ -63,7 +84,7 @@ class Jumbotron extends React.Component {
   }
 
   handleEndChat() {
-    this.state.socket.close();
+    this.state.chatSocket.close();
   }
 
   render() {

@@ -4,6 +4,7 @@ from channels.generic.websocket import WebsocketConsumer
 from django.contrib.sessions.models import Session
 from django.core.exceptions import SuspiciousOperation
 import chat.models.channel as Channel
+from chat.constants import Message
 
 class ChatConsumer(WebsocketConsumer):
     """Custom WebsocketConsumer for handling chat web socket requests
@@ -32,7 +33,6 @@ class ChatConsumer(WebsocketConsumer):
         self.accept()
 
     def disconnect(self, code):
-        print('disconnect called')
         # TODO: notify corrosponding matched user after disconnect
         # TODO: handle group chat deletetion
         channel_inst = Channel.IndividualChannel.objects.get(channel_name=self.channel_name)
@@ -48,35 +48,44 @@ class ChatConsumer(WebsocketConsumer):
                 self.room_id,
                 self.channel_name
             )
-        print('disconnect called ended')
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_id,
+                {
+                    'type': 'group_msg_receive',
+                    'payload': {
+                        'type': Message.PARTNER_LEFT,
+                        'data': {}
+                    }
+                }
+            )
 
     def receive(self, text_data=None, bytes_data=None):
-        text_data_json = json.loads(text_data)
-        text_msg = text_data_json['message']
-        if self.room_id is None:
-            raise SuspiciousOperation
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_id,
-            {
-                'type': 'group_msg_receive',
-                'payload': {
-                    'message': text_msg,
-                    'room_id': self.room_id,
-                    # TODO: send 'sender info'
+        payload_json = json.loads(text_data)
+        message_type = payload_json['type']
+        message_data = payload_json['data']
+        if message_type == Message.TEXT:
+            if self.room_id is None:
+                raise SuspiciousOperation
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_id,
+                {
+                    'type': 'group_msg_receive',
+                    'payload': {
+                        'type': Message.TEXT,
+                        'data': {
+                            'text': message_data['text'],
+                            'room_id': self.room_id,
+                        }
+                        # TODO: send 'sender info' and remove room i
+                    }
                 }
-            }
-        )
+            )
 
     def group_msg_receive(self, event):
         """Group message receiver
         """
         payload = event['payload']
-        text_msg = payload['message']
-        if 'room_id' in payload:
-            self.room_id = payload['room_id']
-        self.send(text_data=json.dumps(
-            {
-                'message': text_msg,
-                'room_id': self.room_id,
-            }
-        ))
+        # TODO: remove room id in payload
+        if 'room_id' in payload['data']:
+            self.room_id = payload['data']['room_id']
+        self.send(text_data=json.dumps(payload))

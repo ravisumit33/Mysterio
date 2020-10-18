@@ -11,7 +11,7 @@ def run_match():
     logger.info('Periodic task started')
     scheduer = BlockingScheduler()
     # TODO: set appropiate time interval
-    @scheduer.scheduled_job('interval', seconds=3)
+    @scheduer.scheduled_job('interval', seconds=1)
     def timed_job(): # pylint: disable=W0612
         match()
 

@@ -4,8 +4,9 @@ repos:
     hooks:
     -    id: pylint
          language: system
-         entry: bash -c 'exec env DJANGO_SETTINGS_MODULE=mysterio.settings.local'
+         entry: dotenv run pylint
          verbose: true
+         args: ["--disable=W0511"]
 -   repo: local
     hooks:
     -    id: test

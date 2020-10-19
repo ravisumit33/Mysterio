@@ -12,6 +12,6 @@ repos:
     -    id: test
          name: test
          language: system
-         entry: ./manage.py test
+         entry: python manage.py test
          pass_filenames: false
          verbose: true

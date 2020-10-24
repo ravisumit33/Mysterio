@@ -7,6 +7,11 @@ repos:
          entry: dotenv run pylint
          verbose: true
          args: ["--disable=W0511"]
+-   repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v7.12.0
+    hooks:
+    -    id: eslint
+         args: ["--max-warnings=0"]
 -   repo: local
     hooks:
     -    id: test

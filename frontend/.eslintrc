@@ -1,6 +1,12 @@
 {
+    "extends": "react-app",
     "parser": "babel-eslint",
     "rules": {
         "eol-last": ["error", "always"]
+    },
+    "settings": {
+      "react": {
+        "version": "latest"
+      }
     }
 }

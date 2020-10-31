@@ -9,3 +9,5 @@ ALLOWED_HOSTS = []
 CHANNEL_LAYERS['default']['CONFIG'] = {
     'hosts': [os.getenv('REDIS_URL')],
 }
+
+LOGGING['handlers']['console']['formatter'] = 'verbose'

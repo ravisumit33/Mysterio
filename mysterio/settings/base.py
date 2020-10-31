@@ -114,35 +114,34 @@ STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, 'build', 'static'),
 ]
 
+BASE_LOG_FORMAT = (
+    'module=%(name)s lineno=%(lineno)s funcname=%(funcName)s ' +
+    '%(log_color)s[%(levelname)s]%(reset)s %(blue)s%(message)s'
+)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
-                       'pathname=%(pathname)s lineno=%(lineno)s ' +
-                       'funcname=%(funcName)s %(message)s'),
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(asctime)s [%(process)d] ' + BASE_LOG_FORMAT,
             'datefmt': '%Y-%m-%d %H:%M:%S'
         },
         'simple': {
-            'format': '%(levelname)s %(message)s'
-        }
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(asctime)s ' + BASE_LOG_FORMAT,
+            'datefmt': '%H:%M:%S'
+        },
     },
     'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'logging.NullHandler',
-        },
         'console': {
-            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
         }
     },
-    'loggers': {
-        'mysterio': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        }
-    }
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+
 }

@@ -31,3 +31,4 @@ txaio==20.4.1
 tzlocal==2.1
 zope.interface==5.1.2
 psycopg2==2.8.6
+colorlog==4.4.0

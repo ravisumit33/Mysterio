@@ -24,5 +24,18 @@ CHANNEL_LAYERS['default']['CONFIG'] = {
     'hosts': ['redis://127.0.0.1:6379'],
 }
 
+LOGGING['loggers'] = {
+    'mysterio': {
+        'level': 'DEBUG',
+    },
+    'chat': {
+        'level': 'DEBUG',
+    },
+    'django': {
+        'level': 'WARNING',
+    }
+}
+
+LOGGING['handlers']['console']['formatter'] = 'simple'
 
 ALLOWED_HOSTS = ["*"]

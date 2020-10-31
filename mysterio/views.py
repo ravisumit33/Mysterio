@@ -4,7 +4,7 @@ from django.template.exceptions import TemplateDoesNotExist
 from django.http import Http404
 from django.template.loader import get_template
 
-logger = logging.getLogger("mysterio")
+logger = logging.getLogger(__name__)
 
 class FrontendView(TemplateView):
     """Frontend View

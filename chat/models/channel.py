@@ -7,6 +7,7 @@ class Channel(models.Model):
     name = models.CharField(max_length=100, unique=True)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         abstract = True
 
@@ -14,6 +15,15 @@ class IndividualChannel(Channel):
     """Channel for individual chat
     """
     is_matched = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['is_matched', 'created_at'],
+                condition=models.Q(is_matched=False),
+                name='individual_channel_index'
+            )
+        ]
 
 class GroupChannel(Channel):
     """Channel for group chat

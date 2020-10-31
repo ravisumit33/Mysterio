@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 from django.test import TestCase
 from django.template.loader import get_template
@@ -22,5 +23,7 @@ class FrontendViewTests(TestCase):
     def test_index_page_404(self, mock_get_template): # pylint:disable=W0613
         """Test if 404 returned if index page not available
         """
+        logging.disable(logging.CRITICAL)
         response = self.client.get('/')
         self.assertEqual(response.status_code, 404)
+        logging.disable(logging.NOTSET)

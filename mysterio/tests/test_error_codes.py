@@ -1,3 +1,4 @@
+import logging
 from django.test import SimpleTestCase, override_settings
 from django.http import Http404
 from django.core.exceptions import SuspiciousOperation, PermissionDenied
@@ -35,6 +36,16 @@ urlpatterns = [
 class ErrorCodeHandlerTests(SimpleTestCase):
     """ Tests for error code handlers
     """
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        logging.disable(logging.NOTSET)
+
     status_codes = [400, 403, 404, 500]
     templates = ['400.html', '403.html', '404.html', '500.html']
     user_messages = ['Bad request', 'Permission denied', 'Page not found', 'Internal server error']

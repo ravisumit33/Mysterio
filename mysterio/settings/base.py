@@ -69,22 +69,8 @@ ASGI_APPLICATION = 'mysterio.routing.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [os.getenv('REDIS_URL', 'redis://127.0.0.1:6379')],
-        },
     }
 }
-
-# Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -128,35 +114,34 @@ STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, 'build', 'static'),
 ]
 
+BASE_LOG_FORMAT = (
+    'module=%(name)s lineno=%(lineno)s funcname=%(funcName)s ' +
+    '%(log_color)s[%(levelname)s]%(reset)s %(blue)s%(message)s'
+)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': ('%(asctime)s [%(process)d] [%(levelname)s] ' +
-                       'pathname=%(pathname)s lineno=%(lineno)s ' +
-                       'funcname=%(funcName)s %(message)s'),
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(asctime)s [%(process)d] ' + BASE_LOG_FORMAT,
             'datefmt': '%Y-%m-%d %H:%M:%S'
         },
         'simple': {
-            'format': '%(levelname)s %(message)s'
-        }
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(asctime)s ' + BASE_LOG_FORMAT,
+            'datefmt': '%H:%M:%S'
+        },
     },
     'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'logging.NullHandler',
-        },
         'console': {
-            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
         }
     },
-    'loggers': {
-        'mysterio': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        }
-    }
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+
 }

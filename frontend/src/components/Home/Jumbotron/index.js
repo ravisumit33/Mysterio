@@ -41,12 +41,12 @@ class Jumbotron extends React.Component {
       const message_data = payload.data;
       let message = '';
       switch (message_type) {
-        case Message.PARTNER_JOINED:
-          message = 'Say hi to your anonymous friend';
+        case Message.USER_JOINED:
+          message = 'User joined';
           break;
-        case Message.PARTNER_LEFT:
+        case Message.USER_LEFT:
           this.handleEndChat();
-          message = 'Your anonymous friend has left';
+          message = 'User left';
           break;
         case Message.TEXT:
           message = message_data.text;

@@ -17,6 +17,7 @@ class IndividualChannel(Channel):
     is_matched = models.BooleanField(default=False)
 
     class Meta:
+        # TODO: Analyse performance for indexes
         indexes = [
             models.Index(
                 fields=['is_matched', 'created_at'],

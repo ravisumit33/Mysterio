@@ -8,21 +8,13 @@ repos:
          verbose: true
          args: ["--disable=W0511"]
 -   repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v7.12.0
+    rev: v7.12.1
     hooks:
     -    id: eslint
+         language: system
+         entry: frontend/node_modules/.bin/eslint 
          verbose: true
-         args: ["--max-warnings=0", "--ignore-path", ".gitignore", "--rule", "no-console: 0"]
-         additional_dependencies:
-         -    eslint@^7.12.1
-         -    eslint-config-airbnb@^18.2.0
-         -    eslint-config-prettier@^6.15.0
-         -    eslint-plugin-import@^2.22.1
-         -    eslint-plugin-jsx-a11y@^6.4.1
-         -    eslint-plugin-prettier@^3.1.4
-         -    eslint-plugin-react@^7.21.5
-         -    eslint-plugin-react-hooks@^4.2.0
-         -    prettier@^2.1.2
+         args: ["--max-warnings=0", "--rule", "no-console:0"]
 -   repo: local
     hooks:
     -    id: test

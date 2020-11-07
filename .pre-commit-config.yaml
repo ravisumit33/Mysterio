@@ -2,24 +2,28 @@ repos:
 -   repo: https://github.com/PyCQA/pylint
     rev: pylint-2.6.0
     hooks:
-    -    id: pylint
-         language: system
-         entry: dotenv run pylint
-         verbose: true
-         args: ["--disable=W0511"]
+    -   id: pylint
+        language: system
+        entry: dotenv run pylint
+        verbose: true
+        args: ["--disable=W0511"]
+-   repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+    -   id: black
 -   repo: https://github.com/pre-commit/mirrors-eslint
     rev: v7.12.1
     hooks:
-    -    id: eslint
-         language: system
-         entry: frontend/node_modules/.bin/eslint 
-         verbose: true
-         args: ["--max-warnings=0", "--rule", "no-console:0"]
+    -   id: eslint
+        language: system
+        entry: frontend/node_modules/.bin/eslint 
+        verbose: true
+        args: ["--max-warnings=0", "--rule", "no-console:0"]
 -   repo: local
     hooks:
-    -    id: test
-         name: test
-         language: system
-         entry: python manage.py test
-         pass_filenames: false
-         verbose: true
+    -   id: test
+        name: test
+        language: system
+        entry: python manage.py test
+        pass_filenames: false
+        verbose: true

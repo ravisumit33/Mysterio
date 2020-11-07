@@ -8,28 +8,29 @@ from chat.constants import MESSAGE, PREFIX
 
 logger = logging.getLogger(__name__)
 
+
 def match_channels(channels):
-    """Algorithm for matching individual channels
-    """
-    idx_pairs= []
+    """Algorithm for matching individual channels"""
+    idx_pairs = []
     for i in range(1, len(channels), 2):
         # Currently matching serially
-        idx_pairs.append((i-1, i))
+        idx_pairs.append((i - 1, i))
     return idx_pairs
 
+
 def process_unmatched_channels():
-    """Match individual channels and create rooms for them
-    """
+    """Match individual channels and create rooms for them"""
     unmatched_channels = (
-        IndividualChannel.objects
-        .select_for_update()
+        IndividualChannel.objects.select_for_update()
         .filter(is_matched=False)
-        .order_by('created_at')[:1000]  #TODO: set limit and scheduler interval after inspection
+        .order_by("created_at")[
+            :1000
+        ]  # TODO: set limit and scheduler interval after inspection
     )
     channel_layer = get_channel_layer()
 
     with transaction.atomic():
-        channels = unmatched_channels.values('id', 'name')
+        channels = unmatched_channels.values("id", "name")
         individual_room_list = []
 
         channel_idx_pairs = match_channels(channels)
@@ -37,42 +38,41 @@ def process_unmatched_channels():
         for channel_idx1, channel_idx2 in channel_idx_pairs:
             individual_room_list.append(
                 IndividualRoom(
-                    name='Anonymous',
-                    channel1_id=channels[channel_idx1]['id'],
-                    channel2_id=channels[channel_idx2]['id']
+                    name="Anonymous",
+                    channel1_id=channels[channel_idx1]["id"],
+                    channel2_id=channels[channel_idx2]["id"],
                 )
             )
 
         IndividualRoom.objects.bulk_create(individual_room_list)
 
-        channel_ids_list = [channel['id'] for channel in channels]
-        if len(channel_ids_list) % 2:    # pop out unmatched channel
+        channel_ids_list = [channel["id"] for channel in channels]
+        if len(channel_ids_list) % 2:  # pop out unmatched channel
             channel_ids_list.pop()
-        IndividualChannel.objects.filter(pk__in=channel_ids_list).update(is_matched=True)
+        IndividualChannel.objects.filter(pk__in=channel_ids_list).update(
+            is_matched=True
+        )
 
         for room_idx, channel_idx_pair in enumerate(channel_idx_pairs):
             room_id = individual_room_list[room_idx].id
             logger.info(
-                'Room id %d is allocated to user ids %d and %d',
+                "Room id %d is allocated to user ids %d and %d",
                 room_id,
-                channels[channel_idx_pair[0]]['id'],
-                channels[channel_idx_pair[1]]['id']
+                channels[channel_idx_pair[0]]["id"],
+                channels[channel_idx_pair[1]]["id"],
             )
             for channel_idx in channel_idx_pair:
                 async_to_sync(channel_layer.group_add)(
-                    PREFIX.INDIVIDUAL_ROOM + str(room_id),
-                    channels[channel_idx]['name']
+                    PREFIX.INDIVIDUAL_ROOM + str(room_id), channels[channel_idx]["name"]
                 )
                 async_to_sync(channel_layer.group_send)(
-                    PREFIX.INDIVIDUAL_CHANNEL + str(channels[channel_idx]['id']),
+                    PREFIX.INDIVIDUAL_CHANNEL + str(channels[channel_idx]["id"]),
                     {
-                        'type': 'group_msg_receive',
-                        'payload': {
-                            'type': MESSAGE.USER_JOINED,
-                            'data': {
-                                'room_id': room_id
-                            }
-                            #TODO: send user info who has joined
-                        }
-                    }
+                        "type": "group_msg_receive",
+                        "payload": {
+                            "type": MESSAGE.USER_JOINED,
+                            "data": {"room_id": room_id}
+                            # TODO: send user info who has joined
+                        },
+                    },
                 )

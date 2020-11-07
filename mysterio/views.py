@@ -6,12 +6,14 @@ from django.template.loader import get_template
 
 logger = logging.getLogger(__name__)
 
+
 class FrontendView(TemplateView):
     """Frontend View
     Inherits django.views.generic.base.TemplateView to render index.html
     from Frontend App
     """
-    template_name = 'index.html'
+
+    template_name = "index.html"
 
     def get(self, request, *args, **kwargs):
         session = request.session

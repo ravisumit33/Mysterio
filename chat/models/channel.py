@@ -1,9 +1,10 @@
 from django.db import models
 from django.contrib.sessions.models import Session
 
+
 class Channel(models.Model):
-    """Channel Model for individual chat
-    """
+    """Channel Model for individual chat"""
+
     name = models.CharField(max_length=100, unique=True)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -11,26 +12,26 @@ class Channel(models.Model):
     class Meta:
         abstract = True
 
+
 class IndividualChannel(Channel):
-    """Channel for individual chat
-    """
+    """Channel for individual chat"""
+
     is_matched = models.BooleanField(default=False)
 
     class Meta:
         # TODO: Analyse performance for indexes
         indexes = [
             models.Index(
-                fields=['is_matched', 'created_at'],
+                fields=["is_matched", "created_at"],
                 condition=models.Q(is_matched=False),
-                name='individual_channel_index'
+                name="individual_channel_index",
             )
         ]
 
+
 class GroupChannel(Channel):
-    """Channel for group chat
-    """
+    """Channel for group chat"""
+
     group_room = models.ForeignKey(
-        'chat.GroupRoom',
-        on_delete=models.CASCADE,
-        related_name='group_channels'
+        "chat.GroupRoom", on_delete=models.CASCADE, related_name="group_channels"
     )

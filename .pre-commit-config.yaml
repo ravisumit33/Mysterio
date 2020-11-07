@@ -16,7 +16,6 @@ repos:
     hooks:
     -   id: eslint
         language: system
-        entry: frontend/node_modules/.bin/eslint 
         verbose: true
         args: ["--max-warnings=0", "--rule", "no-console:0"]
 -   repo: local

@@ -65,7 +65,7 @@ class Jumbotron extends React.Component {
 
   handleSocketSend() {
     console.log('chekc receive');
-    const currentMessage = this.state;
+    const { currentMessage } = this.state;
     const payload = {
       type: Message.TEXT,
       data: {

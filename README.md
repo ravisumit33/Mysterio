@@ -17,8 +17,9 @@ Anonymous chat web app
 - Node >= 12.14.0
 - npm >= 6.13.4
 - Postgres >= 13.0
+- Redis >= 6.0.8
 
-# Step for local developement
+# Steps for local developement
 
 1. Install python dependencies (virtual environment recommended)
 
@@ -29,26 +30,37 @@ Anonymous chat web app
 2. Install node modules for frontend
 
     ```sh
-    cd frontend
-    npm install
+    cd frontend && npm install && cd ..
+    npm install -g eslint
     ```
 
+    **Note:** Global eslint is required for pre-commit.
+
 3. Setup postgres
+    - Run postgres on `localhost:5432`(default)
     - Create a database
     - Create a user and give all privileges on above database
     - Grant `CREATEDB` permission to the user (for unit testing)
 
-4. Setup environment variable
+4. Setup redis
+    - Run redis on `localhost:6379`(default)
+
+5. Setup environment variable
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
-    - Add other required environment varialbes
+    - Add other required environment variables
 
-5. Start Development Server
+6. Start development servers in different terminals
 
     ```sh
     python manage.py runserver
-    python manage.py run_periodic
     cd frontend && npm start
+    ```
+
+7. Start background task in another terminal
+
+    ```sh
+    python manage.py run_periodic
     ```
 
 # Contributing

@@ -31,10 +31,7 @@ Anonymous chat web app
 
     ```sh
     cd frontend && npm install && cd ..
-    npm install -g eslint
     ```
-
-    **Note:** Global eslint is required for pre-commit.
 
 3. Setup postgres
     - Run postgres on `localhost:5432`(default)

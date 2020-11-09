@@ -28,7 +28,7 @@ module.exports = {
   },
   settings: {
     react: {
-      version: '16.14.0',
+      version: 'detect',
     },
     'import/resolver': {
       node: {

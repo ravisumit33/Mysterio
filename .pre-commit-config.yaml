@@ -17,7 +17,9 @@ repos:
     -   id: eslint
         language: system
         verbose: true
-        args: ["--max-warnings=0", "--rule", "no-console:0"]
+        entry: npm run --silent lint
+        args: ["--", "--max-warnings=0", "--rule", "no-console:0"]
+        pass_filenames: false
 -   repo: local
     hooks:
     -   id: test

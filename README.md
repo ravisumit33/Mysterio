@@ -19,7 +19,7 @@ Anonymous chat web app
 - Postgres >= 13.0
 - Redis >= 6.0.8
 
-# Steps for local developement
+# Steps for local development
 
 1. Install python dependencies (virtual environment recommended)
 

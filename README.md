@@ -42,7 +42,7 @@ Anonymous chat web app
 4. Setup redis
     - Run redis on `localhost:6379`(default)
 
-5. Setup environment variable
+5. Setup environment variables
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
     - Add other required environment variables

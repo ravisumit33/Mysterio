@@ -21,10 +21,11 @@ Anonymous chat web app
 
 # Steps for local development
 
-1. Install python dependencies (virtual environment recommended)
+1. Install python dependencies (virtual environment recommended) and pre-commit hook
 
     ```sh
     pip install -r requirements_local.txt
+    pre-commit install
     ```
 
 2. Install node modules for frontend
@@ -34,18 +35,24 @@ Anonymous chat web app
     ```
 
 3. Setup postgres
-    - Run postgres on `localhost:5432`(default)
+    - Install & run postgres on `localhost:5432`(default)
     - Create a database
     - Create a user and give all privileges on above database
     - Grant `CREATEDB` permission to the user (for unit testing)
 
 4. Setup redis
-    - Run redis on `localhost:6379`(default)
+    - Install & run redis on `localhost:6379`(default)
 
 5. Setup environment variables
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
     - Add other required environment variables
+    - Apply migrations
+
+      ```sh
+      python manage.py makemigrations
+      python manage.py migrate
+      ```
 
 6. Start development servers in different terminals
 

@@ -1,17 +1,24 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from '@material-ui/core';
+import { Grid, Link } from '@material-ui/core';
 
-const ButtonIcon = ({ Icon }) => {
+const ButtonIcon = ({ Icon, link }) => {
   return (
-    <Grid item>
-      <Icon />
+    <Grid item container alignItems="center">
+      <Link href={link} target="_blank" rel="noopener" color="inherit">
+        <Icon />
+      </Link>
     </Grid>
   );
 };
 
 ButtonIcon.propTypes = {
   Icon: PropTypes.elementType.isRequired,
+  link: PropTypes.string,
+};
+
+ButtonIcon.defaultProps = {
+  link: '',
 };
 
 export default ButtonIcon;

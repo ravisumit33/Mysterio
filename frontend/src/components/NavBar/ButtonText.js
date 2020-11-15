@@ -12,9 +12,7 @@ const ButtonText = (props) => {
   return (
     <>
       <Grid item>
-        <Box mt={0.5}>
-          <Typography variant="body1">{text}</Typography>
-        </Box>
+        <Typography variant="body1">{text}</Typography>
       </Grid>
       <Grid item>
         <Zoom in={focused}>{indicator}</Zoom>

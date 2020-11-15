@@ -15,9 +15,6 @@ import {
 import { GitHub, Menu as MenuIcon } from '@material-ui/icons';
 import ButtonWrapper from './ButtonWrapper';
 
-const PREFIX = '[components/NavBar]';
-const DEBUG = true;
-
 const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
   breakpoints: {
@@ -87,7 +84,6 @@ class NavBar extends React.Component {
   }
 
   handleNavbarBtnClick(key) {
-    if (DEBUG) console.log(PREFIX, 'handleNavbarBtnClick', key);
     this.setFocusedBtnKey(key);
   }
 
@@ -105,7 +101,6 @@ class NavBar extends React.Component {
   }
 
   render() {
-    if (DEBUG) console.log(PREFIX, 'render');
     const { focusedBtnKey, hamburgerTriggerElement } = this.state;
     const navbarBtns = navbarButtons.map((navbarBtn) => (
       <Grid item key={navbarBtn.data.key}>

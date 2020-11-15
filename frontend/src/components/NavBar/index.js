@@ -2,11 +2,13 @@ import React from 'react';
 import {
   AppBar,
   Container,
+  createMuiTheme,
   Grid,
   Hidden,
   IconButton,
   Menu,
   MenuItem,
+  ThemeProvider,
   Toolbar,
   Typography,
 } from '@material-ui/core';
@@ -15,6 +17,16 @@ import ButtonWrapper from './ButtonWrapper';
 
 const PREFIX = '[components/NavBar]';
 const DEBUG = true;
+
+const defaultTheme = createMuiTheme();
+const theme = createMuiTheme({
+  breakpoints: {
+    values: {
+      ...defaultTheme.breakpoints.values,
+      md: 750,
+    },
+  },
+});
 
 const navbarButtons = [
   {
@@ -148,8 +160,10 @@ class NavBar extends React.Component {
                 <Typography variant="h5">Mysterio</Typography>
               </Grid>
               <Grid item container justify="flex-end" xs alignItems="flex-end">
-                <Hidden xsDown>{navbarBtns}</Hidden>
-                <Hidden smUp>{hamburgerMenu}</Hidden>
+                <ThemeProvider theme={theme}>
+                  <Hidden smDown>{navbarBtns}</Hidden>
+                  <Hidden mdUp>{hamburgerMenu}</Hidden>
+                </ThemeProvider>
               </Grid>
             </Grid>
           </Container>

@@ -1,5 +1,6 @@
 # Add locally ignored files
 .vscode
+.vim
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

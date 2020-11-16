@@ -64,7 +64,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "mysterio.wsgi.application"
-ASGI_APPLICATION = "mysterio.routing.application"
+ASGI_APPLICATION = "mysterio.asgi.application"
 
 CHANNEL_LAYERS = {
     "default": {

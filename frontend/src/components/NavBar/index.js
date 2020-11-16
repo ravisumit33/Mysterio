@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { GitHub, Menu as MenuIcon } from '@material-ui/icons';
-import ButtonWrapper from './ButtonWrapper';
+import CustomButton from './customButton';
 
 const defaultTheme = createMuiTheme();
 const theme = createMuiTheme({
@@ -31,6 +31,7 @@ const navbarButtons = [
     data: {
       key: 'home',
       text: 'Home',
+      href: '#',
     },
   },
   {
@@ -38,6 +39,7 @@ const navbarButtons = [
     data: {
       key: 'features',
       text: 'Features',
+      href: '#',
     },
   },
   {
@@ -45,6 +47,7 @@ const navbarButtons = [
     data: {
       key: 'about',
       text: 'About',
+      href: '#',
     },
   },
   {
@@ -52,14 +55,16 @@ const navbarButtons = [
     data: {
       key: 'contributors',
       text: 'Contributors',
+      href: '#',
     },
   },
   {
     type: 'icon',
     data: {
       key: 'github',
+      text: 'Github',
       icon: GitHub,
-      link: 'https://github.com/ravisumit33/Mysterio',
+      href: 'https://github.com/ravisumit33/Mysterio',
     },
   },
 ];
@@ -75,12 +80,6 @@ class NavBar extends React.Component {
     this.handleNavbarBtnClick = this.handleNavbarBtnClick.bind(this);
     this.handleHamburgerClick = this.handleHamburgerClick.bind(this);
     this.handleHamburgerClose = this.handleHamburgerClose.bind(this);
-  }
-
-  setFocusedBtnKey(key) {
-    this.setState({
-      focusedBtnKey: key,
-    });
   }
 
   handleNavbarBtnClick(key) {
@@ -100,16 +99,28 @@ class NavBar extends React.Component {
     });
   }
 
+  setFocusedBtnKey(key) {
+    this.setState({
+      focusedBtnKey: key,
+    });
+  }
+
   render() {
     const { focusedBtnKey, hamburgerTriggerElement } = this.state;
-    const navbarBtns = navbarButtons.map((navbarBtn) => (
-      <Grid item key={navbarBtn.data.key}>
-        <ButtonWrapper
-          type={navbarBtn.type}
-          data={navbarBtn.data}
-          focused={focusedBtnKey === navbarBtn.data.key}
-          onClickHandler={this.handleNavbarBtnClick}
-        />
+
+    const navbarBtns = navbarButtons.map((navbarBtn) => ({
+      key: navbarBtn.data.key,
+      commonProps: {
+        type: navbarBtn.type,
+        data: navbarBtn.data,
+        focused: focusedBtnKey === navbarBtn.data.key,
+        onClickHandler: this.handleNavbarBtnClick,
+      },
+    }));
+    const navbarMenu = navbarBtns.map((navbarBtn) => (
+      <Grid item key={navbarBtn.key}>
+        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+        <CustomButton {...navbarBtn.commonProps} />
       </Grid>
     ));
     const hamburgerMenu = (
@@ -123,24 +134,15 @@ class NavBar extends React.Component {
           <MenuIcon />
         </IconButton>
         <Menu
-          id="navbar-menu"
           anchorEl={hamburgerTriggerElement}
           keepMounted
           open={Boolean(hamburgerTriggerElement)}
           onClose={this.handleHamburgerClose}
         >
-          {navbarButtons.map((navbarBtn) => (
-            <MenuItem
-              key={navbarBtn.data.key}
-              selected={focusedBtnKey === navbarBtn.data.key}
-              dense
-            >
-              <ButtonWrapper
-                type={navbarBtn.type}
-                data={navbarBtn.data}
-                focused={focusedBtnKey === navbarBtn.data.key}
-                onClickHandler={this.handleNavbarBtnClick}
-              />
+          {navbarBtns.map((navbarBtn) => (
+            <MenuItem key={navbarBtn.key} selected={focusedBtnKey === navbarBtn.key} dense>
+              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+              <CustomButton {...navbarBtn.commonProps} isHamburgerMenu />
             </MenuItem>
           ))}
         </Menu>
@@ -149,14 +151,14 @@ class NavBar extends React.Component {
     return (
       <AppBar position="sticky">
         <Toolbar>
-          <Container disableGutters>
+          <Container>
             <Grid container alignItems="center" style={{ height: '64px' }}>
               <Grid item>
                 <Typography variant="h5">Mysterio</Typography>
               </Grid>
-              <Grid item container justify="flex-end" xs alignItems="flex-end">
+              <Grid item container justify="flex-end" xs alignItems="center">
                 <ThemeProvider theme={theme}>
-                  <Hidden smDown>{navbarBtns}</Hidden>
+                  <Hidden smDown>{navbarMenu}</Hidden>
                   <Hidden mdUp>{hamburgerMenu}</Hidden>
                 </ThemeProvider>
               </Grid>

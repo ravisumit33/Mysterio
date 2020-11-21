@@ -21,10 +21,13 @@ Anonymous chat web app
 
 # Steps for local development
 
-1. Install python dependencies (virtual environment recommended) and pre-commit hook
+1. Install python dependencies and pre-commit hook
+   (You may need to add pipenv location to PATH)
 
     ```sh
-    pip install -r requirements_local.txt
+    pip install --user pipenv
+    pipenv install --dev
+    pipenv shell
     pre-commit install
     ```
 
@@ -47,21 +50,22 @@ Anonymous chat web app
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
     - Add other required environment variables
-    - Apply migrations
+
+6. Apply migrations
 
       ```sh
       python manage.py makemigrations
       python manage.py migrate
       ```
 
-6. Start development servers in different terminals
+7. Start development servers in different terminals
 
     ```sh
     python manage.py runserver
     cd frontend && npm start
     ```
 
-7. Start background task in another terminal
+8. Start background task in another terminal
 
     ```sh
     python manage.py run_periodic

@@ -4,7 +4,7 @@ repos:
   hooks:
   - id: pylint
     language: system
-    entry: pylint
+    entry: dotenv run pylint
     verbose: true
     args: ["--disable=W0511"]
 

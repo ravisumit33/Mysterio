@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+channels = "*"
+channels-redis = "*"
+psycopg2 = "*"
+colorlog = "*"
+APScheduler = "*"
+Django = "*"
+
+[dev-packages]
+pylint = "*"
+pylint-django = "*"
+black = "*"
+pre-commit = "*"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+# Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)
+allow_prereleases = true

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, CssBaseline } from '@material-ui/core';
-import { NavBar, Home, Footer } from 'components';
+import { NavBar, Home, Footer, ChatContainer } from 'components';
 import './index.css';
 
 const App = () => (
@@ -9,6 +9,7 @@ const App = () => (
       <NavBar />
       <Home />
       <Footer />
+      <ChatContainer />
     </Box>
   </CssBaseline>
 );

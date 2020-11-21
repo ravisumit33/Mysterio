@@ -3,6 +3,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import Box from '@material-ui/core/Box';
 import { Button, TextField } from '@material-ui/core';
 import Message from 'constants.js';
+import { chatContainerStore } from 'stores';
 
 class Jumbotron extends React.Component {
   constructor(props) {
@@ -28,6 +29,7 @@ class Jumbotron extends React.Component {
     });
     socket.addEventListener('open', () => {
       console.log('socket connection established, try sending messages');
+      chatContainerStore.addChatWindow('individual_chat');
     });
     socket.addEventListener('close', () => {
       console.log('socket connection closed, try later');

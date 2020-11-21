@@ -12,7 +12,6 @@ APScheduler = "*"
 Django = "*"
 
 [dev-packages]
-python-dotenv = {extras = ["cli"], version = "*"}
 pylint = "*"
 pylint-django = "*"
 black = "*"

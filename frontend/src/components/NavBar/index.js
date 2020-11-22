@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Container,
@@ -69,105 +69,71 @@ const navbarButtons = [
   },
 ];
 
-class NavBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      focusedBtnKey: 'home',
-      hamburgerTriggerElement: null,
-    };
-    this.setFocusedBtnKey = this.setFocusedBtnKey.bind(this);
-    this.handleNavbarBtnClick = this.handleNavbarBtnClick.bind(this);
-    this.handleHamburgerClick = this.handleHamburgerClick.bind(this);
-    this.handleHamburgerClose = this.handleHamburgerClose.bind(this);
-  }
+const NavBar = () => {
+  const [focusedBtnKey, setFocusedBtnKey] = useState('home');
+  const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
-  handleNavbarBtnClick(key) {
-    this.setFocusedBtnKey(key);
-  }
-
-  handleHamburgerClick(event) {
+  const handleNavbarBtnClick = (key) => setFocusedBtnKey(key);
+  const handleHamburgerClick = (event) => {
     event.preventDefault();
-    this.setState({
-      hamburgerTriggerElement: event.currentTarget,
-    });
-  }
+    setHamburgerTriggerElement(event.currentTarget);
+  };
+  const handleHamburgerClose = () => setHamburgerTriggerElement(null);
 
-  handleHamburgerClose() {
-    this.setState({
-      hamburgerTriggerElement: null,
-    });
-  }
-
-  setFocusedBtnKey(key) {
-    this.setState({
-      focusedBtnKey: key,
-    });
-  }
-
-  render() {
-    const { focusedBtnKey, hamburgerTriggerElement } = this.state;
-
-    const navbarBtns = navbarButtons.map((navbarBtn) => ({
-      key: navbarBtn.data.key,
-      commonProps: {
-        type: navbarBtn.type,
-        data: navbarBtn.data,
-        focused: focusedBtnKey === navbarBtn.data.key,
-        onClickHandler: this.handleNavbarBtnClick,
-      },
-    }));
-    const navbarMenu = navbarBtns.map((navbarBtn) => (
-      <Grid item key={navbarBtn.key}>
-        {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <CustomButton {...navbarBtn.commonProps} />
-      </Grid>
-    ));
-    const hamburgerMenu = (
-      <>
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="menu"
-          onClick={this.handleHamburgerClick}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Menu
-          anchorEl={hamburgerTriggerElement}
-          keepMounted
-          open={Boolean(hamburgerTriggerElement)}
-          onClose={this.handleHamburgerClose}
-        >
-          {navbarBtns.map((navbarBtn) => (
-            <MenuItem key={navbarBtn.key} selected={focusedBtnKey === navbarBtn.key} dense>
-              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-              <CustomButton {...navbarBtn.commonProps} isHamburgerMenu />
-            </MenuItem>
-          ))}
-        </Menu>
-      </>
-    );
-    return (
-      <AppBar position="sticky">
-        <Toolbar>
-          <Container>
-            <Grid container alignItems="center" style={{ height: '64px' }}>
-              <Grid item>
-                <Typography variant="h5">Mysterio</Typography>
-              </Grid>
-              <Grid item container justify="flex-end" xs alignItems="center">
-                <ThemeProvider theme={theme}>
-                  <Hidden smDown>{navbarMenu}</Hidden>
-                  <Hidden mdUp>{hamburgerMenu}</Hidden>
-                </ThemeProvider>
-              </Grid>
+  const navbarBtns = navbarButtons.map((navbarBtn) => ({
+    key: navbarBtn.data.key,
+    commonProps: {
+      type: navbarBtn.type,
+      data: navbarBtn.data,
+      focused: focusedBtnKey === navbarBtn.data.key,
+      onClickHandler: handleNavbarBtnClick,
+    },
+  }));
+  const navbarMenu = navbarBtns.map((navbarBtn) => (
+    <Grid item key={navbarBtn.key}>
+      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      <CustomButton {...navbarBtn.commonProps} />
+    </Grid>
+  ));
+  const hamburgerMenu = (
+    <>
+      <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleHamburgerClick}>
+        <MenuIcon />
+      </IconButton>
+      <Menu
+        anchorEl={hamburgerTriggerElement}
+        keepMounted
+        open={Boolean(hamburgerTriggerElement)}
+        onClose={handleHamburgerClose}
+      >
+        {navbarBtns.map((navbarBtn) => (
+          <MenuItem key={navbarBtn.key} selected={focusedBtnKey === navbarBtn.key} dense>
+            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+            <CustomButton {...navbarBtn.commonProps} isHamburgerMenu />
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+  return (
+    <AppBar position="sticky">
+      <Toolbar>
+        <Container>
+          <Grid container alignItems="center" style={{ height: '64px' }}>
+            <Grid item>
+              <Typography variant="h5">Mysterio</Typography>
             </Grid>
-          </Container>
-        </Toolbar>
-      </AppBar>
-    );
-  }
-}
+            <Grid item container justify="flex-end" xs alignItems="center">
+              <ThemeProvider theme={theme}>
+                <Hidden smDown>{navbarMenu}</Hidden>
+                <Hidden mdUp>{hamburgerMenu}</Hidden>
+              </ThemeProvider>
+            </Grid>
+          </Grid>
+        </Container>
+      </Toolbar>
+    </AppBar>
+  );
+};
 
 export default NavBar;

@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from 'app';
+import { configure } from 'mobx';
 import * as serviceWorker from './serviceWorker';
+
+configure({ isolateGlobalState: true });
 
 ReactDOM.render(
   <React.StrictMode>

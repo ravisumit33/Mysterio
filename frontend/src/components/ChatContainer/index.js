@@ -1,22 +1,34 @@
 import React from 'react';
-import { List, ListItem } from '@material-ui/core';
-import { observer } from 'mobx-react';
+import { Box, Grid, makeStyles } from '@material-ui/core';
 import { chatContainerStore } from 'stores';
+import { observer } from 'mobx-react-lite';
+import ChatWindow from './ChatWindow/index';
 
-class ChatContainer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+const useStyles = makeStyles(() => ({
+  chatContainer: {
+    position: 'absolute',
+    right: '0',
+    bottom: '0',
+    width: 'auto',
+    height: 'auto',
+  },
+}));
 
-  render() {
-    const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow) => (
-      <ListItem button key={chatWindow}>
-        {chatWindow}
-      </ListItem>
-    ));
-    return <List component="div">{chatContainerWindowsList}</List>;
-  }
-}
+const ChatContainer = () => {
+  const classes = useStyles();
+  const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
+    <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
+      <ChatWindow roomId={chatWindow.roomId} />
+    </Grid>
+  ));
+
+  return (
+    <Box className={classes.chatContainer}>
+      <Grid container alignItems="flex-end">
+        {chatContainerWindowsList}
+      </Grid>
+    </Box>
+  );
+};
 
 export default observer(ChatContainer);

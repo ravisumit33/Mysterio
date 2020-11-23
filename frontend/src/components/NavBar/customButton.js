@@ -7,11 +7,13 @@ const useStyles = makeStyles(() => ({
     paddingLeft: '0.5rem',
   },
   buttonCommon: {
-    borderRadius: 0,
-    backgroundColor: 'transparent !important',
     color: 'inherit',
   },
   buttonText: {
+    borderRadius: 0,
+    backgroundColor: 'transparent !important',
+  },
+  buttonBoxText: {
     boxShadow: '0px 0px 0px 0px red',
     transition: 'box-shadow 0.12s linear',
     '&.focused, &:hover': {
@@ -35,28 +37,31 @@ const CustomButton = (props) => {
       <Button
         size="small"
         href={data.href}
-        className={classes.buttonCommon}
+        className={`${classes.buttonCommon} ${classes.buttonText}`}
         disableRipple={disableRipple}
       >
-        <Box className={`${classes.buttonText} ${focused ? 'focused' : ''}`}>{data.text}</Box>
+        <Box className={`${classes.buttonBoxText} ${focused ? 'focused' : ''}`}>{data.text}</Box>
       </Button>
     );
   } else {
     const commonIconBtnProps = {
-      className: classes.buttonCommon,
       href: data.href,
       target: '_blank',
       rel: 'noopener',
       disableRipple,
     };
     buttonComponent = isHamburgerMenu ? (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <Button {...commonIconBtnProps} endIcon={<IconComponent />}>
+      <Button
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...commonIconBtnProps}
+        className={`${classes.buttonCommon} ${classes.buttonText}`}
+        endIcon={<IconComponent />}
+      >
         {data.text}
       </Button>
     ) : (
       // eslint-disable-next-line react/jsx-props-no-spreading
-      <IconButton {...commonIconBtnProps}>
+      <IconButton {...commonIconBtnProps} className={classes.buttonCommon}>
         <IconComponent />
       </IconButton>
     );

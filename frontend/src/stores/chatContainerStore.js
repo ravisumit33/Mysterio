@@ -1,24 +1,34 @@
-import { observable, action } from 'mobx';
-
-const PREFIX = '[store/chatContainerStore]';
-const DEBUG = true;
+import log from 'loglevel';
+import { action, makeObservable, observable } from 'mobx';
 
 class CharContainerStore {
-  @observable.shallow chatWindows = [];
+  chatWindows = [];
 
-  @observable chatId = 0;
+  chatId = 0;
 
-  @action.bound
-  addChatWindow(type) {
-    if (DEBUG) console.log(PREFIX, 'action addChatWindow', type);
-    this.chatWindows.push(this.chatId);
+  constructor() {
+    makeObservable(this, {
+      chatWindows: observable.shallow,
+      chatId: observable,
+      addChatWindow: action.bound,
+      removeChatWIndow: action.bound,
+    });
+    this.initState();
+  }
+
+  initState() {
+    this.chatWindows = [];
+    this.chatId = 0;
+  }
+
+  addChatWindow(roomId) {
+    log.warn('add new chat window', roomId);
+    this.chatWindows.push({ id: this.chatId, roomId });
     this.chatId += 1;
   }
 
-  @action
   removeChatWIndow(id) {
-    if (DEBUG) console.log(PREFIX, 'action removeChatWindow', id);
-    const chatWindowIdx = this.chatWindows.indexOf(id);
+    const chatWindowIdx = this.chatWindows.findIndex((item) => item.id === id);
     if (chatWindowIdx !== -1) {
       this.chatWindows.splice(chatWindowIdx, 1);
     }

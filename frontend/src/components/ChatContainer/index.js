@@ -18,10 +18,11 @@ const ChatContainer = () => {
   const classes = useStyles();
   const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
     <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
-      <ChatWindow roomId={chatWindow.roomId} />
+      <ChatWindow store={chatWindow.store} />
     </Grid>
   ));
 
+  chatContainerWindowsList.reverse();
   return (
     <Box className={classes.chatContainer}>
       <Grid container alignItems="flex-end">

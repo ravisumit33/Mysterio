@@ -1,35 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Grid, IconButton } from '@material-ui/core';
 import { Launcher } from 'react-chat-window';
 import log from 'loglevel';
 import { observer } from 'mobx-react-lite';
 import ReplayIcon from '@material-ui/icons/Replay';
-import { ChatWindowStore } from 'stores';
 import './styles.css';
 
 const ChatWindow = (props) => {
-  const { roomId } = props;
-  const [chatWindowStore, ,] = useState(new ChatWindowStore(roomId));
-  const { messageList, isWidnowMinimized } = chatWindowStore;
+  const { store } = props;
+  const { messageList, isWindowMinimized } = store;
 
   function onMessageWasSent(message) {
     log.warn(message);
-    chatWindowStore.handleSocketSend(message.data.text);
+    store.handleSocketSend(message.data.text);
   }
 
   function handleChatBubbleClick() {
     log.warn('handleChatBubbleClick');
-    // chatWindowStore.handleEndChat();
+    // store.handleEndChat();
     // handleClose(id);
-    chatWindowStore.toggleWindowMinimized();
+    store.toggleWindowMinimized();
   }
 
   function handleReconnectChat() {
-    chatWindowStore.handleReconnectChat();
+    store.handleReconnectChat();
   }
 
-  const chatWindowControlButton = !isWidnowMinimized ? (
+  const chatWindowControlButton = !isWindowMinimized ? (
     <Grid container justify="flex-end">
       <IconButton
         style={{ marginRight: '4.2rem', marginTop: '1.5rem' }}
@@ -50,7 +48,7 @@ const ChatWindow = (props) => {
           imageUrl: 'https://a.slack-edge.com/66f9/img/avatars-teams/ava_0001-34.png',
         }}
         messageList={messageList}
-        isOpen={!isWidnowMinimized}
+        isOpen={!isWindowMinimized}
         showEmoji
         onMessageWasSent={onMessageWasSent}
         handleClick={handleChatBubbleClick}
@@ -61,11 +59,15 @@ const ChatWindow = (props) => {
 };
 
 ChatWindow.propTypes = {
-  roomId: PropTypes.number,
+  store: PropTypes.shape({
+    messageList: PropTypes.arrayOf(PropTypes.string),
+    isWindowMinimized: PropTypes.bool,
+    handleSocketSend: PropTypes.func,
+    toggleWindowMinimized: PropTypes.func,
+    handleReconnectChat: PropTypes.func,
+  }).isRequired,
 };
 
-ChatWindow.defaultProps = {
-  roomId: undefined,
-};
+ChatWindow.defaultProps = {};
 
 export default observer(ChatWindow);

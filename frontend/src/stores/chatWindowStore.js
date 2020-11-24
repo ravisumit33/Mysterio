@@ -3,7 +3,7 @@ import log from 'loglevel';
 import { action, makeObservable, observable } from 'mobx';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-class CharContainerStore {
+class ChatWindowStore {
   roomId = undefined;
 
   messageList = [];
@@ -102,4 +102,4 @@ class CharContainerStore {
   }
 }
 
-export default CharContainerStore;
+export default ChatWindowStore;

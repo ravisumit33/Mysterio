@@ -1,6 +1,6 @@
 import ChatContainerStore from './chatContainerStore';
-import ChatWindowStore from './chatWindowStore';
 
 const chatContainerStore = new ChatContainerStore();
 
-export { chatContainerStore, ChatWindowStore };
+// eslint-disable-next-line import/prefer-default-export
+export { chatContainerStore };

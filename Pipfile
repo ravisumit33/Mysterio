@@ -15,12 +15,5 @@ Django = "*"
 python-dotenv = {extras = ["cli"], version = "*"}
 pylint = "*"
 pylint-django = "*"
-black = "*"
+black = "==20.8b1" # Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)
 pre-commit = "*"
-
-[requires]
-python_version = "3.9"
-
-[pipenv]
-# Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)
-allow_prereleases = true

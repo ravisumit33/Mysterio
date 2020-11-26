@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Button, Grid, IconButton, makeStyles } from '@material-ui/core';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   buttonContainer: {
-    paddingLeft: '0.5rem',
+    paddingLeft: theme.spacing(2),
   },
   buttonCommon: {
     color: 'inherit',
@@ -14,10 +14,13 @@ const useStyles = makeStyles(() => ({
     backgroundColor: 'transparent !important',
   },
   buttonBoxText: {
-    boxShadow: '0px 0px 0px 0px red',
-    transition: 'box-shadow 0.12s linear',
+    boxShadow: `0px 0px 0px 0px ${theme.palette.secondary.main}`,
+    transition: theme.transitions.create('box-shadow', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.short,
+    }),
     '&.focused, &:hover': {
-      boxShadow: '0px 2px 0px 0px red',
+      boxShadow: `0px 2px 0px 0px ${theme.palette.secondary.main}`,
     },
   },
 }));

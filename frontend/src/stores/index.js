@@ -1,6 +1,7 @@
 import ChatContainerStore from './chatContainerStore';
+import ProfileStore from './profileStore';
 
 const chatContainerStore = new ChatContainerStore();
+const profileStore = new ProfileStore();
 
-// eslint-disable-next-line import/prefer-default-export
-export { chatContainerStore };
+export { chatContainerStore, profileStore };

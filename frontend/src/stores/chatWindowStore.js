@@ -2,6 +2,7 @@ import MessageType from 'constants.js';
 import log from 'loglevel';
 import { action, makeObservable, observable } from 'mobx';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+import profileStore from 'stores/profileStore';
 
 class ChatWindowStore {
   avatarUrl = '';
@@ -16,7 +17,7 @@ class ChatWindowStore {
 
   isWidnowMinimized = false;
 
-  constructor(roomId, stores) {
+  constructor(roomId) {
     makeObservable(this, {
       avatarUrl: observable,
       name: observable,
@@ -34,17 +35,12 @@ class ChatWindowStore {
       setName: action.bound,
       setAvatarUrl: action.bound,
     });
-    this.initState(roomId, stores);
-  }
-
-  initStore(stores) {
-    this.stores = stores;
+    this.initState(roomId);
   }
 
   initState(roomId, stores) {
     this.roomId = roomId;
     // TODO: set group name if groupChat
-    this.initStore(stores);
     this.initSocket();
   }
 
@@ -63,7 +59,7 @@ class ChatWindowStore {
     this.socket.addEventListener('open', this.handleSocketOpen);
     this.socket.addEventListener('close', this.handleSocketClose);
     this.socket.addEventListener('message', this.handleSocketMessage);
-    this.handleSocketSend(MessageType.USER_INFO, { name: this.stores.profileStore.name });
+    this.handleSocketSend(MessageType.USER_INFO, { name: profileStore.name });
   }
 
   handleSocketOpen() {

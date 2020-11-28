@@ -26,10 +26,6 @@ class CharContainerStore {
     this.chatId = 0;
   }
 
-  initStore(stores) {
-    this.stores = stores;
-  }
-
   setIndividualChatExist(value = false) {
     this.individualChatExist = value;
   }
@@ -38,7 +34,7 @@ class CharContainerStore {
     log.warn('add new chat window', roomId);
     this.chatWindows[this.chatId] = {
       id: this.chatId,
-      store: new ChatWindowStore(roomId, this.stores),
+      store: new ChatWindowStore(roomId),
     };
     this.chatId += 1;
   }
@@ -51,4 +47,6 @@ class CharContainerStore {
   }
 }
 
-export default CharContainerStore;
+const chatContainerStore = new CharContainerStore();
+
+export default chatContainerStore;

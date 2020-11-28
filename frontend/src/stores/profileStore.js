@@ -9,10 +9,6 @@ class ProfileStore {
     makeAutoObservable(this);
   }
 
-  initStore(stores) {
-    this.stores = stores;
-  }
-
   setName(newName) {
     this.name = newName;
   }
@@ -22,4 +18,6 @@ class ProfileStore {
   }
 }
 
-export default ProfileStore;
+const profileStore = new ProfileStore();
+
+export default profileStore;

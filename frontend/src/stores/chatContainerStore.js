@@ -3,9 +3,11 @@ import { action, makeObservable, observable } from 'mobx';
 import ChatWindowStore from './chatWindowStore';
 
 class CharContainerStore {
-  chatWindows = [];
+  chatWindows = {};
 
   chatId = 0;
+
+  individualChatExist = false;
 
   constructor() {
     makeObservable(this, {
@@ -13,6 +15,8 @@ class CharContainerStore {
       chatId: observable,
       addChatWindow: action.bound,
       removeChatWIndow: action.bound,
+      individualChatExist: observable,
+      setIndividualChatExist: action.bound,
     });
     this.initState();
   }
@@ -22,9 +26,20 @@ class CharContainerStore {
     this.chatId = 0;
   }
 
+  initStore(stores) {
+    this.stores = stores;
+  }
+
+  setIndividualChatExist(value = false) {
+    this.individualChatExist = value;
+  }
+
   addChatWindow(roomId) {
     log.warn('add new chat window', roomId);
-    this.chatWindows.push({ id: this.chatId, roomId, store: new ChatWindowStore(roomId) });
+    this.chatWindows[this.chatId] = {
+      id: this.chatId,
+      store: new ChatWindowStore(roomId, this.stores),
+    };
     this.chatId += 1;
   }
 

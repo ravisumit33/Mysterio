@@ -4,4 +4,9 @@ import ProfileStore from './profileStore';
 const chatContainerStore = new ChatContainerStore();
 const profileStore = new ProfileStore();
 
-export { chatContainerStore, profileStore };
+const initStores = (stores) => {
+  chatContainerStore.initStore(stores);
+  profileStore.initStore(stores);
+};
+
+export { chatContainerStore, profileStore, initStores };

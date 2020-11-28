@@ -5,15 +5,20 @@ import { Launcher } from 'react-chat-window';
 import log from 'loglevel';
 import { observer } from 'mobx-react-lite';
 import ReplayIcon from '@material-ui/icons/Replay';
+import { chatContainerStore } from 'stores';
+import MessageType from 'constants.js';
+
 import './styles.css';
 
 const ChatWindow = (props) => {
-  const { store } = props;
+  const { id } = props;
+  const { store } = chatContainerStore.chatWindows[id];
   const { messageList, isWindowMinimized } = store;
 
-  function onMessageWasSent(message) {
-    log.warn(message);
-    store.handleSocketSend(message.data.text);
+  function onMessageWasSent(messageObj) {
+    log.warn(messageObj);
+    const message = messageObj.data;
+    store.handleSocketSend(MessageType.TEXT, message);
   }
 
   function handleChatBubbleClick() {
@@ -44,7 +49,7 @@ const ChatWindow = (props) => {
     <Box position="relative" height="500px" width="400px">
       <Launcher
         agentProfile={{
-          teamName: 'Chat',
+          teamName: store.name,
           imageUrl: 'https://a.slack-edge.com/66f9/img/avatars-teams/ava_0001-34.png',
         }}
         messageList={messageList}
@@ -59,15 +64,7 @@ const ChatWindow = (props) => {
 };
 
 ChatWindow.propTypes = {
-  store: PropTypes.shape({
-    messageList: PropTypes.arrayOf(PropTypes.string),
-    isWindowMinimized: PropTypes.bool,
-    handleSocketSend: PropTypes.func,
-    toggleWindowMinimized: PropTypes.func,
-    handleReconnectChat: PropTypes.func,
-  }).isRequired,
+  id: PropTypes.number.isRequired,
 };
-
-ChatWindow.defaultProps = {};
 
 export default observer(ChatWindow);

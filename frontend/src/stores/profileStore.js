@@ -9,6 +9,10 @@ class ProfileStore {
     makeAutoObservable(this);
   }
 
+  initStore(stores) {
+    this.stores = stores;
+  }
+
   setName(newName) {
     this.name = newName;
   }

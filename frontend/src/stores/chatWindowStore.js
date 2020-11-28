@@ -1,9 +1,13 @@
-import Message from 'constants.js';
+import MessageType from 'constants.js';
 import log from 'loglevel';
 import { action, makeObservable, observable } from 'mobx';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
 class ChatWindowStore {
+  avatarUrl = '';
+
+  name = '';
+
   roomId = undefined;
 
   messageList = [];
@@ -12,8 +16,10 @@ class ChatWindowStore {
 
   isWidnowMinimized = false;
 
-  constructor(roomId) {
+  constructor(roomId, stores) {
     makeObservable(this, {
+      avatarUrl: observable,
+      name: observable,
       roomId: observable,
       messageList: observable.shallow,
       socket: observable,
@@ -25,13 +31,29 @@ class ChatWindowStore {
       handleEndChat: action.bound,
       handleReconnectChat: action.bound,
       toggleWindowMinimized: action.bound,
+      setName: action.bound,
+      setAvatarUrl: action.bound,
     });
-    this.initState(roomId);
+    this.initState(roomId, stores);
   }
 
-  initState(roomId) {
+  initStore(stores) {
+    this.stores = stores;
+  }
+
+  initState(roomId, stores) {
     this.roomId = roomId;
+    // TODO: set group name if groupChat
+    this.initStore(stores);
     this.initSocket();
+  }
+
+  setName(newName) {
+    this.name = newName;
+  }
+
+  setAvatarUrl(url) {
+    this.avatarUrl = url;
   }
 
   initSocket() {
@@ -41,6 +63,7 @@ class ChatWindowStore {
     this.socket.addEventListener('open', this.handleSocketOpen);
     this.socket.addEventListener('close', this.handleSocketClose);
     this.socket.addEventListener('message', this.handleSocketMessage);
+    this.handleSocketSend(MessageType.USER_INFO, { name: this.stores.profileStore.name });
   }
 
   handleSocketOpen() {
@@ -59,14 +82,19 @@ class ChatWindowStore {
     const author = this.messageList.length % 2 ? 'them' : 'me';
     const message = { author, type: 'text', data: {} };
     switch (messageType) {
-      case Message.USER_JOINED:
-        message.data.text = 'User joined';
+      case MessageType.USER_JOINED:
+        if ('match' in messageData) {
+          // This is individual chat
+          this.setName(messageData.match.name);
+          this.setAvatarUrl(messageData.match);
+        }
+        message.data.text = `You are connected to ${this.name}`;
         break;
-      case Message.USER_LEFT:
+      case MessageType.USER_LEFT:
         this.handleEndChat();
         message.data.text = 'User left';
         break;
-      case Message.TEXT:
+      case MessageType.TEXT:
         message.data.text = messageData.text;
         break;
       default:
@@ -76,13 +104,11 @@ class ChatWindowStore {
     this.messageList.push(message);
   }
 
-  handleSocketSend(message) {
+  handleSocketSend(msgType, message) {
     log.info('send over socket', message);
     const payload = {
-      type: Message.TEXT,
-      data: {
-        text: message,
-      },
+      type: msgType,
+      data: message,
     };
     this.socket.send(JSON.stringify(payload));
   }

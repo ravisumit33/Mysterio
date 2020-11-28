@@ -3,7 +3,9 @@ import log from 'loglevel';
 import { action, makeObservable, observable } from 'mobx';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
-class CharContainerStore {
+class ChatWindowStore {
+  id = undefined;
+
   roomId = undefined;
 
   messageList = [];
@@ -12,8 +14,9 @@ class CharContainerStore {
 
   isWidnowMinimized = false;
 
-  constructor(roomId) {
+  constructor(id, roomId) {
     makeObservable(this, {
+      id: observable,
       roomId: observable,
       messageList: observable.shallow,
       socket: observable,
@@ -26,10 +29,11 @@ class CharContainerStore {
       handleReconnectChat: action.bound,
       toggleWindowMinimized: action.bound,
     });
-    this.initState(roomId);
+    this.initState(id, roomId);
   }
 
-  initState(roomId) {
+  initState(id, roomId) {
+    this.id = id;
     this.roomId = roomId;
     this.initSocket();
   }
@@ -63,7 +67,10 @@ class CharContainerStore {
         message.data.text = 'User joined';
         break;
       case Message.USER_LEFT:
-        this.handleEndChat();
+        if (!this.roomId) {
+          // individual_room's user left
+          this.handleEndChat();
+        }
         message.data.text = 'User left';
         break;
       case Message.TEXT:
@@ -98,8 +105,8 @@ class CharContainerStore {
   handleReconnectChat() {
     log.warn('handleReconnectChat', this.socket);
     this.socket.close();
-    // this.initSocket();
+    this.initSocket();
   }
 }
 
-export default CharContainerStore;
+export default ChatWindowStore;

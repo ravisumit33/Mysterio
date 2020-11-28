@@ -1,5 +1,6 @@
 import log from 'loglevel';
 import { action, makeObservable, observable } from 'mobx';
+import ChatWindowStore from './chatWindowStore';
 
 class CharContainerStore {
   chatWindows = [];
@@ -23,7 +24,11 @@ class CharContainerStore {
 
   addChatWindow(roomId) {
     log.warn('add new chat window', roomId);
-    this.chatWindows.push({ id: this.chatId, roomId });
+    this.chatWindows.push({
+      id: this.chatId,
+      roomId,
+      store: new ChatWindowStore(this.chatId, roomId),
+    });
     this.chatId += 1;
   }
 

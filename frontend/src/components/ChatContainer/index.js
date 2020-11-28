@@ -20,6 +20,11 @@ const useStyles = makeStyles(() => ({
 
 const ChatContainer = () => {
   const classes = useStyles();
+
+  const handleClose = (chatId) => {
+    chatContainerStore.removeChatWIndow(chatId);
+  };
+
   const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
     <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
       <ChatWindow chatWindowStore={chatWindow.store} />

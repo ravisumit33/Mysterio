@@ -31,7 +31,7 @@ class ChatContainerStore {
       id: this.chatId,
       store: new ChatWindowStore(roomId),
     });
-    if (this.chatWindows[this.chatWindows.length - 1].store.isGroupChat) {
+    if (!this.chatWindows[this.chatWindows.length - 1].store.isGroupChat) {
       this.setIndividualChatExist(true);
     }
     this.chatId += 1;
@@ -39,7 +39,7 @@ class ChatContainerStore {
 
   removeChatWIndow(id) {
     const chatWindowIdx = this.chatWindows.findIndex((item) => item.id === id);
-    this.chatWindows[chatWindowIdx].store.isGroupChat && this.setIndividualChatExist(false);
+    !this.chatWindows[chatWindowIdx].store.isGroupChat && this.setIndividualChatExist(false);
     this.chatWindows[chatWindowIdx].store.closeChatWindow();
     this.chatWindows.splice(chatWindowIdx, 1);
   }

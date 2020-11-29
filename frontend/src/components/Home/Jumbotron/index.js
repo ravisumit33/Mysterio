@@ -27,6 +27,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
 import { red } from '@material-ui/core/colors';
 import { chatContainerStore, profileStore } from 'stores';
+import { observer } from 'mobx-react-lite';
 
 const customTheme = createMuiTheme({
   palette: {
@@ -179,6 +180,11 @@ const Jumbotron = () => {
     setUserInfoDialogOpen(true);
   };
 
+  const handleSelectRoom = (roomId) => {
+    setSelectedRoomId(roomId);
+    profileStore.name ? handleStartGroupChat(roomId) : openUserInfoDialog();
+  };
+
   const trandingGroupsUI = trandingGroups.map((group, index) => (
     <Grid item key={group.roomId}>
       <Button
@@ -186,7 +192,7 @@ const Jumbotron = () => {
         color="inherit"
         size="small"
         startIcon={<Icon>groups</Icon>}
-        onClick={() => handleStartGroupChat(group.roomId)}
+        onClick={() => handleSelectRoom(group.roomId)}
       >
         {group.title}
       </Button>
@@ -253,7 +259,10 @@ const Jumbotron = () => {
                           <Button
                             className={classes.individualChatButton}
                             color="inherit"
-                            onClick={handleStartIndividualChat}
+                            disabled={chatContainerStore.individualChatExist}
+                            onClick={
+                              profileStore.name ? handleStartIndividualChat : openUserInfoDialog
+                            }
                           >
                             Chat Now
                           </Button>
@@ -315,4 +324,4 @@ const Jumbotron = () => {
   );
 };
 
-export default Jumbotron;
+export default observer(Jumbotron);

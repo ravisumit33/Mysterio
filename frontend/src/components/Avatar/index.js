@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, makeStyles } from '@material-ui/core';
+import { Avatar, Icon, makeStyles } from '@material-ui/core';
 import { generateRandomColor } from 'utils';
 import clsx from 'clsx';
 
@@ -36,14 +36,14 @@ const TextAvatar = (props) => {
     <Avatar
       className={clsx(useStyles({ avatarBg: generateRandomColor(store.name) }).avatar, className)}
     >
-      {store.name.charAt(0).toUpperCase()}
+      {store.name ? store.name.charAt(0).toUpperCase() : '?'}
     </Avatar>
   );
 };
 
 TextAvatar.propTypes = {
   store: PropTypes.shape({
-    name: PropTypes.string.isRequired,
+    name: PropTypes.string,
   }).isRequired,
   className: PropTypes.string,
 };
@@ -54,11 +54,16 @@ TextAvatar.defaultProps = {
 
 const CustomAvatar = (props) => {
   const { store, className } = props;
-
-  return store.avatarUrl ? (
-    <ImageAvatar className={className} store={store} />
-  ) : (
-    <TextAvatar className={className} store={store} />
+  if (store.avatarUrl) {
+    return <ImageAvatar className={className} store={store} />;
+  }
+  if (store.name) {
+    return <TextAvatar className={className} store={store} />;
+  }
+  return (
+    <Avatar className={className}>
+      <Icon>person_search</Icon>
+    </Avatar>
   );
 };
 

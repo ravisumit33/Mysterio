@@ -31,7 +31,6 @@ class Jumbotron extends React.Component {
   handleStartChat() {
     const { selectedRoomId } = this.state;
     log.warn(selectedRoomId);
-    chatContainerStore.setIndividualChatExist(true);
     chatContainerStore.addChatWindow();
   }
 

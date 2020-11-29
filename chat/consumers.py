@@ -20,9 +20,11 @@ class ChatConsumer(WebsocketConsumer):
         self.channel_id = None
         self.room_id = None
         self.is_group_consumer = False
+        self.session = None
+        self.profile = None
 
     def connect(self):
-        self.session = self.scope["session"]  # pylint: disable=W0201
+        self.session = self.scope["session"]
         if self.session.session_key is None:
             if settings.DEBUG is True:  # for local development
                 self.session.create()
@@ -45,17 +47,6 @@ class ChatConsumer(WebsocketConsumer):
                 raise DenyConnection from excp
             async_to_sync(self.channel_layer.group_add)(
                 PREFIX.GROUP_ROOM + str(self.room_id), self.channel_name
-            )
-            async_to_sync(self.channel_layer.group_send)(
-                PREFIX.GROUP_ROOM + str(self.room_id),
-                {
-                    "type": "group_msg_receive",
-                    "payload": {
-                        "type": MESSAGE.USER_JOINED,
-                        "data": {}
-                        # TODO: send user info who has joined
-                    },
-                },
             )
             logger.info("New group channel created with room_id %d", self.room_id)
         else:
@@ -94,8 +85,10 @@ class ChatConsumer(WebsocketConsumer):
                 group_prefix + str(self.room_id),
                 {
                     "type": "group_msg_receive",
-                    "payload": {"type": MESSAGE.USER_LEFT, "data": {}}
-                    # TODO: send user info who has left
+                    "payload": {
+                        "type": MESSAGE.USER_LEFT,
+                        "data": {"resignee": self.profile},
+                    },
                 },
             )
             logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
@@ -115,10 +108,13 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("SuspiciousOperation : Text message received with no name")
                 self.close()
                 return
-            logger.info("Text message received in room id %d", self.room_id)
-            # TODO: remove this log as messages will be encrypted
+            logger.info(
+                "Text message received in room id %d by %s",
+                self.room_id,
+                self.session["name"],
+            )
             logger.info("%s", message_data["text"])
-            # TODO: log sender info
+            # TODO: remove this log as messages will be encrypted
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             if self.is_group_consumer:
                 Message.TextMessage.objects.create(
@@ -135,23 +131,35 @@ class ChatConsumer(WebsocketConsumer):
                         "type": MESSAGE.TEXT,
                         "data": {
                             "text": message_data["text"],
-                            "sender": {
-                                "name": self.session["name"],
-                                "avatarUrl": self.session["avatar_url"],
-                            },
-                            "room_id": self.room_id,
-                        }
-                        # TODO: send 'sender info' and remove room i
+                            "sender": self.profile,
+                        },
                     },
                 },
             )
         elif message_type == MESSAGE.USER_INFO:
             logger.info("User details: %s", message_data["name"])
-            self.session["name"] = message_data["name"]
-            self.session["avatarUrl"] = (
+            name = message_data["name"]
+            avatar_url = (
                 message_data["avatarUrl"] if "avatarUrl" in message_data else ""
             )
+            self.session["name"] = name
+            self.session["avatarUrl"] = avatar_url
             self.session.save()
+            self.profile = {
+                "name": self.session["name"],
+                "avatarUrl": self.session["avatarUrl"],
+            }
+            if self.is_group_consumer:
+                async_to_sync(self.channel_layer.group_send)(
+                    PREFIX.GROUP_ROOM + str(self.room_id),
+                    {
+                        "type": "group_msg_receive",
+                        "payload": {
+                            "type": MESSAGE.USER_JOINED,
+                            "data": self.profile,
+                        },
+                    },
+                )
 
     def group_msg_receive(self, event):
         """Group message receiver"""

@@ -1,4 +1,4 @@
-import chatContainerStore from './chatContainerStore';
-import profileStore from './profileStore';
+import chatContainerStore from './ChatContainerStore';
+import profileStore from './ProfileStore';
 
 export { chatContainerStore, profileStore };

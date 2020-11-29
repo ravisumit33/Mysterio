@@ -2,7 +2,8 @@ import React from 'react';
 import { Box, Grid, makeStyles } from '@material-ui/core';
 import { chatContainerStore } from 'stores';
 import { observer } from 'mobx-react-lite';
-import ChatWindow from './ChatWindow/index';
+import clsx from 'clsx';
+import ChatWindow from './ChatWindow';
 
 const useStyles = makeStyles(() => ({
   chatContainer: {
@@ -12,19 +13,22 @@ const useStyles = makeStyles(() => ({
     width: 'auto',
     height: 'auto',
   },
+  chatMinimized: {
+    right: 240,
+  },
 }));
 
 const ChatContainer = () => {
   const classes = useStyles();
   const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
     <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
-      <ChatWindow id={chatWindow.id} />
+      <ChatWindow chatWindowStore={chatWindow.store} />
     </Grid>
   ));
 
   chatContainerWindowsList.reverse();
   return (
-    <Box className={classes.chatContainer}>
+    <Box className={clsx(classes.chatContainer, classes.chatMinimized)}>
       <Grid container alignItems="flex-end">
         {chatContainerWindowsList}
       </Grid>

@@ -40,10 +40,10 @@ const useStyle = makeStyles((theme) => ({
     display: 'flex',
     position: 'relative',
     width: '100%',
-    minHeight: '80vh',
+    minHeight: '500px',
     alignItems: 'center',
     [theme.breakpoints.down('sm')]: {
-      minHeight: '100vh',
+      minHeight: '500px',
       padding: theme.spacing(3, 0),
     },
   },
@@ -63,7 +63,7 @@ const useStyle = makeStyles((theme) => ({
     color: theme.palette.primary.contrastText,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
-  chatCardWrapper: {
+  equalGrow: {
     position: 'relative',
     flexGrow: 1,
     flexBasis: 0,
@@ -130,7 +130,7 @@ const Jumbotron = () => {
   const [selectedRoomId, setSelectedRoomId] = useState(undefined);
   const [userInfoDialogOpen, setUserInfoDialogOpen] = useState(false);
   const [textFieldValue, setTextFieldValue] = useState('');
-  const [trandingGroups, setTrandingGroups] = useState([]);
+  const [trendingGroups, setTrandingGroups] = useState([]);
 
   useEffect(() => {
     const tempTrandingGroups = [
@@ -185,7 +185,7 @@ const Jumbotron = () => {
     profileStore.name ? handleStartGroupChat(roomId) : openUserInfoDialog();
   };
 
-  const trandingGroupsUI = trandingGroups.map((group, index) => (
+  const trendingGroupsUI = trendingGroups.map((group, index) => (
     <Grid item key={group.roomId}>
       <Button
         variant="text"
@@ -240,22 +240,22 @@ const Jumbotron = () => {
                 </Card>
               </Grid>
               <Grid item container xs={12} md={6}>
-                <Grid item className={classes.chatCardWrapper}>
+                <Grid item className={classes.equalGrow}>
                   <Divider className={classes.chatCardDivider} orientation="vertical" />
                   <Card className={classes.card}>
                     <CardContent>
                       <Grid container justify="space-between">
-                        <Grid item style={{ flexBasis: 0, flexGrow: 1 }}>
+                        <Grid item className={classes.equalGrow}>
                           <PeopleIcon className={classes.chatIcon} />
                         </Grid>
-                        <Grid item style={{ flexBasis: 0, flexGrow: 1 }}>
+                        <Grid item className={classes.equalGrow}>
                           <Icon className={classes.chatIcon}>groups</Icon>
                         </Grid>
                       </Grid>
                     </CardContent>
                     <CardActions>
                       <Grid container>
-                        <Grid item style={{ flexBasis: 0, flexGrow: 1 }}>
+                        <Grid item className={classes.equalGrow}>
                           <Button
                             className={classes.individualChatButton}
                             color="inherit"
@@ -272,7 +272,7 @@ const Jumbotron = () => {
                           container
                           direction="column"
                           spacing={2}
-                          style={{ flexBasis: 0, flexGrow: 1 }}
+                          className={classes.equalGrow}
                         >
                           <Grid item>
                             <div className={classes.search}>
@@ -290,7 +290,7 @@ const Jumbotron = () => {
                             </div>
                           </Grid>
                           <Grid item container justify="space-evenly" spacing={2}>
-                            {trandingGroupsUI}
+                            {trendingGroupsUI}
                           </Grid>
                         </Grid>
                       </Grid>

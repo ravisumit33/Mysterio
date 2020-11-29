@@ -1,111 +1,116 @@
 import React from 'react';
-import ReconnectingWebSocket from 'reconnecting-websocket';
 import Box from '@material-ui/core/Box';
-import { Button, TextField } from '@material-ui/core';
-import Message from 'constants.js';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from '@material-ui/core';
+import { chatContainerStore, profileStore } from 'stores';
+import log from 'loglevel';
 
 class Jumbotron extends React.Component {
   constructor(props) {
     super(props);
     this.handleStartChat = this.handleStartChat.bind(this);
-    this.handleEndChat = this.handleEndChat.bind(this);
-    this.handleSocketSend = this.handleSocketSend.bind(this);
-    this.handleCurrentMessageChange = this.handleCurrentMessageChange.bind(this);
+    this.handleStartGroupChat = this.handleStartGroupChat.bind(this);
+    this.handleSelectedRoomIdChange = this.handleSelectedRoomIdChange.bind(this);
+    this.handleDialogueButtonClick = this.handleDialogueButtonClick.bind(this);
+    this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
+    this.openUserInfoDialog = this.openUserInfoDialog.bind(this);
+    this.closeUserInfoDialog = this.closeUserInfoDialog.bind(this);
     this.state = {
-      chatSocket: null,
-      currentMessage: '',
-      localMessage: [],
+      selectedRoomId: undefined,
+      userInfoDialogOpen: false,
+      textFieldValue: '',
     };
   }
 
   handleStartChat() {
-    console.log('handleStartChat', 'chat start request sent');
-    const SERVER_ADD = window.location.host.split(':')[0];
-    console.log('handleStartChat', 'chat start request sent', SERVER_ADD);
-    const socket = new ReconnectingWebSocket(`ws://${SERVER_ADD}:8000/ws/chat`);
-    this.setState({
-      chatSocket: socket,
-    });
-    socket.addEventListener('open', () => {
-      console.log('socket connection established, try sending messages');
-    });
-    socket.addEventListener('close', () => {
-      console.log('socket connection closed, try later');
-    });
+    const { selectedRoomId } = this.state;
+    log.warn(selectedRoomId);
+    chatContainerStore.addChatWindow();
+  }
 
-    socket.addEventListener('message', (event) => {
-      console.log('socket connection received msg', event);
-      const payload = JSON.parse(event.data);
-      const messageType = payload.type;
-      const messageData = payload.data;
-      const message = { id: new Date().getTime() };
-      switch (messageType) {
-        case Message.USER_JOINED:
-          message.text = 'User joined';
-          break;
-        case Message.USER_LEFT:
-          this.handleEndChat();
-          message.text = 'User left';
-          break;
-        case Message.TEXT:
-          message.text = messageData.text;
-          break;
-        default:
-          console.error('Unsupported message type', messageType);
-          break;
-      }
-      const { localMessage } = this.state;
-      const tempLocalMessage = [...localMessage, message];
-      console.log('socket connection received msg', localMessage, tempLocalMessage);
-      this.setState({
-        localMessage: tempLocalMessage,
-      });
+  handleStartGroupChat() {
+    const { selectedRoomId } = this.state;
+    chatContainerStore.addChatWindow(selectedRoomId);
+  }
+
+  handleSelectedRoomIdChange({ target: { value } }) {
+    this.setState({
+      selectedRoomId: parseInt(value, 10),
     });
   }
 
-  handleSocketSend() {
-    console.log('chekc receive');
-    const { currentMessage } = this.state;
-    const payload = {
-      type: Message.TEXT,
-      data: {
-        text: currentMessage,
-      },
-    };
-    const { chatSocket } = this.state;
-    chatSocket.send(JSON.stringify(payload));
+  handleTextFieldChange(e) {
     this.setState({
-      currentMessage: '',
+      textFieldValue: e.target.value,
     });
   }
 
-  handleCurrentMessageChange({ target: { value } }) {
+  handleDialogueButtonClick() {
+    this.closeUserInfoDialog();
+    const { selectedRoomId, textFieldValue } = this.state;
+    profileStore.setName(textFieldValue);
+    selectedRoomId ? this.handleStartGroupChat() : this.handleStartChat();
+  }
+
+  closeUserInfoDialog() {
     this.setState({
-      currentMessage: value,
+      userInfoDialogOpen: false,
     });
   }
 
-  handleEndChat() {
-    const { chatSocket } = this.state;
-    chatSocket.close();
+  openUserInfoDialog() {
+    this.setState({
+      userInfoDialogOpen: true,
+    });
   }
 
   render() {
-    const { localMessage } = this.state;
-    const messageList = localMessage.map((message) => <div key={message.id}>{message.text}</div>);
-    const { currentMessage } = this.state;
+    const { userInfoDialogOpen, textFieldValue } = this.state;
     return (
       <Box>
         Work in progress Jumbotron
-        <Button onClick={this.handleStartChat}>Start Chat</Button>
-        {messageList}
+        <Button
+          disabled={chatContainerStore.individualChatExist}
+          onClick={profileStore.name ? this.handleStartChat : this.openUserInfoDialog}
+        >
+          Start Chat
+        </Button>
         <TextField
-          placeholder="Type your message"
-          value={currentMessage}
-          onChange={this.handleCurrentMessageChange}
+          placeholder="Enter Room Id"
+          onChange={this.handleSelectedRoomIdChange}
+          label="Room Id"
         />
-        <Button onClick={this.handleSocketSend}>Send Chat</Button>
-        <Button onClick={this.handleEndChat}>End Chat</Button>
+        <Button onClick={profileStore.name ? this.handleStartGroupChat : this.openUserInfoDialog}>
+          Start Group Chat
+        </Button>
+        <Dialog open={userInfoDialogOpen} onClose={this.closeUserInfoDialog}>
+          <DialogTitle>Let&apos;s get started!</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Name"
+              fullWidth
+              value={textFieldValue}
+              onChange={this.handleTextFieldChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              disabled={!textFieldValue}
+              onClick={this.handleDialogueButtonClick}
+              color="primary"
+            >
+              Go
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     );
   }

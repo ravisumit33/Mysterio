@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Button, Grid, IconButton, makeStyles } from '@material-ui/core';
+import clsx from 'clsx';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   buttonContainer: {
-    paddingLeft: '0.5rem',
+    paddingLeft: theme.spacing(2),
   },
   buttonCommon: {
     color: 'inherit',
@@ -14,10 +15,13 @@ const useStyles = makeStyles(() => ({
     backgroundColor: 'transparent !important',
   },
   buttonBoxText: {
-    boxShadow: '0px 0px 0px 0px red',
-    transition: 'box-shadow 0.12s linear',
+    boxShadow: `0px 0px 0px 0px ${theme.palette.secondary.main}`,
+    transition: theme.transitions.create('box-shadow', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.short,
+    }),
     '&.focused, &:hover': {
-      boxShadow: '0px 2px 0px 0px red',
+      boxShadow: `0px 2px 0px 0px ${theme.palette.secondary.main}`,
     },
   },
 }));
@@ -37,10 +41,10 @@ const CustomButton = (props) => {
       <Button
         size="small"
         href={data.href}
-        className={`${classes.buttonCommon} ${classes.buttonText}`}
+        className={clsx(classes.buttonCommon, classes.buttonText)}
         disableRipple={disableRipple}
       >
-        <Box className={`${classes.buttonBoxText} ${focused ? 'focused' : ''}`}>{data.text}</Box>
+        <Box className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
       </Button>
     );
   } else {
@@ -54,7 +58,7 @@ const CustomButton = (props) => {
       <Button
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...commonIconBtnProps}
-        className={`${classes.buttonCommon} ${classes.buttonText}`}
+        className={clsx(classes.buttonCommon, classes.buttonText)}
         endIcon={<IconComponent />}
       >
         {data.text}
@@ -69,10 +73,11 @@ const CustomButton = (props) => {
   return (
     <Box width="100%">
       <Grid
-        className={!isHamburgerMenu ? classes.buttonContainer : undefined}
+        className={clsx({ [classes.buttonContainer]: !isHamburgerMenu })}
         container
         direction="column"
-        onClick={type === 'text' ? handleClick : undefined}
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...(type === 'text' && { onClick: handleClick })}
       >
         {buttonComponent}
       </Grid>

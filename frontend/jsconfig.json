@@ -5,6 +5,7 @@
     "checkJs": true,
     "moduleResolution": "node",
     "jsx": "react",
+    "experimentalDecorators": true,
     "baseUrl": "src",
     "paths": {
       "*": [

@@ -6,6 +6,7 @@ import {
   Grid,
   Hidden,
   IconButton,
+  makeStyles,
   Menu,
   MenuItem,
   ThemeProvider,
@@ -16,7 +17,7 @@ import { GitHub, Menu as MenuIcon } from '@material-ui/icons';
 import CustomButton from './customButton';
 
 const defaultTheme = createMuiTheme();
-const theme = createMuiTheme({
+const customTheme = createMuiTheme({
   breakpoints: {
     values: {
       ...defaultTheme.breakpoints.values,
@@ -24,6 +25,12 @@ const theme = createMuiTheme({
     },
   },
 });
+
+const useStyles = makeStyles((theme) => ({
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
+}));
 
 const navbarButtons = [
   {
@@ -70,6 +77,7 @@ const navbarButtons = [
 ];
 
 const NavBar = () => {
+  const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
@@ -116,7 +124,7 @@ const NavBar = () => {
     </>
   );
   return (
-    <AppBar position="sticky">
+    <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
         <Container>
           <Grid container alignItems="center" style={{ height: '64px' }}>
@@ -124,7 +132,7 @@ const NavBar = () => {
               <Typography variant="h5">Mysterio</Typography>
             </Grid>
             <Grid item container justify="flex-end" xs alignItems="center">
-              <ThemeProvider theme={theme}>
+              <ThemeProvider theme={customTheme}>
                 <Hidden smDown>{navbarMenu}</Hidden>
                 <Hidden mdUp>{hamburgerMenu}</Hidden>
               </ThemeProvider>

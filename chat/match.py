@@ -1,5 +1,6 @@
 import logging
 from django.db import transaction
+from django.contrib.sessions.models import Session
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from chat.models.room import IndividualRoom
@@ -7,6 +8,14 @@ from chat.models.channel import IndividualChannel
 from chat.constants import MESSAGE, PREFIX
 
 logger = logging.getLogger(__name__)
+
+
+def get_sessions_data(channels):
+    """Get stored session data for each channel"""
+    session_ids = [channel["session"] for channel in channels]
+    sessions = Session.objects.filter(pk__in=session_ids)
+    sessions_data = [session.get_decoded() for session in sessions]
+    return sessions_data
 
 
 def match_channels(channels):
@@ -30,10 +39,11 @@ def process_unmatched_channels():
     channel_layer = get_channel_layer()
 
     with transaction.atomic():
-        channels = unmatched_channels.values("id", "name")
+        channels = unmatched_channels.values("id", "name", "session")
         individual_room_list = []
 
         channel_idx_pairs = match_channels(channels)
+        sessions_data = get_sessions_data(channels)
 
         for channel_idx1, channel_idx2 in channel_idx_pairs:
             individual_room_list.append(
@@ -61,18 +71,28 @@ def process_unmatched_channels():
                 channels[channel_idx_pair[0]]["id"],
                 channels[channel_idx_pair[1]]["id"],
             )
-            for channel_idx in channel_idx_pair:
+            for i in range(2):
+                channel = channels[channel_idx_pair[i]]
+                match_channel_idx = channel_idx_pair[1 - i]
                 async_to_sync(channel_layer.group_add)(
-                    PREFIX.INDIVIDUAL_ROOM + str(room_id), channels[channel_idx]["name"]
+                    PREFIX.INDIVIDUAL_ROOM + str(room_id),
+                    channel["name"],
                 )
                 async_to_sync(channel_layer.group_send)(
-                    PREFIX.INDIVIDUAL_CHANNEL + str(channels[channel_idx]["id"]),
+                    PREFIX.INDIVIDUAL_CHANNEL + str(channel["id"]),
                     {
                         "type": "group_msg_receive",
                         "payload": {
                             "type": MESSAGE.USER_JOINED,
-                            "data": {"room_id": room_id}
-                            # TODO: send user info who has joined
+                            "data": {
+                                "room_id": room_id,
+                                "match": {
+                                    "name": sessions_data[match_channel_idx]["name"],
+                                    "avatarUrl": sessions_data[match_channel_idx][
+                                        "avatarUrl"
+                                    ],
+                                },
+                            },
                         },
                     },
                 )

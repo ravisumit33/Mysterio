@@ -156,7 +156,7 @@ class ChatConsumer(WebsocketConsumer):
                         "type": "group_msg_receive",
                         "payload": {
                             "type": MESSAGE.USER_JOINED,
-                            "data": self.profile,
+                            "data": {"newJoinee": self.profile},
                         },
                     },
                 )

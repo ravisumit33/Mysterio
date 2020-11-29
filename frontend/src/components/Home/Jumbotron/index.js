@@ -1,95 +1,307 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import {
   Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Container,
+  createMuiTheme,
+  Divider,
+  fade,
+  Grid,
+  Icon,
+  InputBase,
+  makeStyles,
+  ThemeProvider,
+  Typography,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
 } from '@material-ui/core';
+import PeopleIcon from '@material-ui/icons/People';
+import SearchIcon from '@material-ui/icons/Search';
+import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
+import { red } from '@material-ui/core/colors';
 import { chatContainerStore, profileStore } from 'stores';
-import log from 'loglevel';
+import { observer } from 'mobx-react-lite';
 
-class Jumbotron extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleStartChat = this.handleStartChat.bind(this);
-    this.handleStartGroupChat = this.handleStartGroupChat.bind(this);
-    this.handleSelectedRoomIdChange = this.handleSelectedRoomIdChange.bind(this);
-    this.handleDialogueButtonClick = this.handleDialogueButtonClick.bind(this);
-    this.handleTextFieldChange = this.handleTextFieldChange.bind(this);
-    this.openUserInfoDialog = this.openUserInfoDialog.bind(this);
-    this.closeUserInfoDialog = this.closeUserInfoDialog.bind(this);
-    this.state = {
-      selectedRoomId: undefined,
-      userInfoDialogOpen: false,
-      textFieldValue: '',
-    };
-  }
+const customTheme = createMuiTheme({
+  palette: {
+    divider: red[800],
+  },
+});
 
-  handleStartChat() {
-    const { selectedRoomId } = this.state;
-    log.warn(selectedRoomId);
+const useStyle = makeStyles((theme) => ({
+  jumbotron: {
+    display: 'flex',
+    position: 'relative',
+    width: '100%',
+    minHeight: '500px',
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+      minHeight: '500px',
+      padding: theme.spacing(3, 0),
+    },
+  },
+  bg: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+    filter: 'blur(2.5px)',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  card: {
+    width: '100%',
+    height: theme.spacing(40),
+    color: theme.palette.primary.contrastText,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  equalGrow: {
+    position: 'relative',
+    flexGrow: 1,
+    flexBasis: 0,
+  },
+  chatCardDivider: {
+    position: 'absolute',
+    left: '50%',
+    top: '50%',
+    height: '80%',
+    transform: 'translate(-50%, -50%)',
+  },
+  appCardTitle: {
+    height: theme.spacing(16),
+  },
+  appCardSubtitle: {
+    padding: theme.spacing(10, 0),
+  },
+  appCardDescription: {
+    padding: theme.spacing(10, 0),
+  },
+  chatIcon: {
+    width: theme.spacing(16),
+    height: theme.spacing(16),
+    fontSize: theme.spacing(16),
+  },
+  individualChatButton: {
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
+    },
+  },
+  search: {
+    position: 'relative',
+    width: '80%',
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: fade(theme.palette.common.white, 0.15),
+    '&:hover': {
+      backgroundColor: fade(theme.palette.common.white, 0.25),
+    },
+    margin: 'auto',
+  },
+  searchIcon: {
+    padding: theme.spacing(0, 2),
+    height: '100%',
+    position: 'absolute',
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inputRoot: {
+    color: 'inherit',
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 0),
+    paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
+    transition: theme.transitions.create('width'),
+    width: '100%',
+  },
+}));
+
+const Jumbotron = () => {
+  const classes = useStyle();
+  const [selectedRoomId, setSelectedRoomId] = useState(undefined);
+  const [userInfoDialogOpen, setUserInfoDialogOpen] = useState(false);
+  const [textFieldValue, setTextFieldValue] = useState('');
+  const [trendingGroups, setTrandingGroups] = useState([]);
+
+  useEffect(() => {
+    const tempTrandingGroups = [
+      {
+        title: 'Title1',
+        roomId: 1,
+      },
+      {
+        title: 'Title2',
+        roomId: 2,
+      },
+      {
+        title: 'Title3',
+        roomId: 3,
+      },
+      {
+        title: 'Title4',
+        roomId: 4,
+      },
+    ];
+    setTrandingGroups(tempTrandingGroups);
+  }, []);
+
+  const handleStartIndividualChat = () => {
     chatContainerStore.addChatWindow();
-  }
+  };
 
-  handleStartGroupChat() {
-    const { selectedRoomId } = this.state;
-    chatContainerStore.addChatWindow(selectedRoomId);
-  }
+  const handleStartGroupChat = (roomId) => {
+    chatContainerStore.addChatWindow(roomId);
+  };
 
-  handleSelectedRoomIdChange({ target: { value } }) {
-    this.setState({
-      selectedRoomId: parseInt(value, 10),
-    });
-  }
+  const handleTextFieldChange = (e) => {
+    setTextFieldValue(e.target.value);
+  };
 
-  handleTextFieldChange(e) {
-    this.setState({
-      textFieldValue: e.target.value,
-    });
-  }
-
-  handleDialogueButtonClick() {
-    this.closeUserInfoDialog();
-    const { selectedRoomId, textFieldValue } = this.state;
+  const handleDialogueButtonClick = () => {
+    closeUserInfoDialog();
     profileStore.setName(textFieldValue);
-    selectedRoomId ? this.handleStartGroupChat() : this.handleStartChat();
-  }
+    selectedRoomId ? handleStartGroupChat(selectedRoomId) : handleStartIndividualChat();
+  };
 
-  closeUserInfoDialog() {
-    this.setState({
-      userInfoDialogOpen: false,
-    });
-  }
+  const closeUserInfoDialog = () => {
+    setUserInfoDialogOpen(false);
+  };
 
-  openUserInfoDialog() {
-    this.setState({
-      userInfoDialogOpen: true,
-    });
-  }
+  const openUserInfoDialog = () => {
+    setUserInfoDialogOpen(true);
+  };
 
-  render() {
-    const { userInfoDialogOpen, textFieldValue } = this.state;
-    return (
+  const handleSelectRoom = (roomId) => {
+    setSelectedRoomId(roomId);
+    profileStore.name ? handleStartGroupChat(roomId) : openUserInfoDialog();
+  };
+
+  const trendingGroupsUI = trendingGroups.map((group, index) => (
+    <Grid item key={group.roomId}>
+      <Button
+        variant="text"
+        color="inherit"
+        size="small"
+        startIcon={<Icon>groups</Icon>}
+        onClick={() => handleSelectRoom(group.roomId)}
+      >
+        {group.title}
+      </Button>
+    </Grid>
+  ));
+  return (
+    <ThemeProvider theme={customTheme}>
       <Box>
-        Work in progress Jumbotron
-        <Button
-          disabled={chatContainerStore.individualChatExist}
-          onClick={profileStore.name ? this.handleStartChat : this.openUserInfoDialog}
-        >
-          Start Chat
-        </Button>
-        <TextField
-          placeholder="Enter Room Id"
-          onChange={this.handleSelectedRoomIdChange}
-          label="Room Id"
-        />
-        <Button onClick={profileStore.name ? this.handleStartGroupChat : this.openUserInfoDialog}>
-          Start Group Chat
-        </Button>
-        <Dialog open={userInfoDialogOpen} onClose={this.closeUserInfoDialog}>
+        <Box className={classes.jumbotron}>
+          <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
+          <Container>
+            <Grid container spacing={1} justify="space-between">
+              <Grid item container xs={12} md={6}>
+                <Card className={classes.card}>
+                  <CardContent>
+                    <Grid
+                      container
+                      direction="column"
+                      justify="center"
+                      spacing={2}
+                      alignContent="space-around"
+                    >
+                      <Grid
+                        item
+                        container
+                        alignContent="flex-end"
+                        justify="center"
+                        className={classes.appCardTitle}
+                      >
+                        <Typography variant="h3">Mysterio</Typography>
+                      </Grid>
+                      <Grid item className={classes.appCardSubtitle}>
+                        <Typography variant="subtitle1">
+                          Chat Anounimously Chat Anounimously
+                        </Typography>
+                      </Grid>
+                      <Grid item className={classes.appCardDescription}>
+                        <Typography variant="caption" component="p">
+                          No one knows who you are :P No one knows who you are :P No one knows who
+                          you are :P No one knows who you are :PNo one knows who you are :P
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item container xs={12} md={6}>
+                <Grid item className={classes.equalGrow}>
+                  <Divider className={classes.chatCardDivider} orientation="vertical" />
+                  <Card className={classes.card}>
+                    <CardContent>
+                      <Grid container justify="space-between">
+                        <Grid item className={classes.equalGrow}>
+                          <PeopleIcon className={classes.chatIcon} />
+                        </Grid>
+                        <Grid item className={classes.equalGrow}>
+                          <Icon className={classes.chatIcon}>groups</Icon>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                    <CardActions>
+                      <Grid container>
+                        <Grid item className={classes.equalGrow}>
+                          <Button
+                            className={classes.individualChatButton}
+                            color="inherit"
+                            disabled={chatContainerStore.individualChatExist}
+                            onClick={
+                              profileStore.name ? handleStartIndividualChat : openUserInfoDialog
+                            }
+                          >
+                            Chat Now
+                          </Button>
+                        </Grid>
+                        <Grid
+                          item
+                          container
+                          direction="column"
+                          spacing={2}
+                          className={classes.equalGrow}
+                        >
+                          <Grid item>
+                            <div className={classes.search}>
+                              <div className={classes.searchIcon}>
+                                <SearchIcon />
+                              </div>
+                              <InputBase
+                                placeholder="Search…"
+                                classes={{
+                                  root: classes.inputRoot,
+                                  input: classes.inputInput,
+                                }}
+                                inputProps={{ 'aria-label': 'search' }}
+                              />
+                            </div>
+                          </Grid>
+                          <Grid item container justify="space-evenly" spacing={2}>
+                            {trendingGroupsUI}
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+        <Dialog open={userInfoDialogOpen} onClose={closeUserInfoDialog}>
           <DialogTitle>Let&apos;s get started!</DialogTitle>
           <DialogContent>
             <TextField
@@ -98,22 +310,18 @@ class Jumbotron extends React.Component {
               label="Name"
               fullWidth
               value={textFieldValue}
-              onChange={this.handleTextFieldChange}
+              onChange={handleTextFieldChange}
             />
           </DialogContent>
           <DialogActions>
-            <Button
-              disabled={!textFieldValue}
-              onClick={this.handleDialogueButtonClick}
-              color="primary"
-            >
+            <Button disabled={!textFieldValue} onClick={handleDialogueButtonClick} color="primary">
               Go
             </Button>
           </DialogActions>
         </Dialog>
       </Box>
-    );
-  }
-}
+    </ThemeProvider>
+  );
+};
 
-export default Jumbotron;
+export default observer(Jumbotron);

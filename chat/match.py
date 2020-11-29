@@ -85,6 +85,7 @@ def process_unmatched_channels():
                         "payload": {
                             "type": MESSAGE.USER_JOINED,
                             "data": {
+                                "room_id": room_id,
                                 "match": {
                                     "name": sessions_data[match_channel_idx]["name"],
                                     "avatarUrl": sessions_data[match_channel_idx][

@@ -62,6 +62,7 @@ class ChatWindowStore {
   }
 
   reconnect() {
+    this.setName('');
     // @ts-ignore
     this.messageList.clear();
     this.socket.close();

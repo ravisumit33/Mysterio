@@ -40,7 +40,7 @@ const useStyle = makeStyles((theme) => ({
     display: 'flex',
     position: 'relative',
     width: '100%',
-    minHeight: '500px',
+    minHeight: '600px',
     alignItems: 'center',
     [theme.breakpoints.down('sm')]: {
       minHeight: '500px',
@@ -54,7 +54,7 @@ const useStyle = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    filter: 'blur(2.5px)',
+    filter: 'blur(1.5px)',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   card: {
@@ -200,7 +200,7 @@ const Jumbotron = () => {
   ));
   return (
     <ThemeProvider theme={customTheme}>
-      <Box>
+      <Box id="jumbotron">
         <Box className={classes.jumbotron}>
           <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
           <Container>

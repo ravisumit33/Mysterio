@@ -69,14 +69,14 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   },
 }));
 
-const ChatListItem = ({ bold, chatId, chatWindowStore }) => {
-  const styles = useStyles({ bold });
+const ChatListItem = ({ chatId, chatWindowStore }) => {
   const handleClose = (e) => {
     e.stopPropagation();
     chatContainerStore.removeChatWIndow(chatId);
   };
   const handleClick = (e) => {
     chatWindowStore.setWindowMinimized(false);
+    chatWindowStore.hasUnreadMessages && chatWindowStore.setUnreadMessageStatus(false);
   };
   const { name, messageList } = chatWindowStore;
   let lastMessage = '';
@@ -87,10 +87,12 @@ const ChatListItem = ({ bold, chatId, chatWindowStore }) => {
       },
     ] = messageList.slice(-1);
   }
+  const bold = chatWindowStore.hasUnreadMessages;
+  const classes = useStyles({ bold });
   return (
-    <ListItem button onClick={handleClick} className={clsx(styles.root, styles.rootHover)}>
+    <ListItem button onClick={handleClick} className={clsx(classes.root, classes.rootHover)}>
       <ListItemIcon>
-        <Avatar store={chatWindowStore} className={styles.avatar} />
+        <Avatar store={chatWindowStore} className={classes.avatar} />
       </ListItemIcon>
       <>
         {name ? (
@@ -99,18 +101,18 @@ const ChatListItem = ({ bold, chatId, chatWindowStore }) => {
             secondary={lastMessage}
             primaryTypographyProps={{ noWrap: true }}
             secondaryTypographyProps={{ noWrap: true }}
-            classes={{ primary: styles.primary, secondary: styles.secondary }}
+            classes={{ primary: classes.primary, secondary: classes.secondary }}
           />
         ) : (
-          <Box className={styles.progress}>
+          <Box className={classes.progress}>
             <CircularProgress />
           </Box>
         )}
         <Box position="relative">
-          <IconButton onClick={handleClose} className={styles.cancel}>
+          <IconButton onClick={handleClose} className={classes.cancel}>
             <CancelIcon />
           </IconButton>
-          {bold && <div className={clsx(styles.float, styles.dot)} />}
+          {bold && <div className={clsx(classes.float, classes.dot)} />}
         </Box>
       </>
     </ListItem>
@@ -118,17 +120,15 @@ const ChatListItem = ({ bold, chatId, chatWindowStore }) => {
 };
 
 ChatListItem.propTypes = {
-  bold: PropTypes.bool,
   chatWindowStore: PropTypes.shape({
     name: PropTypes.string.isRequired,
     messageList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+    isWindowMinimized: PropTypes.bool.isRequired,
     setWindowMinimized: PropTypes.func.isRequired,
+    hasUnreadMessages: PropTypes.bool.isRequired,
+    setUnreadMessageStatus: PropTypes.func.isRequired,
   }).isRequired,
   chatId: PropTypes.number.isRequired,
-};
-
-ChatListItem.defaultProps = {
-  bold: false,
 };
 
 export default observer(ChatListItem);

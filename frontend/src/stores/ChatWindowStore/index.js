@@ -14,6 +14,8 @@ class ChatWindowStore {
 
   shouldReconnect = false;
 
+  hasUnreadMessages = false;
+
   constructor(roomId) {
     makeObservable(this, {
       avatarUrl: observable,
@@ -22,6 +24,7 @@ class ChatWindowStore {
       messageList: observable.shallow,
       isWindowMinimized: observable,
       shouldReconnect: observable,
+      hasUnreadMessages: observable,
       setWindowMinimized: action.bound,
       setName: action.bound,
       setAvatarUrl: action.bound,
@@ -31,6 +34,7 @@ class ChatWindowStore {
       reconnect: action.bound,
       closeChatWindow: action.bound,
       initState: action.bound,
+      setUnreadMessageStatus: action.bound,
     });
     this.initState(roomId);
     this.socket = new Socket(this);
@@ -59,6 +63,7 @@ class ChatWindowStore {
 
   addMessage(message) {
     this.messageList.push(message);
+    this.isWindowMinimized && this.setUnreadMessageStatus(true);
   }
 
   reconnect() {
@@ -76,6 +81,10 @@ class ChatWindowStore {
 
   setReconnectStatus(status) {
     this.shouldReconnect = status;
+  }
+
+  setUnreadMessageStatus(status) {
+    this.hasUnreadMessages = status;
   }
 }
 

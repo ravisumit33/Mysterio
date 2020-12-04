@@ -5,6 +5,8 @@ class ProfileStore {
 
   avatarUrl = '';
 
+  id = '';
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -15,6 +17,10 @@ class ProfileStore {
 
   setAvatarUrl(newAvatarUrl) {
     this.avatarUrl = newAvatarUrl;
+  }
+
+  setId(newId) {
+    this.id = newId;
   }
 }
 

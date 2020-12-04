@@ -3,6 +3,7 @@ import { Box, Grid, makeStyles } from '@material-ui/core';
 import { chatContainerStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
+import { ChatWindowStoreContext } from 'contexts';
 import ChatWindow from './ChatWindow';
 
 const useStyles = makeStyles(() => ({
@@ -23,7 +24,9 @@ const ChatContainer = () => {
 
   const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
     <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
-      <ChatWindow chatWindowStore={chatWindow.store} />
+      <ChatWindowStoreContext.Provider value={chatWindow.store}>
+        <ChatWindow chatId={chatWindow.id} />
+      </ChatWindowStoreContext.Provider>
     </Grid>
   ));
 

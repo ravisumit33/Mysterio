@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
@@ -10,6 +10,7 @@ import Avatar from 'components/Avatar';
 import { CircularProgress, IconButton, ListItemIcon } from '@material-ui/core';
 import { chatContainerStore } from 'stores';
 import { observer } from 'mobx-react-lite';
+import { ChatWindowStoreContext, ClassNameContext } from 'contexts';
 
 const useStyles = makeStyles(({ palette, spacing }) => ({
   // @ts-ignore
@@ -63,13 +64,10 @@ const useStyles = makeStyles(({ palette, spacing }) => ({
   cancel: {
     visibility: 'hidden',
   },
-  responded: {
-    width: 16,
-    height: 16,
-  },
 }));
 
-const ChatListItem = ({ chatId, chatWindowStore }) => {
+const ChatListItem = ({ chatId }) => {
+  const chatWindowStore = useContext(ChatWindowStoreContext);
   const handleClose = (e) => {
     e.stopPropagation();
     chatContainerStore.removeChatWIndow(chatId);
@@ -87,12 +85,17 @@ const ChatListItem = ({ chatId, chatWindowStore }) => {
       },
     ] = messageList.slice(-1);
   }
+  if (lastMessage) {
+    [lastMessage] = lastMessage.slice(-1);
+  }
   const bold = chatWindowStore.hasUnreadMessages;
   const classes = useStyles({ bold });
   return (
     <ListItem button onClick={handleClick} className={clsx(classes.root, classes.rootHover)}>
       <ListItemIcon>
-        <Avatar store={chatWindowStore} className={classes.avatar} />
+        <ClassNameContext.Provider value={classes.avatar}>
+          <Avatar />
+        </ClassNameContext.Provider>
       </ListItemIcon>
       <>
         {name ? (
@@ -120,14 +123,6 @@ const ChatListItem = ({ chatId, chatWindowStore }) => {
 };
 
 ChatListItem.propTypes = {
-  chatWindowStore: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    messageList: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-    isWindowMinimized: PropTypes.bool.isRequired,
-    setWindowMinimized: PropTypes.func.isRequired,
-    hasUnreadMessages: PropTypes.bool.isRequired,
-    setUnreadMessageStatus: PropTypes.func.isRequired,
-  }).isRequired,
   chatId: PropTypes.number.isRequired,
 };
 

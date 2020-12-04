@@ -1,65 +1,73 @@
-import React from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Box, IconButton } from '@material-ui/core';
-import { Launcher } from 'react-chat-window';
-import log from 'loglevel';
+import { Box, makeStyles, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
-import ReplayIcon from '@material-ui/icons/Replay';
 import MessageType from 'constants.js';
-import MinimizeIcon from '@material-ui/icons/Minimize';
-import './styles.css';
+import { ChatWindowStoreContext } from 'contexts';
+import { profileStore } from 'stores';
+import ChatHeader from './ChatHeader';
+import ChatMessage from './ChatMessage';
+import InputBar from './InputBar';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    height: '375px',
+    width: '350px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    boxSizing: 'border-box',
+    boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
+    backgroundColor: 'white',
+  },
+  infoMsg: {
+    fontWeight: 500,
+    color: 'rgba(0,0,0,0.4)',
+    margin: '12px 0',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  section: {
+    padding: theme.spacing(0, 1),
+  },
+}));
 
 const ChatWindow = (props) => {
-  const { chatWindowStore } = props;
-  const {
-    messageList,
-    isWindowMinimized,
-    name,
-    socket,
-    setWindowMinimized,
-    reconnect,
-  } = chatWindowStore;
+  const { chatId } = props;
+  const classes = useStyles();
+  const endBox = useRef(null);
+  const scrollToBottom = () => endBox.current.scrollIntoView({ behavior: 'smooth' });
+  const chatWindowStore = useContext(ChatWindowStoreContext);
+  const { messageList, isWindowMinimized } = chatWindowStore;
+  useEffect(scrollToBottom, [messageList]);
 
-  function onMessageWasSent(messageObj) {
-    log.warn(messageObj);
-    const message = messageObj.data;
-    socket.send(MessageType.TEXT, message);
-  }
-
-  function handleMinimize() {
-    // store.handleEndChat();
-    // handleClose(id);
-    setWindowMinimized(true);
-  }
-
-  function handleReconnect() {
-    reconnect();
-  }
-
-  const chatWindowControlButton = (
-    <>
-      <IconButton style={{ marginRight: '4.2rem', marginTop: '1.5rem' }} onClick={handleReconnect}>
-        <ReplayIcon />
-      </IconButton>
-      <IconButton style={{ marginRight: '4.2rem', marginTop: '1.5rem' }} onClick={handleMinimize}>
-        <MinimizeIcon />
-      </IconButton>
-    </>
-  );
+  const chatMessages = messageList.map((message, idx) => {
+    const messageData = message.data;
+    if (message.type === MessageType.TEXT) {
+      const side = messageData.sender.id === profileStore.id ? 'right' : 'left';
+      // eslint-disable-next-line react/no-array-index-key
+      return <ChatMessage key={idx} side={side} messages={messageData.text} />;
+    }
+    return (
+      // eslint-disable-next-line react/no-array-index-key
+      <Typography key={idx} className={classes.infoMsg}>
+        {messageData.text}
+      </Typography>
+    );
+  });
 
   return !isWindowMinimized ? (
-    <Box position="relative" height="500px" width="400px">
-      <Launcher
-        agentProfile={{
-          teamName: name,
-          imageUrl: 'https://a.slack-edge.com/66f9/img/avatars-teams/ava_0001-34.png',
-        }}
-        messageList={messageList}
-        isOpen={!isWindowMinimized}
-        showEmoji
-        onMessageWasSent={onMessageWasSent}
-      />
-      {chatWindowControlButton}
+    <Box className={classes.root}>
+      <Box className={classes.section}>
+        <ChatHeader chatId={chatId} />
+      </Box>
+      <Box flexGrow={1} overflow="scroll" className={classes.section}>
+        {chatMessages}
+      </Box>
+      <Box>
+        <InputBar />
+      </Box>
+      <div ref={endBox} />
     </Box>
   ) : (
     <></>
@@ -67,16 +75,7 @@ const ChatWindow = (props) => {
 };
 
 ChatWindow.propTypes = {
-  chatWindowStore: PropTypes.shape({
-    messageList: PropTypes.arrayOf(PropTypes.shape({})),
-    isWindowMinimized: PropTypes.bool,
-    name: PropTypes.string,
-    socket: PropTypes.shape({
-      send: PropTypes.func.isRequired,
-    }).isRequired,
-    setWindowMinimized: PropTypes.func.isRequired,
-    reconnect: PropTypes.func.isRequired,
-  }).isRequired,
+  chatId: PropTypes.number.isRequired,
 };
 
 export default observer(ChatWindow);

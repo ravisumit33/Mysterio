@@ -30,37 +30,7 @@ class Socket {
   handleMessage(event) {
     log.warn('socket receive', event.data);
     const payload = JSON.parse(event.data);
-    const messageType = payload.type;
-    const messageData = payload.data;
-    const author = this.chatWindowStore.messageList.length % 2 ? 'them' : 'me';
-    const message = { author, type: 'text', data: {} };
-    switch (messageType) {
-      case MessageType.USER_JOINED:
-        if ('match' in messageData) {
-          this.chatWindowStore.setName(messageData.match.name);
-          this.chatWindowStore.setAvatarUrl(messageData.match.avatarUrl);
-        }
-        message.data.text = this.chatWindowStore.isGroupChat
-          ? `${messageData.newJoinee.name} entered`
-          : `You are connected to ${messageData.match.name}`;
-        break;
-      case MessageType.USER_LEFT:
-        message.data.text = `${messageData.resignee.name} left`;
-        if (!this.chatWindowStore.isGroupChat) {
-          this.close();
-        }
-        break;
-      case MessageType.TEXT:
-        message.data.text = messageData.text;
-        break;
-      default:
-        log.error('Unsupported message type', messageType);
-        break;
-    }
-    this.chatWindowStore.addMessage(message);
-    if (!this.chatWindowStore.isGroupChat && messageType === MessageType.USER_LEFT) {
-      this.chatWindowStore.setReconnectStatus(true);
-    }
+    this.chatWindowStore.addMessage(payload);
   }
 
   send(msgType, msgData) {

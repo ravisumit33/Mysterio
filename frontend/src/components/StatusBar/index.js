@@ -3,7 +3,8 @@ import { chatContainerStore } from 'stores';
 
 import { Drawer, List, makeStyles } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
-import ChatListItem from './chatListItem';
+import { ChatWindowStoreContext } from 'contexts';
+import ChatListItem from './ChatListItem';
 
 const useStyles = makeStyles((theme) => ({
   drawerPaper: {
@@ -20,7 +21,11 @@ const StatusBar = () => {
   const classes = useStyles();
   const chatList = chatContainerStore.chatWindows.map(
     ({ id, store }) =>
-      store.isWindowMinimized && <ChatListItem key={id} chatId={id} chatWindowStore={store} />
+      store.isWindowMinimized && (
+        <ChatWindowStoreContext.Provider value={store}>
+          <ChatListItem key={id} chatId={id} />
+        </ChatWindowStoreContext.Provider>
+      )
   );
   return (
     <Drawer

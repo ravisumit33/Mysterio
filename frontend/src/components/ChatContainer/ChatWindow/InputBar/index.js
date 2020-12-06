@@ -6,16 +6,16 @@ import SendIcon from '@material-ui/icons/Send';
 import { Box, IconButton } from '@material-ui/core';
 import log from 'loglevel';
 import { ChatWindowStoreContext } from 'contexts';
-import MessageType from 'constants.js';
+import { ChatStatus, MessageType } from 'constants.js';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    paddingLeft: 16,
+    paddingLeft: theme.spacing(2),
     backgroundColor: 'rgba(0,0,0,0.04)',
-    height: 36,
-    fontSize: 13,
+    height: theme.spacing(4.5),
+    fontSize: '0.8rem',
     width: '100%',
     transition: 'background-color .2s ease,box-shadow .2s ease',
   },
@@ -35,7 +35,7 @@ const InputBar = () => {
   const input = useRef(null);
   const [active, setActive] = useState(false);
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { socket } = chatWindowStore;
+  const { socket, chatStatus } = chatWindowStore;
 
   const handleSendMessage = () => {
     const msgTxt = input.current.value;
@@ -50,9 +50,15 @@ const InputBar = () => {
   };
 
   return (
-    <Box onFocus={() => setActive(true)} onBlur={() => setActive(false)}>
+    <Box
+      onFocus={() => setActive(true)}
+      onBlur={() => setActive(false)}
+      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+    >
       <InputBase
         className={clsx(styles.root, { [styles.active]: active })}
+        disabled={!(chatStatus === ChatStatus.ONGOING)}
+        autoFocus
         placeholder="Type a message..."
         inputRef={input}
         endAdornment={

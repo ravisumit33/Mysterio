@@ -8,8 +8,6 @@ import ChatListItem from './ChatListItem';
 
 const useStyles = makeStyles((theme) => ({
   drawerPaper: {
-    // position: 'absolute',
-    // right: 0,
     width: 240,
   },
   chatList: {

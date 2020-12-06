@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable } from 'mobx';
-import MessageType from 'constants.js';
+import { ChatStatus, MessageType } from 'constants.js';
 import log from 'loglevel';
 import profileStore from 'stores/ProfileStore';
 import Socket from './socket';
@@ -15,7 +15,7 @@ class ChatWindowStore {
 
   isWindowMinimized = false;
 
-  shouldReconnect = false;
+  chatStatus = ChatStatus.NOT_STARTED;
 
   hasUnreadMessages = false;
 
@@ -28,7 +28,7 @@ class ChatWindowStore {
       roomId: observable,
       messageList: observable,
       isWindowMinimized: observable,
-      shouldReconnect: observable,
+      chatStatus: observable,
       hasUnreadMessages: observable,
       socket: observable,
       setWindowMinimized: action.bound,
@@ -36,7 +36,7 @@ class ChatWindowStore {
       setAvatarUrl: action.bound,
       isGroupChat: computed,
       addMessage: action.bound,
-      setReconnectStatus: action.bound,
+      setChatStatus: action.bound,
       reconnect: action.bound,
       closeChatWindow: action.bound,
       initState: action.bound,
@@ -82,12 +82,13 @@ class ChatWindowStore {
         messageData.text = this.isGroupChat
           ? [`${messageData.newJoinee.name} entered`]
           : [`You are connected to ${messageData.match.name}`];
+        this.setChatStatus(ChatStatus.ONGOING);
         break;
       case MessageType.USER_LEFT:
         messageData.text = [`${messageData.resignee.name} left`];
         if (!this.isGroupChat) {
           this.socket.close();
-          this.setReconnectStatus(true);
+          this.setChatStatus(ChatStatus.ENDED);
         }
         break;
       case MessageType.TEXT: {
@@ -110,6 +111,7 @@ class ChatWindowStore {
   }
 
   reconnect() {
+    this.setChatStatus(ChatStatus.NOT_STARTED);
     this.setName('');
     // @ts-ignore
     this.messageList.clear();
@@ -122,8 +124,8 @@ class ChatWindowStore {
     this.socket = null;
   }
 
-  setReconnectStatus(status) {
-    this.shouldReconnect = status;
+  setChatStatus(status) {
+    this.chatStatus = status;
   }
 
   setUnreadMessageStatus(status) {

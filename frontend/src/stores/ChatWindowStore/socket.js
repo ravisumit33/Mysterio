@@ -1,6 +1,6 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import MessageType from 'constants.js';
+import { MessageType } from 'constants.js';
 import profileStore from 'stores/ProfileStore';
 
 class Socket {

@@ -7,6 +7,7 @@ import {
   ListItemAvatar,
   ListItemText,
   makeStyles,
+  Tooltip,
 } from '@material-ui/core';
 import ReplayIcon from '@material-ui/icons/Replay';
 import RemoveIcon from '@material-ui/icons/Remove';
@@ -27,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(2),
     width: theme.spacing(2),
   },
-  windowInfo: {
+  infoWindow: {
     maxWidth: '70%',
   },
 }));
@@ -52,7 +53,7 @@ const ChatHeader = (props) => {
 
   return (
     <Box className={classes.root}>
-      <Box className={classes.windowInfo}>
+      <Box className={classes.infoWindow}>
         <ListItem disableGutters>
           <ListItemAvatar>
             <Avatar />
@@ -62,7 +63,9 @@ const ChatHeader = (props) => {
       </Box>
       <Box>
         <IconButton onClick={handleReconnect} className={classes.icon}>
-          <ReplayIcon fontSize="small" />
+          <Tooltip title="Find someone else" arrow>
+            <ReplayIcon fontSize="small" />
+          </Tooltip>
         </IconButton>
         <IconButton onClick={handleMinimize} className={classes.icon}>
           <RemoveIcon fontSize="small" />

@@ -18,9 +18,10 @@ const useStyles = makeStyles((theme) => ({
 
 const StatusBar = () => {
   const classes = useStyles();
-  const chatList = chatContainerStore.chatWindows.map(({ id, store }) => {
-    return store.isWindowMinimized && <ChatListItem key={id} chatId={id} chatWindowStore={store} />;
-  });
+  const chatList = chatContainerStore.chatWindows.map(
+    ({ id, store }) =>
+      store.isWindowMinimized && <ChatListItem key={id} chatId={id} chatWindowStore={store} />
+  );
   return (
     <Drawer
       variant="persistent"

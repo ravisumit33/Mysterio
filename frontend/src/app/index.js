@@ -3,18 +3,16 @@ import { Box, CssBaseline } from '@material-ui/core';
 import { NavBar, Home, Footer, ChatContainer, StatusBar } from 'components';
 import './index.css';
 
-const App = () => {
-  return (
-    <CssBaseline>
-      <Box className="App">
-        <NavBar />
-        <Home />
-        <Footer />
-        <ChatContainer />
-        <StatusBar />
-      </Box>
-    </CssBaseline>
-  );
-};
+const App = () => (
+  <CssBaseline>
+    <Box className="App">
+      <NavBar />
+      <Home />
+      <Footer />
+      <ChatContainer />
+      <StatusBar />
+    </Box>
+  </CssBaseline>
+);
 
 export default App;

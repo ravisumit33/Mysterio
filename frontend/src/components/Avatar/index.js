@@ -42,10 +42,10 @@ const CustomAvatar = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const className = useContext(ClassNameContext);
   if (chatWindowStore.avatarUrl) {
-    return <ImageAvatar className={className} />;
+    return <ImageAvatar />;
   }
   if (chatWindowStore.name) {
-    return <TextAvatar className={className} />;
+    return <TextAvatar />;
   }
   return (
     <Avatar className={className}>

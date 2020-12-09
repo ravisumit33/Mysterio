@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MessageType } from 'constants.js';
 import log from 'loglevel';
 import profileStore from 'stores/ProfileStore';
@@ -22,26 +22,7 @@ class ChatWindowStore {
   socket = new Socket(this);
 
   constructor(roomId) {
-    makeObservable(this, {
-      avatarUrl: observable,
-      name: observable,
-      roomId: observable,
-      messageList: observable,
-      isWindowMinimized: observable,
-      chatStatus: observable,
-      hasUnreadMessages: observable,
-      socket: observable,
-      setWindowMinimized: action.bound,
-      setName: action.bound,
-      setAvatarUrl: action.bound,
-      isGroupChat: computed,
-      addMessage: action.bound,
-      setChatStatus: action.bound,
-      reconnect: action.bound,
-      closeChatWindow: action.bound,
-      initState: action.bound,
-      setUnreadMessageStatus: action.bound,
-    });
+    makeAutoObservable(this);
     this.initState(roomId);
   }
 

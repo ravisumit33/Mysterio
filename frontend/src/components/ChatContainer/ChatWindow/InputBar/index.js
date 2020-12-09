@@ -4,7 +4,6 @@ import InputBase from '@material-ui/core/InputBase';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
 import { Box, IconButton } from '@material-ui/core';
-import log from 'loglevel';
 import { ChatWindowStoreContext } from 'contexts';
 import { ChatStatus, MessageType } from 'constants.js';
 import { observer } from 'mobx-react-lite';
@@ -31,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const InputBar = () => {
-  const styles = useStyles();
+  const classes = useStyles();
   const input = useRef(null);
   const [active, setActive] = useState(false);
   const chatWindowStore = useContext(ChatWindowStoreContext);
@@ -39,7 +38,6 @@ const InputBar = () => {
 
   const handleSendMessage = () => {
     const msgTxt = input.current.value;
-    log.warn(msgTxt);
     if (msgTxt) {
       const message = {
         text: msgTxt,
@@ -56,14 +54,14 @@ const InputBar = () => {
       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
     >
       <InputBase
-        className={clsx(styles.root, { [styles.active]: active })}
+        className={clsx(classes.root, { [classes.active]: active })}
         disabled={!(chatStatus === ChatStatus.ONGOING)}
         autoFocus
         placeholder="Type a message..."
         inputRef={input}
         endAdornment={
           <InputAdornment position="end">
-            <IconButton className={styles.icon} onClick={handleSendMessage}>
+            <IconButton className={classes.icon} onClick={handleSendMessage}>
               <SendIcon />
             </IconButton>
           </InputAdornment>

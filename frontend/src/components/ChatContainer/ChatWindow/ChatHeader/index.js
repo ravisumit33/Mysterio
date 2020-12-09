@@ -68,10 +68,14 @@ const ChatHeader = (props) => {
           </Tooltip>
         </IconButton>
         <IconButton onClick={handleMinimize} className={classes.icon}>
-          <RemoveIcon fontSize="small" />
+          <Tooltip title="Minimize" arrow>
+            <RemoveIcon fontSize="small" />
+          </Tooltip>
         </IconButton>
         <IconButton onClick={handleClose} className={classes.icon}>
-          <CloseIcon fontSize="small" />
+          <Tooltip title="Close" arrow>
+            <CloseIcon fontSize="small" />
+          </Tooltip>
         </IconButton>
       </Box>
     </Box>

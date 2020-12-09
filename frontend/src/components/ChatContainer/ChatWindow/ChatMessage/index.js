@@ -72,13 +72,13 @@ const useStyles = makeStyles((theme) => {
 const ChatMessage = ({ messages, side }) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { isGroupChat } = chatWindowStore;
-  const styles = useStyles();
+  const classes = useStyles();
   const attachClass = (index) => {
     if (index === 0) {
-      return styles[`${side}First`];
+      return classes[`${side}First`];
     }
     if (index === messages.length - 1) {
-      return styles[`${side}Last`];
+      return classes[`${side}Last`];
     }
     return '';
   };
@@ -86,7 +86,7 @@ const ChatMessage = ({ messages, side }) => {
     <Grid container spacing={2} justify={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
         <Grid item>
-          <ClassNameContext.Provider value={styles.avatar}>
+          <ClassNameContext.Provider value={classes.avatar}>
             <Avatar />
           </ClassNameContext.Provider>
         </Grid>
@@ -94,9 +94,9 @@ const ChatMessage = ({ messages, side }) => {
       <Grid item xs>
         {messages.map((msg, i) => (
           // eslint-disable-next-line react/no-array-index-key
-          <Box key={i} className={styles[`${side}Row`]}>
-            <Box className={clsx(styles.msgBox, styles[`${side}MsgBox`])}>
-              <Typography align="left" className={clsx(styles.msg, styles[side], attachClass(i))}>
+          <Box key={i} className={classes[`${side}Row`]}>
+            <Box className={clsx(classes.msgBox, classes[`${side}MsgBox`])}>
+              <Typography align="left" className={clsx(classes.msg, classes[side], attachClass(i))}>
                 {msg}
               </Typography>
             </Box>

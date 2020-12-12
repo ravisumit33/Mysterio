@@ -1,38 +1,41 @@
 import React from 'react';
-import { Box, Grid, makeStyles } from '@material-ui/core';
+import { Box, Container, Grid, makeStyles } from '@material-ui/core';
 import { chatContainerStore } from 'stores';
 import { observer } from 'mobx-react-lite';
-import clsx from 'clsx';
+import { ChatWindowStoreContext } from 'contexts';
 import ChatWindow from './ChatWindow';
 
-const useStyles = makeStyles(() => ({
-  chatContainer: {
+const useStyles = makeStyles((theme) => ({
+  root: {
     position: 'absolute',
     right: '0',
     bottom: '0',
-    width: 'auto',
+    width: '100%',
     height: 'auto',
   },
-  chatMinimized: {
-    right: 240,
+  chatWindow: {
+    marginLeft: theme.spacing(1),
   },
 }));
 
 const ChatContainer = () => {
   const classes = useStyles();
 
-  const chatContainerWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
-    <Grid item key={chatWindow.id} style={{ marginLeft: 10 }}>
-      <ChatWindow chatWindowStore={chatWindow.store} />
+  const chatWindowsList = chatContainerStore.chatWindows.map((chatWindow, index) => (
+    <Grid item key={chatWindow.id} className={classes.chatWindow}>
+      <ChatWindowStoreContext.Provider value={chatWindow.store}>
+        <ChatWindow chatId={chatWindow.id} />
+      </ChatWindowStoreContext.Provider>
     </Grid>
   ));
 
-  chatContainerWindowsList.reverse();
   return (
-    <Box className={clsx(classes.chatContainer, classes.chatMinimized)}>
-      <Grid container alignItems="flex-end">
-        {chatContainerWindowsList}
-      </Grid>
+    <Box className={classes.root}>
+      <Container>
+        <Grid container direction="row-reverse">
+          {chatWindowsList}
+        </Grid>
+      </Container>
     </Box>
   );
 };

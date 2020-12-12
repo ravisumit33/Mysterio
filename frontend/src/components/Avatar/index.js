@@ -1,8 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { useContext } from 'react';
 import { Avatar, Icon, makeStyles } from '@material-ui/core';
 import { generateRandomColor } from 'utils';
 import clsx from 'clsx';
+import { ChatWindowStoreContext, ClassNameContext } from 'contexts';
 
 const useStyles = makeStyles((theme) => ({
   avatar: (props) => ({
@@ -14,69 +14,44 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ImageAvatar = (props) => {
-  const { store, className } = props;
-  return <Avatar className={className} alt={store.name} src={store.avatarUrl} />;
-};
+  const chatWindowStore = useContext(ChatWindowStoreContext);
+  const className = useContext(ClassNameContext);
 
-ImageAvatar.propTypes = {
-  store: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    avatarUrl: PropTypes.string.isRequired,
-  }).isRequired,
-  className: PropTypes.string,
-};
-
-ImageAvatar.defaultProps = {
-  className: '',
+  return (
+    <Avatar className={className} alt={chatWindowStore.name} src={chatWindowStore.avatarUrl} />
+  );
 };
 
 const TextAvatar = (props) => {
-  const { store, className } = props;
+  const chatWindowStore = useContext(ChatWindowStoreContext);
+  const className = useContext(ClassNameContext);
+
   return (
     <Avatar
-      className={clsx(useStyles({ avatarBg: generateRandomColor(store.name) }).avatar, className)}
+      className={clsx(
+        useStyles({ avatarBg: generateRandomColor(chatWindowStore.name) }).avatar,
+        className
+      )}
     >
-      {store.name ? store.name.charAt(0).toUpperCase() : '?'}
+      {chatWindowStore.name ? chatWindowStore.name.charAt(0).toUpperCase() : '?'}
     </Avatar>
   );
 };
 
-TextAvatar.propTypes = {
-  store: PropTypes.shape({
-    name: PropTypes.string,
-  }).isRequired,
-  className: PropTypes.string,
-};
-
-TextAvatar.defaultProps = {
-  className: '',
-};
-
 const CustomAvatar = (props) => {
-  const { store, className } = props;
-  if (store.avatarUrl) {
-    return <ImageAvatar className={className} store={store} />;
+  const chatWindowStore = useContext(ChatWindowStoreContext);
+  const className = useContext(ClassNameContext);
+  if (chatWindowStore.avatarUrl) {
+    return <ImageAvatar />;
   }
-  if (store.name) {
-    return <TextAvatar className={className} store={store} />;
+  if (chatWindowStore.name) {
+    return <TextAvatar />;
   }
   return (
     <Avatar className={className}>
       <Icon>person_search</Icon>
     </Avatar>
   );
-};
-
-CustomAvatar.propTypes = {
-  store: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    avatarUrl: PropTypes.string,
-  }).isRequired,
-  className: PropTypes.string,
-};
-
-CustomAvatar.defaultProps = {
-  className: '',
 };
 
 export default CustomAvatar;

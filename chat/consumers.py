@@ -49,17 +49,8 @@ class ChatConsumer(WebsocketConsumer):
                 PREFIX.GROUP_ROOM + str(self.room_id), self.channel_name
             )
             logger.info("New group channel created with room_id %d", self.room_id)
-        else:
-            new_channel = Channel.IndividualChannel.objects.create(
-                name=self.channel_name,
-                session_id=self.session.session_key,
-            )
-            async_to_sync(self.channel_layer.group_add)(
-                PREFIX.INDIVIDUAL_CHANNEL + str(new_channel.id), self.channel_name
-            )
-            logger.info("New individual channel created")
-        self.channel_id = new_channel.id
-        logger.info("Channel id: %d", self.channel_id)
+            self.channel_id = new_channel.id
+            logger.info("Channel id: %d", self.channel_id)
         self.accept()
 
     def disconnect(self, code):
@@ -142,13 +133,43 @@ class ChatConsumer(WebsocketConsumer):
             avatar_url = (
                 message_data["avatarUrl"] if "avatarUrl" in message_data else ""
             )
+            self.session["id"] = self.channel_name
             self.session["name"] = name
             self.session["avatarUrl"] = avatar_url
             self.session.save()
             self.profile = {
+                "id": self.channel_name,
                 "name": self.session["name"],
                 "avatarUrl": self.session["avatarUrl"],
             }
+            if not self.is_group_consumer:
+                group_prefix_channel = PREFIX.INDIVIDUAL_CHANNEL
+                new_channel = Channel.IndividualChannel.objects.create(
+                    name=self.channel_name,
+                    session_id=self.session.session_key,
+                )
+                self.channel_id = new_channel.id
+                async_to_sync(self.channel_layer.group_add)(
+                    group_prefix_channel + str(self.channel_id),
+                    self.channel_name,
+                )
+                logger.info("New individual channel created")
+                logger.info("Channel id: %d", self.channel_id)
+            else:
+                group_prefix_channel = PREFIX.GROUP_CHANNEL
+            async_to_sync(self.channel_layer.group_send)(
+                group_prefix_channel + str(self.channel_id),
+                {
+                    "type": "group_msg_receive",
+                    "payload": {
+                        "type": MESSAGE.USER_INFO,
+                        "data": {
+                            "id": self.session["id"],
+                        },
+                    },
+                },
+            )
+
             if self.is_group_consumer:
                 async_to_sync(self.channel_layer.group_send)(
                     PREFIX.GROUP_ROOM + str(self.room_id),

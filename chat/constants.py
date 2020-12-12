@@ -17,5 +17,6 @@ class PREFIX:
     """Prefix used in making group names"""
 
     INDIVIDUAL_CHANNEL = "grp_IndividualChannel_"
+    GROUP_CHANNEL = "grp_GroupChannel_"
     GROUP_ROOM = "grp_GroupRoom_"
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"

@@ -301,7 +301,11 @@ const Jumbotron = () => {
             </Grid>
           </Container>
         </Box>
-        <Dialog open={userInfoDialogOpen} onClose={closeUserInfoDialog}>
+        <Dialog
+          open={userInfoDialogOpen}
+          onClose={closeUserInfoDialog}
+          onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
+        >
           <DialogTitle>Let&apos;s get started!</DialogTitle>
           <DialogContent>
             <TextField

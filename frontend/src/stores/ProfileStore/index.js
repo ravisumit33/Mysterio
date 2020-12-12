@@ -5,17 +5,23 @@ class ProfileStore {
 
   avatarUrl = '';
 
+  id = '';
+
   constructor() {
     makeAutoObservable(this);
   }
 
-  setName(newName) {
+  setName = (newName) => {
     this.name = newName;
-  }
+  };
 
-  setAvatarUrl(newAvatarUrl) {
+  setAvatarUrl = (newAvatarUrl) => {
     this.avatarUrl = newAvatarUrl;
-  }
+  };
+
+  setId = (newId) => {
+    this.id = newId;
+  };
 }
 
 const profileStore = new ProfileStore();

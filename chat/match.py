@@ -87,6 +87,7 @@ def process_unmatched_channels():
                             "data": {
                                 "room_id": room_id,
                                 "match": {
+                                    "id": sessions_data[match_channel_idx]["id"],
                                     "name": sessions_data[match_channel_idx]["name"],
                                     "avatarUrl": sessions_data[match_channel_idx][
                                         "avatarUrl"

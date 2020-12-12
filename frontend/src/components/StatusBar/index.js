@@ -20,8 +20,8 @@ const StatusBar = () => {
   const chatList = chatContainerStore.chatWindows.map(
     ({ id, store }) =>
       store.isWindowMinimized && (
-        <ChatWindowStoreContext.Provider value={store}>
-          <ChatListItem key={id} chatId={id} />
+        <ChatWindowStoreContext.Provider key={id} value={store}>
+          <ChatListItem chatId={id} />
         </ChatWindowStoreContext.Provider>
       )
   );

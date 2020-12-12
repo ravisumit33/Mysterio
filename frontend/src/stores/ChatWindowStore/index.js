@@ -26,28 +26,28 @@ class ChatWindowStore {
     this.initState(roomId);
   }
 
-  initState(roomId, stores) {
+  initState = (roomId, stores) => {
     this.roomId = roomId;
     // TODO: set group name if groupChat
-  }
+  };
 
-  setName(newName) {
+  setName = (newName) => {
     this.name = newName;
-  }
+  };
 
-  setAvatarUrl(url) {
+  setAvatarUrl = (url) => {
     this.avatarUrl = url;
-  }
+  };
 
-  setWindowMinimized(value) {
+  setWindowMinimized = (value) => {
     this.isWindowMinimized = value;
-  }
+  };
 
   get isGroupChat() {
     return !!this.roomId;
   }
 
-  addMessage(payload) {
+  addMessage = (payload) => {
     this.isWindowMinimized && this.setUnreadMessageStatus(true);
     const messageType = payload.type;
     const messageData = payload.data;
@@ -89,29 +89,29 @@ class ChatWindowStore {
         return;
     }
     this.messageList.push(payload);
-  }
+  };
 
-  reconnect() {
+  reconnect = () => {
     this.setChatStatus(ChatStatus.NOT_STARTED);
     this.setName('');
     // @ts-ignore
     this.messageList.clear();
     this.socket.close();
     this.socket = new Socket(this);
-  }
+  };
 
-  closeChatWindow() {
+  closeChatWindow = () => {
     this.socket.close();
     this.socket = null;
-  }
+  };
 
-  setChatStatus(status) {
+  setChatStatus = (status) => {
     this.chatStatus = status;
-  }
+  };
 
-  setUnreadMessageStatus(status) {
+  setUnreadMessageStatus = (status) => {
     this.hasUnreadMessages = status;
-  }
+  };
 }
 
 export default ChatWindowStore;

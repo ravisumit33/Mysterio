@@ -7,11 +7,12 @@ import ChatWindow from './ChatWindow';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    position: 'absolute',
+    position: 'fixed',
     right: '0',
-    bottom: '0',
-    width: '100%',
+    top: window.innerHeight - theme.spacing(2),
+    width: 'auto',
     height: 'auto',
+    transform: 'translateY(-100%)',
   },
   chatWindow: {
     marginLeft: theme.spacing(1),

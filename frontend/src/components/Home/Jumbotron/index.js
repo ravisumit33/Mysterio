@@ -7,14 +7,12 @@ import {
   CardContent,
   CardMedia,
   Container,
-  createMuiTheme,
   Divider,
   fade,
   Grid,
   Icon,
   InputBase,
   makeStyles,
-  ThemeProvider,
   Typography,
   Dialog,
   DialogActions,
@@ -28,12 +26,6 @@ import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
 import { red } from '@material-ui/core/colors';
 import { chatContainerStore, profileStore } from 'stores';
 import { observer } from 'mobx-react-lite';
-
-const customTheme = createMuiTheme({
-  palette: {
-    divider: red[800],
-  },
-});
 
 const useStyle = makeStyles((theme) => ({
   jumbotron: {
@@ -68,12 +60,16 @@ const useStyle = makeStyles((theme) => ({
     flexGrow: 1,
     flexBasis: 0,
   },
+  textAlignCenter: {
+    textAlign: 'center',
+  },
   chatCardDivider: {
     position: 'absolute',
     left: '50%',
     top: '50%',
     height: '80%',
     transform: 'translate(-50%, -50%)',
+    backgroundColor: red[800],
   },
   appCardTitle: {
     height: theme.spacing(16),
@@ -199,132 +195,130 @@ const Jumbotron = () => {
     </Grid>
   ));
   return (
-    <ThemeProvider theme={customTheme}>
-      <Box id="jumbotron">
-        <Box className={classes.jumbotron}>
-          <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-          <Container>
-            <Grid container spacing={1} justify="space-between">
-              <Grid item container xs={12} md={6}>
+    <Box id="jumbotron">
+      <Box className={classes.jumbotron}>
+        <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
+        <Container>
+          <Grid container spacing={1} justify="space-between">
+            <Grid item container xs={12} md={6}>
+              <Card className={classes.card}>
+                <CardContent>
+                  <Grid
+                    container
+                    direction="column"
+                    justify="center"
+                    spacing={2}
+                    alignContent="space-around"
+                  >
+                    <Grid
+                      item
+                      container
+                      alignContent="flex-end"
+                      justify="center"
+                      className={classes.appCardTitle}
+                    >
+                      <Typography variant="h3">Mysterio</Typography>
+                    </Grid>
+                    <Grid item className={classes.appCardSubtitle}>
+                      <Typography variant="subtitle1" style={{ textAlign: 'center' }}>
+                        Chat Anounimously Chat Anounimously
+                      </Typography>
+                    </Grid>
+                    <Grid item className={classes.appCardDescription}>
+                      <Typography variant="caption" component="p" style={{ textAlign: 'center' }}>
+                        No one knows who you are :P No one knows who you are :P No one knows who you
+                        are :P No one knows who you are :PNo one knows who you are :P
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item container xs={12} md={6}>
+              <Grid item className={classes.equalGrow}>
+                <Divider className={classes.chatCardDivider} orientation="vertical" />
                 <Card className={classes.card}>
                   <CardContent>
-                    <Grid
-                      container
-                      direction="column"
-                      justify="center"
-                      spacing={2}
-                      alignContent="space-around"
-                    >
-                      <Grid
-                        item
-                        container
-                        alignContent="flex-end"
-                        justify="center"
-                        className={classes.appCardTitle}
-                      >
-                        <Typography variant="h3">Mysterio</Typography>
+                    <Grid container className={classes.textAlignCenter}>
+                      <Grid item className={classes.equalGrow}>
+                        <PeopleIcon className={classes.chatIcon} />
                       </Grid>
-                      <Grid item className={classes.appCardSubtitle}>
-                        <Typography variant="subtitle1">
-                          Chat Anounimously Chat Anounimously
-                        </Typography>
-                      </Grid>
-                      <Grid item className={classes.appCardDescription}>
-                        <Typography variant="caption" component="p">
-                          No one knows who you are :P No one knows who you are :P No one knows who
-                          you are :P No one knows who you are :PNo one knows who you are :P
-                        </Typography>
+                      <Grid item className={classes.equalGrow}>
+                        <Icon className={classes.chatIcon}>groups</Icon>
                       </Grid>
                     </Grid>
                   </CardContent>
+                  <CardActions>
+                    <Grid container className={classes.textAlignCenter}>
+                      <Grid item className={classes.equalGrow}>
+                        <Button
+                          className={classes.individualChatButton}
+                          color="inherit"
+                          disabled={chatContainerStore.individualChatExist}
+                          onClick={
+                            profileStore.name ? handleStartIndividualChat : openUserInfoDialog
+                          }
+                        >
+                          Chat Now
+                        </Button>
+                      </Grid>
+                      <Grid
+                        item
+                        container
+                        direction="column"
+                        spacing={2}
+                        className={classes.equalGrow}
+                      >
+                        <Grid item>
+                          <div className={classes.search}>
+                            <div className={classes.searchIcon}>
+                              <SearchIcon />
+                            </div>
+                            <InputBase
+                              placeholder="Search…"
+                              classes={{
+                                root: classes.inputRoot,
+                                input: classes.inputInput,
+                              }}
+                              inputProps={{ 'aria-label': 'search' }}
+                            />
+                          </div>
+                        </Grid>
+                        <Grid item container justify="space-evenly" spacing={2}>
+                          {trendingGroupsUI}
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </CardActions>
                 </Card>
               </Grid>
-              <Grid item container xs={12} md={6}>
-                <Grid item className={classes.equalGrow}>
-                  <Divider className={classes.chatCardDivider} orientation="vertical" />
-                  <Card className={classes.card}>
-                    <CardContent>
-                      <Grid container justify="space-between">
-                        <Grid item className={classes.equalGrow}>
-                          <PeopleIcon className={classes.chatIcon} />
-                        </Grid>
-                        <Grid item className={classes.equalGrow}>
-                          <Icon className={classes.chatIcon}>groups</Icon>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                    <CardActions>
-                      <Grid container>
-                        <Grid item className={classes.equalGrow}>
-                          <Button
-                            className={classes.individualChatButton}
-                            color="inherit"
-                            disabled={chatContainerStore.individualChatExist}
-                            onClick={
-                              profileStore.name ? handleStartIndividualChat : openUserInfoDialog
-                            }
-                          >
-                            Chat Now
-                          </Button>
-                        </Grid>
-                        <Grid
-                          item
-                          container
-                          direction="column"
-                          spacing={2}
-                          className={classes.equalGrow}
-                        >
-                          <Grid item>
-                            <div className={classes.search}>
-                              <div className={classes.searchIcon}>
-                                <SearchIcon />
-                              </div>
-                              <InputBase
-                                placeholder="Search…"
-                                classes={{
-                                  root: classes.inputRoot,
-                                  input: classes.inputInput,
-                                }}
-                                inputProps={{ 'aria-label': 'search' }}
-                              />
-                            </div>
-                          </Grid>
-                          <Grid item container justify="space-evenly" spacing={2}>
-                            {trendingGroupsUI}
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              </Grid>
             </Grid>
-          </Container>
-        </Box>
-        <Dialog
-          open={userInfoDialogOpen}
-          onClose={closeUserInfoDialog}
-          onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
-        >
-          <DialogTitle>Let&apos;s get started!</DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Name"
-              fullWidth
-              value={textFieldValue}
-              onChange={handleTextFieldChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button disabled={!textFieldValue} onClick={handleDialogueButtonClick} color="primary">
-              Go
-            </Button>
-          </DialogActions>
-        </Dialog>
+          </Grid>
+        </Container>
       </Box>
-    </ThemeProvider>
+      <Dialog
+        open={userInfoDialogOpen}
+        onClose={closeUserInfoDialog}
+        onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
+      >
+        <DialogTitle>Let&apos;s get started!</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Name"
+            fullWidth
+            value={textFieldValue}
+            onChange={handleTextFieldChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={!textFieldValue} onClick={handleDialogueButtonClick} color="primary">
+            Go
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

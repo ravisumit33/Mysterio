@@ -5,7 +5,7 @@ import Features from './Features';
 import Contributors from './Contributors';
 
 const Home = () => (
-  <Box textAlign="center">
+  <Box>
     <Grid container direction="column">
       <Grid item>
         <Jumbotron />

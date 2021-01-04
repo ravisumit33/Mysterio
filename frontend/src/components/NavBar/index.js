@@ -116,7 +116,7 @@ const NavBar = () => {
     </>
   );
   return (
-    <AppBar position="fixed" className={classes.appBar}>
+    <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
         <Container>
           <Grid container alignItems="center" style={{ height: '64px' }}>

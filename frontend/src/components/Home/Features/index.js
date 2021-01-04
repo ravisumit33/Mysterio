@@ -36,6 +36,7 @@ const Features = () => {
 
   const featuresUI = featuresData.map((feature) => (
     <FeatureCard
+      key={feature.title}
       icon={feature.icon}
       title={feature.title}
       description={feature.description}
@@ -47,11 +48,11 @@ const Features = () => {
     <Paper square>
       <Box id="features">
         <Container>
-          <Grid container direction="column" spacing={5}>
-            <Grid item>
+          <Grid container direction="column" style={{ paddingTop: 40 }}>
+            <Grid item style={{ textAlign: 'center' }}>
               <Typography variant="h5">Features</Typography>
             </Grid>
-            <Grid item container justify="center">
+            <Grid item container xs justify="center" style={{ paddingTop: 40 }}>
               {featuresUI}
             </Grid>
           </Grid>

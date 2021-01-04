@@ -4,7 +4,7 @@ import { Grid, makeStyles, Typography } from '@material-ui/core';
 
 const useStyle = makeStyles((theme) => ({
   footer: {
-    height: '45px',
+    height: theme.spacing(5),
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.getContrastText(theme.palette.primary.main),
   },

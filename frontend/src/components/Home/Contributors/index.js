@@ -22,6 +22,7 @@ const Contributors = () => {
 
   const contributorsUI = contributorsData.map((contributor) => (
     <ContributorCard
+      key={contributor.title}
       icon={contributor.icon}
       title={contributor.title}
       description={contributor.description}
@@ -34,7 +35,7 @@ const Contributors = () => {
       <Box id="contributors">
         <Container>
           <Grid container direction="column" spacing={0}>
-            <Grid item style={{ paddingTop: 40 }}>
+            <Grid item style={{ paddingTop: 40, textAlign: 'center' }}>
               <Typography variant="h5">Contributors</Typography>
             </Grid>
             <Grid item container justify="center" style={{ paddingTop: 40 }}>

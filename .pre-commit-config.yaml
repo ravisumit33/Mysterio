@@ -19,9 +19,8 @@ repos:
   - id: eslint
     language: system
     verbose: true
-    entry: npm run --silent lint
-    args: ["--", "--max-warnings=0", "--rule", "no-console:0"]
-    pass_filenames: false
+    entry: npm run --silent --prefix frontend precommit-lint
+    args: ["--", "--max-warnings=0", "--rule", "no-console:0", "--files"] # --files arg indicate start of filenames
 
 - repo: local
   hooks:

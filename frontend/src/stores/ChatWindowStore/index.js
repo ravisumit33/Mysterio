@@ -19,11 +19,12 @@ class ChatWindowStore {
 
   hasUnreadMessages = false;
 
-  socket = new Socket(this);
+  socket = null;
 
   constructor(roomId) {
     makeAutoObservable(this);
     this.initState(roomId);
+    this.socket = new Socket(this);
   }
 
   initState = (roomId, stores) => {

@@ -24,3 +24,5 @@ class IndividualRoom(Room):
 
 class GroupRoom(Room):
     """Room for group chat"""
+
+    zscore = models.FloatField()

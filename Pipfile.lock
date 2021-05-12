@@ -124,11 +124,11 @@
         },
         "colorlog": {
             "hashes": [
-                "sha256:54e5f153419c22afc283c130c4201db19a3dbd83221a0f4657d5ee66234a2ea4",
-                "sha256:edd5ada5de03e880e42b2526f8be5570fd9b692f8eb7cf6b1fdcac3e3fb23976"
+                "sha256:4e6be13d9169254e2ded6526a6a4a1abb8ac564f2fa65b310a98e4ca5bea2c04",
+                "sha256:f17c013a06962b02f4449ee07cfdbe6b287df29efc2c9a1515b4a376f4e588ea"
             ],
             "index": "pypi",
-            "version": "==4.6.2"
+            "version": "==5.0.1"
         },
         "constantly": {
             "hashes": [

@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/PyCQA/pylint
-  rev: pylint-2.6.0
+  rev: v2.8.2
   hooks:
   - id: pylint
     language: system
@@ -9,15 +9,14 @@ repos:
     args: ["--disable=W0511"]
 
 - repo: https://github.com/psf/black
-  rev: 20.8b1
+  rev: 21.5b1
   hooks:
   - id: black
 
 - repo: https://github.com/pre-commit/mirrors-eslint
-  rev: v7.12.1
+  rev: v7.26.0
   hooks:
   - id: eslint
-    language: system
     verbose: true
     entry: npm run --silent --prefix frontend precommit-lint
     args: ["--", "--max-warnings=0", "--rule", "no-console:0", "--files"] # --files arg indicate start of filenames

@@ -6,8 +6,7 @@ import ContributorCard from './card';
 const Contributors = () => {
   const contributorsData = [
     {
-      icon:
-        'https://avatars3.githubusercontent.com/u/19284116?s=400&u=9e05e3d1ec7622cb55bc0af0ec58f81ce639e48e&v=4',
+      icon: 'https://avatars3.githubusercontent.com/u/19284116?s=400&u=9e05e3d1ec7622cb55bc0af0ec58f81ce639e48e&v=4',
       href: 'https://github.com/ravisumit33',
       title: 'Sumit Kumar',
       description: '',

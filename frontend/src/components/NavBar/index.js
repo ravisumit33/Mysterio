@@ -38,7 +38,7 @@ const navbarButtons = [
     data: {
       key: 'home',
       text: 'Home',
-      href: '#',
+      href: '#jumbotron',
     },
   },
   {
@@ -46,15 +46,7 @@ const navbarButtons = [
     data: {
       key: 'features',
       text: 'Features',
-      href: '#',
-    },
-  },
-  {
-    type: 'text',
-    data: {
-      key: 'about',
-      text: 'About',
-      href: '#',
+      href: '#features',
     },
   },
   {
@@ -62,7 +54,7 @@ const navbarButtons = [
     data: {
       key: 'contributors',
       text: 'Contributors',
-      href: '#',
+      href: '#contributors',
     },
   },
   {

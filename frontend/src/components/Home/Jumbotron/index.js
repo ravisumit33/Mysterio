@@ -23,11 +23,6 @@ const useStyle = makeStyles((theme) => ({
     position: 'relative',
     width: '100%',
     minHeight: '60vh',
-    // alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      minHeight: '50vh',
-      padding: theme.spacing(3, 0),
-    },
   },
   bg: {
     position: 'absolute',
@@ -38,6 +33,9 @@ const useStyle = makeStyles((theme) => ({
     zIndex: -1,
     filter: 'blur(1.5px)',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  gridRoot: {
+    height: '90%',
   },
 }));
 
@@ -73,10 +71,18 @@ const Jumbotron = () => {
       <Box className={classes.jumbotron}>
         <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
         <Container>
-          <Grid container spacing={1} direction="column">
+          <Grid
+            container
+            spacing={1}
+            direction="column"
+            justify="space-between"
+            className={classes.gridRoot}
+          >
             <Grid item container justify="center">
               <Grid item xs={12} md={7}>
-                <QuickChatImg width="100%" />
+                <Box py={3}>
+                  <QuickChatImg width="100%" height="300" />
+                </Box>
               </Grid>
             </Grid>
             <Grid item container justify="center">

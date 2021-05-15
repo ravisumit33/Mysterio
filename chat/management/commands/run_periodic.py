@@ -11,21 +11,18 @@ def run_scheduler():
     """Scheduled processing of periodic jobs"""
     logger.info("Periodic task started")
 
-    matching_scheduler = BlockingScheduler()
+    process_scheduler = BlockingScheduler()
     # TODO: set appropiate time interval
-    @matching_scheduler.scheduled_job("interval", seconds=1)
+    @process_scheduler.scheduled_job("interval", seconds=1)
     def match_job():  # pylint: disable=W0612
         process_unmatched_channels()
 
-    matching_scheduler.start()
-
-    trending_groups_scheduler = BlockingScheduler()
-
-    @trending_groups_scheduler.scheduled_job("interval", days=1)
+    # TODO: set appropiate time interval
+    @process_scheduler.scheduled_job("interval", hours=4)
     def trending_groups_job():  # pylint: disable=W0612
         update_trending_groups()
 
-    trending_groups_scheduler.start()
+    process_scheduler.start()
 
 
 class Command(BaseCommand):

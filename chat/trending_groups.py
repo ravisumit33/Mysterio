@@ -1,8 +1,12 @@
+import logging
 from math import sqrt
 from django.utils import timezone
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 from chat.models import Message, GroupRoom
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_zscore(obs, pop):
@@ -49,6 +53,7 @@ def get_group_stats():
 
 def update_trending_groups():
     """Find and update trending groups"""
+    logger.info("Trending groups update started")
     group_stats = get_group_stats()
     zscores = {}
     for room_id, message_stats in group_stats.items():

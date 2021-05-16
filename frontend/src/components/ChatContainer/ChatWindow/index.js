@@ -21,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
     backgroundColor: 'white',
     borderRadius: theme.spacing(1, 1, 0, 0),
-    margin: '0 auto',
   },
   infoMsg: {
     fontWeight: 500,

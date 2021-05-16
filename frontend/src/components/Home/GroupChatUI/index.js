@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Container, Grid, TextField } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  TextField,
+} from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
+import { TextAvatar } from 'components/Avatar';
 
 const GroupChatUI = () => {
   const [groupRooms, setGroupRooms] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState({});
+
   useEffect(() => {
     fetch('/api/chat/groups').then((response) =>
       response.json().then((data) => {
@@ -28,9 +40,11 @@ const GroupChatUI = () => {
                 <Grid item>
                   <Autocomplete
                     id="Groups-Search-Box"
-                    freeSolo
-                    options={groupRooms.map((option) => option.name)}
+                    options={groupRooms}
+                    noOptionsText="New group will be created"
                     size="small"
+                    value={selectedGroup}
+                    onChange={(event, newGroup) => setSelectedGroup(newGroup)}
                     renderInput={(params) => (
                       <TextField
                         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -40,6 +54,15 @@ const GroupChatUI = () => {
                         variant="outlined"
                       />
                     )}
+                    renderOption={(option) => (
+                      <ListItem disableGutters>
+                        <ListItemAvatar>
+                          <TextAvatar name={option.name} />
+                        </ListItemAvatar>
+                        <ListItemText primary={option.name} secondary="34 members" />
+                      </ListItem>
+                    )}
+                    getOptionLabel={(option) => option.name || ''}
                   />
                 </Grid>
               </Box>

@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => {
       fontFamily:
         // eslint-disable-next-line max-len
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      fontSize: '0.9rem',
+      fontSize: '1.1rem',
     },
     left: {
       borderTopRightRadius: borderRadius,

@@ -1,20 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@material-ui/core/Box';
-import {
-  Button,
-  CardMedia,
-  Grid,
-  makeStyles,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-  Typography,
-} from '@material-ui/core';
+import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
-import { chatContainerStore, profileStore } from 'stores';
+import { chatContainerStore, profileStore, userInfoDialogStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 
 const useStyle = makeStyles((theme) => ({
@@ -48,35 +37,19 @@ const useStyle = makeStyles((theme) => ({
       'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.75), rgba(0,0,0,0.5), rgba(0,0,0,0.25), rgba(0,0,0,0))',
   },
   quickChatDesc: {
-    color: 'white',
+    color: theme.palette.common.white,
   },
 }));
 
 const Jumbotron = () => {
   const classes = useStyle();
-  const [userInfoDialogOpen, setUserInfoDialogOpen] = useState(false);
-  const [textFieldValue, setTextFieldValue] = useState('');
 
   const handleStartIndividualChat = () => {
     chatContainerStore.addChatWindow();
   };
 
-  const handleTextFieldChange = (e) => {
-    setTextFieldValue(e.target.value);
-  };
-
-  const handleDialogueButtonClick = () => {
-    closeUserInfoDialog();
-    profileStore.setName(textFieldValue);
-    handleStartIndividualChat();
-  };
-
-  const closeUserInfoDialog = () => {
-    setUserInfoDialogOpen(false);
-  };
-
-  const openUserInfoDialog = () => {
-    setUserInfoDialogOpen(true);
+  const handleStartChat = () => {
+    profileStore.name ? handleStartIndividualChat() : userInfoDialogStore.setShouldOpen(true);
   };
 
   return (
@@ -111,7 +84,7 @@ const Jumbotron = () => {
                   color="secondary"
                   variant="contained"
                   size="large"
-                  onClick={profileStore.name ? handleStartIndividualChat : openUserInfoDialog}
+                  onClick={handleStartChat}
                 >
                   Chat Now
                 </Button>
@@ -120,28 +93,6 @@ const Jumbotron = () => {
           </Grid>
         </Grid>
       </Box>
-      <Dialog
-        open={userInfoDialogOpen}
-        onClose={closeUserInfoDialog}
-        onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
-      >
-        <DialogTitle>Let&apos;s get started!</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Name"
-            fullWidth
-            value={textFieldValue}
-            onChange={handleTextFieldChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button disabled={!textFieldValue} onClick={handleDialogueButtonClick} color="primary">
-            Go
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

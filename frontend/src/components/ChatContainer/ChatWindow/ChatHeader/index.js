@@ -10,7 +10,6 @@ import {
   Tooltip,
 } from '@material-ui/core';
 import ReplayIcon from '@material-ui/icons/Replay';
-import RemoveIcon from '@material-ui/icons/Remove';
 import CloseIcon from '@material-ui/icons/Close';
 import Avatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
@@ -27,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     height: theme.spacing(2),
     width: theme.spacing(2),
+    marginRight: theme.spacing(1),
   },
   infoWindow: {
     maxWidth: '70%',
@@ -37,11 +37,7 @@ const ChatHeader = (props) => {
   const { chatId } = props;
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, setWindowMinimized, reconnect } = chatWindowStore;
-
-  const handleMinimize = () => {
-    setWindowMinimized(true);
-  };
+  const { name, reconnect } = chatWindowStore;
 
   const handleReconnect = () => {
     reconnect();
@@ -65,11 +61,6 @@ const ChatHeader = (props) => {
         <IconButton onClick={handleReconnect} className={classes.icon}>
           <Tooltip title="Find someone else" arrow>
             <ReplayIcon fontSize="small" />
-          </Tooltip>
-        </IconButton>
-        <IconButton onClick={handleMinimize} className={classes.icon}>
-          <Tooltip title="Minimize" arrow>
-            <RemoveIcon fontSize="small" />
           </Tooltip>
         </IconButton>
         <IconButton onClick={handleClose} className={classes.icon}>

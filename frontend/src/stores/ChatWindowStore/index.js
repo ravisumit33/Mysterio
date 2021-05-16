@@ -13,11 +13,7 @@ class ChatWindowStore {
 
   messageList = [];
 
-  isWindowMinimized = false;
-
   chatStatus = ChatStatus.NOT_STARTED;
-
-  hasUnreadMessages = false;
 
   socket = null;
 
@@ -40,16 +36,11 @@ class ChatWindowStore {
     this.avatarUrl = url;
   };
 
-  setWindowMinimized = (value) => {
-    this.isWindowMinimized = value;
-  };
-
   get isGroupChat() {
     return !!this.roomId;
   }
 
   addMessage = (payload) => {
-    this.isWindowMinimized && this.setUnreadMessageStatus(true);
     const messageType = payload.type;
     const messageData = payload.data;
     switch (messageType) {
@@ -108,10 +99,6 @@ class ChatWindowStore {
 
   setChatStatus = (status) => {
     this.chatStatus = status;
-  };
-
-  setUnreadMessageStatus = (status) => {
-    this.hasUnreadMessages = status;
   };
 }
 

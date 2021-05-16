@@ -12,8 +12,8 @@ import InputBar from './InputBar';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    height: theme.spacing(47),
-    width: theme.spacing(44),
+    height: '100%',
+    width: '100vw',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
     backgroundColor: 'white',
     borderRadius: theme.spacing(1, 1, 0, 0),
+    margin: '0 auto',
   },
   infoMsg: {
     fontWeight: 500,

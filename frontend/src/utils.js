@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export const generateRandomColor = (string) => {
   let hash = 0;
   let i;
@@ -16,4 +15,20 @@ export const generateRandomColor = (string) => {
   /* eslint-enable no-bitwise */
 
   return color;
+};
+
+export const getCookie = (name) => {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i += 1) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === `${name}=`) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 };

@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 from rest_framework import viewsets
-from rest_framework import permissions
 from chat.serializers import GroupRoomSerializer
 from chat.models import GroupRoom
 
@@ -21,4 +20,3 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
 
     queryset = GroupRoom.objects.all()
     serializer_class = GroupRoomSerializer
-    permission_classes = [permissions.IsAuthenticated]

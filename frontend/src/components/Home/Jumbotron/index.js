@@ -3,7 +3,6 @@ import Box from '@material-ui/core/Box';
 import {
   Button,
   CardMedia,
-  Container,
   Grid,
   makeStyles,
   Dialog,
@@ -11,6 +10,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
@@ -22,7 +22,7 @@ const useStyle = makeStyles((theme) => ({
     display: 'flex',
     position: 'relative',
     width: '100%',
-    minHeight: '60vh',
+    height: '60vh',
   },
   bg: {
     position: 'absolute',
@@ -35,7 +35,20 @@ const useStyle = makeStyles((theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   gridRoot: {
-    height: '90%',
+    height: '100%',
+  },
+  quickChatImg: {
+    height: 300,
+    [theme.breakpoints.down('sm')]: {
+      height: 200,
+    },
+  },
+  quickChatTxtSection: {
+    background:
+      'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.75), rgba(0,0,0,0.5), rgba(0,0,0,0.25), rgba(0,0,0,0))',
+  },
+  quickChatDesc: {
+    color: 'white',
   },
 }));
 
@@ -70,19 +83,26 @@ const Jumbotron = () => {
     <Box id="jumbotron">
       <Box className={classes.jumbotron}>
         <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-        <Container>
-          <Grid
-            container
-            spacing={1}
-            direction="column"
-            justify="space-between"
-            className={classes.gridRoot}
-          >
+        <Grid
+          container
+          spacing={1}
+          direction="column"
+          className={classes.gridRoot}
+          justify="space-around"
+        >
+          <Grid item container justify="center">
+            <Grid item xs={12} md={7}>
+              <Box py={3}>
+                <QuickChatImg width="100%" className={classes.quickChatImg} />
+              </Box>
+            </Grid>
+          </Grid>
+          <Grid item container className={classes.quickChatTxtSection} spacing={3}>
             <Grid item container justify="center">
-              <Grid item xs={12} md={7}>
-                <Box py={3}>
-                  <QuickChatImg width="100%" height="300" />
-                </Box>
+              <Grid item xs={12}>
+                <Typography variant="h4" className={classes.quickChatDesc} align="center">
+                  Free Anonymous Chat
+                </Typography>
               </Grid>
             </Grid>
             <Grid item container justify="center">
@@ -91,7 +111,6 @@ const Jumbotron = () => {
                   color="secondary"
                   variant="contained"
                   size="large"
-                  disabled={chatContainerStore.individualChatExist}
                   onClick={profileStore.name ? handleStartIndividualChat : openUserInfoDialog}
                 >
                   Chat Now
@@ -99,7 +118,7 @@ const Jumbotron = () => {
               </Grid>
             </Grid>
           </Grid>
-        </Container>
+        </Grid>
       </Box>
       <Dialog
         open={userInfoDialogOpen}

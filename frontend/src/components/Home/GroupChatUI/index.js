@@ -5,11 +5,14 @@ import {
   Button,
   Container,
   Grid,
+  List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   TextField,
+  Typography,
 } from '@material-ui/core';
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
 import { TextAvatar } from 'components/Avatar';
@@ -23,8 +26,18 @@ const GroupChatUI = () => {
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
 
   useEffect(() => {
-    fetchUrl('/api/chat/groups').then((data) => setGroupRooms(Object.values(data)));
+    fetchUrl('/api/chat/groups').then((data) => {
+      setGroupRooms(Object.values(data));
+    });
   }, []);
+
+  const trendingGroups = [...groupRooms]
+    .sort((a, b) => {
+      const zscoreA = parseInt(a.zscore, 10);
+      const zscoreB = parseInt(b.zscore, 10);
+      return zscoreB - zscoreA;
+    })
+    .slice(0, 5);
 
   const handleStartGroupChat = (chatWindowData) => {
     if (profileStore.name) {
@@ -35,12 +48,13 @@ const GroupChatUI = () => {
     }
   };
 
-  const handleStartChat = () => {
+  const handleStartChat = (group) => {
     let chatWindowData;
-    if (selectedGroup && selectedGroup.id !== -1) {
+    const chatGroup = group || selectedGroup;
+    if (chatGroup && chatGroup.id !== -1) {
       chatWindowData = {
-        roomId: selectedGroup.id,
-        name: selectedGroup.name,
+        roomId: chatGroup.id,
+        name: chatGroup.name,
       };
       handleStartGroupChat(chatWindowData);
     } else if (newGroupName) {
@@ -73,14 +87,14 @@ const GroupChatUI = () => {
   return (
     <Box>
       <Container>
-        <Grid container justify="space-between" spacing={2}>
+        <Grid container justify="space-between" spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={6}>
             <Box py={2}>
               <GroupChatImg width="100%" height="400" />
             </Box>
           </Grid>
-          <Grid item container xs={12} md={6} justify="center">
-            <Grid item container xs={12} spacing={2} justify="center">
+          <Grid item container xs={12} md={5} direction="column">
+            <Grid item container xs={12} spacing={2}>
               <Box width="50%" my={3}>
                 <Grid item>
                   <Autocomplete
@@ -125,12 +139,30 @@ const GroupChatUI = () => {
                     color="secondary"
                     variant="contained"
                     size="medium"
-                    onClick={handleStartChat}
+                    onClick={() => handleStartChat()}
                   >
                     Enter Group
                   </Button>
                 </Box>
               </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h5">
+                Trending Groups <TrendingUpIcon />
+              </Typography>
+              <List>
+                {trendingGroups.map((group) => (
+                  <ListItem button onClick={() => handleStartChat(group)} key={group.id}>
+                    <ListItemAvatar>
+                      <TextAvatar name={group.name} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={group.name}
+                      secondary={`${group.group_messages.length} messages`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </Grid>
           </Grid>
         </Grid>

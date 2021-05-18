@@ -35,7 +35,12 @@ class ChatConsumer(WebsocketConsumer):
         # room_id in URL comes only in group chat
         if "room_id" in self.scope["url_route"]["kwargs"]:
             self.is_group_consumer = True
-            self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
+            try:
+                self.room_id = int(self.scope["url_route"]["kwargs"]["room_id"])
+            except ValueError as excp:
+                logger.error("Invalid room id")
+                raise DenyConnection from excp
+
             try:
                 new_channel = Channel.GroupChannel.objects.create(
                     name=self.channel_name,

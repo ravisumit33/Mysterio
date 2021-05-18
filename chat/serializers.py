@@ -14,7 +14,7 @@ class GroupRoomSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = GroupRoom
-        fields = ["name", "id", "created_at", "group_messages"]
+        fields = ["name", "id", "created_at", "group_messages", "zscore"]
 
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):

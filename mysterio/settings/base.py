@@ -66,6 +66,7 @@ TEMPLATES = [
     },
 ]
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 WSGI_APPLICATION = "mysterio.wsgi.application"
 ASGI_APPLICATION = "mysterio.asgi.application"
 

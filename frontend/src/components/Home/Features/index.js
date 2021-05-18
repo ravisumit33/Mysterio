@@ -25,7 +25,8 @@ const Features = () => {
     {
       icon: 'groups',
       title: 'Interest Groups',
-      description: 'Interest groups for like minded people to chat anonymously.',
+      description:
+        'Interest groups for like minded people to chat anonymously. Create groups and enjoy chatting for a month',
     },
     {
       icon: 'speed',

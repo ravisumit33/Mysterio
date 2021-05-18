@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
     color: 'rgba(0,0,0,0.4)',
     margin: theme.spacing(1, 0),
-    fontSize: '0.75rem',
+    fontSize: '0.9rem',
     textAlign: 'center',
   },
   section: {
@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, isWindowMinimized, chatStatus } = chatWindowStore;
+  const { messageList, chatStatus } = chatWindowStore;
   const { chatId } = props;
   const classes = useStyles({ chatStatus });
   const endBox = useRef(null);
@@ -62,8 +62,15 @@ const ChatWindow = (props) => {
     const messageData = message.data;
     if (message.type === MessageType.TEXT) {
       const side = messageData.sender.id === profileStore.id ? 'right' : 'left';
-      // eslint-disable-next-line react/no-array-index-key
-      return <ChatMessage key={idx} side={side} messages={messageData.text} />;
+      return (
+        <ChatMessage
+          // eslint-disable-next-line react/no-array-index-key
+          key={idx}
+          side={side}
+          messages={messageData.text}
+          sender={messageData.sender}
+        />
+      );
     }
     return (
       // eslint-disable-next-line react/no-array-index-key
@@ -73,14 +80,14 @@ const ChatWindow = (props) => {
     );
   });
 
-  return !isWindowMinimized ? (
+  return (
     <Box className={classes.root}>
       <Box className={clsx(classes.section, classes.header)}>
         <ChatHeader chatId={chatId} />
       </Box>
       <Box flexGrow={1} overflow="scroll" className={clsx(classes.section, classes.messageBox)}>
         <Backdrop className={classes.backdrop} open={chatStatus === ChatStatus.NOT_STARTED}>
-          <Typography variant="body1">Searching</Typography>
+          <Typography variant="body1">Please wait...</Typography>
           <Box ml={2}>
             <CircularProgress color="inherit" />
           </Box>
@@ -96,8 +103,6 @@ const ChatWindow = (props) => {
         <InputBar />
       </Box>
     </Box>
-  ) : (
-    <></>
   );
 };
 

@@ -1,10 +1,12 @@
-from django.urls import include, path
 from rest_framework import routers
 import chat.views as ChatView
 
-router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 router.register(r"groups", ChatView.GroupRoomViewSet)
+router.register(r"messages", ChatView.MessageViewSet, basename="message")
+router.register(r"group_channels", ChatView.GroupChannelViewSet)
+router.register(r"sessions", ChatView.SessionViewSet, basename="session")
 
-urlpatterns = [
-    path("", include(router.urls), name="drf_router"),
-]
+urlpatterns = router.urls
+
+app_name = "chat"

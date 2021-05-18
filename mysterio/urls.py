@@ -18,7 +18,7 @@ from django.urls import path, include
 import mysterio.views as RootView
 
 urlpatterns = [
-    path("api/chat/", include("chat.urls")),
+    path("api/chat/", include("chat.urls", "chat")),
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
     path("", RootView.FrontendView.as_view()),

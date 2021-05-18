@@ -3,7 +3,7 @@ import { makeAutoObservable } from 'mobx';
 class UserInfoDialogStore {
   shouldOpen = false;
 
-  roomId = undefined;
+  chatWindowData = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -13,8 +13,8 @@ class UserInfoDialogStore {
     this.shouldOpen = shouldOpen;
   };
 
-  setRoomId = (roomId) => {
-    this.roomId = roomId;
+  setChatWindowData = (chatWindowData) => {
+    this.chatWindowData = chatWindowData;
   };
 }
 

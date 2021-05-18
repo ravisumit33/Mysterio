@@ -50,16 +50,17 @@ class ChatConsumer(WebsocketConsumer):
             )
             logger.info("New group channel created with room_id %d", self.room_id)
             self.channel_id = new_channel.id
+            async_to_sync(self.channel_layer.group_add)(
+                PREFIX.GROUP_CHANNEL + str(self.channel_id),
+                self.channel_name,
+            )
             logger.info("Channel id: %d", self.channel_id)
         self.accept()
 
     def disconnect(self, code):
         if self.channel_id is None:
             return
-        if self.is_group_consumer:
-            Channel.GroupChannel.objects.filter(pk=self.channel_id).delete()
-            logger.info("Group channel deleted")
-        else:
+        if not self.is_group_consumer:
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
             async_to_sync(self.channel_layer.group_discard)(
                 PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
@@ -71,6 +72,12 @@ class ChatConsumer(WebsocketConsumer):
             )
             async_to_sync(self.channel_layer.group_discard)(
                 group_prefix + str(self.room_id), self.channel_name
+            )
+            Message.TextMessage.objects.create(
+                group_room_id=self.room_id,
+                sender_channel_id=self.channel_id,
+                text=f"{self.profile['name']} left",
+                message_type=MESSAGE.USER_LEFT,
             )
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
@@ -112,6 +119,7 @@ class ChatConsumer(WebsocketConsumer):
                     group_room_id=self.room_id,
                     sender_channel_id=self.channel_id,
                     text=message_data["text"],
+                    message_type=MESSAGE.TEXT,
                 )
                 group_prefix = PREFIX.GROUP_ROOM
             async_to_sync(self.channel_layer.group_send)(
@@ -171,6 +179,12 @@ class ChatConsumer(WebsocketConsumer):
             )
 
             if self.is_group_consumer:
+                Message.TextMessage.objects.create(
+                    group_room_id=self.room_id,
+                    sender_channel_id=self.channel_id,
+                    text=f"{name} entered",
+                    message_type=MESSAGE.USER_JOINED,
+                )
                 async_to_sync(self.channel_layer.group_send)(
                     PREFIX.GROUP_ROOM + str(self.room_id),
                     {

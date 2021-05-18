@@ -32,3 +32,5 @@ export const getCookie = (name) => {
   }
   return cookieValue;
 };
+
+export const fetchUrl = (url, data) => fetch(url, data).then((response) => response.json());

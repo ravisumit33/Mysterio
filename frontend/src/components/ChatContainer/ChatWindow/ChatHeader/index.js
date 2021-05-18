@@ -58,11 +58,13 @@ const ChatHeader = (props) => {
         </ListItem>
       </Box>
       <Box>
-        <IconButton onClick={handleReconnect} className={classes.icon}>
-          <Tooltip title="Find someone else" arrow>
-            <ReplayIcon fontSize="small" />
-          </Tooltip>
-        </IconButton>
+        {!chatWindowStore.isGroupChat && (
+          <IconButton onClick={handleReconnect} className={classes.icon}>
+            <Tooltip title="Find someone else" arrow>
+              <ReplayIcon fontSize="small" />
+            </Tooltip>
+          </IconButton>
+        )}
         <IconButton onClick={handleClose} className={classes.icon}>
           <Tooltip title="Close" arrow>
             <CloseIcon fontSize="small" />

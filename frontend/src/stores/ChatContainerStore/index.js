@@ -10,10 +10,10 @@ class ChatContainerStore {
     makeAutoObservable(this);
   }
 
-  addChatWindow = (roomId) => {
+  addChatWindow = (data) => {
     this.chatWindow = {
       id: this.chatId,
-      store: new ChatWindowStore(roomId),
+      store: new ChatWindowStore(data),
     };
     this.chatId += 1;
   };

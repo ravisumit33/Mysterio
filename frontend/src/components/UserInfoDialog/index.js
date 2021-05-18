@@ -20,7 +20,7 @@ const UserInfoDialog = () => {
   const handleDialogueButtonClick = () => {
     userInfoDialogStore.setShouldOpen(false);
     profileStore.setName(textFieldValue);
-    chatContainerStore.addChatWindow(userInfoDialogStore.roomId);
+    chatContainerStore.addChatWindow(userInfoDialogStore.chatWindowData);
   };
 
   return (

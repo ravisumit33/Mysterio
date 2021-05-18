@@ -11,6 +11,7 @@ colorlog = "*"
 APScheduler = "*"
 Django = "*"
 djangorestframework = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 python-dotenv = {extras = ["cli"], version = "*"}

@@ -1,42 +1,27 @@
-import { makeAutoObservable, observable } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import ChatWindowStore from 'stores/ChatWindowStore';
 
 class ChatContainerStore {
-  chatWindows = [];
+  chatWindow = null;
 
   chatId = 0;
 
-  individualChatExist = false;
-
   constructor() {
-    makeAutoObservable(this, { chatWindows: observable.shallow });
+    makeAutoObservable(this);
   }
 
-  setIndividualChatExist = (value) => {
-    this.individualChatExist = value;
-  };
-
-  addChatWindow = (roomId) => {
-    this.chatWindows.push({
+  addChatWindow = (data) => {
+    this.chatWindow = {
       id: this.chatId,
-      store: new ChatWindowStore(roomId),
-    });
-    if (!this.chatWindows[this.chatWindows.length - 1].store.isGroupChat) {
-      this.setIndividualChatExist(true);
-    }
+      store: new ChatWindowStore(data),
+    };
     this.chatId += 1;
   };
 
   removeChatWIndow = (id) => {
-    const chatWindowIdx = this.chatWindows.findIndex((item) => item.id === id);
-    !this.chatWindows[chatWindowIdx].store.isGroupChat && this.setIndividualChatExist(false);
-    this.chatWindows[chatWindowIdx].store.closeChatWindow();
-    this.chatWindows.splice(chatWindowIdx, 1);
+    this.chatWindow.store.closeChatWindow();
+    this.chatWindow = null;
   };
-
-  get isAnyWindowMinimized() {
-    return this.chatWindows.some((chatWindow) => chatWindow.store.isWindowMinimized);
-  }
 }
 
 const chatContainerStore = new ChatContainerStore();

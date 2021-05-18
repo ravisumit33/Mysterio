@@ -13,8 +13,8 @@ const useStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
     backgroundColor: 'rgba(0,0,0,0.04)',
-    height: theme.spacing(4.5),
-    fontSize: '0.8rem',
+    height: theme.spacing(6),
+    fontSize: '1rem',
     width: '100%',
     transition: 'background-color .2s ease,box-shadow .2s ease',
   },

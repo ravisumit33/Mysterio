@@ -10,27 +10,28 @@ const Features = () => {
       icon: AnonymousIcon,
       isLocalIcon: true,
       title: 'Anonymous',
-      description: 'No one knows who you are.',
+      description: 'No one knows who you are. Truly anonymous experience.',
     },
     {
       icon: 'shuffle',
       title: 'Random',
-      description: 'You can be matched with any person in this whole universe.',
+      description: 'You can be matched with any person in this whole universe. ',
     },
     {
       icon: 'lock',
       title: 'Secure',
-      description: 'No one knows who you are.',
+      description: 'End to End encrypted chats for increased anonymity and security.',
     },
     {
       icon: 'groups',
       title: 'Interest Groups',
-      description: 'No one knows who you are.',
+      description:
+        'Interest groups for like minded people to chat anonymously. Create groups and enjoy chatting for a month',
     },
     {
       icon: 'speed',
       title: 'Fast',
-      description: 'No one knows who you are.',
+      description: 'Blazing fast matching with instant text messaging.',
     },
   ];
 

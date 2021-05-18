@@ -35,7 +35,12 @@ class ChatConsumer(WebsocketConsumer):
         # room_id in URL comes only in group chat
         if "room_id" in self.scope["url_route"]["kwargs"]:
             self.is_group_consumer = True
-            self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
+            try:
+                self.room_id = int(self.scope["url_route"]["kwargs"]["room_id"])
+            except ValueError as excp:
+                logger.error("Invalid room id")
+                raise DenyConnection from excp
+
             try:
                 new_channel = Channel.GroupChannel.objects.create(
                     name=self.channel_name,
@@ -50,16 +55,17 @@ class ChatConsumer(WebsocketConsumer):
             )
             logger.info("New group channel created with room_id %d", self.room_id)
             self.channel_id = new_channel.id
+            async_to_sync(self.channel_layer.group_add)(
+                PREFIX.GROUP_CHANNEL + str(self.channel_id),
+                self.channel_name,
+            )
             logger.info("Channel id: %d", self.channel_id)
         self.accept()
 
     def disconnect(self, code):
         if self.channel_id is None:
             return
-        if self.is_group_consumer:
-            Channel.GroupChannel.objects.filter(pk=self.channel_id).delete()
-            logger.info("Group channel deleted")
-        else:
+        if not self.is_group_consumer:
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
             async_to_sync(self.channel_layer.group_discard)(
                 PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
@@ -72,6 +78,15 @@ class ChatConsumer(WebsocketConsumer):
             async_to_sync(self.channel_layer.group_discard)(
                 group_prefix + str(self.room_id), self.channel_name
             )
+            try:
+                Message.TextMessage.objects.create(
+                    group_room_id=self.room_id,
+                    sender_channel_id=self.channel_id,
+                    text=f"{self.profile['name']} left",
+                    message_type=MESSAGE.USER_LEFT,
+                )
+            except IntegrityError:
+                return
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
                 {
@@ -99,21 +114,30 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("SuspiciousOperation : Text message received with no name")
                 self.close()
                 return
-            logger.info(
-                "Text message received in room id %d by %s",
-                self.room_id,
-                self.session["name"],
-            )
-            logger.info("%s", message_data["text"])
-            # TODO: remove this log as messages will be encrypted
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             if self.is_group_consumer:
-                Message.TextMessage.objects.create(
-                    group_room_id=self.room_id,
-                    sender_channel_id=self.channel_id,
-                    text=message_data["text"],
-                )
                 group_prefix = PREFIX.GROUP_ROOM
+                try:
+                    Message.TextMessage.objects.create(
+                        group_room_id=self.room_id,
+                        sender_channel_id=self.channel_id,
+                        text=message_data["text"],
+                        message_type=MESSAGE.TEXT,
+                    )
+                except IntegrityError:
+                    async_to_sync(self.channel_layer.group_send)(
+                        group_prefix + str(self.room_id),
+                        {
+                            "type": "group_msg_receive",
+                            "payload": {
+                                "type": MESSAGE.CHAT_DELETE,
+                                "data": {
+                                    "text": "Group is deleted as it is more than one month older",
+                                },
+                            },
+                        },
+                    )
+                    return
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
                 {
@@ -127,6 +151,13 @@ class ChatConsumer(WebsocketConsumer):
                     },
                 },
             )
+            logger.info(
+                "Text message received in room id %d by %s",
+                self.room_id,
+                self.session["name"],
+            )
+            logger.info("%s", message_data["text"])
+            # TODO: remove this log as messages will be encrypted
         elif message_type == MESSAGE.USER_INFO:
             logger.info("User details: %s", message_data["name"])
             name = message_data["name"]
@@ -171,6 +202,15 @@ class ChatConsumer(WebsocketConsumer):
             )
 
             if self.is_group_consumer:
+                try:
+                    Message.TextMessage.objects.create(
+                        group_room_id=self.room_id,
+                        sender_channel_id=self.channel_id,
+                        text=f"{name} entered",
+                        message_type=MESSAGE.USER_JOINED,
+                    )
+                except IntegrityError:
+                    return
                 async_to_sync(self.channel_layer.group_send)(
                     PREFIX.GROUP_ROOM + str(self.room_id),
                     {

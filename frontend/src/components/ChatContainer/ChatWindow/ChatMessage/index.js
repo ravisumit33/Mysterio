@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Avatar from 'components/Avatar';
+import { TextAvatar } from 'components/Avatar';
 import Typography from '@material-ui/core/Typography';
-import { ChatWindowStoreContext, ClassNameContext } from 'contexts';
+import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
 import { Box } from '@material-ui/core';
 import clsx from 'clsx';
@@ -41,7 +41,7 @@ const useStyles = makeStyles((theme) => {
       fontFamily:
         // eslint-disable-next-line max-len
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      fontSize: '0.9rem',
+      fontSize: '1.1rem',
     },
     left: {
       borderTopRightRadius: borderRadius,
@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-const ChatMessage = ({ messages, side }) => {
+const ChatMessage = ({ messages, sender, side }) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { isGroupChat } = chatWindowStore;
   const classes = useStyles();
@@ -86,9 +86,7 @@ const ChatMessage = ({ messages, side }) => {
     <Grid container spacing={2} justify={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
         <Grid item>
-          <ClassNameContext.Provider value={classes.avatar}>
-            <Avatar />
-          </ClassNameContext.Provider>
+          <TextAvatar name={sender.name || '?'} className={classes.avatar} />
         </Grid>
       )}
       <Grid item xs>
@@ -110,6 +108,10 @@ const ChatMessage = ({ messages, side }) => {
 ChatMessage.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.string).isRequired,
   side: PropTypes.oneOf(['left', 'right']),
+  sender: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    avatarUrl: PropTypes.string,
+  }).isRequired,
 };
 ChatMessage.defaultProps = {
   side: 'left',

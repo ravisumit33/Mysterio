@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, CssBaseline, makeStyles } from '@material-ui/core';
-import { NavBar, Home, Footer, ChatContainer, StatusBar } from 'components';
+import { NavBar, Home, Footer, ChatContainer } from 'components';
+import UserInfoDialog from 'components/UserInfoDialog';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -19,7 +20,7 @@ const App = () => {
         <Home />
         <Footer />
         <ChatContainer />
-        <StatusBar />
+        <UserInfoDialog />
       </Box>
     </CssBaseline>
   );

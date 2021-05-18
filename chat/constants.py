@@ -10,6 +10,7 @@ class MESSAGE(IntEnum):
     USER_LEFT = 2
     USER_INFO = 3
     TEXT = 4
+    CHAT_DELETE = 5
 
 
 @dataclass

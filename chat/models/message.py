@@ -23,3 +23,4 @@ class TextMessage(Message):
     """Model to store text messages"""
 
     text = models.CharField(max_length=65535)
+    message_type = models.IntegerField()

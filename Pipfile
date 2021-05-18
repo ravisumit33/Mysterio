@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+channels = "*"
+channels-redis = "*"
+psycopg2 = "*"
+colorlog = "*"
+APScheduler = "*"
+Django = "*"
+djangorestframework = "*"
+django-cors-headers = "*"
+whitenoise = "*"
+dj-database-url = "*"
+
+[dev-packages]
+python-dotenv = {extras = ["cli"], version = "*"}
+pylint = "*"
+pylint-django = "*"
+black = "==21.5b1" # Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)
+pre-commit = "*"

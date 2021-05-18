@@ -1,0 +1,25 @@
+{
+  "name": "mysterio",
+  "version": "1.0.0",
+  "description": "Anonymous chat web app",
+  "main": "frontend/src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-prebuild": "NODE_ENV=production cd frontend/ && npm install && npm run build && cd .."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravisumit33/Mysterio.git"
+  },
+  "keywords": [
+    "Anonymous",
+    "Django",
+    "React"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ravisumit33/Mysterio/issues"
+  },
+  "homepage": "https://github.com/ravisumit33/Mysterio#readme"
+}

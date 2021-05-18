@@ -10,15 +10,24 @@ https://docs.djangoproject.com/en/3.1/howto/deployment/asgi/
 import os
 
 from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
+
+django_asgi_app = get_asgi_application()
+
+# pylint: disable=wrong-import-position
+from channels.routing import (
+    ProtocolTypeRouter,
+    URLRouter,
+)
 from channels.auth import AuthMiddlewareStack
 import chat.routing
+
+# pylint: enable=wrong-import-position
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysterio.settings.local")
 
 application = ProtocolTypeRouter(
     {
-        "http": get_asgi_application(),
+        "http": django_asgi_app,
         "websocket": AuthMiddlewareStack(URLRouter(chat.routing.websocket_urlpatterns)),
     }
 )

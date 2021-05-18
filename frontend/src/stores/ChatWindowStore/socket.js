@@ -10,9 +10,11 @@ class Socket {
   }
 
   init() {
-    const SERVER_ADD = window.location.host.split(':')[0];
+    const isDevEnv = process.env.NODE_ENV === 'development';
+    const { host } = window.location;
+    const SERVER_ADD = isDevEnv ? `${host.split(':')[0]}:8000` : host;
     const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
-    this.socket = new ReconnectingWebSocket(`ws://${SERVER_ADD}:8000/ws/chat${groupChatURL}`);
+    this.socket = new ReconnectingWebSocket(`ws://${SERVER_ADD}/ws/chat${groupChatURL}`);
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
     this.socket.addEventListener('message', this.handleMessage);

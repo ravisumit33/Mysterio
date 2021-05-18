@@ -1,3 +1,8 @@
+# Add locally ignored files
+.vscode
+.vim
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -60,6 +65,8 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+chat/migrations/
+staticfiles/*
 
 # Flask stuff:
 instance/

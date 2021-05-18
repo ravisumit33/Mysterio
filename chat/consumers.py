@@ -65,28 +65,28 @@ class ChatConsumer(WebsocketConsumer):
     def disconnect(self, code):
         if self.channel_id is None:
             return
-        if not self.is_group_consumer:
-            Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
-            async_to_sync(self.channel_layer.group_discard)(
-                PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
-            )
-            logger.info("Individual channel deleted")
         if self.room_id is not None:
-            group_prefix = (
-                PREFIX.GROUP_ROOM if self.is_group_consumer else PREFIX.INDIVIDUAL_ROOM
-            )
+            if not self.is_group_consumer:
+                group_prefix = PREFIX.INDIVIDUAL_ROOM
+                Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
+                async_to_sync(self.channel_layer.group_discard)(
+                    PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
+                )
+                logger.info("Individual channel deleted")
+            else:
+                group_prefix = PREFIX.GROUP_ROOM
+                try:
+                    Message.TextMessage.objects.create(
+                        group_room_id=self.room_id,
+                        sender_channel_id=self.channel_id,
+                        text=f"{self.profile['name']} left",
+                        message_type=MESSAGE.USER_LEFT,
+                    )
+                except IntegrityError:
+                    return
             async_to_sync(self.channel_layer.group_discard)(
                 group_prefix + str(self.room_id), self.channel_name
             )
-            try:
-                Message.TextMessage.objects.create(
-                    group_room_id=self.room_id,
-                    sender_channel_id=self.channel_id,
-                    text=f"{self.profile['name']} left",
-                    message_type=MESSAGE.USER_LEFT,
-                )
-            except IntegrityError:
-                return
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
                 {

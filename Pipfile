@@ -14,9 +14,9 @@ djangorestframework = "*"
 django-cors-headers = "*"
 whitenoise = "*"
 dj-database-url = "*"
+python-dotenv = {extras = ["cli"], version = "*"}
 
 [dev-packages]
-python-dotenv = {extras = ["cli"], version = "*"}
 pylint = "*"
 pylint-django = "*"
 black = "==21.5b1" # Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)

@@ -11,6 +11,7 @@ import {
   ListItemText,
   makeStyles,
   TextField,
+  Tooltip,
   Typography,
 } from '@material-ui/core';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
@@ -135,15 +136,19 @@ const GroupChatUI = () => {
                       />
                     )}
                     renderOption={(option) => (
-                      <ListItem disableGutters>
-                        <ListItemAvatar>
-                          <TextAvatar name={option.name} />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={option.name}
-                          secondary={`${option.group_messages.length} messages`}
-                        />
-                      </ListItem>
+                      <Tooltip title={option.name} arrow>
+                        <ListItem disableGutters>
+                          <ListItemAvatar>
+                            <TextAvatar name={option.name} />
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={option.name}
+                            secondary={`${option.group_messages.length} messages`}
+                            primaryTypographyProps={{ noWrap: true }}
+                            secondaryTypographyProps={{ noWrap: true }}
+                          />
+                        </ListItem>
+                      </Tooltip>
                     )}
                     getOptionLabel={(option) => option.name || ''}
                   />

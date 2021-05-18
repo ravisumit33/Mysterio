@@ -14,7 +14,10 @@ class Socket {
     const { host } = window.location;
     const SERVER_ADD = isDevEnv ? `${host.split(':')[0]}:8000` : host;
     const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
-    this.socket = new ReconnectingWebSocket(`ws://${SERVER_ADD}/ws/chat${groupChatURL}`);
+    const websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    this.socket = new ReconnectingWebSocket(
+      `${websocketProtocol}://${SERVER_ADD}/ws/chat${groupChatURL}`
+    );
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
     this.socket.addEventListener('message', this.handleMessage);

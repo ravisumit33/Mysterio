@@ -9,6 +9,7 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  makeStyles,
   TextField,
   Typography,
 } from '@material-ui/core';
@@ -19,7 +20,22 @@ import { TextAvatar } from 'components/Avatar';
 import { chatContainerStore, profileStore, userInfoDialogStore } from 'stores';
 import { fetchUrl, getCookie } from 'utils';
 
+const useStyles = makeStyles((theme) => ({
+  groupChatUI: {
+    [theme.breakpoints.down('sm')]: {
+      alignItems: 'center',
+    },
+  },
+  groupSearch: {
+    [theme.breakpoints.down('sm')]: {
+      justifyContent: 'center',
+    },
+  },
+}));
+
 const GroupChatUI = () => {
+  const classes = useStyles();
+
   const [groupRooms, setGroupRooms] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
   const [newGroupName, setNewGroupName] = useState('');
@@ -93,8 +109,8 @@ const GroupChatUI = () => {
               <GroupChatImg width="100%" height="400" />
             </Box>
           </Grid>
-          <Grid item container xs={12} md={5} direction="column">
-            <Grid item container xs={12} spacing={2}>
+          <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
+            <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
               <Box width="50%" my={3}>
                 <Grid item>
                   <Autocomplete

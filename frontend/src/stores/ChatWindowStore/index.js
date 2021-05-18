@@ -130,6 +130,10 @@ class ChatWindowStore {
         messageData.text = [messageData.text];
         break;
       }
+      case MessageType.CHAT_DELETE:
+        this.socket.close();
+        this.setChatStatus(ChatStatus.ENDED);
+        break;
       default:
         log.error('Unsupported message type', messageType);
         return;

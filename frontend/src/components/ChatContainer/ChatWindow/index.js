@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, chatStatus } = chatWindowStore;
+  const { messageList, chatStatus, isGroupChat } = chatWindowStore;
   const { chatId } = props;
   const classes = useStyles({ chatStatus });
   const endBox = useRef(null);
@@ -96,7 +96,7 @@ const ChatWindow = (props) => {
         {/* https://github.com/mui-org/material-ui/issues/17010 */}
         <div ref={endBox} />
       </Box>
-      {chatStatus === ChatStatus.ENDED && (
+      {chatStatus === ChatStatus.ENDED && !isGroupChat && (
         <Typography className={classes.infoMsg}>Click &#x21BA; above to find someone</Typography>
       )}
       <Box>

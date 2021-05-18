@@ -73,12 +73,15 @@ class ChatConsumer(WebsocketConsumer):
             async_to_sync(self.channel_layer.group_discard)(
                 group_prefix + str(self.room_id), self.channel_name
             )
-            Message.TextMessage.objects.create(
-                group_room_id=self.room_id,
-                sender_channel_id=self.channel_id,
-                text=f"{self.profile['name']} left",
-                message_type=MESSAGE.USER_LEFT,
-            )
+            try:
+                Message.TextMessage.objects.create(
+                    group_room_id=self.room_id,
+                    sender_channel_id=self.channel_id,
+                    text=f"{self.profile['name']} left",
+                    message_type=MESSAGE.USER_LEFT,
+                )
+            except IntegrityError:
+                return
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
                 {
@@ -106,22 +109,30 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("SuspiciousOperation : Text message received with no name")
                 self.close()
                 return
-            logger.info(
-                "Text message received in room id %d by %s",
-                self.room_id,
-                self.session["name"],
-            )
-            logger.info("%s", message_data["text"])
-            # TODO: remove this log as messages will be encrypted
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             if self.is_group_consumer:
-                Message.TextMessage.objects.create(
-                    group_room_id=self.room_id,
-                    sender_channel_id=self.channel_id,
-                    text=message_data["text"],
-                    message_type=MESSAGE.TEXT,
-                )
                 group_prefix = PREFIX.GROUP_ROOM
+                try:
+                    Message.TextMessage.objects.create(
+                        group_room_id=self.room_id,
+                        sender_channel_id=self.channel_id,
+                        text=message_data["text"],
+                        message_type=MESSAGE.TEXT,
+                    )
+                except IntegrityError:
+                    async_to_sync(self.channel_layer.group_send)(
+                        group_prefix + str(self.room_id),
+                        {
+                            "type": "group_msg_receive",
+                            "payload": {
+                                "type": MESSAGE.CHAT_DELETE,
+                                "data": {
+                                    "text": "Group is deleted as it is more than one month older",
+                                },
+                            },
+                        },
+                    )
+                    return
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix + str(self.room_id),
                 {
@@ -135,6 +146,13 @@ class ChatConsumer(WebsocketConsumer):
                     },
                 },
             )
+            logger.info(
+                "Text message received in room id %d by %s",
+                self.room_id,
+                self.session["name"],
+            )
+            logger.info("%s", message_data["text"])
+            # TODO: remove this log as messages will be encrypted
         elif message_type == MESSAGE.USER_INFO:
             logger.info("User details: %s", message_data["name"])
             name = message_data["name"]
@@ -179,12 +197,15 @@ class ChatConsumer(WebsocketConsumer):
             )
 
             if self.is_group_consumer:
-                Message.TextMessage.objects.create(
-                    group_room_id=self.room_id,
-                    sender_channel_id=self.channel_id,
-                    text=f"{name} entered",
-                    message_type=MESSAGE.USER_JOINED,
-                )
+                try:
+                    Message.TextMessage.objects.create(
+                        group_room_id=self.room_id,
+                        sender_channel_id=self.channel_id,
+                        text=f"{name} entered",
+                        message_type=MESSAGE.USER_JOINED,
+                    )
+                except IntegrityError:
+                    return
                 async_to_sync(self.channel_layer.group_send)(
                     PREFIX.GROUP_ROOM + str(self.room_id),
                     {

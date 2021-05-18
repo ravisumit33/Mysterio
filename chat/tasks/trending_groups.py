@@ -45,7 +45,7 @@ def get_group_stats():
             date = entry["date"].date()
             count = entry["count"]
             if room_id not in group_stats:
-                group_stats[room_id] = initial_message_counts
+                group_stats[room_id] = dict(initial_message_counts)
             group_stats[room_id][date] += count
 
     return group_stats

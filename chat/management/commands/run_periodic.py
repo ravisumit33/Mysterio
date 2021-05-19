@@ -1,4 +1,5 @@
 import logging
+from django.utils import timezone
 from django.core.management import BaseCommand
 from apscheduler.schedulers.blocking import BlockingScheduler
 from chat.tasks import (
@@ -21,11 +22,11 @@ def run_scheduler():
         process_unmatched_channels()
 
     # TODO: set appropiate time interval
-    @process_scheduler.scheduled_job("interval", hours=4)
+    @process_scheduler.scheduled_job("interval", hours=4, next_run_time=timezone.now())
     def trending_groups_job():  # pylint: disable=W0612
         update_trending_groups()
 
-    @process_scheduler.scheduled_job("interval", days=1)
+    @process_scheduler.scheduled_job("interval", days=1, next_run_time=timezone.now())
     def group_room_job():  # pylint: disable=W0612
         delete_old_groups()
 

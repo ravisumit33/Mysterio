@@ -32,6 +32,11 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: 'center',
     },
   },
+  trendingGroupsTitle: {
+    [theme.breakpoints.down('sm')]: {
+      textAlign: 'center',
+    },
+  },
 }));
 
 const GroupChatUI = () => {
@@ -50,8 +55,8 @@ const GroupChatUI = () => {
 
   const trendingGroups = [...groupRooms]
     .sort((a, b) => {
-      const zscoreA = parseInt(a.zscore, 10);
-      const zscoreB = parseInt(b.zscore, 10);
+      const zscoreA = parseFloat(a.zscore);
+      const zscoreB = parseFloat(b.zscore);
       return zscoreB - zscoreA;
     })
     .slice(0, 5);
@@ -102,7 +107,7 @@ const GroupChatUI = () => {
   };
 
   return (
-    <Box>
+    <Box width="100vw">
       <Container>
         <Grid container justify="space-between" spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={6}>
@@ -168,7 +173,7 @@ const GroupChatUI = () => {
               </Grid>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="h5">
+              <Typography variant="h5" className={classes.trendingGroupsTitle}>
                 Trending Groups <TrendingUpIcon />
               </Typography>
               <List>
@@ -180,6 +185,8 @@ const GroupChatUI = () => {
                     <ListItemText
                       primary={group.name}
                       secondary={`${group.group_messages.length} messages`}
+                      primaryTypographyProps={{ noWrap: true }}
+                      secondaryTypographyProps={{ noWrap: true }}
                     />
                   </ListItem>
                 ))}

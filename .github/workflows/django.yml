@@ -14,7 +14,20 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.7, 3.8, 3.9]
-
+    services:
+      db:
+        image: postgres
+        env:
+          POSTGRES_DB: mysterio
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: cipass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -27,5 +40,9 @@ jobs:
         pip install --user --upgrade pipenv
         pipenv install --dev
     - name: Run Tests
+      env:
+        DB_NAME: mysterio
+        DB_USER: ci
+        DB_PASSWORD: cipass
       run: |
         pipenv run python manage.py test

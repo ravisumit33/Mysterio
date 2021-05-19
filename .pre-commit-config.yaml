@@ -20,12 +20,3 @@ repos:
     verbose: true
     entry: npm run --silent --prefix frontend precommit-lint
     args: ["--", "--max-warnings=0", "--rule", "no-console:0", "--files"] # --files arg indicate start of filenames
-
-- repo: local
-  hooks:
-  - id: test
-    name: test
-    language: system
-    entry: python manage.py test
-    pass_filenames: false
-    verbose: true

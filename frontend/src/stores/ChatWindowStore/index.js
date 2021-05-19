@@ -124,7 +124,9 @@ class ChatWindowStore {
           lastMessage.type === MessageType.TEXT &&
           lastMessage.data.sender.id === messageData.sender.id
         ) {
-          lastMessage.data.text.push(messageData.text);
+          const newLastMessage = { ...lastMessage };
+          newLastMessage.data.text.push(messageData.text);
+          this.messageList[this.messageList.length - 1] = newLastMessage;
           return;
         }
         messageData.text = [messageData.text];

@@ -11,8 +11,8 @@ class Socket {
   }
 
   init() {
-    const { hostname } = window.location;
-    const SERVER_ADD = isDevEnv() ? `${hostname}:8000` : hostname;
+    const { host } = window.location;
+    const SERVER_ADD = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
     const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
     const websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.socket = new ReconnectingWebSocket(

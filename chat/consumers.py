@@ -83,6 +83,8 @@ class ChatConsumer(WebsocketConsumer):
                 )
             except IntegrityError:
                 return
+            logger.info("Group channel disconnected")
+
         if self.room_id is not None:
             async_to_sync(self.channel_layer.group_discard)(
                 group_prefix + str(self.room_id), self.channel_name

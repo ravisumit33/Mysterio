@@ -33,4 +33,18 @@ export const getCookie = (name) => {
   return cookieValue;
 };
 
-export const fetchUrl = (url, data) => fetch(url, data).then((response) => response.json());
+export const isDevEnv = () => process.env.NODE_ENV === 'development';
+
+export const fetchUrl = (url, data) => {
+  let completeUrl;
+  try {
+    completeUrl = new URL(url);
+    completeUrl.protocol = window.location.protocol;
+    completeUrl = completeUrl.href;
+  } catch (_) {
+    // url is relative
+    const origin = isDevEnv() ? '' : window.origin;
+    completeUrl = origin + url;
+  }
+  return fetch(completeUrl, data).then((response) => response.json());
+};

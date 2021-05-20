@@ -11,3 +11,6 @@ export const ChatStatus = {
   ONGOING: 1,
   ENDED: 2,
 };
+
+export const MysterioOrigin = 'https://mysterio-chat.herokuapp.com';
+export const MysterioHost = 'mysterio-chat.herokuapp.com';

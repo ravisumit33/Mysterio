@@ -7,12 +7,27 @@ import * as serviceWorker from './serviceWorker';
 
 configure({ isolateGlobalState: true });
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+const renderReactDom = () => {
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+};
+
+// @ts-ignore
+if (window.cordova) {
+  document.addEventListener(
+    'deviceready',
+    () => {
+      renderReactDom();
+    },
+    false
+  );
+} else {
+  renderReactDom();
+}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

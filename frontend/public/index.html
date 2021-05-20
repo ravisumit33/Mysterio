@@ -13,7 +13,9 @@
   </script>
   <meta charset="utf-8" />
   <link rel="icon" href="%PUBLIC_URL%/static/quick_chat_32.ico" />
-  <meta name="viewport" content="minimum-scale=1, width=device-width, initial-scale=1" />
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="Mysterio is an anonymous chat web app. Talk to strangers online. No login. No sign up. Anonymous chat rooms to talk to people of your interest. Fast and secure with encrypted chat. Best site to chat anonymously." />
   <link rel="apple-touch-icon" href="%PUBLIC_URL%/static/quick_chat_512.png" />
@@ -39,6 +41,17 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <link rel=“canonical” href=“https://mysterio-chat.herokuapp.com” />
   <title>Mysterio - Anonymous Chat</title>
+  <script>
+    if (window.cordova) {
+      var head = document.getElementsByTagName('head')[0];
+      var cordovaJs = document.createElement("script");
+
+      cordovaJs.type = "text/javascript";
+      cordovaJs.src = "cordova.js";
+
+      head.appendChild(cordovaJs);
+    }
+  </script>
 </head>
 
 <body>

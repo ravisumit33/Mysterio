@@ -1,3 +1,5 @@
+import { MysterioOrigin } from 'constants.js';
+
 export const generateRandomColor = (string) => {
   let hash = 0;
   let i;
@@ -39,11 +41,16 @@ export const fetchUrl = (url, data) => {
   let completeUrl;
   try {
     completeUrl = new URL(url);
-    completeUrl.protocol = window.location.protocol;
+    // @ts-ignore
+    completeUrl.protocol = window.cordova ? 'https' : window.location.protocol;
     completeUrl = completeUrl.href;
   } catch (_) {
     // url is relative
-    const origin = isDevEnv() ? '' : window.origin;
+    let origin = '';
+    if (!isDevEnv()) {
+      // @ts-ignore
+      origin = window.cordova ? MysterioOrigin : window.origin;
+    }
     completeUrl = origin + url;
   }
   return fetch(completeUrl, data).then((response) => response.json());

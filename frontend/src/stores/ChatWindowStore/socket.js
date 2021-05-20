@@ -1,6 +1,6 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import { MessageType } from 'constants.js';
+import { MessageType, MysterioHost } from 'constants.js';
 import profileStore from 'stores/ProfileStore';
 import { isDevEnv } from 'utils';
 
@@ -11,12 +11,20 @@ class Socket {
   }
 
   init() {
-    const { host } = window.location;
-    const SERVER_ADD = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
+    let serverHost;
+    let websocketProtocol;
+    // @ts-ignore
+    if (window.cordova) {
+      serverHost = MysterioHost;
+      websocketProtocol = 'wss';
+    } else {
+      const { host } = window.location;
+      serverHost = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
+      websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    }
     const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
-    const websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.socket = new ReconnectingWebSocket(
-      `${websocketProtocol}://${SERVER_ADD}/ws/chat${groupChatURL}`
+      `${websocketProtocol}://${serverHost}/ws/chat${groupChatURL}`
     );
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);

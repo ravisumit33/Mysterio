@@ -9,9 +9,11 @@ import { observer } from 'mobx-react-lite';
 const useStyle = makeStyles((theme) => ({
   jumbotron: {
     display: 'flex',
+    flexDirection: 'column',
     position: 'relative',
     width: '100%',
     height: '60vh',
+    minHeight: '60vh',
   },
   bg: {
     position: 'absolute',
@@ -24,7 +26,7 @@ const useStyle = makeStyles((theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   gridRoot: {
-    height: '100%',
+    flex: 1,
   },
   quickChatImg: {
     height: 300,
@@ -70,24 +72,28 @@ const Jumbotron = () => {
               </Box>
             </Grid>
           </Grid>
-          <Grid item container className={classes.quickChatTxtSection} spacing={3}>
+          <Grid item container className={classes.quickChatTxtSection} direction="column">
             <Grid item container justify="center">
               <Grid item xs={12}>
-                <Typography variant="h4" className={classes.quickChatDesc} align="center">
-                  Free Anonymous Chat
-                </Typography>
+                <Box py={2}>
+                  <Typography variant="h4" className={classes.quickChatDesc} align="center">
+                    Free Anonymous Chat
+                  </Typography>
+                </Box>
               </Grid>
             </Grid>
             <Grid item container justify="center">
               <Grid item>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  size="large"
-                  onClick={handleStartChat}
-                >
-                  Chat Now
-                </Button>
+                <Box py={2}>
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    size="large"
+                    onClick={handleStartChat}
+                  >
+                    Chat Now
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </Grid>

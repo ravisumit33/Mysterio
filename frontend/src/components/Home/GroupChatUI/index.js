@@ -32,6 +32,16 @@ const useStyles = makeStyles((theme) => ({
       justifyContent: 'center',
     },
   },
+  groupSearchLabel: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    right: theme.spacing(5), // do not overlap icon
+    bottom: 0,
+  },
+  groupSearchLabelShrinked: {
+    right: 'unset', // show complete label if shrinked
+  },
   trendingGroupsTitle: {
     [theme.breakpoints.down('sm')]: {
       textAlign: 'center',
@@ -138,6 +148,12 @@ const GroupChatUI = () => {
                         label="Search/Create groups"
                         margin="normal"
                         variant="outlined"
+                        InputLabelProps={{
+                          classes: {
+                            root: classes.groupSearchLabel,
+                            shrink: classes.groupSearchLabelShrinked,
+                          },
+                        }}
                       />
                     )}
                     renderOption={(option) => (

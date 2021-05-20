@@ -4,7 +4,6 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import DenyConnection
 from django.db.utils import IntegrityError
-from django.conf import settings
 import chat.models.channel as Channel
 import chat.models.message as Message
 from chat.constants import MESSAGE, PREFIX
@@ -26,11 +25,8 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.session = self.scope["session"]
         if self.session.session_key is None:
-            if settings.DEBUG is True:  # for local development
-                self.session.create()
-            else:
-                logger.error("SuspiciousOperation : session not created in production")
-                raise DenyConnection
+            # Not a web client
+            self.session.create()
 
         # room_id in URL comes only in group chat
         if "room_id" in self.scope["url_route"]["kwargs"]:

@@ -58,7 +58,7 @@ const GroupChatUI = () => {
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
 
   useEffect(() => {
-    fetchUrl('/api/chat/groups').then((data) => {
+    fetchUrl('/api/chat/groups/').then((data) => {
       setGroupRooms(Object.values(data));
     });
   }, []);

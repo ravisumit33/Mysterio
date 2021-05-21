@@ -36,41 +36,32 @@ class ChatWindowStore {
     const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}`);
     const groupMessages = groupDetail.then((data) => data.group_messages);
     groupMessages.then((messages) => {
-      const messagePromises = messages.map((item) => {
-        const messagePromise = new Promise((resolve, reject) => {
-          const message = {
-            data: {},
-          };
-          fetchUrl(item).then((msg) => {
-            message.data.text = msg.text;
-            message.type = msg.message_type;
-            fetchUrl(msg.sender_channel).then((sender) => {
-              fetchUrl(sender.session).then((session) => {
-                switch (message.type) {
-                  case MessageType.TEXT:
-                    message.data.sender = session.data;
-                    break;
-                  case MessageType.USER_JOINED:
-                    message.data.newJoinee = session.data;
-                    break;
-                  case MessageType.USER_LEFT:
-                    message.data.resignee = session.data;
-                    break;
-                  default:
-                    break;
-                }
-                resolve(message);
-              });
-            });
-          });
-        });
-        return messagePromise;
+      const detaiilMessages = messages.map((msg) => {
+        const message = {
+          data: {},
+        };
+        message.data.text = msg.text;
+        message.type = msg.message_type;
+        const sessionData = msg.sender_channel.session.data;
+        switch (message.type) {
+          case MessageType.TEXT:
+            message.data.sender = sessionData;
+            break;
+          case MessageType.USER_JOINED:
+            message.data.newJoinee = sessionData;
+            break;
+          case MessageType.USER_LEFT:
+            message.data.resignee = sessionData;
+            break;
+          default:
+            log.error('Unknown message type');
+            break;
+        }
+        return message;
       });
-      Promise.all(messagePromises).then((msgs) =>
-        msgs.forEach((msg) => {
-          this.addMessage(msg);
-        })
-      );
+      detaiilMessages.forEach((msg) => {
+        this.addMessage(msg);
+      });
     });
   };
 

@@ -132,7 +132,7 @@ class ChatWindowStore {
           this.setAvatarUrl(messageData.match.avatarUrl);
         }
         messageData.text = this.isGroupChat
-          ? this.chatStatus !== ChatStatus.NOT_STARTED && [`${messageData.newJoinee.name} entered`]
+          ? [`${messageData.newJoinee.name} entered`]
           : [`You are connected to ${messageData.match.name}`];
         this.setChatStatus(ChatStatus.ONGOING);
         this.chatStartedResolve();

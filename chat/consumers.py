@@ -157,17 +157,19 @@ class ChatConsumer(WebsocketConsumer):
             logger.info("%s", message_data["text"])
             # TODO: remove this log as messages will be encrypted
         elif message_type == MESSAGE.USER_INFO:
-            logger.info("User details: %s", message_data["name"])
+            logger.info("User details:")
+            logger.info(message_data)
             name = message_data["name"]
             avatar_url = (
                 message_data["avatarUrl"] if "avatarUrl" in message_data else ""
             )
-            self.session["id"] = self.channel_name
+            user_id = message_data["id"]
+            self.session["id"] = user_id if user_id else self.channel_name
             self.session["name"] = name
             self.session["avatarUrl"] = avatar_url
             self.session.save()
             self.profile = {
-                "id": self.channel_name,
+                "id": self.session["id"],
                 "name": self.session["name"],
                 "avatarUrl": self.session["avatarUrl"],
             }

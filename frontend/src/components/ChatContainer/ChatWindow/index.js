@@ -1,6 +1,13 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Backdrop, Box, CircularProgress, makeStyles, Typography } from '@material-ui/core';
+import {
+  Backdrop,
+  Box,
+  CircularProgress,
+  LinearProgress,
+  makeStyles,
+  Typography,
+} from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import { ChatStatus, MessageType } from 'constants.js';
 import { ChatWindowStoreContext } from 'contexts';
@@ -45,11 +52,20 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
     color: '#fff',
   },
+  loadingMessageBackDrop: {
+    display: 'flex',
+    flexDirection: 'column',
+    bottom: 'auto',
+  },
+  loadingMessage: {
+    position: 'relative',
+    height: theme.spacing(3.5),
+  },
 }));
 
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, chatStatus, isGroupChat } = chatWindowStore;
+  const { messageList, chatStatus, isGroupChat, initDone, noMatchFound } = chatWindowStore;
   const { chatId } = props;
   const classes = useStyles({ chatStatus });
   const endBox = useRef(null);
@@ -80,14 +96,30 @@ const ChatWindow = (props) => {
     );
   });
 
+  const shouldDisplayLoadingMessage =
+    isGroupChat && !initDone && chatStatus !== ChatStatus.NOT_STARTED;
+
   return (
     <Box className={classes.root}>
       <Box className={clsx(classes.section, classes.header)}>
         <ChatHeader chatId={chatId} />
       </Box>
+      {shouldDisplayLoadingMessage && (
+        <Box className={classes.loadingMessage}>
+          <Backdrop
+            className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+            open={shouldDisplayLoadingMessage}
+          >
+            <Typography variant="body1">Loading Message...</Typography>
+            <LinearProgress style={{ width: '100%' }} />
+          </Backdrop>
+        </Box>
+      )}
       <Box flexGrow={1} overflow="scroll" className={clsx(classes.section, classes.messageBox)}>
         <Backdrop className={classes.backdrop} open={chatStatus === ChatStatus.NOT_STARTED}>
-          <Typography variant="body1">Please wait...</Typography>
+          <Typography variant="body1">
+            {isGroupChat ? 'Entering room...' : 'Finding your match...'}
+          </Typography>
           <Box ml={2}>
             <CircularProgress color="inherit" />
           </Box>
@@ -96,8 +128,13 @@ const ChatWindow = (props) => {
         {/* https://github.com/mui-org/material-ui/issues/17010 */}
         <div ref={endBox} />
       </Box>
+      {noMatchFound && chatStatus === ChatStatus.ENDED && !isGroupChat && (
+        <Typography className={classes.infoMsg}>Looks like no one is online &#128542;</Typography>
+      )}
       {chatStatus === ChatStatus.ENDED && !isGroupChat && (
-        <Typography className={classes.infoMsg}>Click &#x21BA; above to find someone</Typography>
+        <Typography className={classes.infoMsg}>
+          Click &#x21BA; above to reconnect to someone
+        </Typography>
       )}
       <Box>
         <InputBar />

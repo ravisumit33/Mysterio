@@ -44,6 +44,7 @@ const InputBar = () => {
       };
       socket.send(MessageType.TEXT, message);
       input.current.value = '';
+      input.current.focus();
     }
   };
 

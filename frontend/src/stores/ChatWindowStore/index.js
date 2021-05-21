@@ -1,8 +1,8 @@
 import { makeAutoObservable } from 'mobx';
-import { ChatStatus, MessageType } from 'constants.js';
+import { ChatStatus, MatchTimeout, MessageType } from 'constants.js';
 import log from 'loglevel';
 import profileStore from 'stores/ProfileStore';
-import { fetchUrl } from 'utils';
+import { fetchUrl, isEmptyObj } from 'utils';
 import Socket from './socket';
 
 class ChatWindowStore {
@@ -18,18 +18,26 @@ class ChatWindowStore {
 
   socket = null;
 
+  chatStartedPromise = null;
+
   chatStartedResolve = null;
+
+  initDone = false;
+
+  noMatchFound = false;
 
   constructor(data) {
     makeAutoObservable(this);
     data && this.initState(data);
-    this.socket = new Socket(this);
-    const chatStartedPromise = new Promise((resolve, reject) => {
+    this.chatStartedPromise = new Promise((resolve, reject) => {
       this.chatStartedResolve = resolve;
     });
     if (this.isGroupChat) {
-      chatStartedPromise.then(() => this.initializeForGroup());
+      this.initializeForGroup();
+    } else {
+      this.setInitDone(true);
     }
+    this.socket = new Socket(this);
   }
 
   initializeForGroup = () => {
@@ -59,8 +67,13 @@ class ChatWindowStore {
         }
         return message;
       });
-      detaiilMessages.forEach((msg) => {
-        this.addMessage(msg);
+      const messagesToAdd = detaiilMessages.filter((msg) => {
+        const processedMessage = this.processMessage(msg, true);
+        return !isEmptyObj(processedMessage);
+      });
+      this.chatStartedPromise.then(() => {
+        this.addInitMessageList(messagesToAdd);
+        this.setInitDone(true);
       });
     });
   };
@@ -78,17 +91,41 @@ class ChatWindowStore {
     this.avatarUrl = url;
   };
 
+  setInitDone = (initDone) => {
+    this.initDone = initDone;
+  };
+
+  setNoMatchFound = (noMatchFound) => {
+    this.noMatchFound = noMatchFound;
+  };
+
   get isGroupChat() {
     return !!this.roomId;
   }
 
-  addMessage = (payload) => {
+  processMessage = (payload, isInitMsg) => {
     const messageType = payload.type;
     const messageData = payload.data;
     switch (messageType) {
       case MessageType.USER_INFO:
         profileStore.setId(messageData.id);
-        return;
+        if (!this.isGroupChat) {
+          this.timeoutStart = Date.now();
+          setTimeout(
+            (chatWindowStore) => {
+              const validTimeoutCb = Date.now() - chatWindowStore.timeoutStart > MatchTimeout;
+              if (validTimeoutCb && chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
+                chatWindowStore.setNoMatchFound(true);
+                chatWindowStore.socket.close();
+                chatWindowStore.setChatStatus(ChatStatus.ENDED);
+              }
+            },
+            MatchTimeout,
+            this
+          );
+        }
+        this.setChatStatus(ChatStatus.NOT_STARTED);
+        return {};
       case MessageType.USER_JOINED:
         if ('match' in messageData) {
           this.setName(messageData.match.name);
@@ -108,17 +145,19 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
-        const lastMessage =
-          this.messageList.length && this.messageList[this.messageList.length - 1];
+        const lastMessageIdx = isInitMsg ? 0 : this.messageList.length - 1;
+        const lastMessage = this.messageList.length && this.messageList[lastMessageIdx];
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
           lastMessage.data.sender.id === messageData.sender.id
         ) {
           const newLastMessage = { ...lastMessage };
-          newLastMessage.data.text.push(messageData.text);
-          this.messageList[this.messageList.length - 1] = newLastMessage;
-          return;
+          isInitMsg
+            ? newLastMessage.data.text.unshift(messageData.text)
+            : newLastMessage.data.text.push(messageData.text);
+          this.messageList[lastMessageIdx] = newLastMessage;
+          return {};
         }
         messageData.text = [messageData.text];
         break;
@@ -129,13 +168,20 @@ class ChatWindowStore {
         break;
       default:
         log.error('Unsupported message type', messageType);
-        return;
+        return {};
     }
-    this.messageList.push(payload);
+    return payload;
+  };
+
+  addMessage = (payload, isInitMsg) =>
+    isInitMsg ? this.messageList.unshift(payload) : this.messageList.push(payload);
+
+  addInitMessageList = (messageList) => {
+    this.messageList = messageList.concat(this.messageList);
   };
 
   reconnect = () => {
-    this.setChatStatus(ChatStatus.NOT_STARTED);
+    this.setChatStatus(ChatStatus.ENDED);
     this.setName('');
     // @ts-ignore
     this.messageList.clear();
@@ -144,6 +190,7 @@ class ChatWindowStore {
   };
 
   closeChatWindow = () => {
+    this.setChatStatus(ChatStatus.ENDED);
     this.socket.close();
     this.socket = null;
   };

@@ -12,7 +12,6 @@ const useStyle = makeStyles((theme) => ({
     flexDirection: 'column',
     position: 'relative',
     width: '100%',
-    height: '60vh',
     minHeight: '60vh',
   },
   bg: {

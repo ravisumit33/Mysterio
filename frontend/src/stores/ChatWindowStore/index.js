@@ -110,11 +110,10 @@ class ChatWindowStore {
       case MessageType.USER_INFO:
         profileStore.setId(messageData.id);
         if (!this.isGroupChat) {
-          this.timeoutStart = Date.now();
-          setTimeout(
+          clearTimeout(this.timeout);
+          this.timeout = setTimeout(
             (chatWindowStore) => {
-              const validTimeoutCb = Date.now() - chatWindowStore.timeoutStart > MatchTimeout;
-              if (validTimeoutCb && chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
+              if (chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
                 chatWindowStore.setNoMatchFound(true);
                 chatWindowStore.socket.close();
                 chatWindowStore.setChatStatus(ChatStatus.ENDED);
@@ -128,6 +127,7 @@ class ChatWindowStore {
         return {};
       case MessageType.USER_JOINED:
         if ('match' in messageData) {
+          clearTimeout(this.timeout);
           this.setName(messageData.match.name);
           this.setAvatarUrl(messageData.match.avatarUrl);
         }
@@ -182,7 +182,9 @@ class ChatWindowStore {
 
   reconnect = () => {
     this.setChatStatus(ChatStatus.ENDED);
+    this.setNoMatchFound(false);
     this.setName('');
+    this.setAvatarUrl('');
     // @ts-ignore
     this.messageList.clear();
     this.socket.close();

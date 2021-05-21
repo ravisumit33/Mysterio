@@ -14,3 +14,5 @@ export const ChatStatus = {
 
 export const MysterioOrigin = 'https://mysterio-chat.herokuapp.com';
 export const MysterioHost = 'mysterio-chat.herokuapp.com';
+
+export const MatchTimeout = 60 * 1000; // 1 minute

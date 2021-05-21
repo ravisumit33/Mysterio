@@ -55,3 +55,6 @@ export const fetchUrl = (url, data) => {
   }
   return fetch(completeUrl, data).then((response) => response.json());
 };
+
+export const isEmptyObj = (obj) =>
+  obj && Object.keys(obj).length === 0 && obj.constructor === Object;

@@ -2,7 +2,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { MessageType, MysterioHost } from 'constants.js';
 import profileStore from 'stores/ProfileStore';
-import { isDevEnv } from 'utils';
+import { isDevEnv, isEmptyObj } from 'utils';
 
 class Socket {
   constructor(chatWindowStore) {
@@ -33,7 +33,11 @@ class Socket {
 
   handleOpen = () => {
     log.info('socket connection established, try sending messages');
-    this.send(MessageType.USER_INFO, { name: profileStore.name, avatar: profileStore.avatarUrl });
+    this.send(MessageType.USER_INFO, {
+      id: profileStore.id,
+      name: profileStore.name,
+      avatar: profileStore.avatarUrl,
+    });
   };
 
   handleClose = () => {
@@ -43,7 +47,8 @@ class Socket {
   handleMessage = (event) => {
     log.info('socket receive', event.data);
     const payload = JSON.parse(event.data);
-    this.chatWindowStore.addMessage(payload);
+    const processedMessage = this.chatWindowStore.processMessage(payload);
+    !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
   };
 
   send = (msgType, msgData) => {

@@ -58,7 +58,7 @@ const Jumbotron = () => {
         <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
         <Grid
           container
-          spacing={1}
+          // spacing={1}
           direction="column"
           className={classes.gridRoot}
           justify="space-around"

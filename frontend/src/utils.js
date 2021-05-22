@@ -1,4 +1,4 @@
-import { MysterioOrigin } from 'constants.js';
+import { MysterioOrigin } from 'appConstants';
 
 export const generateRandomColor = (string) => {
   let hash = 0;

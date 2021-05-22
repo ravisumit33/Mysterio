@@ -15,6 +15,7 @@ import Avatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
 import { chatContainerStore } from 'stores';
+import { ChatStatus } from 'appConstants';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -37,7 +38,7 @@ const ChatHeader = (props) => {
   const { chatId } = props;
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, reconnect } = chatWindowStore;
+  const { name, reconnect, chatStatus } = chatWindowStore;
 
   const handleReconnect = () => {
     reconnect();
@@ -59,7 +60,13 @@ const ChatHeader = (props) => {
       </Box>
       <Box>
         {!chatWindowStore.isGroupChat && (
-          <IconButton onClick={handleReconnect} className={classes.icon}>
+          <IconButton
+            disabled={
+              chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
+            }
+            onClick={handleReconnect}
+            className={classes.icon}
+          >
             <Tooltip title="Find someone else" arrow>
               <ReplayIcon fontSize="small" />
             </Tooltip>

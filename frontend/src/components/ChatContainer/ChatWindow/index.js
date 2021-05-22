@@ -9,7 +9,7 @@ import {
   Typography,
 } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
-import { ChatStatus, MessageType } from 'constants.js';
+import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
 import { profileStore } from 'stores';
 import clsx from 'clsx';
@@ -45,7 +45,9 @@ const useStyles = makeStyles((theme) => ({
   // @ts-ignore
   messageBox: ({ chatStatus }) => ({
     position: 'relative',
-    ...(chatStatus === ChatStatus.ENDED && { opacity: 0.5 }),
+    ...((chatStatus === ChatStatus.ENDED || chatStatus === ChatStatus.NO_MATCH_FOUND) && {
+      opacity: 0.5,
+    }),
   }),
   backdrop: {
     position: 'absolute',
@@ -65,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, chatStatus, isGroupChat, initDone, noMatchFound } = chatWindowStore;
+  const { messageList, chatStatus, isGroupChat, initDone } = chatWindowStore;
   const { chatId } = props;
   const classes = useStyles({ chatStatus });
   const endBox = useRef(null);
@@ -116,7 +118,12 @@ const ChatWindow = (props) => {
         </Box>
       )}
       <Box flexGrow={1} overflow="scroll" className={clsx(classes.section, classes.messageBox)}>
-        <Backdrop className={classes.backdrop} open={chatStatus === ChatStatus.NOT_STARTED}>
+        <Backdrop
+          className={classes.backdrop}
+          open={
+            chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
+          }
+        >
           <Typography variant="body1">
             {isGroupChat ? 'Entering room...' : 'Finding your match...'}
           </Typography>
@@ -128,14 +135,15 @@ const ChatWindow = (props) => {
         {/* https://github.com/mui-org/material-ui/issues/17010 */}
         <div ref={endBox} />
       </Box>
-      {noMatchFound && chatStatus === ChatStatus.ENDED && !isGroupChat && (
+      {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
         <Typography className={classes.infoMsg}>Looks like no one is online &#128542;</Typography>
       )}
-      {chatStatus === ChatStatus.ENDED && !isGroupChat && (
-        <Typography className={classes.infoMsg}>
-          Click &#x21BA; above to reconnect to someone
-        </Typography>
-      )}
+      {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
+        !isGroupChat && (
+          <Typography className={classes.infoMsg}>
+            Click &#x21BA; above to reconnect to someone
+          </Typography>
+        )}
       <Box>
         <InputBar />
       </Box>

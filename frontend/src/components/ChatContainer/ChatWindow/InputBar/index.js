@@ -5,7 +5,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
 import { Box, IconButton } from '@material-ui/core';
 import { ChatWindowStoreContext } from 'contexts';
-import { ChatStatus, MessageType } from 'constants.js';
+import { ChatStatus, MessageType } from 'appConstants';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 

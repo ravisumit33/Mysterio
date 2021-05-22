@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { ChatStatus, MatchTimeout, MessageType } from 'constants.js';
+import { ChatStatus, MatchTimeout, MessageType } from 'appConstants';
 import log from 'loglevel';
 import profileStore from 'stores/ProfileStore';
 import { fetchUrl, isEmptyObj } from 'utils';
@@ -10,21 +10,11 @@ class ChatWindowStore {
 
   name = '';
 
-  roomId = undefined;
-
   messageList = [];
 
   chatStatus = ChatStatus.NOT_STARTED;
 
-  socket = null;
-
-  chatStartedPromise = null;
-
-  chatStartedResolve = null;
-
   initDone = false;
-
-  noMatchFound = false;
 
   constructor(data) {
     makeAutoObservable(this);
@@ -111,10 +101,6 @@ class ChatWindowStore {
     this.initDone = initDone;
   };
 
-  setNoMatchFound = (noMatchFound) => {
-    this.noMatchFound = noMatchFound;
-  };
-
   get isGroupChat() {
     return !!this.roomId;
   }
@@ -130,9 +116,8 @@ class ChatWindowStore {
           this.timeout = setTimeout(
             (chatWindowStore) => {
               if (chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
-                chatWindowStore.setNoMatchFound(true);
                 chatWindowStore.socket.close();
-                chatWindowStore.setChatStatus(ChatStatus.ENDED);
+                chatWindowStore.setChatStatus(ChatStatus.NO_MATCH_FOUND);
               }
             },
             MatchTimeout,
@@ -197,8 +182,7 @@ class ChatWindowStore {
   };
 
   reconnect = () => {
-    this.setChatStatus(ChatStatus.ENDED);
-    this.setNoMatchFound(false);
+    this.setChatStatus(ChatStatus.RECONNECT_REQUESTED);
     this.setName('');
     this.setAvatarUrl('');
     // @ts-ignore

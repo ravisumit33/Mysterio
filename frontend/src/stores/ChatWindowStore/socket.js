@@ -1,6 +1,6 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import { MessageType, MysterioHost } from 'constants.js';
+import { MessageType, MysterioHost } from 'appConstants';
 import profileStore from 'stores/ProfileStore';
 import { isDevEnv, isEmptyObj } from 'utils';
 

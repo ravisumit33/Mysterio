@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
   // @ts-ignore
   messageBox: ({ chatStatus }) => ({
     position: 'relative',
-    ...(chatStatus === ChatStatus.ENDED && { opacity: 0.3 }),
+    ...(chatStatus === ChatStatus.ENDED && { opacity: 0.5 }),
   }),
   backdrop: {
     position: 'absolute',

@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 def get_sessions_data(channels):
     """Get stored session data for each channel"""
     session_ids = [channel["session"] for channel in channels]
-    sessions = Session.objects.filter(pk__in=session_ids)
+    sessions = list(Session.objects.filter(pk__in=session_ids))
+    sessions.sort(key=lambda session: session_ids.index(session.session_key))
     sessions_data = [session.get_decoded() for session in sessions]
     return sessions_data
 

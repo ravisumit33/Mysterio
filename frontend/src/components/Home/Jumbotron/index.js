@@ -21,7 +21,6 @@ const useStyle = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    filter: 'blur(1.5px)',
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
   gridRoot: {

@@ -16,9 +16,6 @@ class FrontendView(TemplateView):
     template_name = "index.html"
 
     def get(self, request, *args, **kwargs):
-        session = request.session
-        if session.session_key is None:
-            session.create()
         try:
             get_template(self.template_name)
             return super().get(request, *args, **kwargs)

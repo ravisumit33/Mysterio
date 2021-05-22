@@ -32,42 +32,58 @@ class ChatWindowStore {
     this.chatStartedPromise = new Promise((resolve, reject) => {
       this.chatStartedResolve = resolve;
     });
+    this.socket = new Socket(this);
     if (this.isGroupChat) {
       this.initializeForGroup();
     } else {
       this.setInitDone(true);
     }
-    this.socket = new Socket(this);
   }
 
   initializeForGroup = () => {
     const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}`);
     const groupMessages = groupDetail.then((data) => data.group_messages);
     groupMessages.then((messages) => {
-      const detaiilMessages = messages.map((msg) => {
-        const message = {
-          data: {},
-        };
-        message.data.text = msg.text;
-        message.type = msg.message_type;
-        const sessionData = msg.sender_channel.session.data;
-        switch (message.type) {
-          case MessageType.TEXT:
-            message.data.sender = sessionData;
-            break;
-          case MessageType.USER_JOINED:
-            message.data.newJoinee = sessionData;
-            break;
-          case MessageType.USER_LEFT:
-            message.data.resignee = sessionData;
-            break;
-          default:
-            log.error('Unknown message type');
-            break;
-        }
-        return message;
-      });
-      const messagesToAdd = detaiilMessages.filter((msg) => {
+      let detailMessages;
+      if (!messages) {
+        detailMessages = [
+          {
+            type: MessageType.CHAT_DELETE,
+            data: {
+              text: 'Group is deleted as it is more than one month older',
+            },
+          },
+        ];
+        this.addInitMessageList(detailMessages);
+        this.setInitDone(true);
+        this.setChatStatus(ChatStatus.ENDED);
+        this.socket.close();
+      } else {
+        detailMessages = messages.map((msg) => {
+          const message = {
+            data: {},
+          };
+          message.data.text = msg.text;
+          message.type = msg.message_type;
+          const sessionData = msg.sender_channel.session.data;
+          switch (message.type) {
+            case MessageType.TEXT:
+              message.data.sender = sessionData;
+              break;
+            case MessageType.USER_JOINED:
+              message.data.newJoinee = sessionData;
+              break;
+            case MessageType.USER_LEFT:
+              message.data.resignee = sessionData;
+              break;
+            default:
+              log.error('Unknown message type');
+              break;
+          }
+          return message;
+        });
+      }
+      const messagesToAdd = detailMessages.filter((msg) => {
         const processedMessage = this.processMessage(msg, true);
         return !isEmptyObj(processedMessage);
       });

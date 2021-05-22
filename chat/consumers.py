@@ -25,7 +25,6 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
         self.session = self.scope["session"]
         if self.session.session_key is None:
-            # Not a web client
             self.session.create()
 
         # room_id in URL comes only in group chat
@@ -44,7 +43,10 @@ class ChatConsumer(WebsocketConsumer):
                     group_room_id=self.room_id,
                 )
             except IntegrityError as excp:
-                logger.error("Non-existing room id %d", self.room_id)
+                logger.error("Cannot create group channel")
+                logger.error("Channel name: %s", self.channel_name)
+                logger.error("Session id: %s", self.session.session_key)
+                logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
             async_to_sync(self.channel_layer.group_add)(
                 PREFIX.GROUP_ROOM + str(self.room_id), self.channel_name
@@ -60,7 +62,9 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, code):
         if self.channel_id is None:
+            # Connection close before channel object creation
             return
+
         if not self.is_group_consumer:
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
@@ -78,6 +82,7 @@ class ChatConsumer(WebsocketConsumer):
                     message_type=MESSAGE.USER_LEFT,
                 )
             except IntegrityError:
+                # Group room deleted
                 return
             logger.info("Group channel disconnected")
 

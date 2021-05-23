@@ -2,6 +2,8 @@ import logging
 from django.views.generic.base import TemplateView
 from django.template.exceptions import TemplateDoesNotExist
 from django.http import Http404
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
 from django.template.loader import get_template
 
 logger = logging.getLogger(__name__)
@@ -15,6 +17,7 @@ class FrontendView(TemplateView):
 
     template_name = "index.html"
 
+    @method_decorator(ensure_csrf_cookie)
     def get(self, request, *args, **kwargs):
         try:
             get_template(self.template_name)

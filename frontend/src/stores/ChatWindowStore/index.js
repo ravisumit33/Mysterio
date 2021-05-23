@@ -22,12 +22,12 @@ class ChatWindowStore {
     this.chatStartedPromise = new Promise((resolve, reject) => {
       this.chatStartedResolve = resolve;
     });
-    this.socket = new Socket(this);
     if (this.isGroupChat) {
       this.initializeForGroup();
     } else {
       this.setInitDone(true);
     }
+    this.socket = new Socket(this);
   }
 
   initializeForGroup = () => {

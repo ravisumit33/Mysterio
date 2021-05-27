@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, makeStyles } from '@material-ui/core';
-import { chatContainerStore } from 'stores';
+import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import ChatWindow from './ChatWindow';
@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
     right: '0',
     width: '100%',
     bottom: '0',
-    top: '64px',
+    top: theme.spacing(8),
     zIndex: 2,
   },
 }));
@@ -19,12 +19,12 @@ const useStyles = makeStyles((theme) => ({
 const ChatContainer = () => {
   const classes = useStyles();
 
-  const { chatWindow } = chatContainerStore;
+  const { chatWindow } = appStore;
   return (
     chatWindow && (
       <Box className={classes.root}>
-        <ChatWindowStoreContext.Provider value={chatWindow.store}>
-          <ChatWindow chatId={chatWindow.id} />
+        <ChatWindowStoreContext.Provider value={chatWindow}>
+          <ChatWindow />
         </ChatWindowStoreContext.Provider>
       </Box>
     )

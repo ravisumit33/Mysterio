@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import PropTypes from 'prop-types';
 import {
   Backdrop,
   Box,
@@ -26,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     boxSizing: 'border-box',
     boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
-    backgroundColor: 'white',
+    backgroundColor: theme.palette.common.white,
     borderRadius: theme.spacing(1, 1, 0, 0),
   },
   infoMsg: {
@@ -52,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     position: 'absolute',
     zIndex: 1,
-    color: '#fff',
+    color: theme.palette.common.white,
   },
   loadingMessageBackDrop: {
     display: 'flex',
@@ -68,7 +67,6 @@ const useStyles = makeStyles((theme) => ({
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { messageList, chatStatus, isGroupChat, initDone } = chatWindowStore;
-  const { chatId } = props;
   const classes = useStyles({ chatStatus });
   const endBox = useRef(null);
   const scrollToBottom = () => {
@@ -104,7 +102,7 @@ const ChatWindow = (props) => {
   return (
     <Box className={classes.root}>
       <Box className={clsx(classes.section, classes.header)}>
-        <ChatHeader chatId={chatId} />
+        <ChatHeader />
       </Box>
       {shouldDisplayLoadingMessage && (
         <Box className={classes.loadingMessage}>
@@ -149,10 +147,6 @@ const ChatWindow = (props) => {
       </Box>
     </Box>
   );
-};
-
-ChatWindow.propTypes = {
-  chatId: PropTypes.number.isRequired,
 };
 
 export default observer(ChatWindow);

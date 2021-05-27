@@ -4,12 +4,19 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  FormControlLabel,
   Grid,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   makeStyles,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -18,8 +25,8 @@ import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
 import { TextAvatar } from 'components/Avatar';
-import { chatContainerStore, profileStore, userInfoDialogStore } from 'stores';
-import { fetchUrl, getCookie } from 'utils';
+import { profileStore, appStore } from 'stores';
+import { fetchUrl } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
   groupChatUI: {
@@ -52,16 +59,29 @@ const useStyles = makeStyles((theme) => ({
 const GroupChatUI = () => {
   const classes = useStyles();
 
-  const [groupRooms, setGroupRooms] = useState([]);
+  const {
+    groupRooms,
+    setGroupRooms,
+    addChatWindow,
+    setChatWindowData,
+    setShouldOpenUserInfoDialog,
+    setShouldOpenLoginSignupDialog,
+    shouldOpenNewGroupDialog,
+    setShouldOpenNewGroupDialog,
+  } = appStore;
   const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
+  const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
+  const [shouldUseGroupPassword, setShouldUseGroupPassword] = useState(false);
+  const [newGroupPassword, setNewGroupPassword] = useState('');
+  const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
 
   useEffect(() => {
     fetchUrl('/api/chat/groups/').then((data) => {
       setGroupRooms(Object.values(data));
     });
-  }, []);
+  }, [setGroupRooms]);
 
   const trendingGroups = [...groupRooms]
     .sort((a, b) => {
@@ -71,13 +91,39 @@ const GroupChatUI = () => {
     })
     .slice(0, 5);
 
-  const handleStartGroupChat = (chatWindowData) => {
-    if (profileStore.name) {
-      chatContainerStore.addChatWindow(chatWindowData);
+  const handleStartGroupChat = () => {
+    if (!profileStore.name) {
+      setShouldOpenUserInfoDialog(true);
     } else {
-      userInfoDialogStore.setChatWindowData(chatWindowData);
-      userInfoDialogStore.setShouldOpen(true);
+      addChatWindow();
     }
+  };
+
+  const handleCreateGroup = () => {
+    fetchUrl('/api/chat/groups/', {
+      method: 'post',
+      body: JSON.stringify({
+        name: newGroupName,
+        password: newGroupPassword,
+      }),
+    }).then((data) => {
+      if (!data.id) {
+        appStore.setAlert({
+          text: 'Cannot create group.',
+          severity: 'error',
+        });
+        appStore.setShouldShowAlert(true);
+        return;
+      }
+      const chatWindowData = {
+        roomId: data.id,
+        name: data.name,
+        password: newGroupPassword,
+      };
+      setChatWindowData(chatWindowData);
+      handleStartGroupChat();
+    });
+    setShouldOpenNewGroupDialog(false);
   };
 
   const handleStartChat = (group) => {
@@ -88,24 +134,18 @@ const GroupChatUI = () => {
         roomId: chatGroup.id,
         name: chatGroup.name,
       };
-      handleStartGroupChat(chatWindowData);
+      setChatWindowData(chatWindowData);
+      if (chatGroup.is_protected) {
+        setShouldOpenGroupPasswordDialog(true);
+      } else {
+        handleStartGroupChat();
+      }
     } else if (newGroupName) {
-      fetchUrl('/api/chat/groups/', {
-        method: 'post',
-        credentials: 'same-origin',
-        headers: {
-          'X-CSRFToken': getCookie('csrftoken'),
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: newGroupName }),
-      }).then((data) => {
-        chatWindowData = {
-          roomId: data.id,
-          name: data.name,
-        };
-        handleStartGroupChat(chatWindowData);
-      });
+      if (!profileStore.isLoggedIn) {
+        setShouldOpenLoginSignupDialog(true);
+      } else {
+        setShouldOpenNewGroupDialog(true);
+      }
     }
   };
 
@@ -116,102 +156,200 @@ const GroupChatUI = () => {
     setNewGroupName(pendingNewGroupName);
   };
 
+  const groupPasswordCheck = () => {
+    fetchUrl('/api/chat/group_password_check/', {
+      method: 'post',
+      body: JSON.stringify({ id: appStore.chatWindowData.roomId, password: selectedGroupPassword }),
+    }).then((data) => {
+      if (data.check) {
+        setChatWindowData({
+          ...appStore.chatWindowData,
+          password: selectedGroupPassword,
+        });
+        handleStartGroupChat();
+      } else {
+        appStore.setAlert({
+          text: 'Cannot enter group.',
+          severity: 'error',
+        });
+        appStore.setShouldShowAlert(true);
+      }
+    });
+    setShouldOpenGroupPasswordDialog(false);
+  };
+
+  const newGroupDialog = (
+    <Dialog
+      open={shouldOpenNewGroupDialog}
+      onClose={() => setShouldOpenNewGroupDialog(false)}
+      onKeyPress={(e) => e.key === 'Enter' && handleCreateGroup()}
+    >
+      <DialogTitle>New Room</DialogTitle>
+      <DialogContent>
+        <TextField margin="dense" label="Name" fullWidth value={newGroupName} />
+        <TextField
+          autoFocus
+          disabled={!shouldUseGroupPassword}
+          margin="dense"
+          label="Password"
+          fullWidth
+          value={newGroupPassword}
+          onChange={(evt) => setNewGroupPassword(evt.target.value)}
+          required
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={shouldUseGroupPassword}
+              onChange={(evt) => setShouldUseGroupPassword(evt.target.checked)}
+            />
+          }
+          label="Protect with password"
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          disabled={shouldUseGroupPassword && newGroupPassword === ''}
+          onClick={handleCreateGroup}
+          color="primary"
+        >
+          Create room
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  const groupPasswordDialog = (
+    <Dialog
+      open={shouldOpenGroupPasswordDialog}
+      onClose={() => setShouldOpenGroupPasswordDialog(false)}
+      onKeyPress={(e) => e.key === 'Enter' && groupPasswordCheck()}
+    >
+      <DialogTitle>Enter Password</DialogTitle>
+      <DialogContent>
+        <DialogContentText>This group is protected with a password</DialogContentText>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Password"
+          fullWidth
+          value={selectedGroupPassword}
+          onChange={(evt) => setSelectedGroupPassword(evt.target.value)}
+          required
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          disabled={selectedGroupPassword === ''}
+          onClick={groupPasswordCheck}
+          color="primary"
+        >
+          Enter room
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   return (
-    <Box width="100vw">
-      <Container>
-        <Grid container justify="space-between" spacing={2} alignItems="flex-start">
-          <Grid item xs={12} md={6}>
-            <Box py={2}>
-              <GroupChatImg width="100%" height="400" />
-            </Box>
-          </Grid>
-          <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
-            <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
-              <Box width="50%" my={3}>
-                <Grid item>
-                  <Autocomplete
-                    id="Groups-Search-Box"
-                    options={groupRooms}
-                    noOptionsText="New group will be created"
-                    size="small"
-                    onClose={handleGroupSearchClose}
-                    inputValue={pendingNewGroupName}
-                    onInputChange={(event, newGroup) => {
-                      setPendingNewGroupName(newGroup);
-                    }}
-                    value={selectedGroup}
-                    onChange={(event, newGroup) => setSelectedGroup(newGroup)}
-                    renderInput={(params) => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        label="Search/Create groups"
-                        margin="normal"
-                        variant="outlined"
-                        InputLabelProps={{
-                          classes: {
-                            root: classes.groupSearchLabel,
-                            shrink: classes.groupSearchLabelShrinked,
-                          },
-                        }}
-                      />
-                    )}
-                    renderOption={(option) => (
-                      <Tooltip title={option.name} arrow>
-                        <ListItem disableGutters>
-                          <ListItemAvatar>
-                            <TextAvatar name={option.name} />
-                          </ListItemAvatar>
-                          <ListItemText
-                            primary={option.name}
-                            secondary={`${option.group_messages.length} messages`}
-                            primaryTypographyProps={{ noWrap: true }}
-                            secondaryTypographyProps={{ noWrap: true }}
-                          />
-                        </ListItem>
-                      </Tooltip>
-                    )}
-                    getOptionLabel={(option) => option.name || ''}
-                  />
-                </Grid>
+    <>
+      <Box width="100vw">
+        <Container>
+          <Grid container justify="space-between" spacing={2} alignItems="flex-start">
+            <Grid item xs={12} md={6}>
+              <Box py={2}>
+                <GroupChatImg width="100%" height="400" />
               </Box>
-              <Grid item>
-                <Box my={4}>
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    size="medium"
-                    onClick={() => handleStartChat()}
-                  >
-                    Enter Group
-                  </Button>
+            </Grid>
+            <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
+              <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
+                <Box width="50%" my={3}>
+                  <Grid item>
+                    <Autocomplete
+                      id="Groups-Search-Box"
+                      options={groupRooms}
+                      noOptionsText="New group will be created"
+                      size="small"
+                      onClose={handleGroupSearchClose}
+                      inputValue={pendingNewGroupName}
+                      onInputChange={(event, newGroup) => {
+                        setPendingNewGroupName(newGroup);
+                      }}
+                      value={selectedGroup}
+                      onChange={(event, newGroup) => setSelectedGroup(newGroup)}
+                      renderInput={(params) => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          label="Search/Create groups"
+                          margin="normal"
+                          variant="outlined"
+                          InputLabelProps={{
+                            classes: {
+                              root: classes.groupSearchLabel,
+                              shrink: classes.groupSearchLabelShrinked,
+                            },
+                          }}
+                        />
+                      )}
+                      renderOption={(option) => (
+                        <Tooltip title={option.name} arrow>
+                          <ListItem disableGutters>
+                            <ListItemAvatar>
+                              <TextAvatar name={option.name} />
+                            </ListItemAvatar>
+                            <ListItemText
+                              primary={option.name}
+                              secondary={`${option.group_messages.length} messages`}
+                              primaryTypographyProps={{ noWrap: true }}
+                              secondaryTypographyProps={{ noWrap: true }}
+                            />
+                          </ListItem>
+                        </Tooltip>
+                      )}
+                      getOptionLabel={(option) => option.name || ''}
+                    />
+                  </Grid>
                 </Box>
+                <Grid item>
+                  <Box my={4}>
+                    <Button
+                      color="secondary"
+                      variant="contained"
+                      size="medium"
+                      onClick={() => handleStartChat()}
+                    >
+                      Enter Group
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h5" className={classes.trendingGroupsTitle}>
+                  Trending Groups <TrendingUpIcon />
+                </Typography>
+                <List>
+                  {trendingGroups.map((group) => (
+                    <ListItem button onClick={() => handleStartChat(group)} key={group.id}>
+                      <ListItemAvatar>
+                        <TextAvatar name={group.name} />
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={group.name}
+                        secondary={`${group.group_messages.length} messages`}
+                        primaryTypographyProps={{ noWrap: true }}
+                        secondaryTypographyProps={{ noWrap: true }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
               </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h5" className={classes.trendingGroupsTitle}>
-                Trending Groups <TrendingUpIcon />
-              </Typography>
-              <List>
-                {trendingGroups.map((group) => (
-                  <ListItem button onClick={() => handleStartChat(group)} key={group.id}>
-                    <ListItemAvatar>
-                      <TextAvatar name={group.name} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={group.name}
-                      secondary={`${group.group_messages.length} messages`}
-                      primaryTypographyProps={{ noWrap: true }}
-                      secondaryTypographyProps={{ noWrap: true }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Grid>
           </Grid>
-        </Grid>
-      </Container>
-    </Box>
+        </Container>
+      </Box>
+      {newGroupDialog}
+      {groupPasswordDialog}
+    </>
   );
 };
 

@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
-import { chatContainerStore, profileStore, userInfoDialogStore } from 'stores';
+import { appStore, profileStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 
 const useStyle = makeStyles((theme) => ({
@@ -45,24 +45,18 @@ const Jumbotron = () => {
   const classes = useStyle();
 
   const handleStartIndividualChat = () => {
-    chatContainerStore.addChatWindow();
+    appStore.addChatWindow();
   };
 
   const handleStartChat = () => {
-    profileStore.name ? handleStartIndividualChat() : userInfoDialogStore.setShouldOpen(true);
+    profileStore.name ? handleStartIndividualChat() : appStore.setShouldOpenUserInfoDialog(true);
   };
 
   return (
     <Box id="jumbotron">
       <Box className={classes.jumbotron}>
         <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-        <Grid
-          container
-          // spacing={1}
-          direction="column"
-          className={classes.gridRoot}
-          justify="space-around"
-        >
+        <Grid container direction="column" className={classes.gridRoot} justify="space-around">
           <Grid item container justify="center">
             <Grid item xs={12} md={7}>
               <Box py={3}>

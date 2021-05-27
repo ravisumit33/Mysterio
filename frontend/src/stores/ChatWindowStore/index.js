@@ -31,7 +31,7 @@ class ChatWindowStore {
   }
 
   initializeForGroup = () => {
-    const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}`);
+    const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
     const groupMessages = groupDetail.then((data) => data.group_messages);
     groupMessages.then((messages) => {
       let detailMessages;
@@ -84,9 +84,10 @@ class ChatWindowStore {
     });
   };
 
-  initState = ({ roomId, name }) => {
+  initState = ({ roomId, name, password }) => {
     this.roomId = roomId;
     this.name = name;
+    this.password = password || '';
   };
 
   setName = (newName) => {

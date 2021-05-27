@@ -1,3 +1,4 @@
+/*
 import React from 'react';
 import { chatContainerStore } from 'stores';
 
@@ -40,3 +41,4 @@ const StatusBar = () => {
 };
 
 export default observer(StatusBar);
+*/

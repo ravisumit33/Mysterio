@@ -26,9 +26,6 @@ class ChatConsumer(WebsocketConsumer):
         self.session = self.scope["session"]
         if self.session.session_key is None:
             self.session.create()
-        else:
-            logger.error("SuspiciousOperation : session key already exists on connect")
-            raise DenyConnection
 
         # room_id in URL comes only in group chat
         if "room_id" in self.scope["url_route"]["kwargs"]:

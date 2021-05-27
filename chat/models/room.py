@@ -28,6 +28,7 @@ class GroupRoom(Room):
     """Room for group chat"""
 
     zscore = models.FloatField(null=True)
+    is_protected = models.BooleanField(default=False)
     password = models.CharField(max_length=128, default=make_password(""))
     admin = models.ForeignKey(
         get_user_model(),

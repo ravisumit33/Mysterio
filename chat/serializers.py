@@ -67,10 +67,11 @@ class GroupRoomSerializer(serializers.ModelSerializer):
         instance = self.Meta.model(**validated_data)
         instance.admin = self.context.get("request").user
         if password is not None:
+            instance.is_protected = True
             instance.password = make_password(password)
         instance.save()
         return instance
 
     class Meta:
         model = GroupRoom
-        fields = ["id", "name", "password", "group_messages", "zscore"]
+        fields = ["id", "name", "password", "group_messages", "zscore", "is_protected"]

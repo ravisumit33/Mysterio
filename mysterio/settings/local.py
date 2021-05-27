@@ -4,7 +4,7 @@ from mysterio.settings.base import *  # pylint: disable=W0614,W0401
 env_path = Path(".") / ".env"
 load_dotenv(dotenv_path=env_path)
 
-SECRET_KEY = "cg#p$g+j9tax!#a3cup@1$8obt2_+&k3q+pmu)5%asj6yjpkag"
+SECRET_KEY = "=8%vvj-i)i^=1@16^cevdpy(lc9_66!bq_w_hg*d1*nxnzow"
 
 DEBUG = True
 TEMPLATE_DEBUG = True

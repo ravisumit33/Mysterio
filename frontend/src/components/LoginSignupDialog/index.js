@@ -152,6 +152,7 @@ const LoginSignupDialog = (props) => {
           required={postActions.password.required}
           helperText={passwordFieldData.help_text}
           error={passwordFieldData.error}
+          inputProps={{ type: 'password' }}
         />
         <FormControlLabel
           control={

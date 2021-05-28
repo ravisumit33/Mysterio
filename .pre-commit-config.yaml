@@ -3,9 +3,12 @@ repos:
   rev: v2.8.2
   hooks:
   - id: pylint
+    name: pylint
     language: system
+    types: [python]
     entry: dotenv run pylint
     verbose: true
+    exclude: "^.*/migrations/.*$"
     args: ["--disable=W0511"]
 
 - repo: https://github.com/psf/black

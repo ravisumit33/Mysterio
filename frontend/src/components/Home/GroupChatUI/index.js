@@ -261,6 +261,7 @@ const GroupChatUI = () => {
           required
           helperText={shouldUseGroupPassword && newGroupPasswordFieldData.help_text}
           error={shouldUseGroupPassword && newGroupPasswordFieldData.error}
+          inputProps={{ type: 'password' }}
         />
         <FormControlLabel
           control={
@@ -299,6 +300,7 @@ const GroupChatUI = () => {
           required
           helperText={protectedGroupPasswordFieldData.help_text}
           error={protectedGroupPasswordFieldData.error}
+          inputProps={{ type: 'password' }}
         />
       </DialogContent>
       <DialogActions>

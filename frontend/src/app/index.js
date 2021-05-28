@@ -6,6 +6,7 @@ import Alert from 'components/Alert';
 import LoginSignupDialog from 'components/LoginSignupDialog';
 import { fetchUrl } from 'utils';
 import { profileStore } from 'stores';
+import PullToRefresh from 'pulltorefreshjs';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -31,6 +32,13 @@ const App = () => {
         }
       });
     });
+    PullToRefresh.init({
+      mainElement: 'body',
+      onRefresh() {
+        window.location.reload();
+      },
+    });
+    return () => PullToRefresh.destroyAll();
   }, []);
 
   return (

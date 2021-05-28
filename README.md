@@ -58,17 +58,10 @@ Anonymous chat web app
       python manage.py migrate
       ```
 
-7. Start development servers in different terminals
+7. Start the app
 
     ```sh
-    python manage.py runserver
-    cd frontend && npm start
-    ```
-
-8. Start background task in another terminal
-
-    ```sh
-    python manage.py run_periodic
+    python start_app.py
     ```
 
 # Contributing

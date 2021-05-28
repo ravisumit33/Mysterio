@@ -1,12 +1,16 @@
+from django.urls import path
 from rest_framework import routers
 import chat.views as ChatView
 
 router = routers.SimpleRouter()
 router.register(r"groups", ChatView.GroupRoomViewSet)
-router.register(r"messages", ChatView.MessageViewSet, basename="message")
-router.register(r"group_channels", ChatView.GroupChannelViewSet)
-router.register(r"sessions", ChatView.SessionViewSet, basename="session")
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path(
+        "group_password_check/",
+        ChatView.check_group_password,
+        name="group_password_check",
+    ),
+]
 
 app_name = "chat"

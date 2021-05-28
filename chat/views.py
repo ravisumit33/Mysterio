@@ -1,63 +1,41 @@
-from django.contrib.sessions.models import Session
-from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password, check_password
+from django.http import HttpResponse, JsonResponse
+from django.db.utils import IntegrityError
 from rest_framework import viewsets
-from chat.serializers import (
-    GroupRoomSerializer,
-    MessageSerializer,
-    GroupChannelSerializer,
-    SessionSerializer,
-)
-from chat.models import GroupRoom, TextMessage, GroupChannel
-
-
-def test_view(request):
-    """Test chat api view"""
-    response_data = {
-        "id": 4,
-        "name": "Hello world",
-    }
-    return JsonResponse(response_data)
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from chat.serializers import GroupRoomSerializer
+from chat.models import GroupRoom
+from chat.permissions import GroupRoomPermission
 
 
 class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     """
-    API endpoint that allows group rooms to be viewed or edited.
+    API endpoint that allows group rooms to be created, viewed, listed, edited & deleted.
     """
 
     queryset = GroupRoom.objects.all()
     serializer_class = GroupRoomSerializer
+    permission_classes = [GroupRoomPermission]
 
 
-class MessageViewSet(
-    viewsets.ReadOnlyModelViewSet
-):  # pylint: disable=too-many-ancestors
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def check_group_password(request):
     """
-    API endpoint that allows messages to be viewed.
+    Check password for group rooms
     """
+    post_data = request.data
+    print(post_data)
+    group_id = post_data["id"]
+    group_password = post_data["password"]
 
-    queryset = TextMessage.objects.all().order_by("sent_at")
-    serializer_class = MessageSerializer
-
-
-class GroupChannelViewSet(
-    viewsets.ReadOnlyModelViewSet
-):  # pylint: disable=too-many-ancestors
-
-    """
-    API endpoint that allows group_channels to be viewed.
-    """
-
-    queryset = GroupChannel.objects.all()
-    serializer_class = GroupChannelSerializer
-
-
-class SessionViewSet(
-    viewsets.ReadOnlyModelViewSet
-):  # pylint: disable=too-many-ancestors
-
-    """
-    API endpoint that allows sessions to be viewed.
-    """
-
-    queryset = Session.objects.all()
-    serializer_class = SessionSerializer
+    try:
+        group_room = GroupRoom.objects.get(id=group_id)
+    except IntegrityError:
+        return HttpResponse(status=400)
+    if group_room.is_protected and group_password == "":
+        return JsonResponse({"check": False, "password": ["This field is required."]})
+    print(make_password(group_password))
+    print(group_room.password)
+    return JsonResponse({"check": check_password(group_password, group_room.password)})

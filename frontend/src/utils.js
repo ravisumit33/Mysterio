@@ -53,7 +53,24 @@ export const fetchUrl = (url, data) => {
     }
     completeUrl = origin + url;
   }
-  return fetch(completeUrl, data).then((response) => response.json());
+  const commonHeaders = {
+    'X-CSRFToken': getCookie('csrftoken'),
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  };
+  const additionalHeaders = (data && data.headers) || {};
+  const headers = { ...commonHeaders, ...additionalHeaders };
+  return fetch(completeUrl, {
+    method: (data && data.method) || 'GET',
+    credentials: 'same-origin',
+    headers,
+    body: data && data.body,
+  }).then((response) => {
+    const responseObj = { status: response.status };
+    return response
+      .text()
+      .then((text) => (text ? { ...responseObj, data: JSON.parse(text) } : responseObj));
+  });
 };
 
 export const isEmptyObj = (obj) =>

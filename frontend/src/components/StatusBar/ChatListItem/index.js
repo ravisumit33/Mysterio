@@ -1,3 +1,4 @@
+/*
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
@@ -127,3 +128,4 @@ ChatListItem.propTypes = {
 };
 
 export default observer(ChatListItem);
+*/

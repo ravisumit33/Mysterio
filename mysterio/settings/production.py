@@ -14,3 +14,7 @@ CHANNEL_LAYERS["default"]["CONFIG"] = {
 }
 
 LOGGING["handlers"]["console"]["formatter"] = "verbose"
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",)
+}

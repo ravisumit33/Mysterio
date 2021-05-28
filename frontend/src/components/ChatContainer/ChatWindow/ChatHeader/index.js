@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import PropTypes from 'prop-types';
 import {
   Box,
   IconButton,
@@ -14,7 +13,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Avatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
-import { chatContainerStore } from 'stores';
+import { appStore } from 'stores';
 import { ChatStatus } from 'appConstants';
 
 const useStyles = makeStyles((theme) => ({
@@ -35,7 +34,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ChatHeader = (props) => {
-  const { chatId } = props;
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { name, reconnect, chatStatus } = chatWindowStore;
@@ -45,7 +43,7 @@ const ChatHeader = (props) => {
   };
 
   const handleClose = () => {
-    chatContainerStore.removeChatWIndow(chatId);
+    appStore.removeChatWIndow();
   };
 
   return (
@@ -80,10 +78,6 @@ const ChatHeader = (props) => {
       </Box>
     </Box>
   );
-};
-
-ChatHeader.propTypes = {
-  chatId: PropTypes.number.isRequired,
 };
 
 export default observer(ChatHeader);

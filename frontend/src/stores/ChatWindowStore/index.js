@@ -22,17 +22,17 @@ class ChatWindowStore {
     this.chatStartedPromise = new Promise((resolve, reject) => {
       this.chatStartedResolve = resolve;
     });
-    this.socket = new Socket(this);
     if (this.isGroupChat) {
       this.initializeForGroup();
     } else {
       this.setInitDone(true);
     }
+    this.socket = new Socket(this);
   }
 
   initializeForGroup = () => {
-    const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}`);
-    const groupMessages = groupDetail.then((data) => data.group_messages);
+    const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
+    const groupMessages = groupDetail.then((response) => response.data.group_messages);
     groupMessages.then((messages) => {
       let detailMessages;
       if (!messages) {
@@ -84,9 +84,10 @@ class ChatWindowStore {
     });
   };
 
-  initState = ({ roomId, name }) => {
+  initState = ({ roomId, name, password }) => {
     this.roomId = roomId;
     this.name = name;
+    this.password = password || '';
   };
 
   setName = (newName) => {

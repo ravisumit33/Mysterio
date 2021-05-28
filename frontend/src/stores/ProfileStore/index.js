@@ -7,6 +7,8 @@ class ProfileStore {
 
   id = '';
 
+  username = '';
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -22,6 +24,14 @@ class ProfileStore {
   setId = (newId) => {
     this.id = newId;
   };
+
+  setUsername = (newUserName) => {
+    this.username = newUserName;
+  };
+
+  get isLoggedIn() {
+    return this.username !== '';
+  }
 }
 
 const profileStore = new ProfileStore();

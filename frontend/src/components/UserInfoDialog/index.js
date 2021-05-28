@@ -8,7 +8,7 @@ import {
   DialogTitle,
   TextField,
 } from '@material-ui/core';
-import { chatContainerStore, profileStore, userInfoDialogStore } from 'stores';
+import { appStore, profileStore } from 'stores';
 
 const UserInfoDialog = () => {
   const [textFieldValue, setTextFieldValue] = useState('');
@@ -18,15 +18,15 @@ const UserInfoDialog = () => {
   };
 
   const handleDialogueButtonClick = () => {
-    userInfoDialogStore.setShouldOpen(false);
+    appStore.setShouldOpenUserInfoDialog(false);
     profileStore.setName(textFieldValue);
-    chatContainerStore.addChatWindow(userInfoDialogStore.chatWindowData);
+    appStore.addChatWindow();
   };
 
   return (
     <Dialog
-      open={userInfoDialogStore.shouldOpen}
-      onClose={() => userInfoDialogStore.setShouldOpen(false)}
+      open={appStore.shouldOpenUserInfoDialog}
+      onClose={() => appStore.setShouldOpenUserInfoDialog(false)}
       onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
     >
       <DialogTitle>Let&apos;s get started!</DialogTitle>
@@ -34,7 +34,7 @@ const UserInfoDialog = () => {
         <TextField
           autoFocus
           margin="dense"
-          label="Name"
+          label="Give yourself a name"
           fullWidth
           value={textFieldValue}
           onChange={handleTextFieldChange}

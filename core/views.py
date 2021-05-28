@@ -1,5 +1,6 @@
 import json
 from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth.forms import AuthenticationForm
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
@@ -57,6 +58,21 @@ class Login(View):
             return HttpResponse(status=400)
 
         post_data = json.loads(request.body.decode("utf-8"))
+        login_form = AuthenticationForm(request, post_data)
+        if login_form.errors:
+            error_data = login_form.errors.get_json_data()
+            json_response = {}
+            if error_data.get("username"):
+                json_response["username"] = [error_data["username"][0]["message"]]
+            if error_data.get("password"):
+                json_response["password"] = [error_data["password"][0]["message"]]
+            if error_data.get("__all__"):
+                json_response["__all__"] = [error_data["__all__"][0]["message"]]
+
+            return JsonResponse(
+                json_response,
+                status=400,
+            )
         username = post_data["username"]
         password = post_data["password"]
 

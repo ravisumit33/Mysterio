@@ -19,12 +19,29 @@ const LoginSignupDialog = (props) => {
   const [password, setPassword] = useState('');
   const [shouldSignup, setShouldSignup] = useState(false);
   const [postActions, setPostActions] = useState({ username: {}, password: {} });
+  const [usernameFieldData, setUsernameFieldData] = useState({
+    help_text: '',
+    error: false,
+  });
+  const [passwordFieldData, setPasswordFieldData] = useState({
+    help_text: '',
+    error: false,
+  });
 
   useEffect(() => {
     fetchUrl('/api/users/', {
       method: 'options',
-    }).then((data) => {
-      setPostActions(data.actions.POST);
+    }).then((response) => {
+      const responseData = response.data;
+      setPostActions(responseData.actions.POST);
+      setUsernameFieldData({
+        help_text: responseData.actions.POST.username.help_text,
+        error: false,
+      });
+      setPasswordFieldData({
+        help_text: responseData.actions.POST.password.help_text,
+        error: false,
+      });
     });
   }, []);
 
@@ -33,34 +50,86 @@ const LoginSignupDialog = (props) => {
     fetchUrl(endPoint, {
       method: 'post',
       body: JSON.stringify({ username, password }),
-    }).then((data) => {
-      if (data.username !== username) {
+    }).then((response) => {
+      const responseData = response.data;
+      const newUsernameFieldData = { ...usernameFieldData };
+      const newPasswordFieldData = { ...passwordFieldData };
+      if (response.status >= 400) {
+        if (responseData.username) {
+          [newUsernameFieldData.help_text] = responseData.username;
+          newUsernameFieldData.error = true;
+        } else {
+          newUsernameFieldData.help_text = shouldSignup
+            ? postActions.username.help_text
+            : 'Enter your registered username';
+          newUsernameFieldData.error = false;
+        }
+        if (responseData.password) {
+          [newPasswordFieldData.help_text] = responseData.password;
+          newPasswordFieldData.error = true;
+        } else {
+          newPasswordFieldData.help_text = postActions.password.help_text;
+          newPasswordFieldData.error = false;
+        }
         const action = shouldSignup ? 'register' : 'login';
         appStore.setAlert({
-          text: `Unable to ${action}.`,
+          // eslint-disable-next-line no-underscore-dangle
+          text: responseData.__all__ ? responseData.__all__[0] : `Unable to ${action}.`,
           severity: 'error',
         });
         appStore.setShouldShowAlert(true);
-        return;
+        appStore.setShouldOpenLoginSignupDialog(true);
+      } else {
+        profileStore.setUsername(username);
+        if (!shouldSignup) {
+          appStore.setShouldOpenLoginSignupDialog(false);
+          appStore.setShouldOpenNewGroupDialog(true);
+        } else {
+          setShouldSignup(false);
+          appStore.setAlert({
+            text: `Registered successfully. Login to proceed.`,
+            severity: 'success',
+          });
+          appStore.setShouldShowAlert(true);
+          newUsernameFieldData.help_text = 'Enter your registered username';
+          newUsernameFieldData.error = false;
+          newPasswordFieldData.help_text = postActions.password.help_text;
+          newPasswordFieldData.error = false;
+          setUsername('');
+          setPassword('');
+        }
       }
-      profileStore.setUsername(username);
-      appStore.setShouldOpenNewGroupDialog(true);
+      setUsernameFieldData(newUsernameFieldData);
+      setPasswordFieldData(newPasswordFieldData);
     });
-    appStore.setShouldOpenLoginSignupDialog(false);
   };
 
-  const shouldEnableLogin = username !== '' && password !== '';
+  let usernameHelperText;
+  if (usernameFieldData.error) {
+    usernameHelperText = usernameFieldData.help_text;
+  } else {
+    usernameHelperText = shouldSignup
+      ? usernameFieldData.help_text
+      : 'Enter your registered username';
+  }
 
   return (
     <Dialog
       open={appStore.shouldOpenLoginSignupDialog}
       onClose={() => appStore.setShouldOpenLoginSignupDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && shouldEnableLogin && handleDialogueButtonClick()}
+      onKeyPress={(e) => e.key === 'Enter' && handleDialogueButtonClick()}
+      fullWidth
     >
       {shouldSignup ? <DialogTitle>Register</DialogTitle> : <DialogTitle>Login</DialogTitle>}
       <DialogContent>
-        {shouldSignup && (
-          <DialogContentText>This helps us make you admin of this group</DialogContentText>
+        {shouldSignup ? (
+          <DialogContentText>
+            Registration helps us give you admin rights of rooms that you create.
+          </DialogContentText>
+        ) : (
+          <DialogContentText>
+            Login to create a new room. Select register below if not already registered.
+          </DialogContentText>
         )}
         <TextField
           autoFocus
@@ -69,18 +138,20 @@ const LoginSignupDialog = (props) => {
           fullWidth
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          helperText={postActions.username.help_text}
+          helperText={usernameHelperText}
           required={postActions.username.required}
           inputProps={{ maxLength: postActions.username.max_length }}
+          error={usernameFieldData.error}
         />
         <TextField
-          autoFocus
           margin="dense"
           label="Password"
           fullWidth
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required={postActions.password.required}
+          helperText={passwordFieldData.help_text}
+          error={passwordFieldData.error}
         />
         <FormControlLabel
           control={
@@ -93,7 +164,7 @@ const LoginSignupDialog = (props) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button disabled={!shouldEnableLogin} onClick={handleDialogueButtonClick} color="primary">
+        <Button onClick={handleDialogueButtonClick} color="primary">
           {shouldSignup ? 'Register' : 'Login'}
         </Button>
       </DialogActions>

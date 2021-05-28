@@ -65,7 +65,12 @@ export const fetchUrl = (url, data) => {
     credentials: 'same-origin',
     headers,
     body: data && data.body,
-  }).then((response) => response.text().then((text) => (text ? JSON.parse(text) : {})));
+  }).then((response) => {
+    const responseObj = { status: response.status };
+    return response
+      .text()
+      .then((text) => (text ? { ...responseObj, data: JSON.parse(text) } : responseObj));
+  });
 };
 
 export const isEmptyObj = (obj) =>

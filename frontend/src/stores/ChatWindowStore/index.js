@@ -32,7 +32,7 @@ class ChatWindowStore {
 
   initializeForGroup = () => {
     const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
-    const groupMessages = groupDetail.then((data) => data.group_messages);
+    const groupMessages = groupDetail.then((response) => response.data.group_messages);
     groupMessages.then((messages) => {
       let detailMessages;
       if (!messages) {

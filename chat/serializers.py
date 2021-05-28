@@ -63,10 +63,14 @@ class GroupRoomSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, allow_blank=True)
 
     def create(self, validated_data):
+        is_protected = validated_data.pop("is_protected", None)
         password = validated_data.pop("password", None)
         instance = self.Meta.model(**validated_data)
         instance.admin = self.context.get("request").user
-        if password is not None:
+        if is_protected and ((not password) or (password == "")):
+            raise serializers.ValidationError({"password": ["This field is required."]})
+
+        if is_protected:
             instance.is_protected = True
             instance.password = make_password(password)
         instance.save()

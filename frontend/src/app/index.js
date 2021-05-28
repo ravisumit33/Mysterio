@@ -4,7 +4,7 @@ import { NavBar, Home, Footer, ChatContainer } from 'components';
 import UserInfoDialog from 'components/UserInfoDialog';
 import Alert from 'components/Alert';
 import LoginSignupDialog from 'components/LoginSignupDialog';
-import { fetchUrl, isEmptyObj } from 'utils';
+import { fetchUrl } from 'utils';
 import { profileStore } from 'stores';
 
 const useStyles = makeStyles(() => ({
@@ -25,9 +25,9 @@ const App = () => {
       },
     });
     csrfPromise.then(() => {
-      fetchUrl('api/login/').then((data) => {
-        if (!isEmptyObj(data)) {
-          profileStore.setUsername(data.username);
+      fetchUrl('api/login/').then((response) => {
+        if (response.data && response.data.username) {
+          profileStore.setUsername(response.data.username);
         }
       });
     });

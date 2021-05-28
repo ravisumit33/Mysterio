@@ -34,6 +34,8 @@ def check_group_password(request):
         group_room = GroupRoom.objects.get(id=group_id)
     except IntegrityError:
         return HttpResponse(status=400)
+    if group_room.is_protected and group_password == "":
+        return JsonResponse({"check": False, "password": ["This field is required."]})
     print(make_password(group_password))
     print(group_room.password)
     return JsonResponse({"check": check_password(group_password, group_room.password)})

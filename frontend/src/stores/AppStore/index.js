@@ -49,6 +49,7 @@ class AppStore {
   removeChatWIndow = () => {
     this.chatWindow.closeChatWindow();
     this.chatWindow = null;
+    this.chatWindowData = {};
   };
 
   setGroupRooms = (groupRooms) => {

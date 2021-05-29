@@ -4,7 +4,7 @@ from django.db.utils import IntegrityError
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from chat.serializers import GroupRoomSerializer
+from chat.serializers import BaseGroupRoomSerializer, ExtendedGroupRoomSerializer
 from chat.models import GroupRoom
 from chat.permissions import GroupRoomPermission
 
@@ -15,8 +15,12 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
     """
 
     queryset = GroupRoom.objects.all()
-    serializer_class = GroupRoomSerializer
     permission_classes = [GroupRoomPermission]
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action == "list":
+            return BaseGroupRoomSerializer
+        return ExtendedGroupRoomSerializer
 
 
 @api_view(["POST"])

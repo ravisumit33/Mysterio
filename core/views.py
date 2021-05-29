@@ -8,7 +8,6 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.middleware.csrf import get_token
 from django.views.generic.base import View
 from django.http import HttpResponse, JsonResponse
-from django.conf import settings
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
@@ -97,11 +96,6 @@ def get_csrf_token(request):
     """
     Set csrf cookie on get request
     """
-    if (
-        not "HTTP_SECRETKEY" in request.META
-        or request.META.get("HTTP_SECRETKEY") != settings.SECRET_KEY
-    ):
-        return HttpResponse(status=400)
     csrf_token = get_token(request)
     response = HttpResponse(status=200)
     response.set_cookie("csrftoken", csrf_token)

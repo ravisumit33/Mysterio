@@ -37,12 +37,10 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["sender_channel", "text", "message_type"]
 
 
-class GroupRoomSerializer(serializers.ModelSerializer):
+class BaseGroupRoomSerializer(serializers.ModelSerializer):
     """
-    Serializer for group room API endpoint
+    Base serializer for group rooms API endpoint
     """
-
-    group_messages = serializers.SerializerMethodField(read_only=True)
 
     zscore = serializers.FloatField(read_only=True)
 
@@ -56,18 +54,24 @@ class GroupRoomSerializer(serializers.ModelSerializer):
         """
         return group_room.group_messages.count()
 
-    def get_group_messages(self, group_room):
-        """
-        Getter function for group_messages serializer field
-        """
-        view = self.context.get("view")
-        if view.action == "list" and group_room.is_protected:
-            return "Hidden for protected groups"
-        request = self.context.get("request")
-        serializer_context = {"request": request}
-        messages = TextMessage.objects.filter(group_room=group_room)
-        serializer = MessageSerializer(messages, many=True, context=serializer_context)
-        return serializer.data
+    class Meta:
+        model = GroupRoom
+        fields = [
+            "id",
+            "name",
+            "password",
+            "zscore",
+            "is_protected",
+            "message_count",
+        ]
+
+
+class ExtendedGroupRoomSerializer(BaseGroupRoomSerializer):
+    """
+    Serializer for group room API endpoint
+    """
+
+    group_messages = MessageSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         is_protected = validated_data.pop("is_protected", None)
@@ -85,12 +89,4 @@ class GroupRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupRoom
-        fields = [
-            "id",
-            "name",
-            "password",
-            "group_messages",
-            "zscore",
-            "is_protected",
-            "message_count",
-        ]
+        fields = BaseGroupRoomSerializer.Meta.fields + ["group_messages"]

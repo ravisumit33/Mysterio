@@ -40,7 +40,7 @@ class ChatWindowStore {
           {
             type: MessageType.CHAT_DELETE,
             data: {
-              text: 'Group is deleted as it is more than one month older',
+              text: 'Group is deleted',
             },
           },
         ];

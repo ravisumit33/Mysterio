@@ -62,16 +62,18 @@ class Login(View):
         if login_form.errors:
             error_data = login_form.errors.get_json_data()
             json_response = {}
+            status = 400
             if error_data.get("username"):
                 json_response["username"] = [error_data["username"][0]["message"]]
             if error_data.get("password"):
                 json_response["password"] = [error_data["password"][0]["message"]]
             if error_data.get("__all__"):
                 json_response["__all__"] = [error_data["__all__"][0]["message"]]
-
+                if error_data["__all__"][0]["code"] == "invalid_login":
+                    status = 403
             return JsonResponse(
                 json_response,
-                status=400,
+                status=status,
             )
         username = post_data["username"]
         password = post_data["password"]

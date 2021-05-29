@@ -41,7 +41,6 @@ class ChatConsumer(WebsocketConsumer):
             except IntegrityError as excp:
                 logger.error("Cannot create group channel")
                 logger.error("Channel name: %s", self.channel_name)
-                logger.error("Session id: %s", self.session.session_id)
                 logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
             async_to_sync(self.channel_layer.group_add)(

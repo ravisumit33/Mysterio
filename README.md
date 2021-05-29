@@ -49,7 +49,7 @@ Anonymous chat web app
 5. Setup environment variables
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
-    - Add other required environment variables
+    - Add other environment variables if required
 
 6. Apply migrations
 

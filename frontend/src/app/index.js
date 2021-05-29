@@ -20,11 +20,7 @@ const App = () => {
   const classes = useStyles();
 
   useEffect(() => {
-    const csrfPromise = fetchUrl('/api/csrf/', {
-      headers: {
-        secretkey: process.env.REACT_APP_SECRET_KEY,
-      },
-    });
+    const csrfPromise = fetchUrl('/api/csrf/');
     csrfPromise.then(() => {
       fetchUrl('/api/login/').then((response) => {
         if (response.data && response.data.username) {

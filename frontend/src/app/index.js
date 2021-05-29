@@ -20,13 +20,13 @@ const App = () => {
   const classes = useStyles();
 
   useEffect(() => {
-    const csrfPromise = fetchUrl('api/csrf/', {
+    const csrfPromise = fetchUrl('/api/csrf/', {
       headers: {
         secretkey: process.env.REACT_APP_SECRET_KEY,
       },
     });
     csrfPromise.then(() => {
-      fetchUrl('api/login/').then((response) => {
+      fetchUrl('/api/login/').then((response) => {
         if (response.data && response.data.username) {
           profileStore.setUsername(response.data.username);
         }

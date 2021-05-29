@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import check_password
 from django.http import HttpResponse, JsonResponse
 from django.db.utils import IntegrityError
 from rest_framework import viewsets
@@ -26,7 +26,6 @@ def check_group_password(request):
     Check password for group rooms
     """
     post_data = request.data
-    print(post_data)
     group_id = post_data["id"]
     group_password = post_data["password"]
 
@@ -36,6 +35,4 @@ def check_group_password(request):
         return HttpResponse(status=400)
     if group_room.is_protected and group_password == "":
         return JsonResponse({"check": False, "password": ["This field is required."]})
-    print(make_password(group_password))
-    print(group_room.password)
     return JsonResponse({"check": check_password(group_password, group_room.password)})

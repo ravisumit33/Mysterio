@@ -165,6 +165,9 @@ const GroupChatUI = () => {
         };
         setChatWindowData(chatWindowData);
         handleStartGroupChat();
+        fetchUrl('/api/chat/groups/').then((resp) => {
+          setGroupRooms(Object.values(resp.data));
+        });
       }
     });
   };

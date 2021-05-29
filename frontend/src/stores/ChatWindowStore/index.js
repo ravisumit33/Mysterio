@@ -55,7 +55,7 @@ class ChatWindowStore {
           };
           message.data.text = msg.text;
           message.type = msg.message_type;
-          const sessionData = msg.sender_channel.session.data;
+          const sessionData = msg.sender_channel.session;
           switch (message.type) {
             case MessageType.TEXT:
               message.data.sender = sessionData;
@@ -111,7 +111,7 @@ class ChatWindowStore {
     const messageData = payload.data;
     switch (messageType) {
       case MessageType.USER_INFO:
-        profileStore.setId(messageData.id);
+        profileStore.setSessionId(messageData.session_id);
         if (!this.isGroupChat) {
           clearTimeout(this.timeout);
           this.timeout = setTimeout(
@@ -152,7 +152,7 @@ class ChatWindowStore {
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
-          lastMessage.data.sender.id === messageData.sender.id
+          lastMessage.data.sender.session_id === messageData.sender.session_id
         ) {
           const newLastMessage = { ...lastMessage };
           isInitMsg

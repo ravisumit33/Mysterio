@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import DenyConnection
 from django.db.utils import IntegrityError
+from chat.models import ChatSession
 import chat.models.channel as Channel
 import chat.models.message as Message
 from chat.constants import MESSAGE, PREFIX
@@ -23,10 +24,6 @@ class ChatConsumer(WebsocketConsumer):
         self.profile = None
 
     def connect(self):
-        self.session = self.scope["session"]
-        if self.session.session_key is None:
-            self.session.create()
-
         # room_id in URL comes only in group chat
         if "room_id" in self.scope["url_route"]["kwargs"]:
             self.is_group_consumer = True
@@ -39,13 +36,12 @@ class ChatConsumer(WebsocketConsumer):
             try:
                 new_channel = Channel.GroupChannel.objects.create(
                     name=self.channel_name,
-                    session_id=self.session.session_key,
                     group_room_id=self.room_id,
                 )
             except IntegrityError as excp:
                 logger.error("Cannot create group channel")
                 logger.error("Channel name: %s", self.channel_name)
-                logger.error("Session id: %s", self.session.session_key)
+                logger.error("Session id: %s", self.session.session_id)
                 logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
             async_to_sync(self.channel_layer.group_add)(
@@ -113,10 +109,6 @@ class ChatConsumer(WebsocketConsumer):
                 )
                 self.close()
                 return
-            if "name" not in self.session:
-                logger.error("SuspiciousOperation : Text message received with no name")
-                self.close()
-                return
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             if self.is_group_consumer:
                 group_prefix = PREFIX.GROUP_ROOM
@@ -157,7 +149,7 @@ class ChatConsumer(WebsocketConsumer):
             logger.info(
                 "Text message received in room id %d by %s",
                 self.room_id,
-                self.session["name"],
+                self.session.name,
             )
             logger.info("%s", message_data["text"])
             # TODO: remove this log as messages will be encrypted
@@ -168,21 +160,23 @@ class ChatConsumer(WebsocketConsumer):
             avatar_url = (
                 message_data["avatarUrl"] if "avatarUrl" in message_data else ""
             )
-            user_id = message_data["id"]
-            self.session["id"] = user_id if user_id else self.channel_name
-            self.session["name"] = name
-            self.session["avatarUrl"] = avatar_url
+            session_id = message_data["sessionId"]
+            session_id = session_id if session_id else self.channel_name
+            self.session = ChatSession(
+                session_id=session_id, name=name, avatar_url=avatar_url
+            )
             self.session.save()
             self.profile = {
-                "id": self.session["id"],
-                "name": self.session["name"],
-                "avatarUrl": self.session["avatarUrl"],
+                "session_id": self.session.session_id,
+                "name": self.session.name,
+                "avatarUrl": self.session.avatar_url,
             }
+
             if not self.is_group_consumer:
                 group_prefix_channel = PREFIX.INDIVIDUAL_CHANNEL
                 new_channel = Channel.IndividualChannel.objects.create(
                     name=self.channel_name,
-                    session_id=self.session.session_key,
+                    session_id=self.session.id,
                 )
                 self.channel_id = new_channel.id
                 async_to_sync(self.channel_layer.group_add)(
@@ -193,6 +187,10 @@ class ChatConsumer(WebsocketConsumer):
                 logger.info("Channel id: %d", self.channel_id)
             else:
                 group_prefix_channel = PREFIX.GROUP_CHANNEL
+                Channel.GroupChannel.objects.filter(name=self.channel_name).update(
+                    session_id=self.session.id
+                )
+
             async_to_sync(self.channel_layer.group_send)(
                 group_prefix_channel + str(self.channel_id),
                 {
@@ -200,7 +198,7 @@ class ChatConsumer(WebsocketConsumer):
                     "payload": {
                         "type": MESSAGE.USER_INFO,
                         "data": {
-                            "id": self.session["id"],
+                            "session_id": self.session.session_id,
                         },
                     },
                 },

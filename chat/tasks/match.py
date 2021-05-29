@@ -1,10 +1,10 @@
 import logging
 from django.db import transaction
-from django.contrib.sessions.models import Session
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from chat.models.room import IndividualRoom
 from chat.models.channel import IndividualChannel
+from chat.models.session import ChatSession
 from chat.constants import MESSAGE, PREFIX
 
 logger = logging.getLogger(__name__)
@@ -13,10 +13,9 @@ logger = logging.getLogger(__name__)
 def get_sessions_data(channels):
     """Get stored session data for each channel"""
     session_ids = [channel["session"] for channel in channels]
-    sessions = list(Session.objects.filter(pk__in=session_ids))
-    sessions.sort(key=lambda session: session_ids.index(session.session_key))
-    sessions_data = [session.get_decoded() for session in sessions]
-    return sessions_data
+    sessions = list(ChatSession.objects.filter(pk__in=session_ids))
+    sessions.sort(key=lambda session: session_ids.index(session.id))
+    return sessions
 
 
 def match_channels(channels):
@@ -88,11 +87,11 @@ def process_unmatched_channels():
                             "data": {
                                 "room_id": room_id,
                                 "match": {
-                                    "id": sessions_data[match_channel_idx]["id"],
-                                    "name": sessions_data[match_channel_idx]["name"],
-                                    "avatarUrl": sessions_data[match_channel_idx][
-                                        "avatarUrl"
-                                    ],
+                                    "id": sessions_data[match_channel_idx].session_id,
+                                    "name": sessions_data[match_channel_idx].name,
+                                    "avatarUrl": sessions_data[
+                                        match_channel_idx
+                                    ].avatar_url,
                                 },
                             },
                         },

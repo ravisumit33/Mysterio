@@ -1,30 +1,16 @@
-from django.contrib.sessions.models import Session
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from chat.models import GroupRoom, TextMessage, GroupChannel
+from chat.models import GroupRoom, TextMessage, GroupChannel, ChatSession
 
 
-class SessionSerializer(serializers.ModelSerializer):
+class ChatSessionSerializer(serializers.ModelSerializer):
     """
-    Serializer for getting session data
+    Serializer for getting chat session data
     """
-
-    data = serializers.SerializerMethodField()
-
-    def get_data(self, session):  # pylint: disable=no-self-use
-        """
-        Getter function for data serializer field
-        """
-        required_session_fields = ["id", "name", "avatarUrl"]
-        session_data = session.get_decoded()
-        required_session_data = {}
-        for field in required_session_fields:
-            required_session_data[field] = session_data[field]
-        return required_session_data
 
     class Meta:
-        model = Session
-        fields = ["data"]
+        model = ChatSession
+        fields = ["session_id", "name", "avatar_url"]
 
 
 class GroupChannelSerializer(serializers.ModelSerializer):
@@ -32,7 +18,7 @@ class GroupChannelSerializer(serializers.ModelSerializer):
     Serializer for group_channels API endpoint
     """
 
-    session = SessionSerializer(read_only=True)
+    session = ChatSessionSerializer(read_only=True)
 
     class Meta:
         model = GroupChannel
@@ -56,11 +42,32 @@ class GroupRoomSerializer(serializers.ModelSerializer):
     Serializer for group room API endpoint
     """
 
-    group_messages = MessageSerializer(many=True, read_only=True)
+    group_messages = serializers.SerializerMethodField(read_only=True)
 
     zscore = serializers.FloatField(read_only=True)
 
     password = serializers.CharField(write_only=True, allow_blank=True)
+
+    message_count = serializers.SerializerMethodField(read_only=True)
+
+    def get_message_count(self, group_room):  # pylint: disable=no-self-use
+        """
+        Getter function for group messages serializer fields
+        """
+        return group_room.group_messages.count()
+
+    def get_group_messages(self, group_room):
+        """
+        Getter function for group_messages serializer field
+        """
+        view = self.context.get("view")
+        if view.action == "list" and group_room.is_protected:
+            return "Hidden for protected groups"
+        request = self.context.get("request")
+        serializer_context = {"request": request}
+        messages = TextMessage.objects.filter(group_room=group_room)
+        serializer = MessageSerializer(messages, many=True, context=serializer_context)
+        return serializer.data
 
     def create(self, validated_data):
         is_protected = validated_data.pop("is_protected", None)
@@ -78,4 +85,12 @@ class GroupRoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroupRoom
-        fields = ["id", "name", "password", "group_messages", "zscore", "is_protected"]
+        fields = [
+            "id",
+            "name",
+            "password",
+            "group_messages",
+            "zscore",
+            "is_protected",
+            "message_count",
+        ]

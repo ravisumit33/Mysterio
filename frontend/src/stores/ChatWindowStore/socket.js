@@ -34,9 +34,9 @@ class Socket {
   handleOpen = () => {
     log.info('socket connection established, try sending messages');
     this.send(MessageType.USER_INFO, {
-      id: profileStore.id,
+      sessionId: profileStore.sessionId,
       name: profileStore.name,
-      avatar: profileStore.avatarUrl,
+      avatarUrl: profileStore.avatarUrl,
     });
   };
 

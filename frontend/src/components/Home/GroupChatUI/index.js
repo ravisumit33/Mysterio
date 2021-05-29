@@ -360,7 +360,7 @@ const GroupChatUI = () => {
                             </ListItemAvatar>
                             <ListItemText
                               primary={option.name}
-                              secondary={`${option.group_messages.length} messages`}
+                              secondary={`${option.message_count} messages`}
                               primaryTypographyProps={{ noWrap: true }}
                               secondaryTypographyProps={{ noWrap: true }}
                             />
@@ -401,7 +401,7 @@ const GroupChatUI = () => {
                       </ListItemAvatar>
                       <ListItemText
                         primary={group.name}
-                        secondary={`${group.group_messages.length} messages`}
+                        secondary={`${group.message_count} messages`}
                         primaryTypographyProps={{ noWrap: true }}
                         secondaryTypographyProps={{ noWrap: true }}
                       />

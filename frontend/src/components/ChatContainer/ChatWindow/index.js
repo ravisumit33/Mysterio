@@ -77,7 +77,7 @@ const ChatWindow = (props) => {
   const chatMessages = messageList.map((message, idx) => {
     const messageData = message.data;
     if (message.type === MessageType.TEXT) {
-      const side = messageData.sender.id === profileStore.id ? 'right' : 'left';
+      const side = messageData.sender.session_id === profileStore.sessionId ? 'right' : 'left';
       return (
         <ChatMessage
           // eslint-disable-next-line react/no-array-index-key

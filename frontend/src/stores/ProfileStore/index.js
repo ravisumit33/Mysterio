@@ -5,7 +5,7 @@ class ProfileStore {
 
   avatarUrl = '';
 
-  id = '';
+  sessionId = '';
 
   username = '';
 
@@ -21,8 +21,8 @@ class ProfileStore {
     this.avatarUrl = newAvatarUrl;
   };
 
-  setId = (newId) => {
-    this.id = newId;
+  setSessionId = (newSessionId) => {
+    this.sessionId = newSessionId;
   };
 
   setUsername = (newUserName) => {

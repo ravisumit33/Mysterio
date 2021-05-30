@@ -21,7 +21,9 @@ export const generateRandomColor = (string) => {
 
 export const getCookie = (name) => {
   let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
+  if (isCordovaEnv()) {
+    cookieValue = window.localStorage.getItem('token');
+  } else if (document.cookie && document.cookie !== '') {
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i += 1) {
       const cookie = cookies[i].trim();
@@ -32,24 +34,26 @@ export const getCookie = (name) => {
       }
     }
   }
+
   return cookieValue;
 };
 
 export const isDevEnv = () => process.env.NODE_ENV === 'development';
 
+// @ts-ignore
+export const isCordovaEnv = () => window.cordova;
+
 export const fetchUrl = (url, data) => {
   let completeUrl;
   try {
     completeUrl = new URL(url);
-    // @ts-ignore
-    completeUrl.protocol = window.cordova ? 'https' : window.location.protocol;
+    completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
     completeUrl = completeUrl.href;
   } catch (_) {
     // url is relative
     let origin = '';
     if (!isDevEnv()) {
-      // @ts-ignore
-      origin = window.cordova ? MysterioOrigin : window.origin;
+      origin = isCordovaEnv() ? MysterioOrigin : window.origin;
     }
     completeUrl = origin + url;
   }

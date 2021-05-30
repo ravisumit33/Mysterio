@@ -4,7 +4,7 @@ import { NavBar, Home, Footer, ChatContainer } from 'components';
 import UserInfoDialog from 'components/UserInfoDialog';
 import Alert from 'components/Alert';
 import LoginSignupDialog from 'components/LoginSignupDialog';
-import { fetchUrl } from 'utils';
+import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
 import PullToRefresh from 'pulltorefreshjs';
 
@@ -21,7 +21,10 @@ const App = () => {
 
   useEffect(() => {
     const csrfPromise = fetchUrl('/api/csrf/');
-    csrfPromise.then(() => {
+    csrfPromise.then((resp) => {
+      if (isCordovaEnv()) {
+        window.localStorage.setItem('token', resp.data.token);
+      }
       fetchUrl('/api/login/').then((response) => {
         if (response.data && response.data.username) {
           profileStore.setUsername(response.data.username);
@@ -34,7 +37,12 @@ const App = () => {
         window.location.reload();
       },
     });
-    return () => PullToRefresh.destroyAll();
+    return () => {
+      if (isCordovaEnv()) {
+        window.localStorage.removeItem('token');
+      }
+      PullToRefresh.destroyAll();
+    };
   }, []);
 
   return (

@@ -2,7 +2,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { MessageType, MysterioHost } from 'appConstants';
 import profileStore from 'stores/ProfileStore';
-import { isDevEnv, isEmptyObj } from 'utils';
+import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 
 class Socket {
   constructor(chatWindowStore) {
@@ -13,8 +13,7 @@ class Socket {
   init() {
     let serverHost;
     let websocketProtocol;
-    // @ts-ignore
-    if (window.cordova) {
+    if (isCordovaEnv()) {
       serverHost = MysterioHost;
       websocketProtocol = 'wss';
     } else {

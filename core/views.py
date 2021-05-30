@@ -97,6 +97,6 @@ def get_csrf_token(request):
     Set csrf cookie on get request
     """
     csrf_token = get_token(request)
-    response = HttpResponse(status=200)
+    response = JsonResponse({"token": csrf_token})
     response.set_cookie("csrftoken", csrf_token)
     return response

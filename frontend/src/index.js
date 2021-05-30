@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { configure } from 'mobx';
 import 'index.css';
 import App from 'app';
+import { isCordovaEnv } from 'utils';
 import * as serviceWorker from './serviceWorker';
 
 configure({ isolateGlobalState: true });
@@ -16,8 +17,7 @@ const renderReactDom = () => {
   );
 };
 
-// @ts-ignore
-if (window.cordova) {
+if (isCordovaEnv()) {
   document.addEventListener(
     'deviceready',
     () => {

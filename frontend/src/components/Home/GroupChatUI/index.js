@@ -63,6 +63,7 @@ const GroupChatUI = () => {
     groupRooms,
     setGroupRooms,
     setGroupRoomsFetched,
+    setGroupCreationInProgress,
     addChatWindow,
     setChatWindowData,
     setShouldOpenUserInfoDialog,
@@ -151,7 +152,7 @@ const GroupChatUI = () => {
           groupPasswordFieldData.error = false;
         }
         appStore.setAlert({
-          text: 'Unable to create group.',
+          text: 'Unable to create room.',
           severity: 'error',
         });
         appStore.setShouldShowAlert(true);
@@ -172,6 +173,7 @@ const GroupChatUI = () => {
           setGroupRooms(Object.values(resp.data));
         });
       }
+      setGroupCreationInProgress(false);
     });
   };
 
@@ -190,6 +192,7 @@ const GroupChatUI = () => {
         handleStartGroupChat();
       }
     } else if (newGroupName) {
+      setGroupCreationInProgress(true);
       if (!profileStore.isLoggedIn) {
         setShouldOpenLoginSignupDialog(true);
       } else {

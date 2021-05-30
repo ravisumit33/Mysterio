@@ -18,6 +18,15 @@ const UserInfoDialog = () => {
   };
 
   const handleDialogueButtonClick = () => {
+    if (!textFieldValue) {
+      appStore.setAlert({
+        text: 'Name cannot be empty.',
+        severity: 'error',
+      });
+      appStore.setShouldShowAlert(true);
+      return;
+    }
+    appStore.setShouldShowAlert(false);
     appStore.setShouldOpenUserInfoDialog(false);
     profileStore.setName(textFieldValue);
     appStore.addChatWindow();
@@ -27,24 +36,39 @@ const UserInfoDialog = () => {
     <Dialog
       open={appStore.shouldOpenUserInfoDialog}
       onClose={() => appStore.setShouldOpenUserInfoDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && textFieldValue && handleDialogueButtonClick()}
     >
       <DialogTitle>Let&apos;s get started!</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Give yourself a name"
-          fullWidth
-          value={textFieldValue}
-          onChange={handleTextFieldChange}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button disabled={!textFieldValue} onClick={handleDialogueButtonClick} color="primary">
-          Go
-        </Button>
-      </DialogActions>
+      <form
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          handleDialogueButtonClick();
+          evt.stopPropagation();
+        }}
+      >
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Give yourself a name"
+            fullWidth
+            value={textFieldValue}
+            onChange={handleTextFieldChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            onClick={(evt) => {
+              evt.preventDefault();
+              handleDialogueButtonClick();
+              evt.stopPropagation();
+            }}
+            color="primary"
+          >
+            Go
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };

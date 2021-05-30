@@ -62,6 +62,7 @@ const GroupChatUI = () => {
   const {
     groupRooms,
     setGroupRooms,
+    setGroupRoomsFetched,
     addChatWindow,
     setChatWindowData,
     setShouldOpenUserInfoDialog,
@@ -92,8 +93,9 @@ const GroupChatUI = () => {
   useEffect(() => {
     fetchUrl('/api/chat/groups/').then((response) => {
       setGroupRooms(Object.values(response.data));
+      setGroupRoomsFetched(true);
     });
-  }, [setGroupRooms]);
+  }, [setGroupRooms, setGroupRoomsFetched]);
 
   const trendingGroups = [...groupRooms]
     .sort((a, b) => {
@@ -157,6 +159,7 @@ const GroupChatUI = () => {
         setNewGroupPasswordFieldData(groupPasswordFieldData);
         setShouldOpenNewGroupDialog(true);
       } else {
+        appStore.setShouldShowAlert(false);
         setShouldOpenNewGroupDialog(false);
         const chatWindowData = {
           roomId: response.data.id,
@@ -214,6 +217,7 @@ const GroupChatUI = () => {
           password: selectedGroupPassword,
         });
         handleStartGroupChat();
+        appStore.setShouldShowAlert(false);
         setShouldOpenGroupPasswordDialog(false);
       } else {
         appStore.setAlert({
@@ -242,45 +246,61 @@ const GroupChatUI = () => {
       onKeyPress={(e) => e.key === 'Enter' && handleCreateGroup()}
     >
       <DialogTitle>New Room</DialogTitle>
-      <DialogContent>
-        <TextField
-          margin="dense"
-          label="Name"
-          fullWidth
-          value={newGroupName}
-          onChange={(evt) => setNewGroupName(evt.target.value)}
-          helperText={newGroupNameFieldData.help_text}
-          error={newGroupNameFieldData.error}
-          required
-        />
-        <TextField
-          autoFocus
-          disabled={!shouldUseGroupPassword}
-          margin="dense"
-          label="Password"
-          fullWidth
-          value={newGroupPassword}
-          onChange={(evt) => setNewGroupPassword(evt.target.value)}
-          required
-          helperText={shouldUseGroupPassword && newGroupPasswordFieldData.help_text}
-          error={shouldUseGroupPassword && newGroupPasswordFieldData.error}
-          inputProps={{ type: 'password' }}
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={shouldUseGroupPassword}
-              onChange={(evt) => setShouldUseGroupPassword(evt.target.checked)}
-            />
-          }
-          label="Protect with password"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCreateGroup} color="primary">
-          Create room
-        </Button>
-      </DialogActions>
+      <form
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          handleCreateGroup();
+          evt.stopPropagation();
+        }}
+      >
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Name"
+            fullWidth
+            value={newGroupName}
+            onChange={(evt) => setNewGroupName(evt.target.value)}
+            helperText={newGroupNameFieldData.help_text}
+            error={newGroupNameFieldData.error}
+            required
+          />
+          <TextField
+            autoFocus
+            disabled={!shouldUseGroupPassword}
+            margin="dense"
+            label="Password"
+            fullWidth
+            value={newGroupPassword}
+            onChange={(evt) => setNewGroupPassword(evt.target.value)}
+            required
+            helperText={shouldUseGroupPassword && newGroupPasswordFieldData.help_text}
+            error={shouldUseGroupPassword && newGroupPasswordFieldData.error}
+            inputProps={{ type: 'password' }}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={shouldUseGroupPassword}
+                onChange={(evt) => setShouldUseGroupPassword(evt.target.checked)}
+              />
+            }
+            label="Protect with password"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            onClick={(evt) => {
+              evt.preventDefault();
+              handleCreateGroup();
+              evt.stopPropagation();
+            }}
+            color="primary"
+          >
+            Create room
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 
@@ -291,26 +311,42 @@ const GroupChatUI = () => {
       onKeyPress={(e) => e.key === 'Enter' && groupPasswordCheck()}
     >
       <DialogTitle>Enter Password</DialogTitle>
-      <DialogContent>
-        <DialogContentText>This room is protected with a password</DialogContentText>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Password"
-          fullWidth
-          value={selectedGroupPassword}
-          onChange={(evt) => setSelectedGroupPassword(evt.target.value)}
-          required
-          helperText={protectedGroupPasswordFieldData.help_text}
-          error={protectedGroupPasswordFieldData.error}
-          inputProps={{ type: 'password' }}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={groupPasswordCheck} color="primary">
-          Enter room
-        </Button>
-      </DialogActions>
+      <form
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          groupPasswordCheck();
+          evt.stopPropagation();
+        }}
+      >
+        <DialogContent>
+          <DialogContentText>This room is protected with a password</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Password"
+            fullWidth
+            value={selectedGroupPassword}
+            onChange={(evt) => setSelectedGroupPassword(evt.target.value)}
+            required
+            helperText={protectedGroupPasswordFieldData.help_text}
+            error={protectedGroupPasswordFieldData.error}
+            inputProps={{ type: 'password' }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            onClick={(evt) => {
+              evt.preventDefault();
+              groupPasswordCheck();
+              evt.stopPropagation();
+            }}
+            color="primary"
+          >
+            Enter room
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 
@@ -335,9 +371,7 @@ const GroupChatUI = () => {
                       size="small"
                       onClose={handleGroupSearchClose}
                       inputValue={pendingNewGroupName}
-                      onInputChange={(event, newGroup) => {
-                        setPendingNewGroupName(newGroup);
-                      }}
+                      onInputChange={(event, newGroup) => setPendingNewGroupName(newGroup)}
                       value={selectedGroup}
                       onChange={(event, newGroup) => setSelectedGroup(newGroup)}
                       renderInput={(params) => (
@@ -380,7 +414,7 @@ const GroupChatUI = () => {
                       color="secondary"
                       variant="contained"
                       size="medium"
-                      onClick={() => handleStartChat()}
+                      onClick={(evt) => handleStartChat()}
                     >
                       Enter Room
                     </Button>

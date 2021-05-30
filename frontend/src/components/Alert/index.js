@@ -24,6 +24,7 @@ const AppAlert = (props) => {
         open={shouldShowAlert}
         autoHideDuration={6000}
         onClose={() => setShouldShowAlert(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert onClose={() => setShouldShowAlert(false)} severity={alert.severity}>
           {alert.text}

@@ -82,6 +82,7 @@ const LoginSignupDialog = (props) => {
       } else {
         profileStore.setUsername(username);
         if (!shouldSignup) {
+          appStore.setShouldShowAlert(false);
           appStore.setShouldOpenLoginSignupDialog(false);
           appStore.setShouldOpenNewGroupDialog(true);
         } else {
@@ -117,58 +118,73 @@ const LoginSignupDialog = (props) => {
     <Dialog
       open={appStore.shouldOpenLoginSignupDialog}
       onClose={() => appStore.setShouldOpenLoginSignupDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && handleDialogueButtonClick()}
       fullWidth
     >
       {shouldSignup ? <DialogTitle>Register</DialogTitle> : <DialogTitle>Login</DialogTitle>}
-      <DialogContent>
-        {shouldSignup ? (
-          <DialogContentText>
-            Registration helps us give you admin rights of rooms that you create.
-          </DialogContentText>
-        ) : (
-          <DialogContentText>
-            Login to create a new room. Select register below if not already registered.
-          </DialogContentText>
-        )}
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Username"
-          fullWidth
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          helperText={usernameHelperText}
-          required={postActions.username.required}
-          inputProps={{ maxLength: postActions.username.max_length }}
-          error={usernameFieldData.error}
-        />
-        <TextField
-          margin="dense"
-          label="Password"
-          fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required={postActions.password.required}
-          helperText={passwordFieldData.help_text}
-          error={passwordFieldData.error}
-          inputProps={{ type: 'password' }}
-        />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={shouldSignup}
-              onChange={(evt) => setShouldSignup(evt.target.checked)}
-            />
-          }
-          label="Register"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleDialogueButtonClick} color="primary">
-          {shouldSignup ? 'Register' : 'Login'}
-        </Button>
-      </DialogActions>
+      <form
+        onSubmit={(evt) => {
+          evt.preventDefault();
+          handleDialogueButtonClick();
+          evt.stopPropagation();
+        }}
+      >
+        <DialogContent>
+          {shouldSignup ? (
+            <DialogContentText>
+              Registration helps us give you admin rights of rooms that you create.
+            </DialogContentText>
+          ) : (
+            <DialogContentText>
+              Login to create a new room. Select register below if not already registered.
+            </DialogContentText>
+          )}
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Username"
+            fullWidth
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            helperText={usernameHelperText}
+            required={postActions.username.required}
+            inputProps={{ maxLength: postActions.username.max_length }}
+            error={usernameFieldData.error}
+          />
+          <TextField
+            margin="dense"
+            label="Password"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required={postActions.password.required}
+            helperText={passwordFieldData.help_text}
+            error={passwordFieldData.error}
+            inputProps={{ type: 'password' }}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={shouldSignup}
+                onChange={(evt) => setShouldSignup(evt.target.checked)}
+              />
+            }
+            label="Register"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            type="submit"
+            onClick={(evt) => {
+              evt.preventDefault();
+              handleDialogueButtonClick();
+              evt.stopPropagation();
+            }}
+            color="primary"
+          >
+            {shouldSignup ? 'Register' : 'Login'}
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };

@@ -18,6 +18,8 @@ class AppStore {
 
   groupRooms = [];
 
+  groupRoomsFetched = false;
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -54,6 +56,10 @@ class AppStore {
 
   setGroupRooms = (groupRooms) => {
     this.groupRooms = groupRooms;
+  };
+
+  setGroupRoomsFetched = (groupRoomsFetched) => {
+    this.groupRoomsFetched = groupRoomsFetched;
   };
 
   setChatWindowData = (data) => {

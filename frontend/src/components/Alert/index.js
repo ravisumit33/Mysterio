@@ -25,8 +25,13 @@ const AppAlert = (props) => {
         autoHideDuration={6000}
         onClose={() => setShouldShowAlert(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        action={alert.action}
       >
-        <Alert onClose={() => setShouldShowAlert(false)} severity={alert.severity}>
+        <Alert
+          onClose={() => setShouldShowAlert(false)}
+          severity={alert.severity}
+          action={alert.action}
+        >
           {alert.text}
         </Alert>
       </Snackbar>

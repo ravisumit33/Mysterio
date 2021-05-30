@@ -84,7 +84,14 @@ const LoginSignupDialog = (props) => {
         if (!shouldSignup) {
           appStore.setShouldShowAlert(false);
           appStore.setShouldOpenLoginSignupDialog(false);
-          appStore.setShouldOpenNewGroupDialog(true);
+          if (appStore.groupCreationInProgress) {
+            appStore.setShouldOpenNewGroupDialog(true);
+          }
+          appStore.setAlert({
+            text: `Login successful.`,
+            severity: 'success',
+          });
+          appStore.setShouldShowAlert(true);
         } else {
           setShouldSignup(false);
           appStore.setAlert({

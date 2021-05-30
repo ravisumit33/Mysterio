@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, observable } from 'mobx';
 import ChatWindowStore from 'stores/ChatWindowStore';
 
 class AppStore {
@@ -20,8 +20,12 @@ class AppStore {
 
   groupRoomsFetched = false;
 
+  groupCreationInProgress = false;
+
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      alert: observable.shallow,
+    });
   }
 
   setAlert = (alert) => {
@@ -60,6 +64,10 @@ class AppStore {
 
   setGroupRoomsFetched = (groupRoomsFetched) => {
     this.groupRoomsFetched = groupRoomsFetched;
+  };
+
+  setGroupCreationInProgress = (groupCreationInProgress) => {
+    this.groupCreationInProgress = groupCreationInProgress;
   };
 
   setChatWindowData = (data) => {

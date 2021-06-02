@@ -42,15 +42,21 @@
   <link rel=“canonical” href=“https://mysterio-chat.herokuapp.com” />
   <title>Mysterio - Anonymous Chat</title>
   <script>
-    if (window.origin === "file://") {
-      var head = document.getElementsByTagName('head')[0];
-      var cordovaJs = document.createElement("script");
+    var loadReactPromise = new Promise((resolve, reject) => {
+      if (window.origin === "file://") {
+        var head = document.getElementsByTagName('head')[0];
+        var cordovaJs = document.createElement("script");
 
-      cordovaJs.type = "text/javascript";
-      cordovaJs.src = "cordova.js";
+        cordovaJs.type = "text/javascript";
+        cordovaJs.src = "cordova.js";
+        cordovaJs.async = false;
 
-      head.appendChild(cordovaJs);
-    }
+        head.appendChild(cordovaJs);
+        cordovaJs.onload = () => resolve();
+      } else {
+        resolve();
+      }
+    })
   </script>
 </head>
 

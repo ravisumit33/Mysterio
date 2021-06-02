@@ -1,5 +1,6 @@
 import { makeAutoObservable, observable } from 'mobx';
 import ChatWindowStore from 'stores/ChatWindowStore';
+import { fetchUrl } from 'utils';
 
 class AppStore {
   alert = {};
@@ -49,7 +50,7 @@ class AppStore {
   };
 
   addChatWindow = () => {
-    this.chatWindow = new ChatWindowStore(this.chatWindowData);
+    this.chatWindow = new ChatWindowStore({ appStore: this, data: this.chatWindowData });
   };
 
   removeChatWIndow = () => {
@@ -73,6 +74,11 @@ class AppStore {
   setChatWindowData = (data) => {
     this.chatWindowData = data;
   };
+
+  updateGroupRooms = () =>
+    fetchUrl('/api/chat/groups/').then((response) => {
+      this.setGroupRooms(Object.values(response.data));
+    });
 }
 
 const appStore = new AppStore();

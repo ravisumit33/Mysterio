@@ -61,7 +61,6 @@ const GroupChatUI = () => {
 
   const {
     groupRooms,
-    setGroupRooms,
     setGroupRoomsFetched,
     setGroupCreationInProgress,
     addChatWindow,
@@ -70,6 +69,7 @@ const GroupChatUI = () => {
     setShouldOpenLoginSignupDialog,
     shouldOpenNewGroupDialog,
     setShouldOpenNewGroupDialog,
+    updateGroupRooms,
   } = appStore;
   const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
   const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
@@ -92,11 +92,9 @@ const GroupChatUI = () => {
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
 
   useEffect(() => {
-    fetchUrl('/api/chat/groups/').then((response) => {
-      setGroupRooms(Object.values(response.data));
-      setGroupRoomsFetched(true);
-    });
-  }, [setGroupRooms, setGroupRoomsFetched]);
+    updateGroupRooms();
+    setGroupRoomsFetched(true);
+  }, [updateGroupRooms, setGroupRoomsFetched]);
 
   const trendingGroups = [...groupRooms]
     .sort((a, b) => {
@@ -169,9 +167,7 @@ const GroupChatUI = () => {
         };
         setChatWindowData(chatWindowData);
         handleStartGroupChat();
-        fetchUrl('/api/chat/groups/').then((resp) => {
-          setGroupRooms(Object.values(resp.data));
-        });
+        updateGroupRooms();
       }
       setGroupCreationInProgress(false);
     });

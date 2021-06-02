@@ -1,12 +1,13 @@
 from django.contrib.auth.hashers import check_password
 from django.http import HttpResponse, JsonResponse
-from django.db.utils import IntegrityError
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from chat.serializers import BaseGroupRoomSerializer, ExtendedGroupRoomSerializer
 from chat.models import GroupRoom
 from chat.permissions import GroupRoomPermission
+from chat.constants import PREFIX, MESSAGE
+from chat.utils import channel_layer
 
 
 class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
@@ -22,6 +23,17 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
             return BaseGroupRoomSerializer
         return ExtendedGroupRoomSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        group_room = self.get_object()
+        channel_layer.group_send(
+            PREFIX.GROUP_ROOM + str(group_room.id),
+            MESSAGE.CHAT_DELETE,
+            {
+                "text": "Group is deleted",
+            },
+        )
+        return super().destroy(request, *args, **kwargs)
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -35,7 +47,7 @@ def check_group_password(request):
 
     try:
         group_room = GroupRoom.objects.get(id=group_id)
-    except IntegrityError:
+    except GroupRoom.DoesNotExist:
         return HttpResponse(status=400)
     if group_room.is_protected and group_password == "":
         return JsonResponse({"check": False, "password": ["This field is required."]})

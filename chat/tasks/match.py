@@ -1,7 +1,6 @@
 import logging
 from django.db import transaction
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+from chat.utils import channel_layer
 from chat.models.room import IndividualRoom
 from chat.models.channel import IndividualChannel
 from chat.models.session import ChatSession
@@ -36,7 +35,6 @@ def process_unmatched_channels():
             :1000
         ]  # TODO: set limit and scheduler interval after inspection
     )
-    channel_layer = get_channel_layer()
 
     with transaction.atomic():
         channels = unmatched_channels.values("id", "name", "session")
@@ -74,26 +72,19 @@ def process_unmatched_channels():
             for i in range(2):
                 channel = channels[channel_idx_pair[i]]
                 match_channel_idx = channel_idx_pair[1 - i]
-                async_to_sync(channel_layer.group_add)(
+                channel_layer.group_add(
                     PREFIX.INDIVIDUAL_ROOM + str(room_id),
                     channel["name"],
                 )
-                async_to_sync(channel_layer.group_send)(
+                channel_layer.group_send(
                     PREFIX.INDIVIDUAL_CHANNEL + str(channel["id"]),
+                    MESSAGE.USER_JOINED,
                     {
-                        "type": "group_msg_receive",
-                        "payload": {
-                            "type": MESSAGE.USER_JOINED,
-                            "data": {
-                                "room_id": room_id,
-                                "match": {
-                                    "id": sessions_data[match_channel_idx].session_id,
-                                    "name": sessions_data[match_channel_idx].name,
-                                    "avatarUrl": sessions_data[
-                                        match_channel_idx
-                                    ].avatar_url,
-                                },
-                            },
+                        "room_id": room_id,
+                        "match": {
+                            "id": sessions_data[match_channel_idx].session_id,
+                            "name": sessions_data[match_channel_idx].name,
+                            "avatarUrl": sessions_data[match_channel_idx].avatar_url,
                         },
                     },
                 )

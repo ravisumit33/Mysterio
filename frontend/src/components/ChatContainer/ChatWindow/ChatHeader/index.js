@@ -84,9 +84,7 @@ const ChatHeader = (props) => {
           severity: 'success',
         });
         appStore.setShouldShowAlert(true);
-        fetchUrl('/api/chat/groups/').then((resp) => {
-          appStore.setGroupRooms(Object.values(resp.data));
-        });
+        appStore.updateGroupRooms();
       }
     });
   };
@@ -109,7 +107,11 @@ const ChatHeader = (props) => {
 
   const groupChatIcons = (
     <>
-      <IconButton onClick={handleDeleteRoom} className={classes.icon}>
+      <IconButton
+        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+        onClick={handleDeleteRoom}
+        className={classes.icon}
+      >
         <Tooltip title="Delete room" arrow>
           <DeleteIcon fontSize="small" />
         </Tooltip>

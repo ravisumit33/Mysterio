@@ -71,7 +71,14 @@ class ExtendedGroupRoomSerializer(BaseGroupRoomSerializer):
     Serializer for group room API endpoint
     """
 
-    group_messages = MessageSerializer(many=True, read_only=True)
+    group_messages = serializers.SerializerMethodField(read_only=True)
+
+    def get_group_messages(self, group_room):  # pylint: disable=no-self-use
+        """
+        Sort group messages in decreasing order of sent_at
+        """
+        messages = group_room.group_messages.order_by("sent_at")
+        return MessageSerializer(messages, many=True).data
 
     def create(self, validated_data):
         is_protected = validated_data.pop("is_protected", None)

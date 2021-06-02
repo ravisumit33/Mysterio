@@ -1,6 +1,5 @@
 import logging
 import json
-from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import DenyConnection
 from django.db.utils import IntegrityError
@@ -8,6 +7,7 @@ from chat.models import ChatSession
 import chat.models.channel as Channel
 import chat.models.message as Message
 from chat.constants import MESSAGE, PREFIX
+from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +43,13 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("Channel name: %s", self.channel_name)
                 logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
-            async_to_sync(self.channel_layer.group_add)(
+            channel_layer.group_add(
                 PREFIX.GROUP_ROOM + str(self.room_id), self.channel_name
             )
             logger.info("New group channel created with room_id %d", self.room_id)
             self.channel_id = new_channel.id
-            async_to_sync(self.channel_layer.group_add)(
-                PREFIX.GROUP_CHANNEL + str(self.channel_id),
-                self.channel_name,
+            channel_layer.group_add(
+                PREFIX.GROUP_CHANNEL + str(self.channel_id), self.channel_name
             )
             logger.info("Channel id: %d", self.channel_id)
         self.accept()
@@ -63,7 +62,7 @@ class ChatConsumer(WebsocketConsumer):
         if not self.is_group_consumer:
             group_prefix = PREFIX.INDIVIDUAL_ROOM
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
-            async_to_sync(self.channel_layer.group_discard)(
+            channel_layer.group_discard(
                 PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
             )
             logger.info("Individual channel deleted")
@@ -82,18 +81,13 @@ class ChatConsumer(WebsocketConsumer):
             logger.info("Group channel disconnected")
 
         if self.room_id is not None:
-            async_to_sync(self.channel_layer.group_discard)(
+            channel_layer.group_discard(
                 group_prefix + str(self.room_id), self.channel_name
             )
-            async_to_sync(self.channel_layer.group_send)(
+            channel_layer.group_send(
                 group_prefix + str(self.room_id),
-                {
-                    "type": "group_msg_receive",
-                    "payload": {
-                        "type": MESSAGE.USER_LEFT,
-                        "data": {"resignee": self.profile},
-                    },
-                },
+                MESSAGE.USER_LEFT,
+                {"resignee": self.profile},
             )
             logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
 
@@ -119,30 +113,18 @@ class ChatConsumer(WebsocketConsumer):
                         message_type=MESSAGE.TEXT,
                     )
                 except IntegrityError:
-                    async_to_sync(self.channel_layer.group_send)(
+                    channel_layer.group_send(
                         group_prefix + str(self.room_id),
-                        {
-                            "type": "group_msg_receive",
-                            "payload": {
-                                "type": MESSAGE.CHAT_DELETE,
-                                "data": {
-                                    "text": "Group is deleted as it is more than one month older",
-                                },
-                            },
-                        },
+                        MESSAGE.CHAT_DELETE,
+                        {"text": "Group is deleted"},
                     )
                     return
-            async_to_sync(self.channel_layer.group_send)(
+            channel_layer.group_send(
                 group_prefix + str(self.room_id),
+                MESSAGE.TEXT,
                 {
-                    "type": "group_msg_receive",
-                    "payload": {
-                        "type": MESSAGE.TEXT,
-                        "data": {
-                            "text": message_data["text"],
-                            "sender": self.profile,
-                        },
-                    },
+                    "text": message_data["text"],
+                    "sender": self.profile,
                 },
             )
             logger.info(
@@ -178,9 +160,8 @@ class ChatConsumer(WebsocketConsumer):
                     session_id=self.session.id,
                 )
                 self.channel_id = new_channel.id
-                async_to_sync(self.channel_layer.group_add)(
-                    group_prefix_channel + str(self.channel_id),
-                    self.channel_name,
+                channel_layer.group_add(
+                    group_prefix_channel + str(self.channel_id), self.channel_name
                 )
                 logger.info("New individual channel created")
                 logger.info("Channel id: %d", self.channel_id)
@@ -190,16 +171,11 @@ class ChatConsumer(WebsocketConsumer):
                     session_id=self.session.id
                 )
 
-            async_to_sync(self.channel_layer.group_send)(
+            channel_layer.group_send(
                 group_prefix_channel + str(self.channel_id),
+                MESSAGE.USER_INFO,
                 {
-                    "type": "group_msg_receive",
-                    "payload": {
-                        "type": MESSAGE.USER_INFO,
-                        "data": {
-                            "session_id": self.session.session_id,
-                        },
-                    },
+                    "session_id": self.session.session_id,
                 },
             )
 
@@ -213,15 +189,10 @@ class ChatConsumer(WebsocketConsumer):
                     )
                 except IntegrityError:
                     return
-                async_to_sync(self.channel_layer.group_send)(
+                channel_layer.group_send(
                     PREFIX.GROUP_ROOM + str(self.room_id),
-                    {
-                        "type": "group_msg_receive",
-                        "payload": {
-                            "type": MESSAGE.USER_JOINED,
-                            "data": {"newJoinee": self.profile},
-                        },
-                    },
+                    MESSAGE.USER_JOINED,
+                    {"newJoinee": self.profile},
                 )
 
     def group_msg_receive(self, event):

@@ -87,7 +87,10 @@ class Login(View):
             return HttpResponse(status=401)
 
         login(request, user)
-        return JsonResponse({"username": user.username})
+        print(request.META)
+        return JsonResponse(
+            {"username": user.username, "csrf_token": request.META["CSRF_COOKIE"]}
+        )
 
 
 @api_view(["GET"])

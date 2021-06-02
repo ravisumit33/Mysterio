@@ -12,7 +12,7 @@ import {
   TextField,
 } from '@material-ui/core';
 import { appStore, profileStore } from 'stores';
-import { fetchUrl } from 'utils';
+import { fetchUrl, isCordovaEnv } from 'utils';
 
 const LoginSignupDialog = (props) => {
   const [username, setUsername] = useState('');
@@ -84,6 +84,9 @@ const LoginSignupDialog = (props) => {
         if (!shouldSignup) {
           appStore.setShouldShowAlert(false);
           appStore.setShouldOpenLoginSignupDialog(false);
+          if (isCordovaEnv()) {
+            window.localStorage.setItem('token', responseData.csrf_token);
+          }
           if (appStore.groupCreationInProgress) {
             appStore.setShouldOpenNewGroupDialog(true);
           }

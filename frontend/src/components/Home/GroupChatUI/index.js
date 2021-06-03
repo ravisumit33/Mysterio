@@ -421,7 +421,7 @@ const GroupChatUI = () => {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="h5" className={classes.trendingGroupsTitle}>
-                  Trending Groups <TrendingUpIcon />
+                  Trending Rooms <TrendingUpIcon />
                 </Typography>
                 <List>
                   {trendingGroups.map((group) => (

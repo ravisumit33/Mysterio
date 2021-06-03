@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { Box, CssBaseline, makeStyles } from '@material-ui/core';
+import {
+  Box,
+  CssBaseline,
+  makeStyles,
+  createMuiTheme,
+  ThemeProvider,
+  responsiveFontSizes,
+} from '@material-ui/core';
 import { NavBar, Home, Footer, ChatContainer } from 'components';
 import UserInfoDialog from 'components/UserInfoDialog';
 import Alert from 'components/Alert';
@@ -15,6 +22,9 @@ const useStyles = makeStyles(() => ({
     position: 'relative',
   },
 }));
+
+let theme = createMuiTheme();
+theme = responsiveFontSizes(theme);
 
 const App = () => {
   const classes = useStyles();
@@ -47,15 +57,17 @@ const App = () => {
 
   return (
     <CssBaseline>
-      <Box className={classes.root}>
-        <Alert />
-        <NavBar />
-        <Home />
-        <Footer />
-        <ChatContainer />
-        <UserInfoDialog />
-        <LoginSignupDialog />
-      </Box>
+      <ThemeProvider theme={theme}>
+        <Box className={classes.root}>
+          <Alert />
+          <NavBar />
+          <Home />
+          <Footer />
+          <ChatContainer />
+          <UserInfoDialog />
+          <LoginSignupDialog />
+        </Box>
+      </ThemeProvider>
     </CssBaseline>
   );
 };

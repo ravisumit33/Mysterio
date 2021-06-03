@@ -34,9 +34,19 @@ const useStyles = makeStyles((theme) => ({
       alignItems: 'center',
     },
   },
+  groupChatImg: {
+    height: 520,
+    [theme.breakpoints.down('sm')]: {
+      height: 220,
+    },
+  },
   groupSearch: {
     [theme.breakpoints.down('sm')]: {
       justifyContent: 'center',
+      marginBottom: theme.spacing(2),
+    },
+    [theme.breakpoints.up('sm')]: {
+      margin: `${theme.spacing(3)}px 0`,
     },
   },
   groupSearchLabel: {
@@ -354,13 +364,13 @@ const GroupChatUI = () => {
         <Container>
           <Grid container justify="space-between" spacing={2} alignItems="flex-start">
             <Grid item xs={12} md={6}>
-              <Box py={2}>
-                <GroupChatImg width="100%" height="400" />
+              <Box pt={1}>
+                <GroupChatImg width="100%" className={classes.groupChatImg} />
               </Box>
             </Grid>
             <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
               <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
-                <Box width="50%" my={3}>
+                <Box width="50%">
                   <Grid item>
                     <Autocomplete
                       id="Groups-Search-Box"
@@ -407,7 +417,7 @@ const GroupChatUI = () => {
                   </Grid>
                 </Box>
                 <Grid item>
-                  <Box my={4}>
+                  <Box my={1}>
                     <Button
                       color="secondary"
                       variant="contained"
@@ -420,7 +430,7 @@ const GroupChatUI = () => {
                 </Grid>
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="h5" className={classes.trendingGroupsTitle}>
+                <Typography variant="h4" className={classes.trendingGroupsTitle}>
                   Trending Rooms <TrendingUpIcon />
                 </Typography>
                 <List>

@@ -42,10 +42,10 @@ const Card = (props) => {
           </Avatar>
         </Grid>
         <Grid item style={{ textAlign: 'center' }}>
-          <Typography variant="subtitle2">{title}</Typography>
+          <Typography variant="h6">{title}</Typography>
         </Grid>
         <Grid item style={{ textAlign: 'center' }}>
-          <Typography variant="caption">{description}</Typography>
+          <Typography variant="body2">{description}</Typography>
         </Grid>
       </Grid>
     </Box>

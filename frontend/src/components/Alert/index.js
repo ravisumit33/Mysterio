@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Snackbar } from '@material-ui/core';
+import { Box, Snackbar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
 import { observer } from 'mobx-react-lite';
@@ -32,7 +32,7 @@ const AppAlert = (props) => {
           severity={alert.severity}
           action={alert.action}
         >
-          {alert.text}
+          <Typography variant="body2">{alert.text}</Typography>
         </Alert>
       </Snackbar>
     </Box>

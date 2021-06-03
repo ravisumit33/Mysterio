@@ -35,7 +35,7 @@ const Contributors = () => {
         <Container>
           <Grid container direction="column" spacing={0}>
             <Grid item style={{ paddingTop: 40, textAlign: 'center' }}>
-              <Typography variant="h5">Contributors</Typography>
+              <Typography variant="h4">Contributors</Typography>
             </Grid>
             <Grid item container justify="center" style={{ paddingTop: 40 }}>
               {contributorsUI}

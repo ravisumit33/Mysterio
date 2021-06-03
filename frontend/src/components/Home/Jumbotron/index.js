@@ -12,7 +12,6 @@ const useStyle = makeStyles((theme) => ({
     flexDirection: 'column',
     position: 'relative',
     width: '100%',
-    minHeight: '60vh',
   },
   bg: {
     position: 'absolute',
@@ -37,6 +36,12 @@ const useStyle = makeStyles((theme) => ({
       'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.75), rgba(0,0,0,0.5), rgba(0,0,0,0.25), rgba(0,0,0,0))',
   },
   quickChatDesc: {
+    [theme.breakpoints.down('sm')]: {
+      padding: `${theme.spacing(1)}px 0`,
+    },
+    [theme.breakpoints.up('sm')]: {
+      padding: `${theme.spacing(2)}px 0`,
+    },
     color: theme.palette.common.white,
   },
 }));
@@ -67,8 +72,8 @@ const Jumbotron = () => {
           <Grid item container className={classes.quickChatTxtSection} direction="column">
             <Grid item container justify="center">
               <Grid item xs={12}>
-                <Box py={2}>
-                  <Typography variant="h4" className={classes.quickChatDesc} align="center">
+                <Box>
+                  <Typography variant="h3" className={classes.quickChatDesc} align="center">
                     Free Anonymous Chat
                   </Typography>
                 </Box>

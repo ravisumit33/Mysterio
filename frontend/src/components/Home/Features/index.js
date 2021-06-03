@@ -51,7 +51,7 @@ const Features = () => {
         <Container>
           <Grid container direction="column" style={{ paddingTop: 40 }}>
             <Grid item style={{ textAlign: 'center' }}>
-              <Typography variant="h5">Features</Typography>
+              <Typography variant="h4">Features</Typography>
             </Grid>
             <Grid item container xs justify="center" style={{ paddingTop: 40 }}>
               {featuresUI}

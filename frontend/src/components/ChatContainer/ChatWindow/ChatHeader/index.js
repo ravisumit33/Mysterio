@@ -1,7 +1,12 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   IconButton,
   ListItem,
   ListItemAvatar,
@@ -40,6 +45,8 @@ const ChatHeader = (props) => {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { name, reconnect, chatStatus, roomId } = chatWindowStore;
+  const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
+    useState(false);
 
   const handleReconnect = () => {
     reconnect();
@@ -84,60 +91,80 @@ const ChatHeader = (props) => {
           severity: 'success',
         });
         appStore.setShouldShowAlert(true);
-        appStore.updateGroupRooms();
       }
     });
   };
 
+  const deleteConfirmationDialog = (
+    <Dialog
+      open={shouldShowDeleteConfirmationDialog}
+      onClose={() => setShouldShowDeleteConfirmationDialog(false)}
+    >
+      <DialogTitle>Delete this Room?</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          This will permanently delete this room and all its messages.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setShouldShowDeleteConfirmationDialog(false)} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={handleDeleteRoom} color="primary">
+          Continue
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const individualChatIcons = (
-    <>
-      <IconButton
-        disabled={
-          chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
-        }
-        onClick={handleReconnect}
-        className={classes.icon}
-      >
-        <Tooltip title="Find someone else" arrow>
-          <ReplayIcon fontSize="small" />
-        </Tooltip>
-      </IconButton>
-    </>
+    <IconButton
+      disabled={
+        chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
+      }
+      onClick={handleReconnect}
+      className={classes.icon}
+    >
+      <Tooltip title="Find someone else" arrow>
+        <ReplayIcon fontSize="small" />
+      </Tooltip>
+    </IconButton>
   );
 
   const groupChatIcons = (
-    <>
-      <IconButton
-        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-        onClick={handleDeleteRoom}
-        className={classes.icon}
-      >
-        <Tooltip title="Delete room" arrow>
-          <DeleteIcon fontSize="small" />
-        </Tooltip>
-      </IconButton>
-    </>
+    <IconButton
+      disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+      onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+      className={classes.icon}
+    >
+      <Tooltip title="Delete room" arrow>
+        <DeleteIcon fontSize="small" />
+      </Tooltip>
+    </IconButton>
   );
 
   return (
-    <Box className={classes.root}>
-      <Box className={classes.infoWindow}>
-        <ListItem disableGutters>
-          <ListItemAvatar>
-            <Avatar />
-          </ListItemAvatar>
-          <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
-        </ListItem>
+    <>
+      <Box className={classes.root}>
+        <Box className={classes.infoWindow}>
+          <ListItem disableGutters>
+            <ListItemAvatar>
+              <Avatar />
+            </ListItemAvatar>
+            <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
+          </ListItem>
+        </Box>
+        <Box>
+          {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
+          <IconButton onClick={handleClose} className={classes.icon}>
+            <Tooltip title="Close" arrow>
+              <CloseIcon fontSize="small" />
+            </Tooltip>
+          </IconButton>
+        </Box>
       </Box>
-      <Box>
-        {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
-        <IconButton onClick={handleClose} className={classes.icon}>
-          <Tooltip title="Close" arrow>
-            <CloseIcon fontSize="small" />
-          </Tooltip>
-        </IconButton>
-      </Box>
-    </Box>
+      {deleteConfirmationDialog}
+    </>
   );
 };
 

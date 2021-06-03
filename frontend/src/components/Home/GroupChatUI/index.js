@@ -167,7 +167,6 @@ const GroupChatUI = () => {
         };
         setChatWindowData(chatWindowData);
         handleStartGroupChat();
-        updateGroupRooms();
       }
       setGroupCreationInProgress(false);
     });

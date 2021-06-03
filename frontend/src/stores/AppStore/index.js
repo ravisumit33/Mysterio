@@ -54,6 +54,7 @@ class AppStore {
   };
 
   removeChatWIndow = () => {
+    this.chatWindow.isGroupChat && this.updateGroupRooms();
     this.chatWindow.closeChatWindow();
     this.chatWindow = null;
     this.chatWindowData = {};

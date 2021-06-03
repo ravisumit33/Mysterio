@@ -49,7 +49,6 @@ class ChatWindowStore {
         this.setInitDone(true);
         this.setChatStatus(ChatStatus.ENDED);
         this.socket.close();
-        this.appStore.updateGroupRooms();
       } else {
         detailMessages = messages.map((msg) => {
           const message = {
@@ -169,7 +168,6 @@ class ChatWindowStore {
       case MessageType.CHAT_DELETE:
         this.socket.close();
         this.setChatStatus(ChatStatus.ENDED);
-        this.appStore.updateGroupRooms();
         break;
       default:
         log.error('Unsupported message type', messageType);

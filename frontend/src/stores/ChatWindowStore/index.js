@@ -74,12 +74,15 @@ class ChatWindowStore {
           return message;
         });
       }
-      const messagesToAdd = detailMessages.filter((msg) => {
+      this.prevMessageList = [];
+      detailMessages.forEach((msg) => {
         const processedMessage = this.processMessage(msg, true);
-        return !isEmptyObj(processedMessage);
+        if (!isEmptyObj(processedMessage)) {
+          this.prevMessageList.push(processedMessage);
+        }
       });
       this.chatStartedPromise.then(() => {
-        this.addInitMessageList(messagesToAdd);
+        this.addInitMessageList(this.prevMessageList);
         this.setInitDone(true);
       });
     });
@@ -148,8 +151,9 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
-        const lastMessageIdx = isInitMsg ? 0 : this.messageList.length - 1;
-        const lastMessage = this.messageList.length && this.messageList[lastMessageIdx];
+        const msgList = isInitMsg ? this.prevMessageList : this.messageList;
+        const lastMessageIdx = msgList.length - 1;
+        const lastMessage = lastMessageIdx >= 0 && msgList[lastMessageIdx];
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
@@ -159,7 +163,7 @@ class ChatWindowStore {
           isInitMsg
             ? newLastMessage.data.text.unshift(messageData.text)
             : newLastMessage.data.text.push(messageData.text);
-          this.messageList[lastMessageIdx] = newLastMessage;
+          msgList[lastMessageIdx] = newLastMessage;
           return {};
         }
         messageData.text = [messageData.text];

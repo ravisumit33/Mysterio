@@ -73,7 +73,10 @@ const NavBar = () => {
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
-  const handleNavbarBtnClick = (key) => setFocusedBtnKey(key);
+  const handleNavbarBtnClick = (key) => {
+    setFocusedBtnKey(key);
+    setHamburgerTriggerElement(null);
+  };
   const handleHamburgerClick = (event) => {
     event.preventDefault();
     setHamburgerTriggerElement(event.currentTarget);

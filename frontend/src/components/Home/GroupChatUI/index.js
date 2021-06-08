@@ -4,19 +4,12 @@ import {
   Box,
   Button,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  FormControlLabel,
   Grid,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   makeStyles,
-  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -26,7 +19,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
 import { TextAvatar } from 'components/Avatar';
 import { profileStore, appStore } from 'stores';
-import { fetchUrl } from 'utils';
+import NewGroupDialog from './NewGroupDialog';
+import GroupPasswordDialog from './GroupPasswordDialog';
 
 const useStyles = makeStyles((theme) => ({
   groupChatUI: {
@@ -72,33 +66,16 @@ const GroupChatUI = () => {
   const {
     groupRooms,
     setGroupRoomsFetched,
-    setGroupCreationInProgress,
     addChatWindow,
     setChatWindowData,
     setShouldOpenUserInfoDialog,
     setShouldOpenLoginSignupDialog,
-    shouldOpenNewGroupDialog,
-    setShouldOpenNewGroupDialog,
     updateGroupRooms,
   } = appStore;
   const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
-  const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
-  const [shouldUseGroupPassword, setShouldUseGroupPassword] = useState(false);
-  const [newGroupPassword, setNewGroupPassword] = useState('');
-  const [newGroupNameFieldData, setNewGroupNameFieldData] = useState({
-    help_text: '',
-    error: false,
-  });
-  const [newGroupPasswordFieldData, setNewGroupPasswordFieldData] = useState({
-    help_text: '',
-    error: false,
-  });
-  const [protectedGroupPasswordFieldData, setProtectedGroupPasswordFieldData] = useState({
-    help_text: '',
-    error: false,
-  });
+  const [shouldOpenNewGroupDialog, setShouldOpenNewGroupDialog] = useState(false);
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
 
   useEffect(() => {
@@ -125,61 +102,8 @@ const GroupChatUI = () => {
 
   const resetState = () => {
     setSelectedGroup({ id: -1, name: '' });
-    setSelectedGroupPassword('');
     setNewGroupName('');
     setPendingNewGroupName('');
-    setShouldUseGroupPassword(false);
-    setNewGroupPassword('');
-  };
-
-  const handleCreateGroup = () => {
-    fetchUrl('/api/chat/groups/', {
-      method: 'post',
-      body: JSON.stringify({
-        name: newGroupName,
-        password: newGroupPassword,
-        is_protected: shouldUseGroupPassword,
-      }),
-    }).then((response) => {
-      const responseData = response.data;
-      const groupNameFieldData = { ...newGroupNameFieldData };
-      const groupPasswordFieldData = { ...newGroupPasswordFieldData };
-      if (response.status >= 400) {
-        if (responseData.name) {
-          [groupNameFieldData.help_text] = responseData.name;
-          groupNameFieldData.error = true;
-        } else {
-          groupNameFieldData.help_text = '';
-          groupNameFieldData.error = false;
-        }
-        if (responseData.password) {
-          [groupPasswordFieldData.help_text] = responseData.password;
-          groupPasswordFieldData.error = true;
-        } else {
-          groupPasswordFieldData.help_text = '';
-          groupPasswordFieldData.error = false;
-        }
-        appStore.setAlert({
-          text: 'Unable to create room.',
-          severity: 'error',
-        });
-        appStore.setShouldShowAlert(true);
-        setNewGroupNameFieldData(groupNameFieldData);
-        setNewGroupPasswordFieldData(groupPasswordFieldData);
-        setShouldOpenNewGroupDialog(true);
-      } else {
-        appStore.setShouldShowAlert(false);
-        setShouldOpenNewGroupDialog(false);
-        const chatWindowData = {
-          roomId: response.data.id,
-          name: response.data.name,
-          password: newGroupPassword,
-        };
-        setChatWindowData(chatWindowData);
-        handleStartGroupChat();
-      }
-      setGroupCreationInProgress(false);
-    });
   };
 
   const handleStartChat = (group) => {
@@ -197,7 +121,6 @@ const GroupChatUI = () => {
         handleStartGroupChat();
       }
     } else if (newGroupName) {
-      setGroupCreationInProgress(true);
       if (!profileStore.isLoggedIn) {
         setShouldOpenLoginSignupDialog(true);
       } else {
@@ -212,151 +135,6 @@ const GroupChatUI = () => {
     }
     setNewGroupName(pendingNewGroupName);
   };
-
-  const groupPasswordCheck = () => {
-    fetchUrl('/api/chat/group_password_check/', {
-      method: 'post',
-      body: JSON.stringify({ id: appStore.chatWindowData.roomId, password: selectedGroupPassword }),
-    }).then((response) => {
-      const responseData = response.data;
-      if (responseData.check) {
-        setChatWindowData({
-          ...appStore.chatWindowData,
-          password: selectedGroupPassword,
-        });
-        handleStartGroupChat();
-        appStore.setShouldShowAlert(false);
-        setShouldOpenGroupPasswordDialog(false);
-      } else {
-        appStore.setAlert({
-          text: 'Invalid room password.',
-          severity: 'error',
-        });
-        appStore.setShouldShowAlert(true);
-        setShouldOpenGroupPasswordDialog(true);
-        const newProtectedGroupPasswordFieldData = { ...protectedGroupPasswordFieldData };
-        if (responseData.password) {
-          [newProtectedGroupPasswordFieldData.help_text] = responseData.password;
-          newProtectedGroupPasswordFieldData.error = true;
-        } else {
-          newProtectedGroupPasswordFieldData.help_text = '';
-          newProtectedGroupPasswordFieldData.error = false;
-        }
-        setProtectedGroupPasswordFieldData(newProtectedGroupPasswordFieldData);
-      }
-    });
-  };
-
-  const newGroupDialog = (
-    <Dialog
-      open={shouldOpenNewGroupDialog}
-      onClose={() => setShouldOpenNewGroupDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && handleCreateGroup()}
-    >
-      <DialogTitle>New Room</DialogTitle>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          handleCreateGroup();
-          evt.stopPropagation();
-        }}
-      >
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="Name"
-            fullWidth
-            value={newGroupName}
-            onChange={(evt) => setNewGroupName(evt.target.value)}
-            helperText={newGroupNameFieldData.help_text}
-            error={newGroupNameFieldData.error}
-            required
-          />
-          <TextField
-            autoFocus
-            disabled={!shouldUseGroupPassword}
-            margin="dense"
-            label="Password"
-            fullWidth
-            value={newGroupPassword}
-            onChange={(evt) => setNewGroupPassword(evt.target.value)}
-            required
-            helperText={shouldUseGroupPassword && newGroupPasswordFieldData.help_text}
-            error={shouldUseGroupPassword && newGroupPasswordFieldData.error}
-            inputProps={{ type: 'password' }}
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={shouldUseGroupPassword}
-                onChange={(evt) => setShouldUseGroupPassword(evt.target.checked)}
-              />
-            }
-            label="Protect with password"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="submit"
-            onClick={(evt) => {
-              evt.preventDefault();
-              handleCreateGroup();
-              evt.stopPropagation();
-            }}
-            color="primary"
-          >
-            Create room
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
-  );
-
-  const groupPasswordDialog = (
-    <Dialog
-      open={shouldOpenGroupPasswordDialog}
-      onClose={() => setShouldOpenGroupPasswordDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && groupPasswordCheck()}
-    >
-      <DialogTitle>Enter Password</DialogTitle>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          groupPasswordCheck();
-          evt.stopPropagation();
-        }}
-      >
-        <DialogContent>
-          <DialogContentText>This room is protected with a password</DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Password"
-            fullWidth
-            value={selectedGroupPassword}
-            onChange={(evt) => setSelectedGroupPassword(evt.target.value)}
-            required
-            helperText={protectedGroupPasswordFieldData.help_text}
-            error={protectedGroupPasswordFieldData.error}
-            inputProps={{ type: 'password' }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="submit"
-            onClick={(evt) => {
-              evt.preventDefault();
-              groupPasswordCheck();
-              evt.stopPropagation();
-            }}
-            color="primary"
-          >
-            Enter room
-          </Button>
-        </DialogActions>
-      </form>
-    </Dialog>
-  );
 
   return (
     <>
@@ -458,8 +236,18 @@ const GroupChatUI = () => {
           </Grid>
         </Container>
       </Box>
-      {newGroupDialog}
-      {groupPasswordDialog}
+      <NewGroupDialog
+        shouldOpenNewGroupDialog={shouldOpenNewGroupDialog}
+        setShouldOpenNewGroupDialog={setShouldOpenNewGroupDialog}
+        newGroupName={newGroupName}
+        setNewGroupName={setNewGroupName}
+        handleStartGroupChat={handleStartGroupChat}
+      />
+      <GroupPasswordDialog
+        shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
+        setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}
+        handleStartGroupChat={handleStartGroupChat}
+      />
     </>
   );
 };

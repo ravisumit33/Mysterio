@@ -1,9 +1,9 @@
-# pylint: disable=C0103
+# pylint: disable=invalid-name
 from enum import IntEnum
 from dataclasses import dataclass
 
 
-class MESSAGE(IntEnum):
+class MessageType(IntEnum):
     """Message enum to be sent on client"""
 
     USER_JOINED = 1
@@ -14,7 +14,7 @@ class MESSAGE(IntEnum):
 
 
 @dataclass
-class PREFIX:
+class GroupPrefix:
     """Prefix used in making group names"""
 
     INDIVIDUAL_CHANNEL = "grp_IndividualChannel_"

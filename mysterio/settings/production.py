@@ -1,5 +1,5 @@
 import dj_database_url
-from mysterio.settings.base import *  # pylint: disable=W0614,W0401
+from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 

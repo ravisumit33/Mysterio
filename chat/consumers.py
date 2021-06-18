@@ -6,7 +6,7 @@ from django.db.utils import IntegrityError
 from chat.models import ChatSession
 import chat.models.channel as Channel
 import chat.models.message as Message
-from chat.constants import MESSAGE, PREFIX
+from chat.constants import MessageType, GroupPrefix
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -44,12 +44,12 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
             channel_layer.group_add(
-                PREFIX.GROUP_ROOM + str(self.room_id), self.channel_name
+                GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name
             )
             logger.info("New group channel created with room_id %d", self.room_id)
             self.channel_id = new_channel.id
             channel_layer.group_add(
-                PREFIX.GROUP_CHANNEL + str(self.channel_id), self.channel_name
+                GroupPrefix.GROUP_CHANNEL + str(self.channel_id), self.channel_name
             )
             logger.info("Channel id: %d", self.channel_id)
         self.accept()
@@ -60,20 +60,20 @@ class ChatConsumer(WebsocketConsumer):
             return
 
         if not self.is_group_consumer:
-            group_prefix = PREFIX.INDIVIDUAL_ROOM
+            group_prefix = GroupPrefix.INDIVIDUAL_ROOM
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
             channel_layer.group_discard(
-                PREFIX.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
+                GroupPrefix.INDIVIDUAL_CHANNEL + str(self.channel_id), self.channel_name
             )
             logger.info("Individual channel deleted")
         else:
-            group_prefix = PREFIX.GROUP_ROOM
+            group_prefix = GroupPrefix.GROUP_ROOM
             try:
                 Message.TextMessage.objects.create(
                     group_room_id=self.room_id,
                     sender_channel_id=self.channel_id,
                     text=f"{self.profile['name']} left",
-                    message_type=MESSAGE.USER_LEFT,
+                    message_type=MessageType.USER_LEFT,
                 )
             except IntegrityError:
                 # Group room deleted
@@ -86,7 +86,7 @@ class ChatConsumer(WebsocketConsumer):
             )
             channel_layer.group_send(
                 group_prefix + str(self.room_id),
-                MESSAGE.USER_LEFT,
+                MessageType.USER_LEFT,
                 {"resignee": self.profile},
             )
             logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
@@ -95,33 +95,33 @@ class ChatConsumer(WebsocketConsumer):
         payload_json = json.loads(text_data)
         message_type = payload_json["type"]
         message_data = payload_json["data"]
-        if message_type == MESSAGE.TEXT:
+        if message_type == MessageType.TEXT:
             if self.room_id is None:
                 logger.error(
                     "SuspiciousOperation : Text message received outside of room"
                 )
                 self.close()
                 return
-            group_prefix = PREFIX.INDIVIDUAL_ROOM
+            group_prefix = GroupPrefix.INDIVIDUAL_ROOM
             if self.is_group_consumer:
-                group_prefix = PREFIX.GROUP_ROOM
+                group_prefix = GroupPrefix.GROUP_ROOM
                 try:
                     Message.TextMessage.objects.create(
                         group_room_id=self.room_id,
                         sender_channel_id=self.channel_id,
                         text=message_data["text"],
-                        message_type=MESSAGE.TEXT,
+                        message_type=MessageType.TEXT,
                     )
                 except IntegrityError:
                     channel_layer.group_send(
                         group_prefix + str(self.room_id),
-                        MESSAGE.CHAT_DELETE,
+                        MessageType.CHAT_DELETE,
                         {"text": "Group is deleted"},
                     )
                     return
             channel_layer.group_send(
                 group_prefix + str(self.room_id),
-                MESSAGE.TEXT,
+                MessageType.TEXT,
                 {
                     "text": message_data["text"],
                     "sender": self.profile,
@@ -134,7 +134,7 @@ class ChatConsumer(WebsocketConsumer):
             )
             logger.info("%s", message_data["text"])
             # TODO: remove this log as messages will be encrypted
-        elif message_type == MESSAGE.USER_INFO:
+        elif message_type == MessageType.USER_INFO:
             logger.info("User details:")
             logger.info(message_data)
             name = message_data["name"]
@@ -154,7 +154,7 @@ class ChatConsumer(WebsocketConsumer):
             }
 
             if not self.is_group_consumer:
-                group_prefix_channel = PREFIX.INDIVIDUAL_CHANNEL
+                group_prefix_channel = GroupPrefix.INDIVIDUAL_CHANNEL
                 new_channel = Channel.IndividualChannel.objects.create(
                     name=self.channel_name,
                     session_id=self.session.id,
@@ -166,14 +166,14 @@ class ChatConsumer(WebsocketConsumer):
                 logger.info("New individual channel created")
                 logger.info("Channel id: %d", self.channel_id)
             else:
-                group_prefix_channel = PREFIX.GROUP_CHANNEL
+                group_prefix_channel = GroupPrefix.GROUP_CHANNEL
                 Channel.GroupChannel.objects.filter(name=self.channel_name).update(
                     session_id=self.session.id
                 )
 
             channel_layer.group_send(
                 group_prefix_channel + str(self.channel_id),
-                MESSAGE.USER_INFO,
+                MessageType.USER_INFO,
                 {
                     "session_id": self.session.session_id,
                 },
@@ -185,13 +185,13 @@ class ChatConsumer(WebsocketConsumer):
                         group_room_id=self.room_id,
                         sender_channel_id=self.channel_id,
                         text=f"{name} entered",
-                        message_type=MESSAGE.USER_JOINED,
+                        message_type=MessageType.USER_JOINED,
                     )
                 except IntegrityError:
                     return
                 channel_layer.group_send(
-                    PREFIX.GROUP_ROOM + str(self.room_id),
-                    MESSAGE.USER_JOINED,
+                    GroupPrefix.GROUP_ROOM + str(self.room_id),
+                    MessageType.USER_JOINED,
                     {"newJoinee": self.profile},
                 )
 

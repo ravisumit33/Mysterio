@@ -4,7 +4,7 @@ from chat.utils import channel_layer
 from chat.models.room import IndividualRoom
 from chat.models.channel import IndividualChannel
 from chat.models.session import ChatSession
-from chat.constants import MESSAGE, PREFIX
+from chat.constants import MessageType, GroupPrefix
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +73,12 @@ def process_unmatched_channels():
                 channel = channels[channel_idx_pair[i]]
                 match_channel_idx = channel_idx_pair[1 - i]
                 channel_layer.group_add(
-                    PREFIX.INDIVIDUAL_ROOM + str(room_id),
+                    GroupPrefix.INDIVIDUAL_ROOM + str(room_id),
                     channel["name"],
                 )
                 channel_layer.group_send(
-                    PREFIX.INDIVIDUAL_CHANNEL + str(channel["id"]),
-                    MESSAGE.USER_JOINED,
+                    GroupPrefix.INDIVIDUAL_CHANNEL + str(channel["id"]),
+                    MessageType.USER_JOINED,
                     {
                         "room_id": room_id,
                         "match": {

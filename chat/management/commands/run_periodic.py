@@ -18,16 +18,16 @@ def run_scheduler():
     process_scheduler = BlockingScheduler()
     # TODO: set appropiate time interval
     @process_scheduler.scheduled_job("interval", seconds=1)
-    def match_job():  # pylint: disable=W0612
+    def match_job():
         process_unmatched_channels()
 
     # TODO: set appropiate time interval
     @process_scheduler.scheduled_job("interval", hours=4, next_run_time=timezone.now())
-    def trending_groups_job():  # pylint: disable=W0612
+    def trending_groups_job():
         update_trending_groups()
 
     @process_scheduler.scheduled_job("interval", days=1, next_run_time=timezone.now())
-    def group_room_job():  # pylint: disable=W0612
+    def group_room_job():
         delete_old_groups()
 
     process_scheduler.start()

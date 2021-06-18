@@ -8,7 +8,7 @@ def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysterio.settings.local")
     try:
-        from django.core.management import (  # pylint: disable=C0415
+        from django.core.management import (  # pylint: disable=import-outside-toplevel
             execute_from_command_line,
         )
     except ImportError as exc:

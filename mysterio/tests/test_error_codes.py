@@ -48,24 +48,40 @@ class ErrorCodeHandlerTests(SimpleTestCase):
         super().tearDownClass()
         logging.disable(logging.NOTSET)
 
-    status_codes = [400, 403, 404, 500]
-    templates = ["400.html", "403.html", "404.html", "500.html"]
-    user_messages = [
-        "Bad request",
-        "Permission denied",
-        "Page not found",
-        "Internal server error",
+    responses = [
+        {
+            "status_code": 400,
+            "template": "400.html",
+            "user_message": "Bad request",
+        },
+        {
+            "status_code": 403,
+            "template": "403.html",
+            "user_message": "Permission denied",
+        },
+        {
+            "status_code": 404,
+            "template": "404.html",
+            "user_message": "Page not found",
+        },
+        {
+            "status_code": 500,
+            "template": "500.html",
+            "user_message": "Internal server error",
+        },
     ]
 
     def test_correct_html_rendered_on_error_code(self):
         """Test if correct template and error code exists in response after http errors"""
-        for i in range(len(self.status_codes)):
-            with self.subTest(i=i):
-                response = self.client.get("/" + str(self.status_codes[i]) + "/")
-                self.assertTemplateUsed(response, self.templates[i])
+        for expected_response in self.responses:
+            with self.subTest(status_code=expected_response["status_code"]):
+                client_response = self.client.get(
+                    "/" + str(expected_response["status_code"]) + "/"
+                )
+                self.assertTemplateUsed(client_response, expected_response["template"])
                 self.assertContains(
-                    response,
-                    self.user_messages[i],
-                    status_code=self.status_codes[i],
+                    client_response,
+                    expected_response["user_message"],
+                    status_code=expected_response["status_code"],
                     html=True,
                 )

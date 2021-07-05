@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, Grid, IconButton, makeStyles } from '@material-ui/core';
+import { Box, Button, Grid, IconButton, makeStyles, Tooltip } from '@material-ui/core';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
@@ -40,7 +40,7 @@ const CustomButton = (props) => {
     buttonComponent = (
       <Button
         size="small"
-        href={data.href}
+        onClick={data.action}
         className={clsx(classes.buttonCommon, classes.buttonText)}
         disableRipple={disableRipple}
       >
@@ -49,9 +49,7 @@ const CustomButton = (props) => {
     );
   } else {
     const commonIconBtnProps = {
-      href: data.href,
-      target: '_blank',
-      rel: 'noopener',
+      onClick: data.action,
       disableRipple,
     };
     buttonComponent = isHamburgerMenu ? (
@@ -60,13 +58,20 @@ const CustomButton = (props) => {
         {...commonIconBtnProps}
         className={clsx(classes.buttonCommon, classes.buttonText)}
         endIcon={<IconComponent />}
+        size="small"
       >
         {data.text}
       </Button>
     ) : (
       // eslint-disable-next-line react/jsx-props-no-spreading
-      <IconButton {...commonIconBtnProps} className={classes.buttonCommon}>
-        <IconComponent />
+      <IconButton {...commonIconBtnProps} className={classes.buttonCommon} size="small">
+        <Tooltip title={data.text} arrow>
+          {/* Need to wrap icon component in Box for tooltip to support functional components. */}
+          {/* https://stackoverflow.com/a/57528471/6842304  */}
+          <Box>
+            <IconComponent />
+          </Box>
+        </Tooltip>
       </IconButton>
     );
   }
@@ -91,7 +96,7 @@ CustomButton.propTypes = {
     key: PropTypes.string.isRequired,
     text: PropTypes.string,
     icon: PropTypes.elementType,
-    href: PropTypes.string,
+    action: PropTypes.func,
   }),
   focused: PropTypes.bool,
   onClickHandler: PropTypes.func.isRequired,

@@ -1,5 +1,5 @@
 import json
-from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth import get_user_model, authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -9,6 +9,7 @@ from django.middleware.csrf import get_token
 from django.views.generic.base import View
 from django.http import HttpResponse, JsonResponse
 from rest_framework import viewsets, mixins
+from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from core.serializers import UserSerializer
@@ -29,13 +30,20 @@ class UserViewSet(
     serializer_class = UserSerializer
     permission_classes = [UserPermission]
 
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, args, kwargs)
+        response_data = {**response.data, "csrf_token": request.META["CSRF_COOKIE"]}
+        response_status = response.status_code
+        return Response(response_data, status=response_status)
 
+
+#  Using View instead of APIView because DRF doesn't support sensitive_post_parameters
+#  https://github.com/encode/django-rest-framework/issues/2768
 class Login(View):
     """
     Login view
     """
 
-    @method_decorator(csrf_protect)
     @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
         """
@@ -90,6 +98,16 @@ class Login(View):
         return JsonResponse(
             {"username": user.username, "csrf_token": request.META["CSRF_COOKIE"]}
         )
+
+
+@api_view(["GET"])
+@never_cache
+def logout_user(request):
+    """
+    Logout user
+    """
+    logout(request)
+    return HttpResponse(status=200)
 
 
 @api_view(["GET"])

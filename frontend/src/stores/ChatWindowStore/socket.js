@@ -23,7 +23,7 @@ class Socket {
     }
     const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
     this.socket = new ReconnectingWebSocket(
-      `${websocketProtocol}://${serverHost}/ws/chat${groupChatURL}`
+      `${websocketProtocol}://${serverHost}/chat${groupChatURL}/`
     );
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
@@ -44,14 +44,12 @@ class Socket {
   };
 
   handleMessage = (event) => {
-    log.info('socket receive', event.data);
     const payload = JSON.parse(event.data);
     const processedMessage = this.chatWindowStore.processMessage(payload);
     !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
   };
 
   send = (msgType, msgData) => {
-    log.info('send over socket', msgData);
     const payload = {
       type: msgType,
       data: msgData,

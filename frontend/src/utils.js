@@ -70,7 +70,7 @@ export const fetchUrl = (url, data) => {
     headers,
     body: data && data.body,
   }).then((response) => {
-    const responseObj = { status: response.status };
+    const responseObj = { status: response.status, data: {} };
     return response
       .text()
       .then((text) => (text ? { ...responseObj, data: JSON.parse(text) } : responseObj));

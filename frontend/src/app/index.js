@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import {
   Box,
   CssBaseline,
@@ -10,7 +11,7 @@ import {
 import { NavBar, Home, Footer, ChatContainer } from 'components';
 import UserInfoDialog from 'components/UserInfoDialog';
 import Alert from 'components/Alert';
-import LoginSignupDialog from 'components/LoginSignupDialog';
+import Auth from 'components/Auth';
 import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
 import PullToRefresh from 'pulltorefreshjs';
@@ -30,16 +31,15 @@ const App = () => {
   const classes = useStyles();
 
   useEffect(() => {
-    const csrfPromise = fetchUrl('/api/csrf/');
-    csrfPromise.then((resp) => {
+    fetchUrl('/api/login/').then((response) => {
+      if (response.data && response.data.username) {
+        profileStore.setUsername(response.data.username);
+      }
+    });
+    fetchUrl('/api/csrf/').then((resp) => {
       if (isCordovaEnv()) {
         window.localStorage.setItem('token', resp.data.token);
       }
-      fetchUrl('/api/login/').then((response) => {
-        if (response.data && response.data.username) {
-          profileStore.setUsername(response.data.username);
-        }
-      });
     });
     PullToRefresh.init({
       mainElement: 'body',
@@ -59,13 +59,24 @@ const App = () => {
     <CssBaseline>
       <ThemeProvider theme={theme}>
         <Box className={classes.root}>
-          <Alert />
-          <NavBar />
-          <Home />
-          <Footer />
-          <ChatContainer />
-          <UserInfoDialog />
-          <LoginSignupDialog />
+          <Router>
+            <Alert />
+            <NavBar />
+            <Switch>
+              <Route exact path="/">
+                <Home />
+                <Footer />
+                <ChatContainer />
+                <UserInfoDialog />
+              </Route>
+              <Route path="/login">
+                <Auth />
+              </Route>
+              <Route path="/register">
+                <Auth shouldRegister />
+              </Route>
+            </Switch>
+          </Router>
         </Box>
       </ThemeProvider>
     </CssBaseline>

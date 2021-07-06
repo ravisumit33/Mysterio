@@ -45,6 +45,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "mysterio.urls"
+FRONTEND_ROUTES = [
+    "login/",
+    "register/",
+]
 
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 MYSTERIO_DIR = os.path.join(BASE_DIR, "mysterio")
@@ -117,6 +121,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
+    os.path.join(MYSTERIO_DIR, "static"),
     os.path.join(FRONTEND_DIR, "build", "static"),
 ]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

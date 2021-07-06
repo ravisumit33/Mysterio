@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   Box,
@@ -62,6 +63,8 @@ const useStyles = makeStyles((theme) => ({
 
 const GroupChatUI = () => {
   const classes = useStyles();
+  const history = useHistory();
+  const location = useLocation();
 
   const {
     groupRooms,
@@ -69,13 +72,13 @@ const GroupChatUI = () => {
     addChatWindow,
     setChatWindowData,
     setShouldOpenUserInfoDialog,
-    setShouldOpenLoginSignupDialog,
+    shouldOpenNewGroupDialog,
+    setShouldOpenNewGroupDialog,
     updateGroupRooms,
   } = appStore;
   const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
-  const [shouldOpenNewGroupDialog, setShouldOpenNewGroupDialog] = useState(false);
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
 
   useEffect(() => {
@@ -122,10 +125,9 @@ const GroupChatUI = () => {
       }
     } else if (newGroupName) {
       if (!profileStore.isLoggedIn) {
-        setShouldOpenLoginSignupDialog(true);
-      } else {
-        setShouldOpenNewGroupDialog(true);
+        history.push('/login', { from: location });
       }
+      setShouldOpenNewGroupDialog(true);
     }
   };
 
@@ -217,7 +219,7 @@ const GroupChatUI = () => {
                       button
                       onClick={() => handleStartChat(group)}
                       key={group.id}
-                      style={{ maxWidth: 'fit-content' }}
+                      style={{ maxWidth: 'max-content' }}
                     >
                       <ListItemAvatar>
                         <TextAvatar name={group.name} />

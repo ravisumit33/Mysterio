@@ -29,7 +29,7 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
             GroupPrefix.GROUP_ROOM + str(group_room.id),
             MessageType.CHAT_DELETE,
             {
-                "text": "Group is deleted",
+                "text": "Room is deleted",
             },
         )
         return super().destroy(request, *args, **kwargs)
@@ -39,7 +39,7 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
 @permission_classes([AllowAny])
 def check_group_password(request):
     """
-    Check password for group rooms
+    API endpoint to check password for group rooms
     """
     post_data = request.data
     group_id = post_data["id"]

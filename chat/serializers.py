@@ -50,7 +50,7 @@ class BaseGroupRoomSerializer(serializers.ModelSerializer):
 
     def get_message_count(self, group_room):  # pylint: disable=no-self-use
         """
-        Getter function for group messages serializer fields
+        Getter function for message_count serializer fields
         """
         return group_room.group_messages.count()
 
@@ -75,7 +75,7 @@ class ExtendedGroupRoomSerializer(BaseGroupRoomSerializer):
 
     def get_group_messages(self, group_room):  # pylint: disable=no-self-use
         """
-        Sort group messages in decreasing order of sent_at
+        Provide group messageds sorted by sent_at
         """
         messages = group_room.group_messages.order_by("sent_at")
         return MessageSerializer(messages, many=True).data

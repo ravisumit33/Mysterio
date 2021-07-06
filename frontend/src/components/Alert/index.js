@@ -22,7 +22,7 @@ const AppAlert = (props) => {
     <Box className={classes.root}>
       <Snackbar
         open={shouldShowAlert}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setShouldShowAlert(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         action={alert.action}

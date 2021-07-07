@@ -30,7 +30,7 @@ def get_group_stats():
     start_time = timezone.now() - timezone.timedelta(days=time_window)
     initial_message_counts = {
         (timezone.now() - timezone.timedelta(days=days_num)).date(): 0
-        for days_num in range(time_window)
+        for days_num in range(time_window + 1)
     }
     group_stats = {}
     for message_model in message_models:

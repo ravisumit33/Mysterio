@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import RouterLink from 'components/RouterLink';
-import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@material-ui/core';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 
 const UserForm = (props) => {
   const {
@@ -15,6 +24,8 @@ const UserForm = (props) => {
     handleFormSubmit,
     redirectTo,
   } = props;
+  const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
+
   return (
     <form
       onSubmit={(evt) => {
@@ -59,8 +70,18 @@ const UserForm = (props) => {
             required={passwordFieldData.required}
             helperText={passwordFieldData.help_text}
             error={passwordFieldData.error}
-            inputProps={{
-              type: 'password',
+            InputProps={{
+              ...(!shouldUnmaskPassword && { type: 'password' }),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
+                    disableRipple
+                  >
+                    {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
             autoComplete="current-password"
           />

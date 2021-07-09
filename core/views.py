@@ -1,6 +1,5 @@
 import json
 from django.contrib.auth import get_user_model, authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_protect
@@ -14,6 +13,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from core.serializers import UserSerializer
 from core.permissions import UserPermission
+from core.forms import AuthenticationForm
 
 
 class UserViewSet(
@@ -51,7 +51,7 @@ class Login(View):
         """
         user = request.user
         if request.user.is_authenticated:
-            return JsonResponse({"username": user.username})
+            return JsonResponse({"email": user.email})
         return HttpResponse(status=200)
 
     @method_decorator(csrf_protect)
@@ -96,7 +96,7 @@ class Login(View):
 
         login(request, user)
         return JsonResponse(
-            {"username": user.username, "csrf_token": request.META["CSRF_COOKIE"]}
+            {"email": user.email, "csrf_token": request.META["CSRF_COOKIE"]}
         )
 
 

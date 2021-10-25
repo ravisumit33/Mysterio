@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import { TextAvatar } from 'components/Avatar';
+import Avatar from 'components/Avatar';
 import Typography from '@material-ui/core/Typography';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
@@ -86,7 +86,11 @@ const ChatMessage = ({ messages, sender, side }) => {
     <Grid container spacing={2} justify={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
         <Grid item>
-          <TextAvatar name={sender.name || '?'} className={classes.avatar} />
+          <Avatar
+            name={sender.name || '?'}
+            avatarUrl={sender.avatarUrl}
+            className={classes.avatar}
+          />
         </Grid>
       )}
       <Grid item xs>

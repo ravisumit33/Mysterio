@@ -1,7 +1,8 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
 import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
-import JumbotronBG from 'assets/images/jumbotron_bg.jpg';
+import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
 import { appStore, profileStore } from 'stores';
 import { observer } from 'mobx-react-lite';
@@ -48,9 +49,11 @@ const useStyle = makeStyles((theme) => ({
 
 const Jumbotron = () => {
   const classes = useStyle();
+  const history = useHistory();
 
   const handleStartIndividualChat = () => {
     appStore.addChatWindow();
+    history.push('/chat');
   };
 
   const handleStartChat = () => {

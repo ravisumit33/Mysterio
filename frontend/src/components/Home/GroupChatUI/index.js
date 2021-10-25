@@ -99,6 +99,7 @@ const GroupChatUI = () => {
       setShouldOpenUserInfoDialog(true);
     } else {
       addChatWindow();
+      history.push('/chat');
     }
     resetState();
   };

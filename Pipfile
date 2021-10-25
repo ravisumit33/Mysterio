@@ -15,6 +15,11 @@ django-cors-headers = "*"
 whitenoise = "*"
 dj-database-url = "*"
 python-dotenv = {extras = ["cli"], version = "*"}
+dj_rest_auth = {extras = ["with_social"], version = "*"}
+google-api-python-client = "*"
+google-auth-oauthlib = "*"
+google-auth-httplib2 = "*"
+djangorestframework-simplejwt = "*"
 
 [dev-packages]
 pylint = "*"

@@ -7,7 +7,11 @@ class ProfileStore {
 
   sessionId = '';
 
-  username = '';
+  email = '';
+
+  profileInitialized = false;
+
+  social = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -25,12 +29,24 @@ class ProfileStore {
     this.sessionId = newSessionId;
   };
 
-  setUsername = (newUserName) => {
-    this.username = newUserName;
+  setProfileInitialized = (newProfileInitialized) => {
+    this.profileInitialized = newProfileInitialized;
+  };
+
+  setEmail = (newEmail) => {
+    this.email = newEmail;
+  };
+
+  setSocial = (newSocial) => {
+    this.social = newSocial;
   };
 
   get isLoggedIn() {
-    return this.username !== '';
+    return this.email !== '';
+  }
+
+  get username() {
+    return this.email.split('@')[0];
   }
 }
 

@@ -46,12 +46,16 @@ Anonymous chat web app
 4. Setup redis
     - Install & run redis on `localhost:6379`(default)
 
-5. Setup environment variables
+5. Setup google api client
+    - Follow <https://developers.google.com/youtube/v3/quickstart/python>
+    - Get API_KEY to use with google api client.
+
+6. Setup environment variables
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
     - Add other environment variables if required
 
-6. Apply migrations
+7. Apply migrations
 
       ```sh
       python manage.py makemigrations

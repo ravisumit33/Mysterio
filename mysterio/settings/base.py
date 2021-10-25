@@ -19,10 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Application definition
 
 INSTALLED_APPS = [
-    "core",
+    "customauth",
     "chat",
     "channels",
     "rest_framework",
+    "rest_framework.authtoken",
+    "dj_rest_auth",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -30,6 +33,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "dj_rest_auth.registration",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
 ]
 
 MIDDLEWARE = [
@@ -40,17 +49,22 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "customauth.middleware.add_jwt_cookie_to_request_body",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 ROOT_URLCONF = "mysterio.urls"
+
 FRONTEND_ROUTES = [
     "login/",
     "register/",
 ]
 
+
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
+
 MYSTERIO_DIR = os.path.join(BASE_DIR, "mysterio")
 
 TEMPLATES = [
@@ -72,15 +86,20 @@ TEMPLATES = [
     },
 ]
 
+
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 WSGI_APPLICATION = "mysterio.wsgi.application"
+
 ASGI_APPLICATION = "mysterio.asgi.application"
+
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -100,6 +119,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    "django.contrib.auth.backends.ModelBackend",
+    # `allauth` specific authentication methods, such as login by e-mail
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
+AUTH_USER_MODEL = "customauth.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -119,13 +146,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 STATICFILES_DIRS = [
     os.path.join(MYSTERIO_DIR, "static"),
     os.path.join(FRONTEND_DIR, "build", "static"),
 ]
+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+
+# Logging configuration
 
 BASE_LOG_FORMAT = (
     "module=%(name)s lineno=%(lineno)s funcname=%(funcName)s "
@@ -158,11 +190,60 @@ LOGGING = {
     },
 }
 
+
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
+# Rest framework & auth configurations
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
 }
+
+REST_AUTH_SERIALIZERS = {
+    "LOGIN_SERIALIZER": "customauth.serializers.LoginSerializer",
+    "USER_DETAILS_SERIALIZER": "customauth.serializers.UserDetailsSerializer",
+}
+
+
+REST_USE_JWT = True
+
+JWT_AUTH_COOKIE = "mysterio-access-token"
+
+JWT_AUTH_REFRESH_COOKIE = "mysterio-refresh-token"
+
+SIMPLE_JWT = {
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
+
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_EMAIL_VERIFICATION = None
+
+ACCOUNT_USERNAME_REQUIRED = False
+
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google_modified": {
+        "SCOPE": [
+            "profile",
+            "email",
+        ],
+        "AUTH_PARAMS": {
+            "access_type": "online",
+        },
+    }
+}
+
+
+# Cors headers configurations
 
 CORS_ORIGIN_ALLOW_ALL = False
 

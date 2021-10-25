@@ -1,5 +1,3 @@
-import { MysterioOrigin } from 'appConstants';
-
 export const generateRandomColor = (string) => {
   let hash = 0;
   let i;
@@ -42,40 +40,6 @@ export const isDevEnv = () => process.env.NODE_ENV === 'development';
 
 // @ts-ignore
 export const isCordovaEnv = () => window.cordova;
-
-export const fetchUrl = (url, data) => {
-  let completeUrl;
-  try {
-    completeUrl = new URL(url);
-    completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
-    completeUrl = completeUrl.href;
-  } catch (_) {
-    // url is relative
-    let origin = '';
-    if (!isDevEnv()) {
-      origin = isCordovaEnv() ? MysterioOrigin : window.origin;
-    }
-    completeUrl = origin + url;
-  }
-  const commonHeaders = {
-    'X-CSRFToken': getCookie('csrftoken'),
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  };
-  const additionalHeaders = (data && data.headers) || {};
-  const headers = { ...commonHeaders, ...additionalHeaders };
-  return fetch(completeUrl, {
-    method: (data && data.method) || 'GET',
-    credentials: 'same-origin',
-    headers,
-    body: data && data.body,
-  }).then((response) => {
-    const responseObj = { status: response.status, data: {} };
-    return response
-      .text()
-      .then((text) => (text ? { ...responseObj, data: JSON.parse(text) } : responseObj));
-  });
-};
 
 export const isEmptyObj = (obj) =>
   obj && Object.keys(obj).length === 0 && obj.constructor === Object;

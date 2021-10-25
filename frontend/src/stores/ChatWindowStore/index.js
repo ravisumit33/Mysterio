@@ -1,8 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MatchTimeout, MessageType } from 'appConstants';
 import log from 'loglevel';
-import profileStore from 'stores/ProfileStore';
 import { fetchUrl, isEmptyObj } from 'utils';
+import profileStore from '../ProfileStore';
 import Socket from './socket';
 
 class ChatWindowStore {
@@ -16,7 +16,18 @@ class ChatWindowStore {
 
   initDone = false;
 
+  shouldShowIframe = false;
+
+  shouldHideIframe = false;
+
+  playerPromise = {};
+
   constructor({ appStore, data }) {
+    const plPromise = new Promise((resolve, reject) => {
+      this.playerPromise.resolve = resolve;
+      this.playerPromise.reject = reject;
+    });
+    this.playerPromise = { promise: plPromise, ...this.playerPromise };
     makeAutoObservable(this);
     this.appStore = appStore;
     data && this.initState(data);
@@ -41,14 +52,13 @@ class ChatWindowStore {
           {
             type: MessageType.CHAT_DELETE,
             data: {
-              text: 'Group is deleted',
+              text: 'Room is deleted',
             },
           },
         ];
         this.addInitMessageList(detailMessages);
         this.setInitDone(true);
-        this.setChatStatus(ChatStatus.ENDED);
-        this.socket.close();
+        this.closeChatWindow();
       } else {
         detailMessages = messages.map((msg) => {
           const message = {
@@ -104,6 +114,18 @@ class ChatWindowStore {
 
   setInitDone = (initDone) => {
     this.initDone = initDone;
+  };
+
+  setShouldShowIframe = (shouldShowIframe) => {
+    this.shouldShowIframe = shouldShowIframe;
+  };
+
+  setShouldHideIframe = (shouldHideIframe) => {
+    this.shouldHideIframe = shouldHideIframe;
+  };
+
+  setPlayer = (player) => {
+    this.player = player;
   };
 
   get isGroupChat() {
@@ -170,8 +192,7 @@ class ChatWindowStore {
         break;
       }
       case MessageType.CHAT_DELETE:
-        this.socket.close();
-        this.setChatStatus(ChatStatus.ENDED);
+        this.closeChatWindow();
         break;
       default:
         log.error('Unsupported message type', messageType);
@@ -198,9 +219,9 @@ class ChatWindowStore {
   };
 
   closeChatWindow = () => {
+    this.setShouldShowIframe(false);
     this.setChatStatus(ChatStatus.ENDED);
     this.socket.close();
-    this.socket = null;
   };
 
   setChatStatus = (status) => {

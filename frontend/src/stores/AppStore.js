@@ -9,9 +9,9 @@ class AppStore {
 
   shouldOpenUserInfoDialog = false;
 
-  shouldOpenLoginSignupDialog = false;
-
   shouldOpenNewGroupDialog = false;
+
+  shouldOpenAccountsDrawer = false;
 
   chatWindow = null;
 
@@ -20,8 +20,6 @@ class AppStore {
   groupRooms = [];
 
   groupRoomsFetched = false;
-
-  groupCreationInProgress = false;
 
   constructor() {
     makeAutoObservable(this, {
@@ -39,10 +37,6 @@ class AppStore {
 
   setShouldOpenUserInfoDialog = (shouldOpenUserInfoDialog) => {
     this.shouldOpenUserInfoDialog = shouldOpenUserInfoDialog;
-  };
-
-  setShouldOpenLoginSignupDialog = (shouldOpenLoginDialog) => {
-    this.shouldOpenLoginSignupDialog = shouldOpenLoginDialog;
   };
 
   setShouldOpenNewGroupDialog = (shouldOpenNewGroupDialog) => {
@@ -68,8 +62,8 @@ class AppStore {
     this.groupRoomsFetched = groupRoomsFetched;
   };
 
-  setGroupCreationInProgress = (groupCreationInProgress) => {
-    this.groupCreationInProgress = groupCreationInProgress;
+  setShouldOpenAccountsDrawer = (shouldOpenAccountsDrawer) => {
+    this.shouldOpenAccountsDrawer = shouldOpenAccountsDrawer;
   };
 
   setChatWindowData = (data) => {

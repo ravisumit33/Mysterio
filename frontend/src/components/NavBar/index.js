@@ -3,48 +3,44 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   AppBar,
+  Box,
   Container,
-  createMuiTheme,
   Grid,
   Hidden,
   IconButton,
   makeStyles,
   Menu,
   MenuItem,
-  ThemeProvider,
   Toolbar,
   Typography,
 } from '@material-ui/core';
 import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@material-ui/icons';
-import { profileStore } from 'stores';
+import clsx from 'clsx';
+import { appStore, profileStore } from 'stores';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
-import CustomButton from './customButton';
-
-const defaultTheme = createMuiTheme();
-const customTheme = createMuiTheme({
-  breakpoints: {
-    values: {
-      ...defaultTheme.breakpoints.values,
-      md: 750,
-    },
-  },
-});
+import NavbarButton from './NavBarButton';
 
 const useStyles = makeStyles((theme) => ({
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-  },
   title: {
     color: theme.palette.common.white,
+  },
+  smallAvatar: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+  },
+  drawerPlaceholder: {
+    width: 240,
+    flexShrink: 0,
   },
 }));
 
 const NavBar = () => {
-  const classes = useStyles();
   const history = useHistory();
   const location = useLocation();
+  const atAccountPage = location.pathname === '/account';
+  const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
@@ -64,19 +60,30 @@ const NavBar = () => {
   };
   const handleHamburgerClose = () => setHamburgerTriggerElement(null);
 
-  const commonNavbarButtons = [
-    {
-      type: 'icon',
-      data: {
-        key: 'account',
-        text: 'Account',
-        icon: profileStore.isLoggedIn
-          ? () => <Avatar name={profileStore.username} avatarUrl={profileStore.avatarUrl} />
-          : () => <AccountCircle fontSize="large" />,
-        action: () => history.push('/account'),
+  const handleAccountBtnClick = () => {
+    appStore.setShouldOpenAccountsDrawer(!appStore.shouldOpenAccountsDrawer);
+  };
+
+  const accountCircle = {
+    type: 'icon',
+    data: {
+      key: 'account',
+      text: 'Account',
+      icon: profileStore.isLoggedIn
+        ? () => (
+            <Avatar
+              name={profileStore.email}
+              avatarUrl={profileStore.avatarUrl}
+              className={clsx({ [classes.smallAvatar]: hamburgerTriggerElement })}
+            />
+          )
+        : () => <AccountCircle fontSize="large" />,
+      action: () => {
+        setHamburgerTriggerElement(null);
+        history.push('/account');
       },
     },
-  ];
+  };
 
   const homeNavbarButtons = [
     {
@@ -113,13 +120,18 @@ const NavBar = () => {
         text: 'Logout',
         icon: ExitToApp,
         action: () =>
-          fetchUrl('/api/logout').then(() => {
-            profileStore.setUsername('');
+          fetchUrl('/api/account/logout/', {
+            method: 'post',
+            body: {},
+          }).then(() => {
             history.replace('/');
+            profileStore.setEmail('');
           }),
       },
     },
   ];
+
+  const commonNavbarButtons = [];
 
   let navbarBtns = [];
   switch (location.pathname) {
@@ -133,6 +145,9 @@ const NavBar = () => {
       break;
   }
   navbarBtns.push(...commonNavbarButtons);
+  if (!atAccountPage) {
+    navbarBtns.push(accountCircle);
+  }
   navbarBtns = navbarBtns.map((navbarBtn) => ({
     key: navbarBtn.data.key,
     commonProps: {
@@ -146,7 +161,7 @@ const NavBar = () => {
   const navbarMenu = navbarBtns.map((navbarBtn) => (
     <Grid item key={navbarBtn.key}>
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-      <CustomButton {...navbarBtn.commonProps} />
+      <NavbarButton {...navbarBtn.commonProps} />
     </Grid>
   ));
   const hamburgerMenu = (
@@ -163,17 +178,32 @@ const NavBar = () => {
         {navbarBtns.map((navbarBtn) => (
           <MenuItem key={navbarBtn.key} selected={focusedBtnKey === navbarBtn.key} dense>
             {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-            <CustomButton {...navbarBtn.commonProps} isHamburgerMenu />
+            <NavbarButton {...navbarBtn.commonProps} isHamburgerMenu />
           </MenuItem>
         ))}
       </Menu>
     </>
   );
+
   return (
-    <AppBar position="sticky" className={classes.appBar}>
-      <Toolbar>
+    <AppBar position="sticky">
+      <Toolbar disableGutters>
+        {atAccountPage && (
+          <Hidden xsDown>
+            <Box className={classes.drawerPlaceholder} />
+          </Hidden>
+        )}
         <Container>
-          <Grid container alignItems="center" style={{ height: '64px' }}>
+          <Grid container alignItems="center" justify="center">
+            {atAccountPage && (
+              <Hidden smUp>
+                <Grid item xs>
+                  <IconButton onClick={handleAccountBtnClick} color="inherit" aria-label="account">
+                    <AccountCircle fontSize="large" />
+                  </IconButton>
+                </Grid>
+              </Hidden>
+            )}
             <Grid item>
               <RouterLink to="/">
                 <Typography variant="h5" className={classes.title}>
@@ -182,10 +212,8 @@ const NavBar = () => {
               </RouterLink>
             </Grid>
             <Grid item container justify="flex-end" xs alignItems="center">
-              <ThemeProvider theme={customTheme}>
-                <Hidden smDown>{navbarMenu}</Hidden>
-                <Hidden mdUp>{hamburgerMenu}</Hidden>
-              </ThemeProvider>
+              <Hidden xsDown>{navbarMenu}</Hidden>
+              <Hidden smUp>{hamburgerMenu}</Hidden>
             </Grid>
           </Grid>
         </Container>

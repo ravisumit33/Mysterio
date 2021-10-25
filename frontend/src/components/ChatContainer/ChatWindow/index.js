@@ -12,6 +12,8 @@ import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
 import { profileStore } from 'stores';
 import clsx from 'clsx';
+import incomingMessageSound from 'assets/sounds/message_pop.mp3';
+import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -64,6 +66,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const playIncomingMessageSound = () => {
+  const audio = new Audio(incomingMessageSound);
+  audio.play();
+};
+
+const playChatStartedSound = () => {
+  const audio = new Audio(chatStartedSound);
+  audio.play();
+};
+
 const ChatWindow = (props) => {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { messageList, chatStatus, isGroupChat, initDone } = chatWindowStore;
@@ -73,6 +85,16 @@ const ChatWindow = (props) => {
     endBox.current && endBox.current.scrollIntoView({ behavior: 'smooth' });
   };
   useEffect(scrollToBottom);
+  useEffect(() => {
+    const lastMessage = messageList.length && messageList[messageList.length - 1];
+    if (chatStatus === ChatStatus.ONGOING && lastMessage) {
+      const isLastMessageText = lastMessage.type === MessageType.TEXT;
+      if (isLastMessageText && lastMessage.data.sender.session_id !== profileStore.sessionId) {
+        playIncomingMessageSound();
+      }
+    }
+  });
+  useEffect(() => initDone && playChatStartedSound(), [initDone]);
 
   const chatMessages = messageList.map((message, idx) => {
     const messageData = message.data;

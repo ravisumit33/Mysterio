@@ -6,8 +6,12 @@ load_dotenv(dotenv_path=env_path)
 
 SECRET_KEY = "=8%vvj-i)i^=1@16^cevdpy(lc9_66!bq_w_hg*d1*nxnzow"
 
+ALLOWED_HOSTS = ["*"]
+
 DEBUG = True
+
 TEMPLATE_DEBUG = True
+
 
 DATABASES = {
     "default": {
@@ -20,9 +24,14 @@ DATABASES = {
     }
 }
 
+
 CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": ["redis://127.0.0.1:6379"],
 }
+
+
+SITE_ID = 2
+
 
 LOGGING["loggers"] = {
     "mysterio": {
@@ -38,4 +47,9 @@ LOGGING["loggers"] = {
 
 LOGGING["handlers"]["console"]["formatter"] = "simple"
 
-ALLOWED_HOSTS = ["*"]
+
+# Email SMTP server configurations
+
+EMAIL_HOST = "localhost"
+
+EMAIL_PORT = 1025

@@ -22,12 +22,17 @@ import mysterio.views as RootView
 frontend_routes = settings.FRONTEND_ROUTES
 urlpatterns = [
     path("api/chat/", include("chat.urls", "chat")),
-    path("api/", include("core.urls", "core")),
+    path("api/account/registration/", include("dj_rest_auth.registration.urls")),
+    path("api/account/", include("customauth.urls", "customauth")),
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
+    path("accounts/", include("allauth.urls")),
     path(
         "robots.txt",
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
     ),
-    re_path(r"^(%s)?$" % "|".join(frontend_routes), RootView.FrontendView.as_view()),
+    re_path(
+        r"^(%s)?$" % "|".join(frontend_routes),  # pylint: disable=C0209
+        RootView.FrontendView.as_view(),
+    ),
 ]

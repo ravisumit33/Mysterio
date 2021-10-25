@@ -1,33 +1,30 @@
 import React from 'react';
-import { Box, makeStyles } from '@material-ui/core';
+import { Box, Grid, Typography } from '@material-ui/core';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import ChatWindow from './ChatWindow';
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    position: 'fixed',
-    right: '0',
-    width: '100%',
-    bottom: '0',
-    top: theme.spacing(8),
-    zIndex: 2,
-  },
-}));
+import Youtube from './Youtube';
 
 const ChatContainer = () => {
-  const classes = useStyles();
-
   const { chatWindow } = appStore;
-  return (
-    chatWindow && (
-      <Box className={classes.root}>
-        <ChatWindowStoreContext.Provider value={chatWindow}>
-          <ChatWindow />
-        </ChatWindowStoreContext.Provider>
+  return chatWindow ? (
+    <Box>
+      <ChatWindowStoreContext.Provider value={chatWindow}>
+        <ChatWindow />
+        {chatWindow.isGroupChat && <Youtube />}
+      </ChatWindowStoreContext.Provider>
+    </Box>
+  ) : (
+    <Grid container alignItems="center" direction="column">
+      <Box my={3}>
+        <Grid item>
+          <Typography variant="h6" align="center">
+            No chat session found
+          </Typography>
+        </Grid>
       </Box>
-    )
+    </Grid>
   );
 };
 

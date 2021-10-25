@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -17,6 +18,7 @@ import {
 import ReplayIcon from '@material-ui/icons/Replay';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
+import YouTubeIcon from '@material-ui/icons/YouTube';
 import Avatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
@@ -44,7 +46,9 @@ const useStyles = makeStyles((theme) => ({
 const ChatHeader = (props) => {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, reconnect, chatStatus, roomId } = chatWindowStore;
+  const { name, reconnect, chatStatus, roomId, avatarUrl } = chatWindowStore;
+  const history = useHistory();
+  const location = useLocation();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
 
@@ -54,11 +58,12 @@ const ChatHeader = (props) => {
 
   const handleClose = () => {
     appStore.removeChatWIndow();
+    history.push('/');
   };
 
   const handleLogin = () => {
     handleAlertClose();
-    appStore.setShouldOpenLoginSignupDialog(true);
+    history.push('/login', { from: location });
   };
 
   const handleAlertClose = () => appStore.setShouldShowAlert(false);
@@ -85,7 +90,7 @@ const ChatHeader = (props) => {
         });
         appStore.setShouldShowAlert(true);
       } else {
-        appStore.removeChatWIndow();
+        handleClose();
         appStore.setAlert({
           text: 'Room deleted successfully.',
           severity: 'success',
@@ -132,15 +137,32 @@ const ChatHeader = (props) => {
   );
 
   const groupChatIcons = (
-    <IconButton
-      disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-      onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-      className={classes.icon}
-    >
-      <Tooltip title="Delete room" arrow>
-        <DeleteIcon fontSize="small" />
-      </Tooltip>
-    </IconButton>
+    <>
+      <IconButton
+        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+        onClick={() => {
+          if (chatWindowStore.shouldShowIframe) {
+            chatWindowStore.setShouldHideIframe(false);
+          } else {
+            chatWindowStore.setShouldShowIframe(true);
+          }
+        }}
+        className={classes.icon}
+      >
+        <Tooltip title="Youtube" arrow>
+          <YouTubeIcon fontSize="small" />
+        </Tooltip>
+      </IconButton>
+      <IconButton
+        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+        onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+        className={classes.icon}
+      >
+        <Tooltip title="Delete room" arrow>
+          <DeleteIcon fontSize="small" />
+        </Tooltip>
+      </IconButton>
+    </>
   );
 
   return (
@@ -149,7 +171,7 @@ const ChatHeader = (props) => {
         <Box className={classes.infoWindow}>
           <ListItem disableGutters>
             <ListItemAvatar>
-              <Avatar />
+              <Avatar name={name} avatarUrl={avatarUrl} />
             </ListItemAvatar>
             <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
           </ListItem>

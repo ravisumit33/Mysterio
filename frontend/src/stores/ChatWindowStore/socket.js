@@ -1,8 +1,8 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { MessageType, MysterioHost } from 'appConstants';
-import profileStore from 'stores/ProfileStore';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
+import profileStore from '../ProfileStore';
 
 class Socket {
   constructor(chatWindowStore) {

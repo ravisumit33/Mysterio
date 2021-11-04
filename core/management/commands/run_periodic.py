@@ -54,7 +54,7 @@ def schedule_jobs(scheduler):
         trigger="interval",
         seconds=1,
         id="match",
-        max_instances=1,
+        max_instances=10,
         replace_existing=True,
     )
 

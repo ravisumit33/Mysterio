@@ -12,17 +12,6 @@ class Room(models.Model):
         abstract = True
 
 
-class IndividualRoom(Room):
-    """Room for individual chat"""
-
-    channel1 = models.ForeignKey(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="rooms1"
-    )
-    channel2 = models.ForeignKey(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="rooms2"
-    )
-
-
 class GroupRoom(Room):
     """Room for group chat"""
 

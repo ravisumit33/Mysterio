@@ -13,6 +13,8 @@ class GroupRoomPermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
         if view.action == "retrieve":
             return (
                 check_password(request.GET.get("password", ""), obj.password)
@@ -21,4 +23,4 @@ class GroupRoomPermission(permissions.BasePermission):
             )
         if not request.user.is_authenticated:
             return False
-        return obj.admin == request.user or request.user.is_superuser
+        return obj.admin == request.user

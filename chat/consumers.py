@@ -17,10 +17,18 @@ class ChatConsumer(WebsocketConsumer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Id of channel model
         self.channel_id = None
+
+        # Id(int) of GroupRoom model for group consumer, uuid(str) for individual consumer
         self.room_id = None
+
         self.is_group_consumer = False
+
+        # ChatSession instance
         self.session = None
+
+        # Cached session data
         self.profile = None
 
     def connect(self):

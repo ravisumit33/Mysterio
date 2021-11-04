@@ -42,6 +42,8 @@ class GroupRoomPasswordSerializer(serializers.ModelSerializer):
     Serialize password field of group room model
     """
 
+    password = serializers.CharField(max_length=128, write_only=True, allow_blank=True)
+
     class Meta:
         model = GroupRoom
         fields = ["password"]

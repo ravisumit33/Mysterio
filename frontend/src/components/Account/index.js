@@ -63,7 +63,7 @@ const Account = (props) => {
         </ListItem>
       </Toolbar>
       <Divider />
-      <Grid item xs container direction="column" justify="space-between">
+      <Grid item xs container direction="column" justifyContent="space-between">
         <Grid item>
           <List>
             {drawerTabs.map((tab) => (
@@ -89,10 +89,17 @@ const Account = (props) => {
                 fetchUrl('/api/account/logout/', {
                   method: 'post',
                   body: {},
-                }).then(() => {
-                  history.replace('/');
-                  profileStore.setEmail('');
                 })
+                  .then(() => {
+                    history.replace('/');
+                    profileStore.setEmail('');
+                  })
+                  .catch(() =>
+                    appStore.showAlert({
+                      text: 'Unable to log out. Make sure you are logged in.',
+                      severity: 'error',
+                    })
+                  )
               }
             >
               <ListItemIcon>

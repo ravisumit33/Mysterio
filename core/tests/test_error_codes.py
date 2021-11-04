@@ -4,6 +4,7 @@ from django.http import Http404
 from django.core.exceptions import SuspiciousOperation, PermissionDenied
 from django.urls import path
 from django.views.defaults import server_error
+from mysterio.urls import urlpatterns as RootUrlPatterns
 
 
 def http_400_view(request):
@@ -26,7 +27,7 @@ def http_500_view(request):
     return server_error(request)
 
 
-urlpatterns = [
+urlpatterns = RootUrlPatterns + [
     path("400/", http_400_view),
     path("403/", http_403_view),
     path("404/", http_404_view),
@@ -52,22 +53,18 @@ class ErrorCodeHandlerTests(SimpleTestCase):
         {
             "status_code": 400,
             "template": "400.html",
-            "user_message": "Bad request",
         },
         {
             "status_code": 403,
             "template": "403.html",
-            "user_message": "Permission denied",
         },
         {
             "status_code": 404,
             "template": "404.html",
-            "user_message": "Page not found",
         },
         {
             "status_code": 500,
             "template": "500.html",
-            "user_message": "Internal server error",
         },
     ]
 
@@ -79,9 +76,7 @@ class ErrorCodeHandlerTests(SimpleTestCase):
                     "/" + str(expected_response["status_code"]) + "/"
                 )
                 self.assertTemplateUsed(client_response, expected_response["template"])
-                self.assertContains(
-                    client_response,
-                    expected_response["user_message"],
-                    status_code=expected_response["status_code"],
-                    html=True,
+                self.assertEqual(
+                    client_response.status_code,
+                    expected_response["status_code"],
                 )

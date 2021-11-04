@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password
 
 
 class Room(models.Model):
@@ -28,8 +27,7 @@ class GroupRoom(Room):
     """Room for group chat"""
 
     zscore = models.FloatField(null=True)
-    is_protected = models.BooleanField(default=False)
-    password = models.CharField(max_length=128, default=make_password(""))
+    password = models.CharField(max_length=128, null=True)
     admin = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,

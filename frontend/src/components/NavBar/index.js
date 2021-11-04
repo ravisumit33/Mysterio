@@ -123,10 +123,17 @@ const NavBar = () => {
           fetchUrl('/api/account/logout/', {
             method: 'post',
             body: {},
-          }).then(() => {
-            history.replace('/');
-            profileStore.setEmail('');
-          }),
+          })
+            .then(() => {
+              history.replace('/');
+              profileStore.setEmail('');
+            })
+            .catch(() =>
+              appStore.showAlert({
+                text: 'Unable to log out. Make sure you are logged in.',
+                severity: 'error',
+              })
+            ),
       },
     },
   ];
@@ -194,7 +201,7 @@ const NavBar = () => {
           </Hidden>
         )}
         <Container>
-          <Grid container alignItems="center" justify="center">
+          <Grid container alignItems="center" justifyContent="center">
             {atAccountPage && (
               <Hidden smUp>
                 <Grid item xs>
@@ -211,7 +218,7 @@ const NavBar = () => {
                 </Typography>
               </RouterLink>
             </Grid>
-            <Grid item container justify="flex-end" xs alignItems="center">
+            <Grid item container justifyContent="flex-end" xs alignItems="center">
               <Hidden xsDown>{navbarMenu}</Hidden>
               <Hidden smUp>{hamburgerMenu}</Hidden>
             </Grid>

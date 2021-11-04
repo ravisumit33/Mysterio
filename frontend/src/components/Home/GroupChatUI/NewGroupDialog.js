@@ -42,16 +42,29 @@ const NewGroupDialog = (props) => {
   const handleCreateGroup = () => {
     fetchUrl('/api/chat/groups/', {
       method: 'post',
-      body: JSON.stringify({
+      body: {
         name: newGroupName,
         password: newGroupPassword,
         is_protected: shouldUseGroupPassword,
-      }),
-    }).then((response) => {
-      const responseData = response.data;
-      const groupNameFieldData = { ...newGroupNameFieldData };
-      const groupPasswordFieldData = { ...newGroupPasswordFieldData };
-      if (response.status >= 400) {
+      },
+    })
+      .then((response) => {
+        appStore.setShouldShowAlert(false);
+        setShouldOpenNewGroupDialog(false);
+        const responseData = response.data;
+        const chatWindowData = {
+          roomId: responseData.id,
+          name: responseData.name,
+          password: newGroupPassword,
+        };
+        appStore.setChatWindowData(chatWindowData);
+        handleStartGroupChat();
+        resetState();
+      })
+      .catch((response) => {
+        const responseData = response.data;
+        const groupNameFieldData = { ...newGroupNameFieldData };
+        const groupPasswordFieldData = { ...newGroupPasswordFieldData };
         if (responseData.name) {
           [groupNameFieldData.help_text] = responseData.name;
           groupNameFieldData.error = true;
@@ -66,27 +79,14 @@ const NewGroupDialog = (props) => {
           groupPasswordFieldData.help_text = '';
           groupPasswordFieldData.error = false;
         }
-        appStore.setAlert({
-          text: 'Unable to create room.',
+        appStore.showAlert({
+          text: 'Error occurred while creating room.',
           severity: 'error',
         });
-        appStore.setShouldShowAlert(true);
         setNewGroupNameFieldData(groupNameFieldData);
         setNewGroupPasswordFieldData(groupPasswordFieldData);
         setShouldOpenNewGroupDialog(true);
-      } else {
-        appStore.setShouldShowAlert(false);
-        setShouldOpenNewGroupDialog(false);
-        const chatWindowData = {
-          roomId: response.data.id,
-          name: response.data.name,
-          password: newGroupPassword,
-        };
-        appStore.setChatWindowData(chatWindowData);
-        handleStartGroupChat();
-        resetState();
-      }
-    });
+      });
   };
 
   return (

@@ -21,11 +21,10 @@ const UserInfoDialog = () => {
 
   const handleDialogueButtonClick = () => {
     if (!textFieldValue) {
-      appStore.setAlert({
+      appStore.showAlert({
         text: 'Name cannot be empty.',
         severity: 'error',
       });
-      appStore.setShouldShowAlert(true);
       return;
     }
     appStore.setShouldShowAlert(false);

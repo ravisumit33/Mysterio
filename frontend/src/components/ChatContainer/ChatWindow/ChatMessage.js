@@ -83,7 +83,7 @@ const ChatMessage = ({ messages, sender, side }) => {
     return '';
   };
   return (
-    <Grid container spacing={2} justify={side === 'right' ? 'flex-end' : 'flex-start'}>
+    <Grid container spacing={2} justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
         <Grid item>
           <Avatar

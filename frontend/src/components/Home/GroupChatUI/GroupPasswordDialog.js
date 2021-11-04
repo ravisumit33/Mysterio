@@ -28,12 +28,11 @@ const GroupPasswordDialog = (props) => {
   };
 
   const groupPasswordCheck = () => {
-    fetchUrl('/api/chat/group_password_check/', {
+    fetchUrl(`/api/chat/${appStore.chatWindowData.roomId}/check_password/`, {
       method: 'post',
-      body: JSON.stringify({ id: appStore.chatWindowData.roomId, password: selectedGroupPassword }),
-    }).then((response) => {
-      const responseData = response.data;
-      if (responseData.check) {
+      body: { password: selectedGroupPassword },
+    })
+      .then((response) => {
         appStore.setChatWindowData({
           ...appStore.chatWindowData,
           password: selectedGroupPassword,
@@ -42,25 +41,19 @@ const GroupPasswordDialog = (props) => {
         appStore.setShouldShowAlert(false);
         setShouldOpenGroupPasswordDialog(false);
         resetState();
-      } else {
-        appStore.setAlert({
+      })
+      .catch((response) => {
+        appStore.showAlert({
           text: 'Invalid room password.',
           severity: 'error',
         });
-        appStore.setShouldShowAlert(true);
         setShouldOpenGroupPasswordDialog(true);
         const newProtectedGroupPasswordFieldData = { ...protectedGroupPasswordFieldData };
-        if (responseData.password) {
-          [newProtectedGroupPasswordFieldData.help_text] = responseData.password;
-          newProtectedGroupPasswordFieldData.error = true;
-        } else {
-          newProtectedGroupPasswordFieldData.help_text = '';
-          newProtectedGroupPasswordFieldData.error = false;
-        }
+        newProtectedGroupPasswordFieldData.error = true;
         setProtectedGroupPasswordFieldData(newProtectedGroupPasswordFieldData);
-      }
-    });
+      });
   };
+
   return (
     <Dialog
       open={shouldOpenGroupPasswordDialog}

@@ -71,8 +71,15 @@ const ChatHeader = (props) => {
   const handleDeleteRoom = () => {
     fetchUrl(`/api/chat/groups/${roomId}/`, {
       method: 'delete',
-    }).then((response) => {
-      if (response.status >= 400) {
+    })
+      .then(() => {
+        handleClose();
+        appStore.showAlert({
+          text: 'Room deleted successfully.',
+          severity: 'success',
+        });
+      })
+      .catch(() => {
         const alertAction = profileStore.isLoggedIn ? undefined : (
           <>
             <Button color="secondary" size="small" onClick={handleLogin} variant="text">
@@ -83,21 +90,12 @@ const ChatHeader = (props) => {
             </IconButton>
           </>
         );
-        appStore.setAlert({
+        appStore.showAlert({
           text: 'Only admin can delete the room.',
           action: alertAction,
           severity: 'error',
         });
-        appStore.setShouldShowAlert(true);
-      } else {
-        handleClose();
-        appStore.setAlert({
-          text: 'Room deleted successfully.',
-          severity: 'success',
-        });
-        appStore.setShouldShowAlert(true);
-      }
-    });
+      });
   };
 
   const deleteConfirmationDialog = (

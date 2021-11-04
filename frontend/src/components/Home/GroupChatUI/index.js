@@ -143,7 +143,7 @@ const GroupChatUI = () => {
     <>
       <Box width="100vw">
         <Container>
-          <Grid container justify="space-between" spacing={2} alignItems="flex-start">
+          <Grid container justifyContent="space-between" spacing={2} alignItems="flex-start">
             <Grid item xs={12} md={6}>
               <Box pt={1}>
                 <GroupChatImg width="100%" className={classes.groupChatImg} />

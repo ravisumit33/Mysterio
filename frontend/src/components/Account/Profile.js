@@ -14,23 +14,21 @@ const Profile = () => {
     fetchUrl('/api/account/delete/', {
       method: 'post',
       body: {},
-    }).then((response) => {
-      appStore.setShouldShowAlert(false);
-      if (response.status >= 400) {
-        appStore.setAlert({
-          text: `Unable to delete account.`,
-          severity: 'error',
-        });
-      } else {
-        appStore.setAlert({
+    })
+      .then((response) => {
+        appStore.showAlert({
           text: `Account deleted successfully.`,
           severity: 'success',
         });
-      }
-      history.replace('/');
-      profileStore.setEmail('');
-      appStore.setShouldShowAlert(true);
-    });
+        history.replace('/');
+        profileStore.setEmail('');
+      })
+      .catch(() => {
+        appStore.showAlert({
+          text: `Error occurred while deleting account. Make sure you are logged in.`,
+          severity: 'error',
+        });
+      });
   };
 
   return (

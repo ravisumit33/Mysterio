@@ -51,9 +51,9 @@ def get_group_stats():
     return group_stats
 
 
-def update_trending_groups():
+def update_trending_rooms():
     """Find and update trending groups"""
-    logger.info("Trending groups update started")
+    logger.debug("Trending rooms update started")
     group_stats = get_group_stats()
     zscores = {}
     for room_id, message_stats in group_stats.items():

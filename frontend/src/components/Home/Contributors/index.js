@@ -37,7 +37,7 @@ const Contributors = () => {
             <Grid item style={{ paddingTop: 40, textAlign: 'center' }}>
               <Typography variant="h4">Contributors</Typography>
             </Grid>
-            <Grid item container justify="center" style={{ paddingTop: 40 }}>
+            <Grid item container justifyContent="center" style={{ paddingTop: 40 }}>
               {contributorsUI}
             </Grid>
           </Grid>

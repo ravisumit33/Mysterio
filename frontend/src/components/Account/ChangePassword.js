@@ -26,22 +26,20 @@ const ChangePassword = () => {
     fetchUrl('/api/account/password/change/', {
       method: 'post',
       body: { new_password1: newPassword, new_password2: newPassword },
-    }).then((response) => {
-      appStore.setShouldShowAlert(false);
-      if (response.status >= 400) {
-        appStore.setAlert({
-          text: `Unable to change password. Password must contain atleast 8 characters and should not be too common`,
-          severity: 'error',
-        });
-      } else {
-        appStore.setAlert({
+    })
+      .then(() => {
+        appStore.showAlert({
           text: `Password changed successfully.`,
           severity: 'success',
         });
-      }
-      history.push(from);
-      appStore.setShouldShowAlert(true);
-    });
+        history.push(from);
+      })
+      .catch(() => {
+        appStore.showAlert({
+          text: `Password must contain atleast 8 characters and should not be too common`,
+          severity: 'error',
+        });
+      });
   };
 
   return (

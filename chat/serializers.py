@@ -37,36 +37,67 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
         fields = ["sender_channel", "text", "message_type"]
 
 
-class BaseGroupRoomSerializer(serializers.ModelSerializer):
+class GroupRoomPasswordSerializer(serializers.ModelSerializer):
+    """
+    Serialize password field of group room model
+    """
+
+    class Meta:
+        model = GroupRoom
+        fields = ["password"]
+
+
+class DefaultGroupRoomSerializer(GroupRoomPasswordSerializer):
     """
     Base serializer for group rooms API endpoint
     """
 
     zscore = serializers.FloatField(read_only=True)
 
-    password = serializers.CharField(write_only=True, allow_blank=True)
-
     message_count = serializers.SerializerMethodField(read_only=True)
+
+    is_protected = serializers.SerializerMethodField(read_only=True)
 
     def get_message_count(self, group_room):  # pylint: disable=no-self-use
         """
-        Getter function for message_count serializer fields
+        Getter function for message_count serializer field
         """
         return group_room.group_messages.count()
 
-    class Meta:
-        model = GroupRoom
-        fields = [
+    def get_is_protected(self, group_room):  # pylint: disable=no-self-use
+        """
+        Getter function for is_protected serializer method field
+        """
+        return bool(group_room.password)
+
+    def create(self, validated_data):
+        password = validated_data.pop("password", None)
+        instance = super().create(validated_data)
+        instance.admin = self.context.get("request").user
+        if password:
+            instance.password = make_password(password)
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop("password", None)
+        instance = super().update(instance, validated_data)
+        if password:
+            instance.password = make_password(password)
+        instance.save()
+        return instance
+
+    class Meta(GroupRoomPasswordSerializer.Meta):
+        fields = GroupRoomPasswordSerializer.Meta.fields + [
             "id",
             "name",
-            "password",
             "zscore",
             "is_protected",
             "message_count",
         ]
 
 
-class ExtendedGroupRoomSerializer(BaseGroupRoomSerializer):
+class RetrieveGroupRoomSerializer(DefaultGroupRoomSerializer):
     """
     Serializer for group room API endpoint
     """
@@ -80,20 +111,5 @@ class ExtendedGroupRoomSerializer(BaseGroupRoomSerializer):
         messages = group_room.group_messages.order_by("sent_at")
         return MessageSerializer(messages, many=True).data
 
-    def create(self, validated_data):
-        is_protected = validated_data.pop("is_protected", None)
-        password = validated_data.pop("password", None)
-        instance = self.Meta.model(**validated_data)
-        instance.admin = self.context.get("request").user
-        if is_protected and ((not password) or (password == "")):
-            raise serializers.ValidationError({"password": ["This field is required."]})
-
-        if is_protected:
-            instance.is_protected = True
-            instance.password = make_password(password)
-        instance.save()
-        return instance
-
-    class Meta:
-        model = GroupRoom
-        fields = BaseGroupRoomSerializer.Meta.fields + ["group_messages"]
+    class Meta(DefaultGroupRoomSerializer.Meta):
+        fields = DefaultGroupRoomSerializer.Meta.fields + ["group_messages"]

@@ -26,7 +26,7 @@ const Auth = (props) => {
       <Container maxWidth="sm">
         <Paper variant="elevation" elevation={2}>
           <Box p={3}>
-            <Grid container direction="column" justify="space-between" spacing={4}>
+            <Grid container direction="column" justifyContent="space-between" spacing={4}>
               <Grid item>
                 <UserForm shouldRegister={shouldRegister} from={from} />
               </Grid>

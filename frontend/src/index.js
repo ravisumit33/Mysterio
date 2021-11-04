@@ -9,12 +9,7 @@ import * as serviceWorker from './serviceWorker';
 configure({ isolateGlobalState: true });
 
 const renderReactDom = () => {
-  ReactDOM.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-    document.getElementById('root')
-  );
+  ReactDOM.render(<App />, document.getElementById('root'));
 };
 
 // @ts-ignore

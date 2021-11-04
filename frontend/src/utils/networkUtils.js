@@ -48,6 +48,8 @@ const fetchUrl = (url, data) =>
     url: getCompleteUrl(url),
     headers: (data && data.headers) || {},
     data: (data && data.body) || {},
-  }).catch((error) => error.response);
+  }).catch((error) => {
+    throw error.response;
+  });
 
 export default fetchUrl;

@@ -35,6 +35,12 @@ class AppStore {
     this.shouldShowAlert = shouldShowAlert;
   };
 
+  showAlert = (newAlert) => {
+    this.setShouldShowAlert(false);
+    this.setAlert(newAlert);
+    this.setShouldShowAlert(true);
+  };
+
   setShouldOpenUserInfoDialog = (shouldOpenUserInfoDialog) => {
     this.shouldOpenUserInfoDialog = shouldOpenUserInfoDialog;
   };
@@ -71,9 +77,11 @@ class AppStore {
   };
 
   updateGroupRooms = () =>
-    fetchUrl('/api/chat/groups/').then((response) => {
-      this.setGroupRooms(Object.values(response.data));
-    });
+    fetchUrl('/api/chat/groups/')
+      .then((response) => {
+        this.setGroupRooms(Object.values(response.data));
+      })
+      .catch(() => {});
 }
 
 const appStore = new AppStore();

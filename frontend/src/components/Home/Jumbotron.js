@@ -64,8 +64,13 @@ const Jumbotron = () => {
     <Box id="jumbotron">
       <Box className={classes.jumbotron}>
         <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-        <Grid container direction="column" className={classes.gridRoot} justify="space-around">
-          <Grid item container justify="center">
+        <Grid
+          container
+          direction="column"
+          className={classes.gridRoot}
+          justifyContent="space-around"
+        >
+          <Grid item container justifyContent="center">
             <Grid item xs={12} md={7}>
               <Box py={3}>
                 <QuickChatImg width="100%" className={classes.quickChatImg} />
@@ -73,7 +78,7 @@ const Jumbotron = () => {
             </Grid>
           </Grid>
           <Grid item container className={classes.quickChatTxtSection} direction="column">
-            <Grid item container justify="center">
+            <Grid item container justifyContent="center">
               <Grid item xs={12}>
                 <Box>
                   <Typography variant="h3" className={classes.quickChatDesc} align="center">
@@ -82,7 +87,7 @@ const Jumbotron = () => {
                 </Box>
               </Grid>
             </Grid>
-            <Grid item container justify="center">
+            <Grid item container justifyContent="center">
               <Grid item>
                 <Box py={2}>
                   <Button

@@ -15,7 +15,7 @@ const Footer = () => {
 
   return (
     <Box>
-      <Grid className={classes.footer} container justify="center" alignContent="center">
+      <Grid className={classes.footer} container justifyContent="center" alignContent="center">
         <Grid item>
           <Typography variant="body2">© 2020 Mysterio - Anonymous Chat</Typography>
         </Grid>

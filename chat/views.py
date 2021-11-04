@@ -1,9 +1,13 @@
 from django.contrib.auth.hashers import check_password
-from django.http import HttpResponse, JsonResponse
-from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
-from chat.serializers import BaseGroupRoomSerializer, ExtendedGroupRoomSerializer
+from chat.serializers import (
+    DefaultGroupRoomSerializer,
+    RetrieveGroupRoomSerializer,
+    GroupRoomPasswordSerializer,
+)
 from chat.models import GroupRoom
 from chat.permissions import GroupRoomPermission
 from chat.constants import GroupPrefix, MessageType
@@ -17,11 +21,15 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
 
     queryset = GroupRoom.objects.all()
     permission_classes = [GroupRoomPermission]
+    serializer_classes = {
+        "retrieve": RetrieveGroupRoomSerializer,
+        "check_password": GroupRoomPasswordSerializer,
+    }
 
     def get_serializer_class(self, *args, **kwargs):
-        if self.action == "list":
-            return BaseGroupRoomSerializer
-        return ExtendedGroupRoomSerializer
+        if self.action in self.serializer_classes:
+            return self.serializer_classes[self.action]
+        return DefaultGroupRoomSerializer
 
     def destroy(self, request, *args, **kwargs):
         group_room = self.get_object()
@@ -34,21 +42,20 @@ class GroupRoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ances
         )
         return super().destroy(request, *args, **kwargs)
 
-
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def check_group_password(request):
-    """
-    API endpoint to check password for group rooms
-    """
-    post_data = request.data
-    group_id = post_data["id"]
-    group_password = post_data["password"]
-
-    try:
-        group_room = GroupRoom.objects.get(id=group_id)
-    except GroupRoom.DoesNotExist:
-        return HttpResponse(status=400)
-    if group_room.is_protected and group_password == "":
-        return JsonResponse({"check": False, "password": ["This field is required."]})
-    return JsonResponse({"check": check_password(group_password, group_room.password)})
+    @action(methods=["post"], detail=True, permission_classes=[AllowAny])
+    def check_password(
+        self, request, pk=None
+    ):  # pylint: disable=unused-argument,invalid-name
+        """
+        Action for checking group room password
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        group_room = self.get_object()
+        request_password = request.data.get("password")
+        password_valid = check_password(request_password, group_room.password)
+        return (
+            Response(status=status.HTTP_200_OK)
+            if password_valid
+            else Response(status=status.HTTP_400_BAD_REQUEST)
+        )

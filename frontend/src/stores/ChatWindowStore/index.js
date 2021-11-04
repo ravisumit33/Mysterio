@@ -45,57 +45,64 @@ class ChatWindowStore {
   initializeForGroup = () => {
     const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
     const groupMessages = groupDetail.then((response) => response.data.group_messages);
-    groupMessages.then((messages) => {
-      let detailMessages;
-      if (!messages) {
-        detailMessages = [
-          {
-            type: MessageType.CHAT_DELETE,
-            data: {
-              text: 'Room is deleted',
+    groupMessages
+      .then((messages) => {
+        let detailMessages;
+        if (!messages) {
+          detailMessages = [
+            {
+              type: MessageType.CHAT_DELETE,
+              data: {
+                text: 'Room is deleted',
+              },
             },
-          },
-        ];
-        this.addInitMessageList(detailMessages);
-        this.setInitDone(true);
-        this.closeChatWindow();
-      } else {
-        detailMessages = messages.map((msg) => {
-          const message = {
-            data: {},
-          };
-          message.data.text = msg.text;
-          message.type = msg.message_type;
-          const sessionData = msg.sender_channel.session;
-          switch (message.type) {
-            case MessageType.TEXT:
-              message.data.sender = sessionData;
-              break;
-            case MessageType.USER_JOINED:
-              message.data.newJoinee = sessionData;
-              break;
-            case MessageType.USER_LEFT:
-              message.data.resignee = sessionData;
-              break;
-            default:
-              log.error('Unknown message type');
-              break;
-          }
-          return message;
-        });
-      }
-      this.prevMessageList = [];
-      detailMessages.forEach((msg) => {
-        const processedMessage = this.processMessage(msg, true);
-        if (!isEmptyObj(processedMessage)) {
-          this.prevMessageList.push(processedMessage);
+          ];
+          this.addInitMessageList(detailMessages);
+          this.setInitDone(true);
+          this.closeChatWindow();
+        } else {
+          detailMessages = messages.map((msg) => {
+            const message = {
+              data: {},
+            };
+            message.data.text = msg.text;
+            message.type = msg.message_type;
+            const sessionData = msg.sender_channel.session;
+            switch (message.type) {
+              case MessageType.TEXT:
+                message.data.sender = sessionData;
+                break;
+              case MessageType.USER_JOINED:
+                message.data.newJoinee = sessionData;
+                break;
+              case MessageType.USER_LEFT:
+                message.data.resignee = sessionData;
+                break;
+              default:
+                log.error('Unknown message type');
+                break;
+            }
+            return message;
+          });
         }
+        this.prevMessageList = [];
+        detailMessages.forEach((msg) => {
+          const processedMessage = this.processMessage(msg, true);
+          if (!isEmptyObj(processedMessage)) {
+            this.prevMessageList.push(processedMessage);
+          }
+        });
+        this.chatStartedPromise.then(() => {
+          this.addInitMessageList(this.prevMessageList);
+          this.setInitDone(true);
+        });
+      })
+      .catch(() => {
+        this.appStore.showAlert({
+          text: 'Error occured while fetching previous messages',
+          severity: 'error',
+        });
       });
-      this.chatStartedPromise.then(() => {
-        this.addInitMessageList(this.prevMessageList);
-        this.setInitDone(true);
-      });
-    });
   };
 
   initState = ({ roomId, name, password }) => {

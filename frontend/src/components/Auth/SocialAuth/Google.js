@@ -6,7 +6,7 @@ const GoogleLogin = (props) => {
   const { onSuccess, onFailure } = props;
   const handleCredentialResponse = (response) => {
     const accessToken = response.credential;
-    const provider = 'Google';
+    const provider = 'google';
     if (accessToken) onSuccess(provider, { access_token: accessToken });
     else onFailure(provider);
   };

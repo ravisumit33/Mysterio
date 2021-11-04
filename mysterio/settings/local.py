@@ -1,3 +1,4 @@
+from datetime import timedelta
 from dotenv import load_dotenv
 from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
@@ -40,6 +41,12 @@ LOGGING["loggers"] = {
     "chat": {
         "level": "DEBUG",
     },
+    "core": {
+        "level": "DEBUG",
+    },
+    "customauth": {
+        "level": "DEBUG",
+    },
     "django": {
         "level": "WARNING",
     },
@@ -53,3 +60,8 @@ LOGGING["handlers"]["console"]["formatter"] = "simple"
 EMAIL_HOST = "localhost"
 
 EMAIL_PORT = 1025
+
+
+# AUTH configurations
+
+SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"] = timedelta(minutes=60)

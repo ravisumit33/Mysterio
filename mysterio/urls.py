@@ -14,15 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.views.generic.base import TemplateView
-from django.conf import settings
-import mysterio.views as RootView
 
-frontend_routes = settings.FRONTEND_ROUTES
 urlpatterns = [
     path("api/chat/", include("chat.urls", "chat")),
-    path("api/account/registration/", include("dj_rest_auth.registration.urls")),
     path("api/account/", include("customauth.urls", "customauth")),
     path("admin/", admin.site.urls),
     path("api-auth/", include("rest_framework.urls")),
@@ -31,8 +27,5 @@ urlpatterns = [
         "robots.txt",
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
     ),
-    re_path(
-        r"^(%s)?$" % "|".join(frontend_routes),  # pylint: disable=C0209
-        RootView.FrontendView.as_view(),
-    ),
+    path("", include("core.urls", "core")),
 ]

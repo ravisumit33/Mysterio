@@ -41,11 +41,27 @@ const UserForm = (props) => {
     fetchUrl(endPoint, {
       method: 'post',
       body: requestBody,
-    }).then((response) => {
-      const responseData = response.data;
-      const newEmailFieldData = { ...emailFieldData };
-      const newPasswordFieldData = { ...passwordFieldData };
-      if (response.status >= 400) {
+    })
+      .then(() => {
+        profileStore.setSocial(false);
+        profileStore.setEmail(email);
+        if (!shouldRegister) {
+          appStore.setShouldShowAlert(false);
+          appStore.showAlert({
+            text: `Login successful.`,
+            severity: 'success',
+          });
+        } else {
+          appStore.showAlert({
+            text: `Account successfully created.`,
+            severity: 'success',
+          });
+        }
+      })
+      .catch((response) => {
+        const responseData = response.data;
+        const newEmailFieldData = { ...emailFieldData };
+        const newPasswordFieldData = { ...passwordFieldData };
         if (responseData.email) {
           [newEmailFieldData.help_text] = responseData.email;
           newEmailFieldData.error = true;
@@ -61,33 +77,15 @@ const UserForm = (props) => {
           newPasswordFieldData.error = false;
         }
         const action = shouldRegister ? 'register' : 'login';
-        appStore.setAlert({
-          // eslint-disable-next-line no-underscore-dangle
-          text: responseData.__all__ ? responseData.__all__[0] : `Unable to ${action}.`,
+        appStore.showAlert({
+          text: responseData.non_field_errors
+            ? responseData.non_field_errors[0]
+            : `Unable to ${action}.`,
           severity: 'error',
         });
-        appStore.setShouldShowAlert(true);
         setEmailFieldData(newEmailFieldData);
         setPasswordFieldData(newPasswordFieldData);
-      } else {
-        profileStore.setSocial(false);
-        profileStore.setEmail(email);
-        if (!shouldRegister) {
-          appStore.setShouldShowAlert(false);
-          appStore.setAlert({
-            text: `Login successful.`,
-            severity: 'success',
-          });
-          appStore.setShouldShowAlert(true);
-        } else {
-          appStore.setAlert({
-            text: `Registered successfully.`,
-            severity: 'success',
-          });
-          appStore.setShouldShowAlert(true);
-        }
-      }
-    });
+      });
   };
 
   return (
@@ -134,7 +132,7 @@ const UserForm = (props) => {
               type: 'email',
             }}
             error={emailFieldData.error}
-            autoComplete="username"
+            autoComplete="email"
           />
         </Grid>
         <Grid item>
@@ -160,7 +158,7 @@ const UserForm = (props) => {
                 </InputAdornment>
               ),
             }}
-            autoComplete="current-password"
+            autoComplete={shouldRegister ? 'new-password' : 'current-password'}
           />
         </Grid>
         <Grid item container direction="row-reverse">
@@ -179,11 +177,13 @@ const UserForm = (props) => {
 
 UserForm.propTypes = {
   shouldRegister: PropTypes.bool.isRequired,
-  from: PropTypes.string,
+  from: PropTypes.shape({
+    pathname: PropTypes.string,
+  }),
 };
 
 UserForm.defaultProps = {
-  from: '/',
+  from: '/account',
 };
 
 export default observer(UserForm);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import RouterLink from 'components/RouterLink';
 import { observer } from 'mobx-react-lite';
@@ -12,11 +13,12 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
-import { fetchUrl } from 'utils';
+import { fetchUrl, getErrorString } from 'utils';
 import { appStore, profileStore } from 'stores';
 
 const UserForm = (props) => {
   const { shouldRegister, from } = props;
+  const history = useHistory();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,8 +26,11 @@ const UserForm = (props) => {
     help_text: '',
     error: false,
   });
+  const passwordHelpText = shouldRegister
+    ? 'Password must contain atleast 8 characters and should not be too common'
+    : '';
   const [passwordFieldData, setPasswordFieldData] = useState({
-    help_text: '',
+    help_text: passwordHelpText,
     error: false,
   });
 
@@ -43,48 +48,54 @@ const UserForm = (props) => {
       body: requestBody,
     })
       .then(() => {
-        profileStore.setSocial(false);
-        profileStore.setEmail(email);
         if (!shouldRegister) {
+          profileStore.setSocial(false);
+          profileStore.setEmail(email);
           appStore.setShouldShowAlert(false);
           appStore.showAlert({
             text: `Login successful.`,
             severity: 'success',
           });
+          history.replace(from);
         } else {
           appStore.showAlert({
-            text: `Account successfully created.`,
+            text: 'Confirmation e-mail sent',
             severity: 'success',
           });
+          history.replace('/account/confirmation-email-sent/');
         }
       })
       .catch((response) => {
         const responseData = response.data;
-        const newEmailFieldData = { ...emailFieldData };
-        const newPasswordFieldData = { ...passwordFieldData };
-        if (responseData.email) {
-          [newEmailFieldData.help_text] = responseData.email;
-          newEmailFieldData.error = true;
+        const responseFields = ['email', 'password1'];
+        if (Object.keys(responseData).some((key) => responseFields.includes(key))) {
+          const newEmailFieldData = { ...emailFieldData };
+          const newPasswordFieldData = { ...passwordFieldData };
+          if (responseData.email) {
+            newEmailFieldData.help_text = getErrorString(responseData.email);
+            newEmailFieldData.error = true;
+          } else {
+            newEmailFieldData.help_text = '';
+            newEmailFieldData.error = false;
+          }
+          if (responseData.password1) {
+            newPasswordFieldData.help_text = getErrorString(responseData.password1);
+            newPasswordFieldData.error = true;
+          } else {
+            newPasswordFieldData.help_text = passwordHelpText;
+            newPasswordFieldData.error = false;
+          }
+          setEmailFieldData(newEmailFieldData);
+          setPasswordFieldData(newPasswordFieldData);
         } else {
-          newEmailFieldData.help_text = '';
-          newEmailFieldData.error = false;
+          const action = shouldRegister ? 'create an account' : 'login';
+          appStore.showAlert({
+            text: responseData.non_field_errors
+              ? getErrorString(responseData.non_field_errors)
+              : `Unable to ${action}.`,
+            severity: 'error',
+          });
         }
-        if (responseData.password) {
-          [newPasswordFieldData.help_text] = responseData.password;
-          newPasswordFieldData.error = true;
-        } else {
-          newPasswordFieldData.help_text = '';
-          newPasswordFieldData.error = false;
-        }
-        const action = shouldRegister ? 'register' : 'login';
-        appStore.showAlert({
-          text: responseData.non_field_errors
-            ? responseData.non_field_errors[0]
-            : `Unable to ${action}.`,
-          severity: 'error',
-        });
-        setEmailFieldData(newEmailFieldData);
-        setPasswordFieldData(newPasswordFieldData);
       });
   };
 
@@ -150,7 +161,8 @@ const UserForm = (props) => {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
+                    onMouseDown={() => setShouldUnmaskPassword(true)}
+                    onMouseUp={() => setShouldUnmaskPassword(false)}
                     disableRipple
                   >
                     {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}

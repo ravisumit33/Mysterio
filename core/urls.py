@@ -8,6 +8,7 @@ urlpatterns = [
     re_path(
         r"^(%s)?$" % "|".join(frontend_routes),  # pylint: disable=C0209
         CoreViews.FrontendView.as_view(),
+        name="frontend",
     ),
 ]
 

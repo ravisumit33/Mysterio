@@ -49,12 +49,12 @@ class ChatConsumer(WebsocketConsumer):
             except IntegrityError as excp:
                 logger.error("Cannot create group channel")
                 logger.error("Channel name: %s", self.channel_name)
-                logger.error("Room id: %d", self.room_id)
+                logger.error("Room id: %s", str(self.room_id))
                 raise DenyConnection from excp
             channel_layer.group_add(
                 GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name
             )
-            logger.info("New group channel created with room_id %d", self.room_id)
+            logger.info("New group channel created with room_id %s", str(self.room_id))
             self.channel_id = new_channel.id
             channel_layer.group_add(
                 GroupPrefix.GROUP_CHANNEL + str(self.channel_id), self.channel_name
@@ -97,7 +97,9 @@ class ChatConsumer(WebsocketConsumer):
                 MessageType.USER_LEFT,
                 {"resignee": self.profile},
             )
-            logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
+            logger.info(
+                "Room id: %s, Channel id: %d", str(self.room_id), self.channel_id
+            )
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
@@ -136,8 +138,8 @@ class ChatConsumer(WebsocketConsumer):
                 },
             )
             logger.info(
-                "Text message received in room id %d by %s",
-                self.room_id,
+                "Text message received in room id %s by %s",
+                str(self.room_id),
                 self.session.name,
             )
             logger.info("%s", message_data["text"])

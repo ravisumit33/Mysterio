@@ -17,6 +17,8 @@ import { AccountCircle, ExitToApp, Favorite } from '@material-ui/icons';
 import { fetchUrl } from 'utils';
 import Profile from './Profile';
 import ChangePassword from './ChangePassword';
+import ConfirmationEmailSent from './ConfirmationEmailSent';
+import ConfirmEmail from './ConfirmEmail';
 
 const drawerWidth = 240;
 
@@ -122,57 +124,67 @@ const Account = (props) => {
     }
   };
 
-  return !profileStore.isLoggedIn ? (
-    <Redirect
-      to={{
-        pathname: '/login',
-        state: { from: location },
-      }}
-    />
-  ) : (
+  return (
     <Switch>
-      <Route exact path={path}>
-        <Grid item container>
-          <Grid item>
-            <nav className={classes.drawer} aria-label="account details">
-              <Hidden smUp>
-                <Drawer
-                  variant="temporary"
-                  anchor="left"
-                  open={appStore.shouldOpenAccountsDrawer}
-                  onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
-                  classes={{
-                    paper: classes.drawerPaper,
-                  }}
-                  ModalProps={{
-                    keepMounted: true, // Better open performance on mobile.
-                  }}
-                >
-                  {drawer}
-                </Drawer>
-              </Hidden>
-              <Hidden xsDown>
-                <Drawer
-                  classes={{
-                    paper: classes.drawerPaper,
-                  }}
-                  variant="permanent"
-                  open
-                >
-                  {drawer}
-                </Drawer>
-              </Hidden>
-            </nav>
-          </Grid>
-          <Grid item xs>
-            <main>{renderTab()}</main>
-          </Grid>
-        </Grid>
+      <Route path={`${path}/confirmation-email-sent`}>
+        <ConfirmationEmailSent />
       </Route>
-      {!profileStore.social && (
-        <Route path={`${path}/change-password`}>
-          <ChangePassword />
-        </Route>
+      <Route path={`${path}/confirm-email/:key`}>
+        <ConfirmEmail />
+      </Route>
+      {!profileStore.isLoggedIn ? (
+        <Redirect
+          to={{
+            pathname: '/login',
+            state: { from: location },
+          }}
+        />
+      ) : (
+        <>
+          <Route exact path={path}>
+            <Grid item container>
+              <Grid item>
+                <nav className={classes.drawer} aria-label="account details">
+                  <Hidden smUp>
+                    <Drawer
+                      variant="temporary"
+                      anchor="left"
+                      open={appStore.shouldOpenAccountsDrawer}
+                      onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
+                      classes={{
+                        paper: classes.drawerPaper,
+                      }}
+                      ModalProps={{
+                        keepMounted: true, // Better open performance on mobile.
+                      }}
+                    >
+                      {drawer}
+                    </Drawer>
+                  </Hidden>
+                  <Hidden xsDown>
+                    <Drawer
+                      classes={{
+                        paper: classes.drawerPaper,
+                      }}
+                      variant="permanent"
+                      open
+                    >
+                      {drawer}
+                    </Drawer>
+                  </Hidden>
+                </nav>
+              </Grid>
+              <Grid item xs>
+                <main>{renderTab()}</main>
+              </Grid>
+            </Grid>
+          </Route>
+          {!profileStore.social && (
+            <Route path={`${path}/change-password`}>
+              <ChangePassword />
+            </Route>
+          )}
+        </>
       )}
     </Switch>
   );

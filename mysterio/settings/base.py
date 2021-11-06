@@ -62,6 +62,8 @@ ROOT_URLCONF = "mysterio.urls"
 FRONTEND_ROUTES = [
     "login/",
     "register/",
+    "account/",
+    "account/confirm-email/(?P<key>[-:\w]+)/",  # pylint: disable=anomalous-backslash-in-string
 ]
 
 
@@ -189,9 +191,6 @@ LOGGING = {
 }
 
 
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-
 # Rest framework & auth configurations
 
 REST_FRAMEWORK = {
@@ -209,9 +208,13 @@ REST_AUTH_SERIALIZERS = {
 
 REST_USE_JWT = True
 
+REST_SESSION_LOGIN = False
+
 JWT_AUTH_COOKIE = "mysterio-access-token"
 
 JWT_AUTH_REFRESH_COOKIE = "mysterio-refresh-token"
+
+OLD_PASSWORD_FIELD_ENABLED = True
 
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
@@ -222,11 +225,13 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 
 ACCOUNT_EMAIL_REQUIRED = True
 
-ACCOUNT_EMAIL_VERIFICATION = None
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 ACCOUNT_USERNAME_REQUIRED = False
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+ACCOUNT_ADAPTER = "customauth.adapter.AccountAdapter"
 
 SOCIALACCOUNT_PROVIDERS = {
     "google_modified": {
@@ -244,5 +249,3 @@ SOCIALACCOUNT_PROVIDERS = {
 # Cors headers configurations
 
 CORS_ORIGIN_ALLOW_ALL = False
-
-CORS_ORIGIN_WHITELIST = ("http://localhost:3000",)

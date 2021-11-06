@@ -14,8 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.generic.base import TemplateView
+from customauth.views import VerifyEmailView
 
 urlpatterns = [
     path("api/chat/", include("chat.urls", "chat")),
@@ -26,6 +27,13 @@ urlpatterns = [
     path(
         "robots.txt",
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+    ),
+    # allauth requires following url name in global namespace
+    # "account_confirm_email" for reverse resolving & handling requests from verification email
+    re_path(
+        r"^confirm-email/(?P<key>[-:\w]+)/$",
+        VerifyEmailView.as_view(),
+        name="account_confirm_email",
     ),
     path("", include("core.urls", "core")),
 ]

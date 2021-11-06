@@ -32,15 +32,20 @@ const App = () => {
   const classes = useStyles();
 
   useEffect(() => {
-    fetchUrl('/api/account/user/').then((response) => {
-      const responseData = response.data;
-      if (responseData) {
-        responseData.email && profileStore.setEmail(response.data.email);
-        responseData.is_socially_registered &&
-          profileStore.setSocial(responseData.is_socially_registered);
-      }
-      profileStore.setProfileInitialized(true);
-    });
+    fetchUrl('/api/account/user/')
+      .then((response) => {
+        const responseData = response.data;
+        if (responseData) {
+          // @ts-ignore
+          const { email } = responseData;
+          // @ts-ignore
+          const isSociallyRegistered = responseData.is_socially_registered;
+          email && profileStore.setEmail(email);
+          isSociallyRegistered && profileStore.setSocial(isSociallyRegistered);
+        }
+      })
+      .catch(() => {})
+      .finally(() => profileStore.setProfileInitialized(true));
     PullToRefresh.init({
       mainElement: 'body',
       onRefresh() {

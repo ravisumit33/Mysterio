@@ -1,7 +1,7 @@
 import { Grid } from '@material-ui/core';
 import React from 'react';
 import { appStore, profileStore } from 'stores';
-import { fetchUrl } from 'utils';
+import { fetchUrl, getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
 const SocialAuth = (props) => {
@@ -12,15 +12,19 @@ const SocialAuth = (props) => {
     })
       .then((resp) => {
         profileStore.setSocial(true);
+        // @ts-ignore
         profileStore.setEmail(resp.data.user.email);
         appStore.showAlert({ text: 'Login Success', severity: 'success' });
       })
-      .catch(() =>
+      .catch((resp) => {
+        const respData = resp.data;
         appStore.showAlert({
-          text: `Unable to login using ${provider}`,
+          text: respData.non_field_errors
+            ? getErrorString(respData.non_field_errors)
+            : `Unable to login using ${provider}`,
           severity: 'error',
-        })
-      );
+        });
+      });
   };
 
   const handleSocialLoginFailure = (provider) => {

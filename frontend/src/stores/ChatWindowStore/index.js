@@ -44,6 +44,7 @@ class ChatWindowStore {
 
   initializeForGroup = () => {
     const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
+    // @ts-ignore
     const groupMessages = groupDetail.then((response) => response.data.group_messages);
     groupMessages
       .then((messages) => {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Box, Button, Grid, IconButton, InputAdornment, TextField } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
@@ -6,7 +7,8 @@ import { fetchUrl, getErrorString } from 'utils';
 import { appStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
 
-const ChangePassword = () => {
+const ChangePassword = (props) => {
+  const { setShouldShowWaitScreen } = props;
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -26,6 +28,7 @@ const ChangePassword = () => {
   });
 
   const handleFormSubmit = () => {
+    setShouldShowWaitScreen(true);
     fetchUrl('/api/account/password/change/', {
       method: 'post',
       body: {
@@ -71,7 +74,8 @@ const ChangePassword = () => {
             severity: 'error',
           });
         }
-      });
+      })
+      .finally(() => setShouldShowWaitScreen(false));
   };
 
   return (
@@ -140,6 +144,10 @@ const ChangePassword = () => {
       </form>
     </CenterPaper>
   );
+};
+
+ChangePassword.propTypes = {
+  setShouldShowWaitScreen: PropTypes.func.isRequired,
 };
 
 export default ChangePassword;

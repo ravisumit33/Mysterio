@@ -119,7 +119,8 @@ const NavBar = () => {
         key: 'logout',
         text: 'Logout',
         icon: ExitToApp,
-        action: () =>
+        action: () => {
+          setHamburgerTriggerElement(null);
           fetchUrl('/api/account/logout/', {
             method: 'post',
             body: {},
@@ -133,7 +134,8 @@ const NavBar = () => {
                 text: 'Unable to log out. Make sure you are logged in.',
                 severity: 'error',
               })
-            ),
+            );
+        },
       },
     },
   ];

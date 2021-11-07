@@ -12,8 +12,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
 import { appStore, profileStore } from 'stores';
 import { Grid } from '@material-ui/core';
-import Avatar from 'components/Avatar';
 import { AccountCircle, ExitToApp, Favorite } from '@material-ui/icons';
+import Avatar from 'components/Avatar';
+import WaitScreen from 'components/WaitScreen';
 import { fetchUrl } from 'utils';
 import Profile from './Profile';
 import ChangePassword from './ChangePassword';
@@ -41,6 +42,7 @@ const Account = (props) => {
   const location = useLocation();
   const history = useHistory();
   const { path } = useRouteMatch();
+  const [shouldShowWaitScreen, setShouldShowWaitScreen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('Profile');
 
   const drawerTabs = [
@@ -72,7 +74,10 @@ const Account = (props) => {
               <ListItem
                 button
                 selected={selectedTab === tab.text}
-                onClick={() => setSelectedTab(tab.text)}
+                onClick={() => {
+                  setSelectedTab(tab.text);
+                  appStore.setShouldOpenAccountsDrawer(false);
+                }}
                 key={tab.text}
               >
                 <ListItemIcon>
@@ -118,13 +123,15 @@ const Account = (props) => {
   const renderTab = () => {
     switch (selectedTab) {
       case 'Profile':
-        return <Profile />;
+        return <Profile setShouldShowWaitScreen={setShouldShowWaitScreen} />;
       default:
         return '';
     }
   };
 
-  return (
+  return shouldShowWaitScreen ? (
+    <WaitScreen shouldOpen={shouldShowWaitScreen} />
+  ) : (
     <Switch>
       <Route path={`${path}/confirmation-email-sent`}>
         <ConfirmationEmailSent />
@@ -181,7 +188,7 @@ const Account = (props) => {
           </Route>
           {!profileStore.social && (
             <Route path={`${path}/change-password`}>
-              <ChangePassword />
+              <ChangePassword setShouldShowWaitScreen={setShouldShowWaitScreen} />
             </Route>
           )}
         </>

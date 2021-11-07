@@ -17,7 +17,7 @@ import { fetchUrl, getErrorString } from 'utils';
 import { appStore, profileStore } from 'stores';
 
 const UserForm = (props) => {
-  const { shouldRegister, from } = props;
+  const { shouldRegister, from, setShouldShowWaitScreen } = props;
   const history = useHistory();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -43,6 +43,7 @@ const UserForm = (props) => {
     } else {
       requestBody.password = password;
     }
+    setShouldShowWaitScreen(true);
     fetchUrl(endPoint, {
       method: 'post',
       body: requestBody,
@@ -96,7 +97,8 @@ const UserForm = (props) => {
             severity: 'error',
           });
         }
-      });
+      })
+      .finally(() => setShouldShowWaitScreen(false));
   };
 
   return (
@@ -192,6 +194,7 @@ UserForm.propTypes = {
   from: PropTypes.shape({
     pathname: PropTypes.string,
   }),
+  setShouldShowWaitScreen: PropTypes.func.isRequired,
 };
 
 UserForm.defaultProps = {

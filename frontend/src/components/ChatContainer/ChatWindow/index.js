@@ -1,12 +1,5 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import {
-  Backdrop,
-  Box,
-  CircularProgress,
-  LinearProgress,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
+import { Box, LinearProgress, makeStyles, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
@@ -14,6 +7,7 @@ import { profileStore } from 'stores';
 import clsx from 'clsx';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
+import WaitScreen from 'components/WaitScreen';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -53,7 +47,6 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     position: 'absolute',
     zIndex: 1,
-    color: theme.palette.common.white,
   },
   loadingMessageBackDrop: {
     display: 'flex',
@@ -128,29 +121,22 @@ const ChatWindow = (props) => {
       </Box>
       {shouldDisplayLoadingMessage && (
         <Box className={classes.loadingMessage}>
-          <Backdrop
+          <WaitScreen
             className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-            open={shouldDisplayLoadingMessage}
-          >
-            <Typography variant="body1">Loading Message...</Typography>
-            <LinearProgress style={{ width: '100%' }} />
-          </Backdrop>
+            shouldOpen={shouldDisplayLoadingMessage}
+            waitScreenText="Loading message"
+            progressComponent={<LinearProgress style={{ width: '100%' }} />}
+          />
         </Box>
       )}
       <Box flexGrow={1} overflow="scroll" className={clsx(classes.section, classes.messageBox)}>
-        <Backdrop
+        <WaitScreen
           className={classes.backdrop}
-          open={
+          shouldOpen={
             chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
           }
-        >
-          <Typography variant="body1">
-            {isGroupChat ? 'Entering room...' : 'Finding your match...'}
-          </Typography>
-          <Box ml={2}>
-            <CircularProgress color="inherit" />
-          </Box>
-        </Backdrop>
+          waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
+        />
         {chatMessages}
         {/* https://github.com/mui-org/material-ui/issues/17010 */}
         <div ref={endBox} />

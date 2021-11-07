@@ -55,20 +55,11 @@ LOGGING["loggers"] = {
 LOGGING["handlers"]["console"]["formatter"] = "simple"
 
 
-# Email SMTP server configurations
+#  Email SMTP server configurations
 
-#  EMAIL_HOST = "localhost"
+EMAIL_HOST = "localhost"
 
-#  EMAIL_PORT = 1025
-EMAIL_USE_TLS = True
-
-EMAIL_HOST = "smtp.gmail.com"
-
-EMAIL_PORT = 587
-
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = 1025
 
 
 # AUTH configurations

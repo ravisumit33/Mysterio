@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Backdrop, Box, Button, CircularProgress, Grid, Typography } from '@material-ui/core';
+import { Box, Button, Grid, makeStyles, Typography } from '@material-ui/core';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
+import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
+import WaitScreen from 'components/WaitScreen';
+
+const useStyles = makeStyles((theme) => ({
+  quickChatImg: {
+    height: 150,
+    [theme.breakpoints.down('sm')]: {
+      height: 75,
+    },
+  },
+}));
 
 const ConfirmEmail = () => {
+  const classes = useStyles();
   // @ts-ignore
   const { key } = useParams();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
@@ -21,9 +33,16 @@ const ConfirmEmail = () => {
   const welcomeComponent = (
     <CenterPaper>
       <Grid container direction="column" justifyContent="space-around" spacing={3}>
+        <Grid item container justifyContent="center">
+          <Grid item xs={12} md={7}>
+            <Box py={3}>
+              <QuickChatImg width="100%" className={classes.quickChatImg} />
+            </Box>
+          </Grid>
+        </Grid>
         <Grid item container>
           <Grid item xs={12}>
-            <Typography variant="h3">Welcome to Mysterio!!</Typography>
+            <Typography variant="h4">Welcome to Mysterio!!</Typography>
           </Grid>
         </Grid>
         <Grid item container justifyContent="center">
@@ -46,14 +65,7 @@ const ConfirmEmail = () => {
     </CenterPaper>
   );
 
-  const waitComponent = (
-    <Backdrop open={!emailConfirmed}>
-      <Typography variant="body1">Verifying...</Typography>
-      <Box ml={2}>
-        <CircularProgress color="inherit" />
-      </Box>
-    </Backdrop>
-  );
+  const waitComponent = <WaitScreen shouldOpen={!emailConfirmed} waitScreenText="Verifying" />;
   return !emailConfirmed ? waitComponent : welcomeComponent;
 };
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
@@ -7,11 +8,13 @@ import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 
-const Profile = () => {
+const Profile = (props) => {
+  const { setShouldShowWaitScreen } = props;
   const history = useHistory();
   const location = useLocation();
 
   const handleDeleteAccount = () => {
+    setShouldShowWaitScreen(true);
     fetchUrl('/api/account/delete/', {
       method: 'post',
       body: {},
@@ -29,7 +32,8 @@ const Profile = () => {
           text: `Error occurred while deleting account. Make sure you are logged in.`,
           severity: 'error',
         });
-      });
+      })
+      .finally(() => setShouldShowWaitScreen(false));
   };
 
   return (
@@ -76,6 +80,10 @@ const Profile = () => {
       </Grid>
     </CenterPaper>
   );
+};
+
+Profile.propTypes = {
+  setShouldShowWaitScreen: PropTypes.func.isRequired,
 };
 
 export default observer(Profile);

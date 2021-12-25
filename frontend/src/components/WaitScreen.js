@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Backdrop, Box, CircularProgress, makeStyles, Typography } from '@material-ui/core';
-import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
@@ -38,4 +37,4 @@ WaitScreen.defaultProps = {
   waitScreenText: 'Please wait',
 };
 
-export default observer(WaitScreen);
+export default WaitScreen;

@@ -1,11 +1,12 @@
+import React, { useCallback } from 'react';
 import { Grid } from '@material-ui/core';
-import React from 'react';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
-const SocialAuth = (props) => {
-  const handleSocialLoginSuccess = (provider, responseData) => {
+const SocialAuth = () => {
+  const handleSocialLoginSuccess = useCallback((provider, responseData) => {
+    appStore.showWaitScreen('Logging you in');
     fetchUrl(`/api/account/${provider}/login/`, {
       method: 'post',
       body: { access_token: responseData.access_token },
@@ -14,7 +15,7 @@ const SocialAuth = (props) => {
         profileStore.setSocial(true);
         // @ts-ignore
         profileStore.setEmail(resp.data.user.email);
-        appStore.showAlert({ text: 'Login Success', severity: 'success' });
+        appStore.showAlert({ text: 'Login Successful', severity: 'success' });
       })
       .catch((resp) => {
         const respData = resp.data;
@@ -24,15 +25,16 @@ const SocialAuth = (props) => {
             : `Unable to login using ${provider}`,
           severity: 'error',
         });
-      });
-  };
+      })
+      .finally(() => appStore.setShouldShowWaitScreen(false));
+  }, []);
 
-  const handleSocialLoginFailure = (provider) => {
+  const handleSocialLoginFailure = useCallback((provider) => {
     appStore.showAlert({
       text: `Unable to login using ${provider}`,
       severity: 'error',
     });
-  };
+  }, []);
 
   return (
     <Grid container justifyContent="space-between">

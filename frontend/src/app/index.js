@@ -9,11 +9,17 @@ import {
   responsiveFontSizes,
   Grid,
 } from '@material-ui/core';
-import { NavBar, Home, Footer, ChatContainer } from 'components';
-import UserInfoDialog from 'components/UserInfoDialog';
-import Alert from 'components/Alert';
-import Auth from 'components/Auth';
-import Account from 'components/Account';
+import {
+  NavBar,
+  Home,
+  Footer,
+  ChatContainer,
+  UserInfoDialog,
+  Alert,
+  Auth,
+  Account,
+  AppWait,
+} from 'components';
 import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
 
@@ -63,6 +69,7 @@ const App = () => {
   return (
     <CssBaseline>
       <ThemeProvider theme={theme}>
+        <AppWait />
         <Grid container direction="column" className={classes.root}>
           <Router>
             <Alert />

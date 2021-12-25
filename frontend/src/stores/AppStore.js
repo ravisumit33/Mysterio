@@ -13,6 +13,10 @@ class AppStore {
 
   shouldOpenAccountsDrawer = false;
 
+  shouldShowWaitScreen = false;
+
+  waitScreenText = '';
+
   chatWindow = null;
 
   chatWindowData = {};
@@ -47,6 +51,20 @@ class AppStore {
 
   setShouldOpenNewGroupDialog = (shouldOpenNewGroupDialog) => {
     this.shouldOpenNewGroupDialog = shouldOpenNewGroupDialog;
+  };
+
+  setShouldShowWaitScreen = (shouldShowWaitScreen) => {
+    this.shouldShowWaitScreen = shouldShowWaitScreen;
+  };
+
+  setWaitScreenText = (waitScreenText) => {
+    this.waitScreenText = waitScreenText;
+  };
+
+  showWaitScreen = (waitScreenText) => {
+    this.setShouldShowWaitScreen(false);
+    this.setWaitScreenText(waitScreenText);
+    this.setShouldShowWaitScreen(true);
   };
 
   addChatWindow = () => {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import RouterLink from 'components/RouterLink';
 import { observer } from 'mobx-react-lite';
 import {
   Box,
@@ -13,11 +12,12 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
+import RouterLink from 'components/RouterLink';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore, profileStore } from 'stores';
 
 const UserForm = (props) => {
-  const { shouldRegister, from, setShouldShowWaitScreen } = props;
+  const { shouldRegister, from } = props;
   const history = useHistory();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
   const [email, setEmail] = useState('');
@@ -43,27 +43,27 @@ const UserForm = (props) => {
     } else {
       requestBody.password = password;
     }
-    setShouldShowWaitScreen(true);
+    appStore.showWaitScreen(shouldRegister ? 'Creating your account' : 'Logging you in');
     fetchUrl(endPoint, {
       method: 'post',
       body: requestBody,
     })
       .then(() => {
         if (!shouldRegister) {
-          profileStore.setSocial(false);
           profileStore.setEmail(email);
+          profileStore.setSocial(false);
+          history.replace(from);
           appStore.setShouldShowAlert(false);
           appStore.showAlert({
             text: `Login successful.`,
             severity: 'success',
           });
-          history.replace(from);
         } else {
+          history.replace('/account/confirmation-email-sent/');
           appStore.showAlert({
             text: 'Confirmation e-mail sent',
             severity: 'success',
           });
-          history.replace('/account/confirmation-email-sent/');
         }
       })
       .catch((response) => {
@@ -98,7 +98,7 @@ const UserForm = (props) => {
           });
         }
       })
-      .finally(() => setShouldShowWaitScreen(false));
+      .finally(() => appStore.setShouldShowWaitScreen(false));
   };
 
   return (
@@ -194,7 +194,6 @@ UserForm.propTypes = {
   from: PropTypes.shape({
     pathname: PropTypes.string,
   }),
-  setShouldShowWaitScreen: PropTypes.func.isRequired,
 };
 
 UserForm.defaultProps = {

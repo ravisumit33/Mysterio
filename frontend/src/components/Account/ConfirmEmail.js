@@ -5,7 +5,7 @@ import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
-import WaitScreen from 'components/WaitScreen';
+import { appStore } from 'stores';
 
 const useStyles = makeStyles((theme) => ({
   quickChatImg: {
@@ -23,14 +23,23 @@ const ConfirmEmail = () => {
   const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   useEffect(() => {
+    appStore.showWaitScreen('Verifying');
     fetchUrl('/api/account/registration/verify-email/', { method: 'post', body: { key } })
       .then(() => {
         setEmailConfirmed(true);
       })
-      .catch();
+      .catch(() =>
+        appStore.showAlert({
+          text: 'Error occured while verifying email',
+          severity: 'error',
+        })
+      )
+      .finally(() => appStore.setShouldShowWaitScreen(false));
   }, [key]);
 
-  const welcomeComponent = (
+  const welcomeComponent = !emailConfirmed ? (
+    <></>
+  ) : (
     <CenterPaper>
       <Grid container direction="column" justifyContent="space-around" spacing={3}>
         <Grid item container justifyContent="center">
@@ -65,8 +74,7 @@ const ConfirmEmail = () => {
     </CenterPaper>
   );
 
-  const waitComponent = <WaitScreen shouldOpen={!emailConfirmed} waitScreenText="Verifying" />;
-  return !emailConfirmed ? waitComponent : welcomeComponent;
+  return welcomeComponent;
 };
 
 export default ConfirmEmail;

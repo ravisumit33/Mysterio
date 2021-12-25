@@ -37,7 +37,7 @@ class ChatWindowStore {
     if (this.isGroupChat) {
       this.initializeForGroup();
     } else {
-      this.setInitDone(true);
+      this.chatStartedPromise.then(() => this.setInitDone(true));
     }
     this.socket = new Socket(this);
   }

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import PullToRefresh from 'pulltorefreshjs';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import {
   CssBaseline,
   makeStyles,
@@ -69,45 +69,43 @@ const App = () => {
   return (
     <CssBaseline>
       <ThemeProvider theme={theme}>
-        <AppWait />
         <Grid container direction="column" className={classes.root}>
-          <Router>
-            <Alert />
-            <Grid item>
-              <NavBar />
-            </Grid>
-            <Switch>
-              <Route exact path="/">
-                <Grid item>
-                  <Home />
-                </Grid>
-                <Grid item>
-                  <Footer />
-                </Grid>
-                <UserInfoDialog />
-              </Route>
-              <Route path="/login">
-                <Grid item xs>
-                  <Auth />
-                </Grid>
-              </Route>
-              <Route path="/register">
-                <Grid item xs>
-                  <Auth shouldRegister />
-                </Grid>
-              </Route>
-              <Route path="/account">
-                <Grid item>
-                  <Account />
-                </Grid>
-              </Route>
-              <Route path="/chat">
-                <Grid item container xs>
-                  <ChatContainer />
-                </Grid>
-              </Route>
-            </Switch>
-          </Router>
+          <Alert />
+          <AppWait />
+          <Grid item>
+            <NavBar />
+          </Grid>
+          <Switch>
+            <Route exact path="/">
+              <Grid item>
+                <Home />
+              </Grid>
+              <Grid item>
+                <Footer />
+              </Grid>
+              <UserInfoDialog />
+            </Route>
+            <Route path="/login">
+              <Grid item xs>
+                <Auth />
+              </Grid>
+            </Route>
+            <Route path="/register">
+              <Grid item xs>
+                <Auth shouldRegister />
+              </Grid>
+            </Route>
+            <Route path="/account">
+              <Grid item>
+                <Account />
+              </Grid>
+            </Route>
+            <Route path="/chat">
+              <Grid item container xs>
+                <ChatContainer />
+              </Grid>
+            </Route>
+          </Switch>
         </Grid>
       </ThemeProvider>
     </CssBaseline>

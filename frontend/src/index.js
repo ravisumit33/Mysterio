@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { configure } from 'mobx';
 import 'index.css';
 import App from 'app';
@@ -9,7 +10,12 @@ import * as serviceWorker from './serviceWorker';
 configure({ isolateGlobalState: true });
 
 const renderReactDom = () => {
-  ReactDOM.render(<App />, document.getElementById('root'));
+  ReactDOM.render(
+    <Router>
+      <App />
+    </Router>,
+    document.getElementById('root')
+  );
 };
 
 // @ts-ignore

@@ -6,7 +6,6 @@ import SendIcon from '@material-ui/icons/Send';
 import { Box, IconButton } from '@material-ui/core';
 import { ChatWindowStoreContext } from 'contexts';
 import { ChatStatus, MessageType } from 'appConstants';
-import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
@@ -48,6 +47,10 @@ const InputBar = () => {
     }
   };
 
+  if (input.current) {
+    chatStatus === ChatStatus.ONGOING ? input.current.focus() : input.current.blur();
+  }
+
   return (
     <Box
       onFocus={() => setActive(true)}
@@ -56,8 +59,6 @@ const InputBar = () => {
     >
       <InputBase
         className={clsx(classes.root, { [classes.active]: active })}
-        disabled={!(chatStatus === ChatStatus.ONGOING)}
-        autoFocus
         placeholder="Type a message..."
         inputRef={input}
         endAdornment={
@@ -72,4 +73,4 @@ const InputBar = () => {
   );
 };
 
-export default observer(InputBar);
+export default InputBar;

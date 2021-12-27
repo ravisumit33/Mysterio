@@ -28,7 +28,7 @@ const GroupPasswordDialog = (props) => {
   };
 
   const groupPasswordCheck = () => {
-    fetchUrl(`/api/chat/${appStore.chatWindowData.roomId}/check_password/`, {
+    fetchUrl(`/api/chat/groups/${appStore.chatWindowData.roomId}/check_password/`, {
       method: 'post',
       body: { password: selectedGroupPassword },
     })

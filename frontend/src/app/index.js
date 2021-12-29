@@ -19,6 +19,7 @@ import {
   Auth,
   Account,
   AppWait,
+  NewRoom,
 } from 'components';
 import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
@@ -72,6 +73,7 @@ const App = () => {
         <Grid container direction="column" className={classes.root}>
           <Alert />
           <AppWait />
+          <UserInfoDialog />
           <Grid item>
             <NavBar />
           </Grid>
@@ -83,7 +85,6 @@ const App = () => {
               <Grid item>
                 <Footer />
               </Grid>
-              <UserInfoDialog />
             </Route>
             <Route path="/login">
               <Grid item xs>
@@ -103,6 +104,11 @@ const App = () => {
             <Route path="/chat">
               <Grid item container xs>
                 <ChatContainer />
+              </Grid>
+            </Route>
+            <Route path="/room">
+              <Grid item>
+                <NewRoom />
               </Grid>
             </Route>
           </Switch>

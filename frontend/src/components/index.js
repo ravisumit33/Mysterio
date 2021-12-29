@@ -7,5 +7,17 @@ import Auth from './Auth';
 import Alert from './Alert';
 import AppWait from './AppWait';
 import UserInfoDialog from './UserInfoDialog';
+import NewRoom from './NewRoom';
 
-export { NavBar, Home, Footer, ChatContainer, Account, Auth, Alert, AppWait, UserInfoDialog };
+export {
+  NavBar,
+  Home,
+  Footer,
+  ChatContainer,
+  Account,
+  Auth,
+  Alert,
+  AppWait,
+  UserInfoDialog,
+  NewRoom,
+};

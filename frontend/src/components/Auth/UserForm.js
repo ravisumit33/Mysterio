@@ -108,7 +108,7 @@ const UserForm = (props) => {
         handleFormSubmit();
       }}
     >
-      <Grid item container direction="column" spacing={1}>
+      <Grid container direction="column" spacing={1}>
         <Grid item>
           <Typography variant="h6">{shouldRegister ? 'Create account' : 'Login'}</Typography>
           <Typography variant="body1" color="textSecondary">

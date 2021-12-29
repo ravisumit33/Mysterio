@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   Box,
@@ -19,8 +19,7 @@ import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
 import { TextAvatar } from 'components/Avatar';
-import { profileStore, appStore } from 'stores';
-import NewGroupDialog from './NewGroupDialog';
+import { appStore } from 'stores';
 import GroupPasswordDialog from './GroupPasswordDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -64,22 +63,14 @@ const useStyles = makeStyles((theme) => ({
 const GroupChatUI = () => {
   const classes = useStyles();
   const history = useHistory();
-  const location = useLocation();
 
-  const {
-    groupRooms,
-    setGroupRoomsFetched,
-    addChatWindow,
-    setChatWindowData,
-    setShouldOpenUserInfoDialog,
-    shouldOpenNewGroupDialog,
-    setShouldOpenNewGroupDialog,
-    updateGroupRooms,
-  } = appStore;
-  const [selectedGroup, setSelectedGroup] = useState({ id: -1, name: '' });
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
+  const [chatWindowData, setChatWindowData] = useState({ roomId: -1, name: '' });
+
+  const { groupRooms, setGroupRoomsFetched, addChatWindow, updateGroupRooms } = appStore;
 
   useEffect(() => {
     updateGroupRooms();
@@ -94,41 +85,27 @@ const GroupChatUI = () => {
     })
     .slice(0, 5);
 
-  const handleStartGroupChat = () => {
-    if (!profileStore.name) {
-      setShouldOpenUserInfoDialog(true);
-    } else {
-      addChatWindow();
-      history.push('/chat');
-    }
-    resetState();
-  };
-
-  const resetState = () => {
-    setSelectedGroup({ id: -1, name: '' });
-    setNewGroupName('');
-    setPendingNewGroupName('');
+  const handleStartGroupChat = (windowData) => {
+    addChatWindow(windowData);
+    history.push('/chat');
   };
 
   const handleStartChat = (group) => {
-    let chatWindowData;
+    let windowData;
     const chatGroup = group || selectedGroup;
-    if (chatGroup && chatGroup.id !== -1) {
-      chatWindowData = {
+    if (chatGroup) {
+      windowData = {
         roomId: chatGroup.id,
         name: chatGroup.name,
       };
-      setChatWindowData(chatWindowData);
+      setChatWindowData(windowData);
       if (chatGroup.is_protected) {
         setShouldOpenGroupPasswordDialog(true);
       } else {
-        handleStartGroupChat();
+        handleStartGroupChat(windowData);
       }
     } else if (newGroupName) {
-      if (!profileStore.isLoggedIn) {
-        history.push('/login', { from: location });
-      }
-      setShouldOpenNewGroupDialog(true);
+      history.push('/room', { name: newGroupName });
     }
   };
 
@@ -160,6 +137,7 @@ const GroupChatUI = () => {
                       size="small"
                       onClose={handleGroupSearchClose}
                       inputValue={pendingNewGroupName}
+                      clearOnBlur={false}
                       onInputChange={(event, newGroup) => setPendingNewGroupName(newGroup)}
                       value={selectedGroup}
                       onChange={(event, newGroup) => setSelectedGroup(newGroup)}
@@ -180,7 +158,7 @@ const GroupChatUI = () => {
                       )}
                       renderOption={(option) => (
                         <Tooltip title={option.name} arrow>
-                          <ListItem disableGutters>
+                          <>
                             <ListItemAvatar>
                               <TextAvatar name={option.name} />
                             </ListItemAvatar>
@@ -190,7 +168,7 @@ const GroupChatUI = () => {
                               primaryTypographyProps={{ noWrap: true }}
                               secondaryTypographyProps={{ noWrap: true }}
                             />
-                          </ListItem>
+                          </>
                         </Tooltip>
                       )}
                       getOptionLabel={(option) => option.name || ''}
@@ -239,17 +217,11 @@ const GroupChatUI = () => {
           </Grid>
         </Container>
       </Box>
-      <NewGroupDialog
-        shouldOpenNewGroupDialog={shouldOpenNewGroupDialog}
-        setShouldOpenNewGroupDialog={setShouldOpenNewGroupDialog}
-        newGroupName={newGroupName}
-        setNewGroupName={setNewGroupName}
-        handleStartGroupChat={handleStartGroupChat}
-      />
       <GroupPasswordDialog
         shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
         setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}
         handleStartGroupChat={handleStartGroupChat}
+        chatWindowData={chatWindowData}
       />
     </>
   );

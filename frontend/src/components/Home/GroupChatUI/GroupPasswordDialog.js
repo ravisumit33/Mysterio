@@ -14,33 +14,31 @@ import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 
 const GroupPasswordDialog = (props) => {
-  const { shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog, handleStartGroupChat } =
-    props;
+  const {
+    shouldOpenGroupPasswordDialog,
+    setShouldOpenGroupPasswordDialog,
+    handleStartGroupChat,
+    chatWindowData,
+  } = props;
 
-  const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
-  const [protectedGroupPasswordFieldData, setProtectedGroupPasswordFieldData] = useState({
+  const defaultPasswordFieldData = {
     help_text: '',
     error: false,
-  });
-
-  const resetState = () => {
-    setSelectedGroupPassword('');
   };
 
+  const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
+  const [protectedGroupPasswordFieldData, setProtectedGroupPasswordFieldData] =
+    useState(defaultPasswordFieldData);
+
   const groupPasswordCheck = () => {
-    fetchUrl(`/api/chat/groups/${appStore.chatWindowData.roomId}/check_password/`, {
+    fetchUrl(`/api/chat/groups/${chatWindowData.roomId}/check_password/`, {
       method: 'post',
       body: { password: selectedGroupPassword },
     })
       .then((response) => {
-        appStore.setChatWindowData({
-          ...appStore.chatWindowData,
-          password: selectedGroupPassword,
-        });
-        handleStartGroupChat();
-        appStore.setShouldShowAlert(false);
         setShouldOpenGroupPasswordDialog(false);
-        resetState();
+        handleStartGroupChat({ ...chatWindowData, password: selectedGroupPassword });
+        appStore.setShouldShowAlert(false);
       })
       .catch((response) => {
         appStore.showAlert({
@@ -65,7 +63,6 @@ const GroupPasswordDialog = (props) => {
         onSubmit={(evt) => {
           evt.preventDefault();
           groupPasswordCheck();
-          evt.stopPropagation();
         }}
       >
         <DialogContent>
@@ -84,15 +81,7 @@ const GroupPasswordDialog = (props) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            type="submit"
-            onClick={(evt) => {
-              evt.preventDefault();
-              groupPasswordCheck();
-              evt.stopPropagation();
-            }}
-            color="primary"
-          >
+          <Button type="submit" color="primary">
             Enter room
           </Button>
         </DialogActions>
@@ -105,6 +94,10 @@ GroupPasswordDialog.propTypes = {
   shouldOpenGroupPasswordDialog: PropTypes.bool,
   setShouldOpenGroupPasswordDialog: PropTypes.func.isRequired,
   handleStartGroupChat: PropTypes.func.isRequired,
+  chatWindowData: PropTypes.shape({
+    roomId: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 GroupPasswordDialog.defaultProps = {

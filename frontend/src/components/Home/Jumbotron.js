@@ -4,7 +4,7 @@ import Box from '@material-ui/core/Box';
 import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
-import { appStore, profileStore } from 'stores';
+import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 
 const useStyle = makeStyles((theme) => ({
@@ -56,10 +56,6 @@ const Jumbotron = () => {
     history.push('/chat');
   };
 
-  const handleStartChat = () => {
-    profileStore.name ? handleStartIndividualChat() : appStore.setShouldOpenUserInfoDialog(true);
-  };
-
   return (
     <Box id="jumbotron">
       <Box className={classes.jumbotron}>
@@ -94,7 +90,7 @@ const Jumbotron = () => {
                     color="secondary"
                     variant="contained"
                     size="large"
-                    onClick={handleStartChat}
+                    onClick={handleStartIndividualChat}
                   >
                     Chat Now
                   </Button>

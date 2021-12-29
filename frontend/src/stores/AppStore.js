@@ -7,8 +7,6 @@ class AppStore {
 
   shouldShowAlert = false;
 
-  shouldOpenUserInfoDialog = false;
-
   shouldOpenNewGroupDialog = false;
 
   shouldOpenAccountsDrawer = false;
@@ -18,8 +16,6 @@ class AppStore {
   waitScreenText = '';
 
   chatWindow = null;
-
-  chatWindowData = {};
 
   groupRooms = [];
 
@@ -45,10 +41,6 @@ class AppStore {
     this.setShouldShowAlert(true);
   };
 
-  setShouldOpenUserInfoDialog = (shouldOpenUserInfoDialog) => {
-    this.shouldOpenUserInfoDialog = shouldOpenUserInfoDialog;
-  };
-
   setShouldOpenNewGroupDialog = (shouldOpenNewGroupDialog) => {
     this.shouldOpenNewGroupDialog = shouldOpenNewGroupDialog;
   };
@@ -67,8 +59,8 @@ class AppStore {
     this.setShouldShowWaitScreen(true);
   };
 
-  addChatWindow = () => {
-    this.chatWindow = new ChatWindowStore({ appStore: this, data: this.chatWindowData });
+  addChatWindow = (chatWindowData) => {
+    this.chatWindow = new ChatWindowStore({ appStore: this, data: chatWindowData });
   };
 
   removeChatWIndow = () => {
@@ -88,10 +80,6 @@ class AppStore {
 
   setShouldOpenAccountsDrawer = (shouldOpenAccountsDrawer) => {
     this.shouldOpenAccountsDrawer = shouldOpenAccountsDrawer;
-  };
-
-  setChatWindowData = (data) => {
-    this.chatWindowData = data;
   };
 
   updateGroupRooms = () =>

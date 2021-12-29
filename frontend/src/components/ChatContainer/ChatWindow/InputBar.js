@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -47,9 +47,9 @@ const InputBar = () => {
     }
   };
 
-  if (input.current) {
+  useEffect(() => {
     chatStatus === ChatStatus.ONGOING ? input.current.focus() : input.current.blur();
-  }
+  });
 
   return (
     <Box

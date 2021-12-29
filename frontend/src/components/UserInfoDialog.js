@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -12,7 +11,7 @@ import {
 import { appStore, profileStore } from 'stores';
 
 const UserInfoDialog = () => {
-  const history = useHistory();
+  const [shouldOpen, setShouldOpen] = useState(true);
   const [textFieldValue, setTextFieldValue] = useState('');
 
   const handleTextFieldChange = (e) => {
@@ -28,23 +27,17 @@ const UserInfoDialog = () => {
       return;
     }
     appStore.setShouldShowAlert(false);
-    appStore.setShouldOpenUserInfoDialog(false);
     profileStore.setName(textFieldValue);
-    appStore.addChatWindow();
-    history.push('/chat');
+    setShouldOpen(false);
   };
 
   return (
-    <Dialog
-      open={appStore.shouldOpenUserInfoDialog}
-      onClose={() => appStore.setShouldOpenUserInfoDialog(false)}
-    >
+    <Dialog open={shouldOpen} onClose={() => profileStore.name && setShouldOpen(false)}>
       <DialogTitle>Let&apos;s get started!</DialogTitle>
       <form
         onSubmit={(evt) => {
           evt.preventDefault();
           handleDialogueButtonClick();
-          evt.stopPropagation();
         }}
       >
         <DialogContent>
@@ -55,18 +48,11 @@ const UserInfoDialog = () => {
             fullWidth
             value={textFieldValue}
             onChange={handleTextFieldChange}
+            required
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            type="submit"
-            onClick={(evt) => {
-              evt.preventDefault();
-              handleDialogueButtonClick();
-              evt.stopPropagation();
-            }}
-            color="primary"
-          >
+          <Button type="submit" color="primary">
             Go
           </Button>
         </DialogActions>

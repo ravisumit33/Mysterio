@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
-import { Box, Container, Grid, Paper } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
 import { profileStore } from 'stores';
+import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';
 import SocialAuth from './SocialAuth';
 
@@ -22,24 +23,18 @@ const Auth = (props) => {
   if (!shouldRenderAuth) return <></>;
 
   return (
-    <Box my={3}>
-      <Container maxWidth="sm">
-        <Paper variant="elevation" elevation={2}>
-          <Box p={3}>
-            <Grid container direction="column" justifyContent="space-between" spacing={4}>
-              <Grid item>
-                <UserForm shouldRegister={shouldRegister} from={from} />
-              </Grid>
-              {!shouldRegister && (
-                <Grid item>
-                  <SocialAuth />
-                </Grid>
-              )}
-            </Grid>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+    <CenterPaper>
+      <Grid container direction="column" justifyContent="space-between" spacing={4}>
+        <Grid item>
+          <UserForm shouldRegister={shouldRegister} from={from} />
+        </Grid>
+        {!shouldRegister && (
+          <Grid item>
+            <SocialAuth />
+          </Grid>
+        )}
+      </Grid>
+    </CenterPaper>
   );
 };
 

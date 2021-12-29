@@ -25,10 +25,6 @@ class ChatConsumer(WebsocketConsumer):
 
         self.is_group_consumer = False
 
-        # ChatSession instance
-        self.session = None
-
-        # Cached session data
         self.profile = None
 
     def connect(self):
@@ -140,7 +136,7 @@ class ChatConsumer(WebsocketConsumer):
             logger.info(
                 "Text message received in room id %s by %s",
                 str(self.room_id),
-                self.session.name,
+                self.profile["name"],
             )
             logger.info("%s", message_data["text"])
             # TODO: remove this log as messages will be encrypted
@@ -153,21 +149,21 @@ class ChatConsumer(WebsocketConsumer):
             )
             session_id = message_data["sessionId"]
             session_id = session_id if session_id else self.channel_name
-            self.session = ChatSession(
+            chat_session = ChatSession(
                 session_id=session_id, name=name, avatar_url=avatar_url
             )
-            self.session.save()
+            chat_session.save()
             self.profile = {
-                "session_id": self.session.session_id,
-                "name": self.session.name,
-                "avatarUrl": self.session.avatar_url,
+                "session_id": chat_session.session_id,
+                "name": chat_session.name,
+                "avatarUrl": chat_session.avatar_url,
             }
 
             if not self.is_group_consumer:
                 group_prefix_channel = GroupPrefix.INDIVIDUAL_CHANNEL
                 new_channel = Channel.IndividualChannel.objects.create(
                     name=self.channel_name,
-                    session_id=self.session.id,
+                    session_id=chat_session.id,
                 )
                 self.channel_id = new_channel.id
                 channel_layer.group_add(
@@ -178,14 +174,14 @@ class ChatConsumer(WebsocketConsumer):
             else:
                 group_prefix_channel = GroupPrefix.GROUP_CHANNEL
                 Channel.GroupChannel.objects.filter(name=self.channel_name).update(
-                    session_id=self.session.id
+                    session_id=chat_session.id
                 )
 
             channel_layer.group_send(
                 group_prefix_channel + str(self.channel_id),
                 MessageType.USER_INFO,
                 {
-                    "session_id": self.session.session_id,
+                    "session_id": self.profile["session_id"],
                 },
             )
 

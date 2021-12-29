@@ -90,7 +90,8 @@ const Account = (props) => {
           <List>
             <ListItem
               button
-              onClick={() =>
+              onClick={() => {
+                appStore.showWaitScreen('Logging you out');
                 fetchUrl('/api/account/logout/', {
                   method: 'post',
                   body: {},
@@ -105,7 +106,8 @@ const Account = (props) => {
                       severity: 'error',
                     })
                   )
-              }
+                  .finally(() => appStore.setShouldShowWaitScreen(false));
+              }}
             >
               <ListItemIcon>
                 <ExitToApp color="secondary" />

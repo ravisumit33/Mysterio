@@ -69,6 +69,7 @@ const ChatHeader = (props) => {
   const handleAlertClose = () => appStore.setShouldShowAlert(false);
 
   const handleDeleteRoom = () => {
+    appStore.showWaitScreen('Deleting Room');
     fetchUrl(`/api/chat/groups/${roomId}/`, {
       method: 'delete',
     })
@@ -95,7 +96,8 @@ const ChatHeader = (props) => {
           action: alertAction,
           severity: 'error',
         });
-      });
+      })
+      .finally(() => appStore.setShouldShowWaitScreen(false));
   };
 
   const deleteConfirmationDialog = (

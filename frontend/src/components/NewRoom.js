@@ -32,10 +32,11 @@ const NewRoom = () => {
     error: false,
   });
 
-  const { setShouldShowWaitScreen, addChatWindow, showAlert, setShouldShowAlert } = appStore;
+  const { showWaitScreen, setShouldShowWaitScreen, addChatWindow, showAlert, setShouldShowAlert } =
+    appStore;
 
   const handleCreateRoom = () => {
-    setShouldShowWaitScreen(true);
+    showWaitScreen('Creating new room');
     fetchUrl('/api/chat/groups/', {
       method: 'post',
       body: {

@@ -121,6 +121,7 @@ const NavBar = () => {
         icon: ExitToApp,
         action: () => {
           setHamburgerTriggerElement(null);
+          appStore.showWaitScreen('Logging you out');
           fetchUrl('/api/account/logout/', {
             method: 'post',
             body: {},
@@ -134,7 +135,8 @@ const NavBar = () => {
                 text: 'Unable to log out. Make sure you are logged in.',
                 severity: 'error',
               })
-            );
+            )
+            .finally(() => appStore.setShouldShowWaitScreen(false));
         },
       },
     },

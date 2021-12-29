@@ -31,6 +31,7 @@ const GroupPasswordDialog = (props) => {
     useState(defaultPasswordFieldData);
 
   const groupPasswordCheck = () => {
+    appStore.showWaitScreen('Validating password');
     fetchUrl(`/api/chat/groups/${chatWindowData.roomId}/check_password/`, {
       method: 'post',
       body: { password: selectedGroupPassword },
@@ -49,7 +50,8 @@ const GroupPasswordDialog = (props) => {
         const newProtectedGroupPasswordFieldData = { ...protectedGroupPasswordFieldData };
         newProtectedGroupPasswordFieldData.error = true;
         setProtectedGroupPasswordFieldData(newProtectedGroupPasswordFieldData);
-      });
+      })
+      .finally(() => appStore.setShouldShowWaitScreen(false));
   };
 
   return (

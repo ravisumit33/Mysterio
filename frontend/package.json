@@ -19,7 +19,7 @@
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "loglevel": "^1.7.1",
-    "mobx": "^6.3.3",
+    "mobx": "^6.3.10",
     "mobx-react-lite": "^3.2.1",
     "prettier": "^2.4.1",
     "prop-types": "^15.7.2",

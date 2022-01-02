@@ -58,7 +58,6 @@ const GroupPasswordDialog = (props) => {
     <Dialog
       open={shouldOpenGroupPasswordDialog}
       onClose={() => setShouldOpenGroupPasswordDialog(false)}
-      onKeyPress={(e) => e.key === 'Enter' && groupPasswordCheck()}
     >
       <DialogTitle>Enter Password</DialogTitle>
       <form

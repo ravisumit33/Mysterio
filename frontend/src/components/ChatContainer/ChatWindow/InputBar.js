@@ -59,6 +59,7 @@ const InputBar = () => {
     >
       <InputBase
         className={clsx(classes.root, { [classes.active]: active })}
+        disabled={!(chatStatus === ChatStatus.ONGOING)}
         placeholder="Type a message..."
         inputRef={input}
         endAdornment={

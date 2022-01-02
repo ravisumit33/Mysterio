@@ -99,8 +99,10 @@ class ChatWindowStore {
         });
       })
       .catch(() => {
+        this.setInitDone(true);
+        this.closeChatWindow();
         this.appStore.showAlert({
-          text: 'Error occured while fetching previous messages',
+          text: 'Error occured. Probably room is deleted.',
           severity: 'error',
         });
       });

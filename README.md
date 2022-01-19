@@ -39,12 +39,21 @@ Anonymous chat web app
 
 3. Setup postgres
     - Install & run postgres on `localhost:5432`(default)
+    - Create a user and give `CREATEDB` permission to the user (for unit testing)
+
+    ```sh
+    createuser --interactive --pwprompt
+    ```
+
     - Create a database
-    - Create a user and give all privileges on above database
-    - Grant `CREATEDB` permission to the user (for unit testing)
+
+    ```sh
+    createdb --owner=<your_user> <your_db>
+    ```
 
 4. Setup redis
     - Install & run redis on `localhost:6379`(default)
+     (Use [docker](https://hub.docker.com/_/redis) for easy setup)
 
 5. Setup google api client
     - Follow <https://developers.google.com/youtube/v3/quickstart/python>
@@ -62,7 +71,7 @@ Anonymous chat web app
       python manage.py migrate
       ```
 
-7. Start the app
+8. Start the app
 
     ```sh
     python start_app.py

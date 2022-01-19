@@ -78,7 +78,6 @@ const GroupChatUI = () => {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
-  const [pendingSelectedGroup, setPendingSelectedGroup] = useState(null);
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
   const [chatWindowData, setChatWindowData] = useState({ roomId: 0, name: '' });
 
@@ -127,14 +126,12 @@ const GroupChatUI = () => {
       return;
     }
     setNewGroupName(pendingNewGroupName);
-    setSelectedGroup(pendingSelectedGroup);
   };
 
   const groupSearchFilterOptions = (options, state) => {
     const results = createFilterOptions()(options, state);
     results.unshift(newGroupOption);
-    if (pendingSelectedGroup && !results.includes(pendingSelectedGroup))
-      results.unshift(pendingSelectedGroup);
+    if (selectedGroup && !results.includes(selectedGroup)) results.unshift(selectedGroup);
     return results;
   };
 
@@ -166,25 +163,25 @@ const GroupChatUI = () => {
                         },
                         filterOptions: groupSearchFilterOptions,
                       }}
-                      value={pendingSelectedGroup}
+                      value={selectedGroup}
                       setPendingValue={(a) => {
                         setPendingNewGroupName(a);
                       }}
-                      setValue={(newPendingSelectedGroup) => {
-                        if (!newPendingSelectedGroup) {
+                      setValue={(newSelectedGroup) => {
+                        if (!newSelectedGroup) {
                           setGroupAction('Create');
-                          setPendingSelectedGroup(null);
+                          setSelectedGroup(null);
                         } else {
-                          if (newPendingSelectedGroup.id === -1) {
+                          if (newSelectedGroup.id === -1) {
                             setGroupAction('Create');
                             if (!pendingNewGroupName) {
-                              setPendingSelectedGroup(null);
+                              setSelectedGroup(null);
                               return;
                             }
                           } else {
                             setGroupAction('Enter');
                           }
-                          setPendingSelectedGroup(newPendingSelectedGroup);
+                          setSelectedGroup(newSelectedGroup);
                         }
                       }}
                       inputLabel="Enter room name"
@@ -204,7 +201,7 @@ const GroupChatUI = () => {
                       color="secondary"
                       variant="contained"
                       size="medium"
-                      disabled={!pendingNewGroupName || !pendingSelectedGroup}
+                      disabled={!pendingNewGroupName || !selectedGroup}
                       onClick={(evt) => handleStartChat()}
                     >
                       {groupAction} Room

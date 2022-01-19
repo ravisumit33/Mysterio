@@ -56,7 +56,7 @@ const CustomAutoComplete = (props) => {
       value={value}
       renderInput={(params) => (
         <Grid container spacing={1} alignItems="center">
-          <Grid item alignContent="flex-end">
+          <Grid item>
             <Box pt={1.25}>{startInputAvatar}</Box>
           </Grid>
           <Grid item xs>
@@ -104,11 +104,12 @@ CustomAutoComplete.propTypes = {
   setValue: PropTypes.func.isRequired,
   getSecondaryText: PropTypes.func.isRequired,
   autoCompleteProps: PropTypes.shape({}),
-  value: PropTypes.shape({ avatar: PropTypes.node }).isRequired,
+  value: PropTypes.shape({ avatar: PropTypes.elementType }),
 };
 
 CustomAutoComplete.defaultProps = {
   autoCompleteProps: {},
+  value: null,
 };
 
 export default CustomAutoComplete;

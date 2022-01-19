@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
+  Avatar,
   Box,
   Button,
   Container,
@@ -11,14 +12,14 @@ import {
   ListItemAvatar,
   ListItemText,
   makeStyles,
-  TextField,
-  Tooltip,
   Typography,
 } from '@material-ui/core';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
 import { TextAvatar } from 'components/Avatar';
+import CustomAutoComplete from 'components/customAutoComplete';
 import { appStore } from 'stores';
 import GroupPasswordDialog from './GroupPasswordDialog';
 
@@ -63,12 +64,23 @@ const useStyles = makeStyles((theme) => ({
 const GroupChatUI = () => {
   const classes = useStyles();
   const history = useHistory();
+  const { current: newGroupOption } = useRef({
+    id: -1,
+    name: 'New room',
+    avatar: () => (
+      <Avatar>
+        <AddCircleIcon />
+      </Avatar>
+    ),
+  });
 
+  const [groupAction, setGroupAction] = useState('Create');
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
+  const [pendingSelectedGroup, setPendingSelectedGroup] = useState(null);
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
-  const [chatWindowData, setChatWindowData] = useState({ roomId: -1, name: '' });
+  const [chatWindowData, setChatWindowData] = useState({ roomId: 0, name: '' });
 
   const { groupRooms, setGroupRoomsFetched, addChatWindow, updateGroupRooms } = appStore;
 
@@ -91,21 +103,22 @@ const GroupChatUI = () => {
   };
 
   const handleStartChat = (group) => {
-    let windowData;
     const chatGroup = group || selectedGroup;
     if (chatGroup) {
-      windowData = {
-        roomId: chatGroup.id,
-        name: chatGroup.name,
-      };
-      setChatWindowData(windowData);
-      if (chatGroup.is_protected) {
-        setShouldOpenGroupPasswordDialog(true);
+      if (chatGroup.id === -1) {
+        newGroupName && history.push('/room', { name: newGroupName });
       } else {
-        handleStartGroupChat(windowData);
+        const windowData = {
+          roomId: chatGroup.id,
+          name: chatGroup.name,
+        };
+        setChatWindowData(windowData);
+        if (chatGroup.is_protected) {
+          setShouldOpenGroupPasswordDialog(true);
+        } else {
+          handleStartGroupChat(windowData);
+        }
       }
-    } else if (newGroupName) {
-      history.push('/room', { name: newGroupName });
     }
   };
 
@@ -114,6 +127,15 @@ const GroupChatUI = () => {
       return;
     }
     setNewGroupName(pendingNewGroupName);
+    setSelectedGroup(pendingSelectedGroup);
+  };
+
+  const groupSearchFilterOptions = (options, state) => {
+    const results = createFilterOptions()(options, state);
+    results.unshift(newGroupOption);
+    if (pendingSelectedGroup && !results.includes(pendingSelectedGroup))
+      results.unshift(pendingSelectedGroup);
+    return results;
   };
 
   return (
@@ -130,60 +152,62 @@ const GroupChatUI = () => {
               <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
                 <Box width="50%">
                   <Grid item>
-                    <Autocomplete
-                      id="Groups-Search-Box"
-                      options={groupRooms}
-                      noOptionsText="New room will be created"
-                      size="small"
-                      onClose={handleGroupSearchClose}
-                      inputValue={pendingNewGroupName}
-                      clearOnBlur={false}
-                      onInputChange={(event, newGroup) => setPendingNewGroupName(newGroup)}
-                      value={selectedGroup}
-                      onChange={(event, newGroup) => setSelectedGroup(newGroup)}
-                      renderInput={(params) => (
-                        <TextField
-                          // eslint-disable-next-line react/jsx-props-no-spreading
-                          {...params}
-                          label="Search/Create rooms"
-                          margin="normal"
-                          variant="outlined"
-                          InputLabelProps={{
-                            classes: {
-                              root: classes.groupSearchLabel,
-                              shrink: classes.groupSearchLabelShrinked,
-                            },
-                          }}
-                        />
-                      )}
-                      renderOption={(option) => (
-                        <Tooltip title={option.name} arrow>
-                          <>
-                            <ListItemAvatar>
-                              <TextAvatar name={option.name} />
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={option.name}
-                              secondary={`${option.message_count} messages`}
-                              primaryTypographyProps={{ noWrap: true }}
-                              secondaryTypographyProps={{ noWrap: true }}
-                            />
-                          </>
-                        </Tooltip>
-                      )}
-                      getOptionLabel={(option) => option.name || ''}
+                    <CustomAutoComplete
+                      autoCompleteProps={{
+                        id: 'Groups-Search-Box',
+                        options: groupRooms,
+                        onClose: handleGroupSearchClose,
+                        noOptionsText: 'New room will be created',
+                        inputValue: pendingNewGroupName,
+                        getOptionLabel: (option) => {
+                          if (option.id > 0) return option.name;
+                          if (option.id === -1) return pendingNewGroupName;
+                          return '';
+                        },
+                        filterOptions: groupSearchFilterOptions,
+                      }}
+                      value={pendingSelectedGroup}
+                      setPendingValue={(a) => {
+                        setPendingNewGroupName(a);
+                      }}
+                      setValue={(newPendingSelectedGroup) => {
+                        if (!newPendingSelectedGroup) {
+                          setGroupAction('Create');
+                          setPendingSelectedGroup(null);
+                        } else {
+                          if (newPendingSelectedGroup.id === -1) {
+                            setGroupAction('Create');
+                            if (!pendingNewGroupName) {
+                              setPendingSelectedGroup(null);
+                              return;
+                            }
+                          } else {
+                            setGroupAction('Enter');
+                          }
+                          setPendingSelectedGroup(newPendingSelectedGroup);
+                        }
+                      }}
+                      inputLabel="Enter room name"
+                      nameField="name"
+                      getSecondaryText={(group) => {
+                        if (group.id > 0) {
+                          return `${group.message_count} messages`;
+                        }
+                        return '';
+                      }}
                     />
                   </Grid>
                 </Box>
                 <Grid item>
-                  <Box my={1}>
+                  <Box mt={1}>
                     <Button
                       color="secondary"
                       variant="contained"
                       size="medium"
+                      disabled={!pendingNewGroupName || !pendingSelectedGroup}
                       onClick={(evt) => handleStartChat()}
                     >
-                      Enter Room
+                      {groupAction} Room
                     </Button>
                   </Box>
                 </Grid>

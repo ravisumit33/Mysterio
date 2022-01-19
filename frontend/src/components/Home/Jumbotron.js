@@ -5,9 +5,8 @@ import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/co
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
 import { appStore } from 'stores';
-import { observer } from 'mobx-react-lite';
 
-const useStyle = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
   jumbotron: {
     display: 'flex',
     flexDirection: 'column',
@@ -48,7 +47,7 @@ const useStyle = makeStyles((theme) => ({
 }));
 
 const Jumbotron = () => {
-  const classes = useStyle();
+  const classes = useStyles();
   const history = useHistory();
 
   const handleStartIndividualChat = () => {
@@ -104,4 +103,4 @@ const Jumbotron = () => {
   );
 };
 
-export default observer(Jumbotron);
+export default Jumbotron;

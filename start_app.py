@@ -3,6 +3,16 @@ import subprocess
 import os
 
 
+def start_dev_smtp_server():
+    """
+    Start email smtp server
+    """
+    subprocess.run(
+        ["python", "-m", "smtpd", "-n", "-c", "DebuggingServer", "localhost:1025"],
+        check=True,
+    )
+
+
 def start_dev_backend_server():
     """
     Start backend server
@@ -27,13 +37,16 @@ def start_dev_frontend_server():
 
 if __name__ == "__main__":
     backend_server = Process(target=start_dev_backend_server)
+    smtp_server = Process(target=start_dev_smtp_server)
     background_tasks = Process(target=start_background_tasks)
     frontend_server = Process(target=start_dev_frontend_server)
 
     backend_server.start()
+    smtp_server.start()
     background_tasks.start()
     frontend_server.start()
 
     backend_server.join()
+    smtp_server.join()
     background_tasks.join()
     frontend_server.join()

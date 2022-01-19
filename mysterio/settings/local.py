@@ -13,6 +13,7 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
+INSTALLED_APPS.append("django_extensions")
 
 DATABASES = {
     "default": {
@@ -31,7 +32,12 @@ CHANNEL_LAYERS["default"]["CONFIG"] = {
 }
 
 
-SITE_ID = 2
+CELERY_BROKER_URL = "redis://127.0.0.1:6379"
+
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
+
+
+SITE_ID = 3
 
 
 LOGGING["loggers"] = {

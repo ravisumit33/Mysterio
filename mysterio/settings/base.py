@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+from datetime import timedelta
 import os
 from pathlib import Path
 
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
-    "django_apscheduler",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -249,3 +250,22 @@ SOCIALACCOUNT_PROVIDERS = {
 # Cors headers configurations
 
 CORS_ORIGIN_ALLOW_ALL = False
+
+CELERY_BEAT_SCHEDULE = {
+    "match": {
+        "task": "chat.tasks.match_channels",
+        "schedule": timedelta(seconds=1),
+    },
+    "trending_rooms": {
+        "task": "chat.tasks.trending_rooms",
+        "schedule": timedelta(hours=12),
+    },
+    "group_rooms": {
+        "task": "chat.tasks.group_rooms",
+        "schedule": timedelta(days=1),
+    },
+    "token_blacklist": {
+        "task": "customauth.tasks.flush_tokens",
+        "schedule": timedelta(days=1),
+    },
+}

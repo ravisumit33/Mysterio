@@ -37,7 +37,7 @@ CELERY_BROKER_URL = "redis://127.0.0.1:6379"
 CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
 
 
-SITE_ID = 3
+SITE_ID = 4
 
 
 LOGGING["loggers"] = {
@@ -52,6 +52,9 @@ LOGGING["loggers"] = {
     },
     "customauth": {
         "level": "DEBUG",
+    },
+    "celery.task": {
+        "level": "INFO",
     },
     "django": {
         "level": "WARNING",

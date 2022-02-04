@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Autocomplete } from '@material-ui/lab';
 import {
   Avatar,
-  Box,
   Grid,
   ListItemAvatar,
   ListItemText,
@@ -15,14 +14,14 @@ import SearchIcon from '@material-ui/icons/Search';
 import { TextAvatar } from './Avatar';
 
 const useStyles = makeStyles((theme) => ({
-  groupSearchLabel: {
+  inputLabel: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     right: theme.spacing(5), // do not overlap icon
     bottom: 0,
   },
-  groupSearchLabelShrinked: {
+  inputLabelShrinked: {
     right: 'unset', // show complete label if shrinked
   },
 }));
@@ -56,20 +55,17 @@ const CustomAutoComplete = (props) => {
       value={value}
       renderInput={(params) => (
         <Grid container spacing={1} alignItems="center">
-          <Grid item>
-            <Box pt={1.25}>{startInputAvatar}</Box>
-          </Grid>
+          <Grid item>{startInputAvatar}</Grid>
           <Grid item xs>
             <TextField
               // eslint-disable-next-line react/jsx-props-no-spreading
               {...params}
-              margin="normal"
               variant="outlined"
               label={inputLabel}
               InputLabelProps={{
                 classes: {
-                  root: classes.groupSearchLabel,
-                  shrink: classes.groupSearchLabelShrinked,
+                  root: classes.inputLabel,
+                  shrink: classes.inputLabelShrinked,
                 },
               }}
             />

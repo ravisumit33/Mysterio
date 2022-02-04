@@ -18,6 +18,7 @@ from channels.routing import (
     ProtocolTypeRouter,
     URLRouter,
 )
+from channels.sessions import SessionMiddlewareStack
 import chat.routing
 
 # pylint: enable=wrong-import-position
@@ -27,6 +28,8 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysterio.settings.local")
 application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
-        "websocket": URLRouter(chat.routing.websocket_urlpatterns),
+        "websocket": SessionMiddlewareStack(
+            URLRouter(chat.routing.websocket_urlpatterns)
+        ),
     }
 )

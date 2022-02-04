@@ -18,7 +18,7 @@ import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
-import { TextAvatar } from 'components/Avatar';
+import CustomAvatar from 'components/Avatar';
 import CustomAutoComplete from 'components/customAutoComplete';
 import { appStore } from 'stores';
 import GroupPasswordDialog from './GroupPasswordDialog';
@@ -37,7 +37,9 @@ const useStyles = makeStyles((theme) => ({
   },
   groupSearch: {
     [theme.breakpoints.down('sm')]: {
-      justifyContent: 'center',
+      // justifyContent: 'center',
+      flexDirection: 'column',
+      alignItems: 'stretch',
       marginBottom: theme.spacing(2),
     },
     [theme.breakpoints.up('sm')]: {
@@ -110,6 +112,8 @@ const GroupChatUI = () => {
         const windowData = {
           roomId: chatGroup.id,
           name: chatGroup.name,
+          avatarUrl: chatGroup.avatar_url,
+          isGroupRoom: true,
         };
         setChatWindowData(windowData);
         if (chatGroup.is_protected) {
@@ -137,107 +141,100 @@ const GroupChatUI = () => {
 
   return (
     <>
-      <Box width="100vw">
-        <Container>
-          <Grid container justifyContent="space-between" spacing={2} alignItems="flex-start">
-            <Grid item xs={12} md={6}>
-              <Box pt={1}>
-                <GroupChatImg width="100%" className={classes.groupChatImg} />
-              </Box>
-            </Grid>
-            <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
-              <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
-                <Box width="50%">
-                  <Grid item>
-                    <CustomAutoComplete
-                      autoCompleteProps={{
-                        id: 'Groups-Search-Box',
-                        options: groupRooms,
-                        onClose: handleGroupSearchClose,
-                        noOptionsText: 'New room will be created',
-                        inputValue: pendingNewGroupName,
-                        getOptionLabel: (option) => {
-                          if (option.id > 0) return option.name;
-                          if (option.id === -1) return pendingNewGroupName;
-                          return '';
-                        },
-                        filterOptions: groupSearchFilterOptions,
-                      }}
-                      value={selectedGroup}
-                      setPendingValue={(a) => {
-                        setPendingNewGroupName(a);
-                      }}
-                      setValue={(newSelectedGroup) => {
-                        if (!newSelectedGroup) {
-                          setGroupAction('Create');
+      <Container>
+        <Grid container justifyContent="space-between" spacing={2} alignItems="flex-start">
+          <Grid item xs={12} md={6}>
+            <Box pt={1}>
+              <GroupChatImg width="100%" className={classes.groupChatImg} />
+            </Box>
+          </Grid>
+          <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
+            <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
+              <Grid item xs>
+                <CustomAutoComplete
+                  autoCompleteProps={{
+                    id: 'Groups-Search-Box',
+                    options: groupRooms,
+                    onClose: handleGroupSearchClose,
+                    inputValue: pendingNewGroupName,
+                    getOptionLabel: (option) => {
+                      if (option.id > 0) return option.name;
+                      if (option.id === -1) return pendingNewGroupName;
+                      return '';
+                    },
+                    filterOptions: groupSearchFilterOptions,
+                  }}
+                  value={selectedGroup}
+                  setPendingValue={setPendingNewGroupName}
+                  setValue={(newSelectedGroup) => {
+                    if (!newSelectedGroup) {
+                      setGroupAction('Create');
+                      setSelectedGroup(null);
+                    } else {
+                      if (newSelectedGroup.id === -1) {
+                        setGroupAction('Create');
+                        if (!pendingNewGroupName) {
                           setSelectedGroup(null);
-                        } else {
-                          if (newSelectedGroup.id === -1) {
-                            setGroupAction('Create');
-                            if (!pendingNewGroupName) {
-                              setSelectedGroup(null);
-                              return;
-                            }
-                          } else {
-                            setGroupAction('Enter');
-                          }
-                          setSelectedGroup(newSelectedGroup);
+                          return;
                         }
-                      }}
-                      inputLabel="Enter room name"
-                      nameField="name"
-                      getSecondaryText={(group) => {
-                        if (group.id > 0) {
-                          return `${group.message_count} messages`;
-                        }
-                        return '';
-                      }}
-                    />
-                  </Grid>
-                </Box>
-                <Grid item>
-                  <Box mt={1}>
-                    <Button
-                      color="secondary"
-                      variant="contained"
-                      size="medium"
-                      disabled={!pendingNewGroupName || !selectedGroup}
-                      onClick={(evt) => handleStartChat()}
-                    >
-                      {groupAction} Room
-                    </Button>
-                  </Box>
+                      } else {
+                        setGroupAction('Enter');
+                      }
+                      setSelectedGroup(newSelectedGroup);
+                    }
+                  }}
+                  inputLabel="Enter room name"
+                  nameField="name"
+                  getSecondaryText={(group) => {
+                    if (group.id > 0) {
+                      return `${group.message_count} messages`;
+                    }
+                    return '';
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Grid container justifyContent="center">
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    size="medium"
+                    disabled={!pendingNewGroupName || !selectedGroup}
+                    onClick={(evt) => handleStartChat()}
+                  >
+                    {groupAction} Room
+                  </Button>
                 </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="h4" className={classes.trendingGroupsTitle}>
-                  Trending Rooms <TrendingUpIcon />
-                </Typography>
-                <List>
-                  {trendingGroups.map((group) => (
-                    <ListItem
-                      button
-                      onClick={() => handleStartChat(group)}
-                      key={group.id}
-                      style={{ maxWidth: 'max-content' }}
-                    >
-                      <ListItemAvatar>
-                        <TextAvatar name={group.name} />
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={group.name}
-                        secondary={`${group.message_count} messages`}
-                        primaryTypographyProps={{ noWrap: true }}
-                        secondaryTypographyProps={{ noWrap: true }}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Grid>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h4" className={classes.trendingGroupsTitle}>
+                Trending Rooms <TrendingUpIcon />
+              </Typography>
+              <List>
+                {trendingGroups.map((group) => (
+                  <ListItem
+                    button
+                    onClick={() => handleStartChat(group)}
+                    key={group.id}
+                    style={{ maxWidth: 'max-content' }}
+                  >
+                    <ListItemAvatar>
+                      <CustomAvatar name={group.name} avatarUrl={group.avatar_url} />
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={group.name}
+                      secondary={`${group.message_count} messages`}
+                      primaryTypographyProps={{ noWrap: true }}
+                      secondaryTypographyProps={{ noWrap: true }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </Grid>
           </Grid>
-        </Container>
-      </Box>
+        </Grid>
+      </Container>
       <GroupPasswordDialog
         shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
         setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}

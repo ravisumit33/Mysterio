@@ -3,18 +3,19 @@ import uuid
 from django.db import transaction
 from chat.utils import channel_layer
 from chat.models.channel import IndividualChannel
-from chat.models.session import ChatSession
+from chat.models.chat_session import ChatSession
+from chat.models.room import IndividualRoom
 from chat.constants import MessageType, GroupPrefix
 
 logger = logging.getLogger(__name__)
 
 
-def get_sessions_data(channels):
+def get_chat_sessions_data(channels):
     """Get stored session data for each channel"""
-    session_ids = [channel["session"] for channel in channels]
-    sessions = list(ChatSession.objects.filter(pk__in=session_ids))
-    sessions.sort(key=lambda session: session_ids.index(session.id))
-    return sessions
+    chat_session_ids = [channel["chat_session"] for channel in channels]
+    chat_sessions = list(ChatSession.objects.filter(pk__in=chat_session_ids))
+    chat_sessions.sort(key=lambda chat_session: chat_session_ids.index(chat_session.id))
+    return chat_sessions
 
 
 def match_channels(channels):
@@ -39,15 +40,28 @@ def process_unmatched_channels():
     )
 
     with transaction.atomic():
-        channels = unmatched_channels.values("id", "name", "session")
+        channels = unmatched_channels.values("id", "name", "chat_session")
 
         (channel_idx_pairs, matched_ids) = match_channels(channels)
-        sessions_data = get_sessions_data(channels)
+        sessions_data = get_chat_sessions_data(channels)
+
+        individual_room_list = []
+        for channel_idx1, channel_idx2 in channel_idx_pairs:
+            individual_room_list.append(
+                IndividualRoom(
+                    id=str(uuid.uuid4()),
+                    name="Anonymous",
+                    channel1_id=channels[channel_idx1]["id"],
+                    channel2_id=channels[channel_idx2]["id"],
+                )
+            )
+
+        IndividualRoom.objects.bulk_create(individual_room_list)
 
         IndividualChannel.objects.filter(pk__in=matched_ids).update(is_matched=True)
 
-        for channel_idx_pair in channel_idx_pairs:
-            room_id = str(uuid.uuid4())
+        for room_idx, channel_idx_pair in enumerate(channel_idx_pairs):
+            room_id = individual_room_list[room_idx].id
             logger.info(
                 "Room id %s is allocated to user ids %d and %d",
                 room_id,

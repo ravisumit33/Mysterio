@@ -51,3 +51,13 @@ export const getErrorString = (errorResponse) => {
   });
   return errorString;
 };
+
+export const createDeferredPromiseObj = () => {
+  let resolve = null;
+  let reject = null;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};

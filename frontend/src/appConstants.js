@@ -1,17 +1,41 @@
-const MessageType = {
+const MessageType = Object.freeze({
   USER_JOINED: 1,
   USER_LEFT: 2,
   USER_INFO: 3,
   TEXT: 4,
   CHAT_DELETE: 5,
-};
+  PLAYER_INFO: 6,
+  PLAYER_SYNC: 7,
+  PLAYER_END: 8,
+});
 
-const ChatStatus = {
+const ChatStatus = Object.freeze({
   NOT_STARTED: 0,
   ONGOING: 1,
   ENDED: 2,
   NO_MATCH_FOUND: 3,
   RECONNECT_REQUESTED: 4,
+});
+
+const PlayerName = Object.freeze({
+  YOUTUBE: 'YT',
+});
+
+const PlayerStatus = Object.freeze({
+  UNSTARTED: -1,
+  ENDED: 0,
+  PLAYING: 1,
+  PAUSED: 2,
+  BUFFERING: 3,
+});
+
+const renderPlayerName = (playerName) => {
+  switch (playerName) {
+    case PlayerName.YOUTUBE:
+      return 'YouTube';
+    default:
+      return '';
+  }
 };
 
 const MysterioOrigin = 'https://mysterio-chat.herokuapp.com';
@@ -19,4 +43,13 @@ const MysterioHost = 'mysterio-chat.herokuapp.com';
 
 const MatchTimeout = 60 * 1000; // 1 minute
 
-export { MessageType, ChatStatus, MysterioOrigin, MysterioHost, MatchTimeout };
+export {
+  MessageType,
+  ChatStatus,
+  MysterioOrigin,
+  MysterioHost,
+  MatchTimeout,
+  PlayerName,
+  PlayerStatus,
+  renderPlayerName,
+};

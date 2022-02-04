@@ -2,7 +2,7 @@ from celery import shared_task
 from celery.utils.log import get_task_logger
 from .match import process_unmatched_channels
 from .trending_rooms import update_trending_rooms
-from .group_room import delete_old_rooms
+from .group_room import delete_old_group_channels
 
 logger = get_task_logger(__name__)
 
@@ -23,7 +23,7 @@ def trending_rooms():
 
 @shared_task
 def group_rooms():
-    """Shared task to delete old rooms"""
-    logger.debug("Deleting old rooms")
-    delete_old_rooms()
-    logger.info("Old rooms deleted")
+    """Shared task to delete old group channels and rooms"""
+    logger.debug("Deleting old group channels & rooms")
+    delete_old_group_channels()
+    logger.info("Old group channels & rooms deleted")

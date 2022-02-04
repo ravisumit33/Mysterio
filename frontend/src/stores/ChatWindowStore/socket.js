@@ -21,13 +21,15 @@ class Socket {
       serverHost = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
       websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     }
-    const groupChatURL = this.chatWindowStore.roomId ? `/${this.chatWindowStore.roomId}` : '';
+    const { roomInfo } = this.chatWindowStore;
+    const groupChatURL = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
     this.socket = new ReconnectingWebSocket(
       `${websocketProtocol}://${serverHost}/chat${groupChatURL}/`
     );
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
     this.socket.addEventListener('message', this.handleMessage);
+    this.socket.addEventListener('error', this.handleError);
   }
 
   handleOpen = () => {
@@ -49,7 +51,17 @@ class Socket {
     !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
   };
 
-  send = (msgType, msgData) => {
+  handleError = (error) => {
+    const { appStore } = this.chatWindowStore;
+    appStore.removeChatWindow();
+    appStore.setShouldShowAlert(false);
+    appStore.showAlert({
+      text: `Error occured while connecting to server.`,
+      severity: 'error',
+    });
+  };
+
+  send = (msgType, msgData = {}) => {
     const payload = {
       type: msgType,
       data: msgData,

@@ -21,12 +21,14 @@ def get_zscore(obs, pop):
 
 def get_group_stats():
     """Get group message stats per day"""
-    message_models = Message.__subclasses__()
-    time_window = 10
-    start_time = timezone.now() - timezone.timedelta(days=time_window)
+    message_models = Message.__subclasses__()  # pylint: disable=no-member
+    days_window = 10
+    start_time = timezone.localtime(timezone.now()) - timezone.timedelta(
+        days=days_window
+    )
     initial_message_counts = {
-        (timezone.now() - timezone.timedelta(days=days_num)).date(): 0
-        for days_num in range(time_window + 1)
+        (timezone.localdate(timezone.now()) - timezone.timedelta(days=days_num)): 0
+        for days_num in range(days_window + 1)
     }
     group_stats = {}
     for message_model in message_models:

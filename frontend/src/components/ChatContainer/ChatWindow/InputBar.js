@@ -48,8 +48,8 @@ const InputBar = () => {
   };
 
   useEffect(() => {
-    chatStatus === ChatStatus.ONGOING ? input.current.focus() : input.current.blur();
-  });
+    chatStatus === ChatStatus.ONGOING && input.current.focus();
+  }, [chatStatus]);
 
   return (
     <Box

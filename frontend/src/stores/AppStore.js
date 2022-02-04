@@ -63,7 +63,8 @@ class AppStore {
     this.chatWindow = new ChatWindowStore({ appStore: this, data: chatWindowData });
   };
 
-  removeChatWIndow = () => {
+  removeChatWindow = () => {
+    if (!this.chatWindow) return;
     this.chatWindow.isGroupChat && this.updateGroupRooms();
     this.chatWindow.closeChatWindow();
     this.chatWindow = null;
@@ -83,7 +84,7 @@ class AppStore {
   };
 
   updateGroupRooms = () =>
-    fetchUrl('/api/chat/groups/')
+    fetchUrl('/api/chat/group_rooms/')
       .then((response) => {
         this.setGroupRooms(Object.values(response.data));
       })

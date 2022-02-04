@@ -1,13 +1,8 @@
 import React, { useContext, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
-  Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
+  Grid,
   IconButton,
   ListItem,
   ListItemAvatar,
@@ -18,21 +13,16 @@ import {
 import ReplayIcon from '@material-ui/icons/Replay';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
-import YouTubeIcon from '@material-ui/icons/YouTube';
+import PlayerIcon from '@material-ui/icons/PlayCircleFilledRounded';
 import Avatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
 import { appStore, profileStore } from 'stores';
 import { ChatStatus } from 'appConstants';
 import { fetchUrl } from 'utils';
+import ConfirmationDialog from 'components/ConfirmationDialog';
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
   icon: {
     height: theme.spacing(2),
     width: theme.spacing(2),
@@ -57,7 +47,7 @@ const ChatHeader = (props) => {
   };
 
   const handleClose = () => {
-    appStore.removeChatWIndow();
+    appStore.removeChatWindow();
     history.push('/');
   };
 
@@ -70,7 +60,7 @@ const ChatHeader = (props) => {
 
   const handleDeleteRoom = () => {
     appStore.showWaitScreen('Deleting Room');
-    fetchUrl(`/api/chat/groups/${roomId}/`, {
+    fetchUrl(`/api/chat/group_rooms/${roomId}/`, {
       method: 'delete',
     })
       .then(() => {
@@ -100,28 +90,6 @@ const ChatHeader = (props) => {
       .finally(() => appStore.setShouldShowWaitScreen(false));
   };
 
-  const deleteConfirmationDialog = (
-    <Dialog
-      open={shouldShowDeleteConfirmationDialog}
-      onClose={() => setShouldShowDeleteConfirmationDialog(false)}
-    >
-      <DialogTitle>Delete this Room?</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-          This will permanently delete this room and all its messages.
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setShouldShowDeleteConfirmationDialog(false)} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={handleDeleteRoom} color="primary">
-          Continue
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-
   const individualChatIcons = (
     <IconButton
       disabled={
@@ -137,55 +105,66 @@ const ChatHeader = (props) => {
   );
 
   const groupChatIcons = (
-    <>
-      <IconButton
-        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-        onClick={() => {
-          if (chatWindowStore.shouldShowIframe) {
-            chatWindowStore.setShouldHideIframe(false);
-          } else {
-            chatWindowStore.setShouldShowIframe(true);
-          }
-        }}
-        className={classes.icon}
-      >
-        <Tooltip title="Youtube" arrow>
-          <YouTubeIcon fontSize="small" />
-        </Tooltip>
-      </IconButton>
-      <IconButton
-        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-        onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-        className={classes.icon}
-      >
-        <Tooltip title="Delete room" arrow>
-          <DeleteIcon fontSize="small" />
-        </Tooltip>
-      </IconButton>
-    </>
+    <IconButton
+      disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+      onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+      className={classes.icon}
+    >
+      <Tooltip title="Delete room" arrow>
+        <DeleteIcon fontSize="small" />
+      </Tooltip>
+    </IconButton>
   );
 
   return (
     <>
-      <Box className={classes.root}>
-        <Box className={classes.infoWindow}>
+      <Grid item container justifyContent="space-between" alignItems="center">
+        <Grid item className={classes.infoWindow}>
           <ListItem disableGutters>
             <ListItemAvatar>
               <Avatar name={name} avatarUrl={avatarUrl} />
             </ListItemAvatar>
             <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
           </ListItem>
-        </Box>
-        <Box>
+        </Grid>
+        <Grid item>
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
+          <IconButton
+            disabled={
+              chatStatus === ChatStatus.NOT_STARTED ||
+              chatStatus === ChatStatus.RECONNECT_REQUESTED ||
+              chatStatus === ChatStatus.ENDED
+            }
+            onClick={() => {
+              chatWindowStore.togglePlayerOpen();
+            }}
+            className={classes.icon}
+          >
+            <Tooltip
+              title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
+              arrow
+            >
+              <PlayerIcon
+                fontSize="small"
+                color={chatWindowStore.shouldOpenPlayer ? 'secondary' : 'inherit'}
+              />
+            </Tooltip>
+          </IconButton>
           <IconButton onClick={handleClose} className={classes.icon}>
             <Tooltip title="Close" arrow>
               <CloseIcon fontSize="small" />
             </Tooltip>
           </IconButton>
-        </Box>
-      </Box>
-      {deleteConfirmationDialog}
+        </Grid>
+      </Grid>
+      <ConfirmationDialog
+        shouldShow={shouldShowDeleteConfirmationDialog}
+        onClose={() => setShouldShowDeleteConfirmationDialog(false)}
+        onCancel={() => setShouldShowDeleteConfirmationDialog(false)}
+        onContinue={handleDeleteRoom}
+        title="Delete this room?"
+        description="This will permanently delete this room and all its messages."
+      />
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MatchTimeout, MessageType } from 'appConstants';
 import log from 'loglevel';
-import { fetchUrl, isEmptyObj } from 'utils';
+import { createDeferredPromiseObj, fetchUrl, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 import Socket from './socket';
 
@@ -14,38 +14,61 @@ class ChatWindowStore {
 
   chatStatus = ChatStatus.NOT_STARTED;
 
-  initDone = false;
+  initDone = false; // Chat started and initialization(if required) is done
 
-  shouldShowIframe = false;
+  roomInfo = {};
 
-  shouldHideIframe = false;
+  shouldOpenPlayer = false;
 
-  playerPromise = {};
+  playerData = {};
 
   constructor({ appStore, data }) {
-    const plPromise = new Promise((resolve, reject) => {
-      this.playerPromise.resolve = resolve;
-      this.playerPromise.reject = reject;
-    });
-    this.playerPromise = { promise: plPromise, ...this.playerPromise };
     makeAutoObservable(this);
     this.appStore = appStore;
-    data && this.initState(data);
-    this.chatStartedPromise = new Promise((resolve, reject) => {
-      this.chatStartedResolve = resolve;
-    });
-    if (this.isGroupChat) {
-      this.initializeForGroup();
-    } else {
-      this.chatStartedPromise.then(() => this.setInitDone(true));
-    }
+    this.chatStartedPromiseObj = createDeferredPromiseObj();
+    this.initState(data || {});
     this.socket = new Socket(this);
   }
 
-  initializeForGroup = () => {
-    const groupDetail = fetchUrl(`/api/chat/groups/${this.roomId}/?password=${this.password}`);
+  reset = () => {
+    this.shouldOpenPlayer = false;
+    this.chatStartedPromiseObj = createDeferredPromiseObj();
+    this.initDone = false;
     // @ts-ignore
-    const groupMessages = groupDetail.then((response) => response.data.group_messages);
+    this.messageList.clear();
+  };
+
+  initState = ({ roomId = '', name = '', avatarUrl = '', password = '', isGroupRoom = false }) => {
+    this.setName(name);
+    this.setAvatarUrl(avatarUrl);
+    this.setRoomInfo({
+      ...this.roomInfo,
+      roomId,
+      isGroupRoom,
+      password,
+    });
+    isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
+  };
+
+  initializeForIndividual = () => {
+    this.chatStartedPromiseObj.promise.then(() => this.setInitDone(true));
+    this.setRoomInfo({ ...this.roomInfo, adminAccess: true });
+  };
+
+  initializeForGroup = () => {
+    const groupDetail = fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
+      headers: { 'X-Group-Password': this.roomInfo.password },
+    }).then((response) => {
+      const { data } = response;
+      // @ts-ignore
+      this.setPlayerData(data.player || {});
+      // @ts-ignore
+      const adminAccess = data.admin_access;
+      this.setRoomInfo({ ...this.roomInfo, adminAccess });
+      return data;
+    });
+    // @ts-ignore
+    const groupMessages = groupDetail.then((responseData) => responseData.group_messages);
     groupMessages
       .then((messages) => {
         let detailMessages;
@@ -68,16 +91,20 @@ class ChatWindowStore {
             };
             message.data.text = msg.text;
             message.type = msg.message_type;
-            const sessionData = msg.sender_channel.session;
+            const chatSessionData = msg.sender_channel.chat_session;
             switch (message.type) {
               case MessageType.TEXT:
-                message.data.sender = sessionData;
+                message.data.sender = chatSessionData;
                 break;
               case MessageType.USER_JOINED:
-                message.data.newJoinee = sessionData;
+                message.data.newJoinee = chatSessionData;
                 break;
               case MessageType.USER_LEFT:
-                message.data.resignee = sessionData;
+                message.data.resignee = chatSessionData;
+                break;
+              case MessageType.PLAYER_INFO:
+              case MessageType.PLAYER_END:
+                message.data.host = chatSessionData;
                 break;
               default:
                 log.error('Unknown message type');
@@ -86,32 +113,28 @@ class ChatWindowStore {
             return message;
           });
         }
-        this.prevMessageList = [];
+        this.roomInfo.prevMessageList = [];
+        const { prevMessageList } = this.roomInfo;
         detailMessages.forEach((msg) => {
           const processedMessage = this.processMessage(msg, true);
           if (!isEmptyObj(processedMessage)) {
-            this.prevMessageList.push(processedMessage);
+            prevMessageList.push(processedMessage);
           }
         });
-        this.chatStartedPromise.then(() => {
-          this.addInitMessageList(this.prevMessageList);
+        this.chatStartedPromiseObj.promise.then(() => {
+          this.addInitMessageList(prevMessageList);
           this.setInitDone(true);
         });
       })
-      .catch(() => {
+      .catch((err) => {
+        log.error(err);
         this.setInitDone(true);
-        this.closeChatWindow();
+        this.appStore.removeChatWindow();
         this.appStore.showAlert({
-          text: 'Error occured. Probably room is deleted.',
+          text: 'Error occured while connecting to server.',
           severity: 'error',
         });
       });
-  };
-
-  initState = ({ roomId, name, password }) => {
-    this.roomId = roomId;
-    this.name = name;
-    this.password = password || '';
   };
 
   setName = (newName) => {
@@ -126,20 +149,32 @@ class ChatWindowStore {
     this.initDone = initDone;
   };
 
-  setShouldShowIframe = (shouldShowIframe) => {
-    this.shouldShowIframe = shouldShowIframe;
+  setRoomInfo = (newRoomInfo) => {
+    this.roomInfo = newRoomInfo;
   };
 
-  setShouldHideIframe = (shouldHideIframe) => {
-    this.shouldHideIframe = shouldHideIframe;
-  };
-
-  setPlayer = (player) => {
-    this.player = player;
+  setPlayerData = (newPlayerData) => {
+    this.playerData = newPlayerData;
   };
 
   get isGroupChat() {
-    return !!this.roomId;
+    return this.roomInfo.isGroupRoom;
+  }
+
+  get roomType() {
+    return this.roomInfo.isGroupRoom ? 'group' : 'individual';
+  }
+
+  get playerExists() {
+    return this.playerData.name;
+  }
+
+  get isHost() {
+    if (this.playerExists) {
+      const { host } = this.playerData;
+      return profileStore.sessionId === host.session_id;
+    }
+    return false;
   }
 
   processMessage = (payload, isInitMsg) => {
@@ -164,26 +199,35 @@ class ChatWindowStore {
         this.setChatStatus(ChatStatus.NOT_STARTED);
         return {};
       case MessageType.USER_JOINED:
-        if ('match' in messageData) {
-          clearTimeout(this.timeout);
-          this.setName(messageData.match.name);
-          this.setAvatarUrl(messageData.match.avatarUrl);
+        if (!isInitMsg) {
+          if ('match' in messageData) {
+            clearTimeout(this.timeout);
+            this.initState({
+              name: messageData.match.name,
+              avatarUrl: messageData.match.avatarUrl,
+              roomId: messageData.room_id,
+            });
+          }
+          messageData.text = this.isGroupChat
+            ? [`${messageData.newJoinee.name} entered`]
+            : [`You are connected to ${messageData.match.name}`];
+          this.setChatStatus(ChatStatus.ONGOING);
+          this.chatStartedPromiseObj.resolve();
         }
-        messageData.text = this.isGroupChat
-          ? [`${messageData.newJoinee.name} entered`]
-          : [`You are connected to ${messageData.match.name}`];
-        this.setChatStatus(ChatStatus.ONGOING);
-        this.chatStartedResolve();
         break;
       case MessageType.USER_LEFT:
-        messageData.text = [`${messageData.resignee.name} left`];
-        if (!this.isGroupChat) {
-          this.socket.close();
-          this.setChatStatus(ChatStatus.ENDED);
+        if (!isInitMsg) {
+          messageData.text = [`${messageData.resignee.name} left`];
+          if (!this.isGroupChat) {
+            this.socket.close();
+            this.socket = null;
+            this.setChatStatus(ChatStatus.ENDED);
+            this.shouldOpenPlayer = false;
+          }
         }
         break;
       case MessageType.TEXT: {
-        const msgList = isInitMsg ? this.prevMessageList : this.messageList;
+        const msgList = isInitMsg ? this.roomInfo.prevMessageList : this.messageList;
         const lastMessageIdx = msgList.length - 1;
         const lastMessage = lastMessageIdx >= 0 && msgList[lastMessageIdx];
         if (
@@ -201,6 +245,26 @@ class ChatWindowStore {
         messageData.text = [messageData.text];
         break;
       }
+      case MessageType.PLAYER_INFO: {
+        if (!isInitMsg) {
+          this.shouldOpenPlayer && this.setPlayerData(messageData);
+          messageData.text = [`${messageData.host.name} started video player`];
+        }
+        break;
+      }
+      case MessageType.PLAYER_SYNC: {
+        this.shouldOpenPlayer &&
+          !this.isHost &&
+          this.setPlayerData({ ...this.playerData, ...messageData });
+        return {};
+      }
+      case MessageType.PLAYER_END: {
+        if (!isInitMsg) {
+          messageData.text = [`${messageData.host.name} stopped video player`];
+          this.setPlayerData({});
+        }
+        break;
+      }
       case MessageType.CHAT_DELETE:
         this.closeChatWindow();
         break;
@@ -211,8 +275,7 @@ class ChatWindowStore {
     return payload;
   };
 
-  addMessage = (payload, isInitMsg) =>
-    isInitMsg ? this.messageList.unshift(payload) : this.messageList.push(payload);
+  addMessage = (payload) => this.messageList.push(payload);
 
   addInitMessageList = (messageList) => {
     this.messageList = messageList.concat(this.messageList);
@@ -220,22 +283,57 @@ class ChatWindowStore {
 
   reconnect = () => {
     this.setChatStatus(ChatStatus.RECONNECT_REQUESTED);
-    this.setName('');
-    this.setAvatarUrl('');
-    // @ts-ignore
-    this.messageList.clear();
-    this.socket.close();
+    this.reset();
+    this.initState({});
+    if (this.socket) {
+      this.handlePlayerDelete();
+      this.socket.close();
+    }
     this.socket = new Socket(this);
   };
 
   closeChatWindow = () => {
-    this.setShouldShowIframe(false);
     this.setChatStatus(ChatStatus.ENDED);
     this.socket.close();
   };
 
   setChatStatus = (status) => {
     this.chatStatus = status;
+  };
+
+  syncPlayer = () => {
+    let fetchData;
+    if (this.isGroupChat) {
+      fetchData = {
+        headers: { 'X-Group-Password': this.roomInfo.password },
+      };
+    }
+    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/get_player/`, fetchData)
+      .then((response) => this.shouldOpenPlayer && this.setPlayerData(response.data))
+      .catch(
+        () =>
+          this.shouldOpenPlayer &&
+          this.appStore.showAlert({
+            type: 'error',
+            text: 'Error occurred while fetching player data',
+          })
+      );
+  };
+
+  handlePlayerDelete = () => {
+    if (this.isHost) {
+      this.setPlayerData({});
+      this.socket.send(MessageType.PLAYER_END);
+    }
+  };
+
+  togglePlayerOpen = () => {
+    if (!this.shouldOpenPlayer) {
+      this.syncPlayer();
+    } else {
+      this.handlePlayerDelete();
+    }
+    this.shouldOpenPlayer = !this.shouldOpenPlayer;
   };
 }
 

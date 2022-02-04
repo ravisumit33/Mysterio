@@ -37,19 +37,22 @@ const NewRoom = () => {
 
   const handleCreateRoom = () => {
     showWaitScreen('Creating new room');
-    fetchUrl('/api/chat/groups/', {
+    fetchUrl('/api/chat/group_rooms/', {
       method: 'post',
       body: {
         name: roomName,
         password: roomPwd,
         is_protected: shouldUsePwd,
+        isGroupRoom: true,
       },
     })
       .then((response) => {
         setShouldShowAlert(false);
         const responseData = response.data;
         const chatWindowData = {
+          // @ts-ignore
           roomId: responseData.id,
+          // @ts-ignore
           name: responseData.name,
           password: roomPwd,
         };

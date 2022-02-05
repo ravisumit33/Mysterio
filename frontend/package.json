@@ -21,7 +21,7 @@
     "loglevel": "^1.8.0",
     "mobx": "^6.3.13",
     "mobx-react-lite": "^3.2.3",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.1",
     "prop-types": "^15.8.1",
     "pulltorefreshjs": "^0.1.22",
     "react": "^17.0.2",

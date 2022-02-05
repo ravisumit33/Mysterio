@@ -294,7 +294,7 @@ class ChatWindowStore {
 
   closeChatWindow = () => {
     this.setChatStatus(ChatStatus.ENDED);
-    this.socket.close();
+    this.socket && this.socket.close();
   };
 
   setChatStatus = (status) => {

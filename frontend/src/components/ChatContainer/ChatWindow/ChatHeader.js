@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ChatHeader = (props) => {
+function ChatHeader(props) {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { name, reconnect, chatStatus, roomId, avatarUrl } = chatWindowStore;
@@ -167,6 +167,6 @@ const ChatHeader = (props) => {
       />
     </>
   );
-};
+}
 
 export default observer(ChatHeader);

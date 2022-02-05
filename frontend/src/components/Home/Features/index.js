@@ -4,7 +4,7 @@ import { Container, Grid, Paper, Typography } from '@material-ui/core';
 import { ReactComponent as AnonymousIcon } from 'assets/images/anonymous.svg';
 import FeatureCard from './card';
 
-const Features = () => {
+function Features() {
   const featuresData = [
     {
       icon: AnonymousIcon,
@@ -61,6 +61,6 @@ const Features = () => {
       </Box>
     </Paper>
   );
-};
+}
 
 export default Features;

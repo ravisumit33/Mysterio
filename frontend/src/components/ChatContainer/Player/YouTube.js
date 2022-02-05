@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useConstant } from 'hooks';
 
-const YouTube = (props) => {
+function YouTube(props) {
   const { videoId, setPlayer, size, onReady, onStateChange, showControls } = props;
   useConstant(() => {
     globalThis.youtubeIframePromise.then(() => {
@@ -24,7 +24,7 @@ const YouTube = (props) => {
   });
 
   return <div id="YouTube" />;
-};
+}
 
 YouTube.propTypes = {
   videoId: PropTypes.string.isRequired,

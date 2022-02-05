@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
@@ -63,17 +63,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const GroupChatUI = () => {
+function GroupChatUI() {
   const classes = useStyles();
   const history = useHistory();
-  const { current: newGroupOption } = useRef({
-    id: -1,
-    name: 'New room',
-    avatar: () => (
+  const AddCircleAvatar = useMemo(
+    () => (
       <Avatar>
         <AddCircleIcon />
       </Avatar>
     ),
+    []
+  );
+  const { current: newGroupOption } = useRef({
+    id: -1,
+    name: 'New room',
+    avatar: AddCircleAvatar,
   });
 
   const [groupAction, setGroupAction] = useState('Create');
@@ -243,6 +247,6 @@ const GroupChatUI = () => {
       />
     </>
   );
-};
+}
 
 export default observer(GroupChatUI);

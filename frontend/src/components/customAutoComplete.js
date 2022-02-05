@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomAutoComplete = (props) => {
+function CustomAutoComplete(props) {
   const {
     nameField,
     inputLabel,
@@ -91,7 +91,7 @@ const CustomAutoComplete = (props) => {
       {...autoCompleteProps}
     />
   );
-};
+}
 
 CustomAutoComplete.propTypes = {
   nameField: PropTypes.string.isRequired,

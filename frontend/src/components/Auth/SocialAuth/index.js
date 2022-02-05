@@ -4,7 +4,7 @@ import { appStore, profileStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
-const SocialAuth = () => {
+function SocialAuth() {
   const handleSocialLoginSuccess = useCallback((provider, responseData) => {
     appStore.showWaitScreen('Logging you in');
     fetchUrl(`/api/account/${provider}/login/`, {
@@ -43,6 +43,6 @@ const SocialAuth = () => {
       </Grid>
     </Grid>
   );
-};
+}
 
 export default SocialAuth;

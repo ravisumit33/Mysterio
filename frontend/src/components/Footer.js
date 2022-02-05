@@ -10,7 +10,7 @@ const useStyle = makeStyles((theme) => ({
   },
 }));
 
-const Footer = () => {
+function Footer() {
   const classes = useStyle();
 
   return (
@@ -22,6 +22,6 @@ const Footer = () => {
       </Grid>
     </Box>
   );
-};
+}
 
 export default Footer;

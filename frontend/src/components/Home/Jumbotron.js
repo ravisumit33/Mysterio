@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Jumbotron = () => {
+function Jumbotron() {
   const classes = useStyles();
   const history = useHistory();
 
@@ -101,6 +101,6 @@ const Jumbotron = () => {
       </Box>
     </Box>
   );
-};
+}
 
 export default Jumbotron;

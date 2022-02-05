@@ -10,7 +10,7 @@ import {
 } from '@material-ui/core';
 import { appStore, profileStore } from 'stores';
 
-const UserInfoDialog = () => {
+function UserInfoDialog() {
   const [shouldOpen, setShouldOpen] = useState(true);
   const [textFieldValue, setTextFieldValue] = useState('');
 
@@ -59,6 +59,6 @@ const UserInfoDialog = () => {
       </form>
     </Dialog>
   );
-};
+}
 
 export default observer(UserInfoDialog);

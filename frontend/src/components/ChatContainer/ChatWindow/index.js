@@ -64,7 +64,7 @@ const playChatStartedSound = () => {
   audio.play();
 };
 
-const ChatWindow = (props) => {
+function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { messageList, chatStatus, isGroupChat, initDone, appStore } = chatWindowStore;
   const classes = useStyles({ chatStatus });
@@ -171,6 +171,6 @@ const ChatWindow = (props) => {
       </Grid>
     </Grid>
   );
-};
+}
 
 export default observer(ChatWindow);

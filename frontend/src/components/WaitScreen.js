@@ -9,7 +9,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const WaitScreen = (props) => {
+function WaitScreen(props) {
   const { waitScreenText, shouldOpen, className, progressComponent } = props;
   const classes = useStyles();
   return (
@@ -18,7 +18,7 @@ const WaitScreen = (props) => {
       {progressComponent}
     </Backdrop>
   );
-};
+}
 
 WaitScreen.propTypes = {
   shouldOpen: PropTypes.bool.isRequired,

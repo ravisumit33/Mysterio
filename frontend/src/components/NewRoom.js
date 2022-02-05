@@ -14,7 +14,7 @@ import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import CenterPaper from './CenterPaper';
 
-const NewRoom = () => {
+function NewRoom() {
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -157,6 +157,6 @@ const NewRoom = () => {
       </form>
     </CenterPaper>
   );
-};
+}
 
 export default observer(NewRoom);

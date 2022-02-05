@@ -37,9 +37,7 @@ const ConfirmEmail = () => {
       .finally(() => appStore.setShouldShowWaitScreen(false));
   }, [key]);
 
-  const welcomeComponent = !emailConfirmed ? (
-    <></>
-  ) : (
+  const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>
       <Grid container direction="column" justifyContent="space-around" spacing={3}>
         <Grid item container justifyContent="center">

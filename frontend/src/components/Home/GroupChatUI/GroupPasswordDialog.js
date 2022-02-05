@@ -13,7 +13,7 @@ import {
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 
-const GroupPasswordDialog = (props) => {
+function GroupPasswordDialog(props) {
   const {
     shouldOpenGroupPasswordDialog,
     setShouldOpenGroupPasswordDialog,
@@ -88,7 +88,7 @@ const GroupPasswordDialog = (props) => {
       </form>
     </Dialog>
   );
-};
+}
 
 GroupPasswordDialog.propTypes = {
   shouldOpenGroupPasswordDialog: PropTypes.bool,

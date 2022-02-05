@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CustomButton = (props) => {
+function CustomButton(props) {
   const { type, data, onClickHandler, focused, isHamburgerMenu } = props;
   const { key } = data;
   const classes = useStyles();
@@ -35,7 +35,7 @@ const CustomButton = (props) => {
   };
   const IconComponent = data.icon;
   const disableRipple = isHamburgerMenu;
-  let buttonComponent = <></>;
+  let buttonComponent;
   if (type === 'text') {
     buttonComponent = (
       <Button
@@ -88,7 +88,7 @@ const CustomButton = (props) => {
       </Grid>
     </Box>
   );
-};
+}
 
 CustomButton.propTypes = {
   type: PropTypes.string.isRequired,

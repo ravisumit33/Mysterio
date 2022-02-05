@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Account = (props) => {
+function Account(props) {
   const classes = useStyles();
   const location = useLocation();
   const history = useHistory();
@@ -193,6 +193,6 @@ const Account = (props) => {
       )}
     </Switch>
   );
-};
+}
 
 export default observer(Account);

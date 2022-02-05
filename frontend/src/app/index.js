@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
-const App = () => {
+function App() {
   const classes = useStyles();
 
   useEffect(() => {
@@ -116,6 +116,6 @@ const App = () => {
       </ThemeProvider>
     </CssBaseline>
   );
-};
+}
 
 export default App;

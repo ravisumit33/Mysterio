@@ -13,9 +13,9 @@ Anonymous chat web app
 
 # Requirements
 
-- Python >= 3.7
-- Node >= 12.14.0
-- npm >= 6.13.4
+- Python >= 3.9
+- Node >= 16.13.2
+- npm >= 8.1.2
 - Postgres >= 13.0
 - Redis >= 6.0.8
 
@@ -55,23 +55,19 @@ Anonymous chat web app
     - Install & run redis on `localhost:6379`(default)
      (Use [docker](https://hub.docker.com/_/redis) for easy setup)
 
-5. Setup google api client
-    - Follow <https://developers.google.com/youtube/v3/quickstart/python>
-    - Get API_KEY to use with google api client.
-
-6. Setup environment variables
+5. Setup environment variables
     - Copy `.env.example` to `.env`
     - Replace all variables having `<>` with your local values
     - Add other environment variables if required
 
-7. Apply migrations
+6. Apply migrations
 
       ```sh
       python manage.py makemigrations
       python manage.py migrate
       ```
 
-8. Start the app
+7. Start the app
 
     ```sh
     python start_app.py

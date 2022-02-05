@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@material-ui/core';
 
-const GoogleLogin = (props) => {
+function GoogleLogin(props) {
   const { onSuccess, onFailure } = props;
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const GoogleLogin = (props) => {
   }, [onFailure, onSuccess]);
 
   return <Box id="GoogleLogin" />;
-};
+}
 
 GoogleLogin.propTypes = {
   onSuccess: PropTypes.func.isRequired,

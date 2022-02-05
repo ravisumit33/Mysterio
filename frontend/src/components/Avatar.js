@@ -12,11 +12,11 @@ const useStyles = makeStyles((theme) => ({
   }),
 }));
 
-export const ImageAvatar = (props) => {
+export function ImageAvatar(props) {
   const { name, avatarUrl, className } = props;
 
   return <Avatar className={className} alt={name} src={avatarUrl} />;
-};
+}
 
 ImageAvatar.propTypes = {
   name: PropTypes.string.isRequired,
@@ -28,7 +28,7 @@ ImageAvatar.defaultProps = {
   className: '',
 };
 
-export const TextAvatar = (props) => {
+export function TextAvatar(props) {
   const { name, className } = props;
   const isFirstLetterAlpha = name.charAt(0).match(/[a-zA-Z]/);
 
@@ -42,7 +42,7 @@ export const TextAvatar = (props) => {
       {txt}
     </Avatar>
   );
-};
+}
 
 TextAvatar.propTypes = {
   name: PropTypes.string.isRequired,
@@ -53,7 +53,7 @@ TextAvatar.defaultProps = {
   className: '',
 };
 
-const CustomAvatar = (props) => {
+function CustomAvatar(props) {
   const { name, avatarUrl, className } = props;
   if (avatarUrl) {
     return <ImageAvatar name={name} avatarUrl={avatarUrl} className={className} />;
@@ -66,7 +66,7 @@ const CustomAvatar = (props) => {
       <Icon>person_search</Icon>
     </Avatar>
   );
-};
+}
 
 CustomAvatar.propTypes = {
   name: PropTypes.string,

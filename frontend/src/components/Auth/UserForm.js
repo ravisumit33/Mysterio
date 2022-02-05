@@ -16,7 +16,7 @@ import RouterLink from 'components/RouterLink';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore, profileStore } from 'stores';
 
-const UserForm = (props) => {
+function UserForm(props) {
   const { shouldRegister, from } = props;
   const history = useHistory();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
@@ -187,7 +187,7 @@ const UserForm = (props) => {
       </Grid>
     </form>
   );
-};
+}
 
 UserForm.propTypes = {
   shouldRegister: PropTypes.bool.isRequired,

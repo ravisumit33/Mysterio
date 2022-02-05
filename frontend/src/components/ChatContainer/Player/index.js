@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Player = (props) => {
+function Player(props) {
   const { isSmallScreen } = props;
 
   const chatWindowStore = useContext(ChatWindowStoreContext);
@@ -228,7 +228,7 @@ const Player = (props) => {
       )}
     </Grid>
   );
-};
+}
 
 Player.propTypes = {
   isSmallScreen: PropTypes.bool,

@@ -8,7 +8,7 @@ import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import ConfirmationDialog from 'components/ConfirmationDialog';
 
-const Profile = () => {
+function Profile() {
   const history = useHistory();
   const location = useLocation();
 
@@ -96,6 +96,6 @@ const Profile = () => {
       />
     </>
   );
-};
+}
 
 export default observer(Profile);

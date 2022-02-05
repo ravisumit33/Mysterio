@@ -6,7 +6,7 @@ import { fetchUrl, getErrorString } from 'utils';
 import { appStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
 
-const ChangePassword = () => {
+function ChangePassword() {
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -142,6 +142,6 @@ const ChangePassword = () => {
       </form>
     </CenterPaper>
   );
-};
+}
 
 export default ChangePassword;

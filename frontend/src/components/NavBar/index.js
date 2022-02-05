@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const NavBar = () => {
+function NavBar() {
   const history = useHistory();
   const location = useLocation();
   const atAccountPage = location.pathname === '/account';
@@ -231,6 +231,6 @@ const NavBar = () => {
       </Toolbar>
     </AppBar>
   );
-};
+}
 
 export default observer(NavBar);

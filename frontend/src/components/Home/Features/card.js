@@ -27,7 +27,7 @@ const useStyle = makeStyles((theme) => ({
     fontSize: '100%',
   },
 }));
-const Card = (props) => {
+function Card(props) {
   const classes = useStyle();
   const { icon, title, description, isLocalIcon } = props;
   return (
@@ -50,7 +50,7 @@ const Card = (props) => {
       </Grid>
     </Box>
   );
-};
+}
 
 Card.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types

@@ -15,7 +15,7 @@ import { appStore } from 'stores';
 import { ChatWindowStoreContext } from 'contexts';
 import { MessageType, PlayerName, renderPlayerName } from 'appConstants';
 
-const PlayerActions = () => {
+function PlayerActions() {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedVideoId, setSelectedVideoId] = useState('');
@@ -144,6 +144,6 @@ const PlayerActions = () => {
       </Grid>
     </Grid>
   );
-};
+}
 
 export default PlayerActions;

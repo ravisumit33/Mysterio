@@ -1,8 +1,11 @@
 {
   "name": "mysterio",
-  "version": "1.0.0",
   "description": "Anonymous chat web app",
   "main": "frontend/src/index.js",
+  "engines": {
+    "npm": ">=8.1.2",
+    "node": ">=16.13.2"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "heroku-prebuild": "NODE_ENV=production cd frontend/ && npm install && npm run build && cd .."

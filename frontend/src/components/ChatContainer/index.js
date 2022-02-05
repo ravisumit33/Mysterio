@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const ChatContainer = () => {
+function ChatContainer() {
   const { chatWindow } = appStore;
   const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
@@ -58,6 +58,6 @@ const ChatContainer = () => {
       </Box>
     </Grid>
   );
-};
+}
 
 export default observer(ChatContainer);

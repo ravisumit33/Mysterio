@@ -8,7 +8,7 @@ import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';
 import SocialAuth from './SocialAuth';
 
-const Auth = (props) => {
+function Auth(props) {
   const { shouldRegister } = props;
   const history = useHistory();
   const location = useLocation();
@@ -20,7 +20,7 @@ const Auth = (props) => {
   });
 
   const shouldRenderAuth = profileStore.profileInitialized && !profileStore.isLoggedIn;
-  if (!shouldRenderAuth) return <></>;
+  if (!shouldRenderAuth) return null;
 
   return (
     <CenterPaper>
@@ -36,7 +36,7 @@ const Auth = (props) => {
       </Grid>
     </CenterPaper>
   );
-};
+}
 
 Auth.propTypes = {
   shouldRegister: PropTypes.bool,

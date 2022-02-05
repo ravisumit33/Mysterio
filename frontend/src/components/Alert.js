@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AppAlert = (props) => {
+function AppAlert(props) {
   const classes = useStyles();
   const { alert, shouldShowAlert, setShouldShowAlert } = appStore;
 
@@ -37,6 +37,6 @@ const AppAlert = (props) => {
       </Snackbar>
     </Box>
   );
-};
+}
 
 export default observer(AppAlert);

@@ -5,24 +5,26 @@ import Features from './Features';
 import Contributors from './Contributors';
 import GroupChatUI from './GroupChatUI';
 
-const Home = () => (
-  <Box>
-    <Grid container direction="column">
-      <Grid item>
-        <Jumbotron />
+function Home() {
+  return (
+    <Box>
+      <Grid container direction="column">
+        <Grid item>
+          <Jumbotron />
+        </Grid>
+        <Grid item>
+          <GroupChatUI />
+        </Grid>
+        <Grid item>
+          <Features />
+        </Grid>
+        <Divider />
+        <Grid item>
+          <Contributors />
+        </Grid>
       </Grid>
-      <Grid item>
-        <GroupChatUI />
-      </Grid>
-      <Grid item>
-        <Features />
-      </Grid>
-      <Divider />
-      <Grid item>
-        <Contributors />
-      </Grid>
-    </Grid>
-  </Box>
-);
+    </Box>
+  );
+}
 
 export default Home;

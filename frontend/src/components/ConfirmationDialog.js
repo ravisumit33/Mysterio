@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@material-ui/core';
 
-const ConfirmationDialog = (props) => {
+function ConfirmationDialog(props) {
   const { shouldShow, onClose, onCancel, onContinue, title, description } = props;
   return (
     <Dialog open={shouldShow} onClose={onClose}>
@@ -27,7 +27,7 @@ const ConfirmationDialog = (props) => {
       </DialogActions>
     </Dialog>
   );
-};
+}
 
 ConfirmationDialog.propTypes = {
   shouldShow: PropTypes.bool.isRequired,

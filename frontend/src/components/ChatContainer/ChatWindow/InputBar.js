@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const InputBar = () => {
+function InputBar() {
   const classes = useStyles();
   const input = useRef(null);
   const [active, setActive] = useState(false);
@@ -72,6 +72,6 @@ const InputBar = () => {
       />
     </Box>
   );
-};
+}
 
 export default InputBar;

@@ -11,7 +11,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const AppWait = () => {
+function AppWait() {
   const classes = useStyles();
   return (
     <WaitScreen
@@ -20,6 +20,6 @@ const AppWait = () => {
       className={classes.waitScreen}
     />
   );
-};
+}
 
 export default observer(AppWait);

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Container, Paper } from '@material-ui/core';
 
-const CenterPaper = (props) => {
+function CenterPaper(props) {
   const { children } = props;
   return (
     <Box my={3}>
@@ -13,7 +13,7 @@ const CenterPaper = (props) => {
       </Container>
     </Box>
   );
-};
+}
 
 CenterPaper.propTypes = {
   children: PropTypes.node.isRequired,

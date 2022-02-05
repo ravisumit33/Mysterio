@@ -69,7 +69,7 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-const ChatMessage = ({ messages, sender, side }) => {
+function ChatMessage({ messages, sender, side }) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { isGroupChat } = chatWindowStore;
   const classes = useStyles();
@@ -107,7 +107,7 @@ const ChatMessage = ({ messages, sender, side }) => {
       </Grid>
     </Grid>
   );
-};
+}
 
 ChatMessage.propTypes = {
   messages: PropTypes.arrayOf(PropTypes.string).isRequired,

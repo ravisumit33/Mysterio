@@ -1,5 +1,5 @@
 import logging
-from django.test import SimpleTestCase, override_settings
+from django.test import TestCase, override_settings
 from django.http import Http404
 from django.core.exceptions import SuspiciousOperation, PermissionDenied
 from django.urls import path
@@ -36,7 +36,7 @@ urlpatterns = RootUrlPatterns + [
 
 
 @override_settings(ROOT_URLCONF=__name__)
-class ErrorCodeHandlerTests(SimpleTestCase):
+class ErrorCodeHandlerTests(TestCase):
     """Tests for error code handlers"""
 
     @classmethod

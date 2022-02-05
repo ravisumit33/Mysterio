@@ -11,6 +11,9 @@ class MessageType(IntEnum):
     USER_INFO = 3
     TEXT = 4
     CHAT_DELETE = 5
+    PLAYER_INFO = 6
+    PLAYER_SYNC = 7
+    PLAYER_END = 8
 
 
 @dataclass

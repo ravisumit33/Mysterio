@@ -1,29 +1,32 @@
 import logging
+import uuid
 from django.db import transaction
 from chat.utils import channel_layer
-from chat.models.room import IndividualRoom
 from chat.models.channel import IndividualChannel
-from chat.models.session import ChatSession
+from chat.models.chat_session import ChatSession
+from chat.models.room import IndividualRoom
 from chat.constants import MessageType, GroupPrefix
 
 logger = logging.getLogger(__name__)
 
 
-def get_sessions_data(channels):
+def get_chat_sessions_data(channels):
     """Get stored session data for each channel"""
-    session_ids = [channel["session"] for channel in channels]
-    sessions = list(ChatSession.objects.filter(pk__in=session_ids))
-    sessions.sort(key=lambda session: session_ids.index(session.id))
-    return sessions
+    chat_session_ids = [channel["chat_session"] for channel in channels]
+    chat_sessions = list(ChatSession.objects.filter(pk__in=chat_session_ids))
+    chat_sessions.sort(key=lambda chat_session: chat_session_ids.index(chat_session.id))
+    return chat_sessions
 
 
 def match_channels(channels):
     """Algorithm for matching individual channels"""
     idx_pairs = []
+    matched_ids = []
     for i in range(1, len(channels), 2):
         # Currently matching serially
         idx_pairs.append((i - 1, i))
-    return idx_pairs
+        matched_ids.extend([channels[i - 1]["id"], channels[i]["id"]])
+    return (idx_pairs, matched_ids)
 
 
 def process_unmatched_channels():
@@ -32,20 +35,21 @@ def process_unmatched_channels():
         IndividualChannel.objects.select_for_update()
         .filter(is_matched=False)
         .order_by("created_at")[
-            :1000
+            :100
         ]  # TODO: set limit and scheduler interval after inspection
     )
 
     with transaction.atomic():
-        channels = unmatched_channels.values("id", "name", "session")
+        channels = unmatched_channels.values("id", "name", "chat_session")
+
+        (channel_idx_pairs, matched_ids) = match_channels(channels)
+        sessions_data = get_chat_sessions_data(channels)
+
         individual_room_list = []
-
-        channel_idx_pairs = match_channels(channels)
-        sessions_data = get_sessions_data(channels)
-
         for channel_idx1, channel_idx2 in channel_idx_pairs:
             individual_room_list.append(
                 IndividualRoom(
+                    id=str(uuid.uuid4()),
                     name="Anonymous",
                     channel1_id=channels[channel_idx1]["id"],
                     channel2_id=channels[channel_idx2]["id"],
@@ -54,17 +58,12 @@ def process_unmatched_channels():
 
         IndividualRoom.objects.bulk_create(individual_room_list)
 
-        channel_ids_list = [channel["id"] for channel in channels]
-        if len(channel_ids_list) % 2:  # pop out unmatched channel
-            channel_ids_list.pop()
-        IndividualChannel.objects.filter(pk__in=channel_ids_list).update(
-            is_matched=True
-        )
+        IndividualChannel.objects.filter(pk__in=matched_ids).update(is_matched=True)
 
         for room_idx, channel_idx_pair in enumerate(channel_idx_pairs):
             room_id = individual_room_list[room_idx].id
             logger.info(
-                "Room id %d is allocated to user ids %d and %d",
+                "Room id %s is allocated to user ids %d and %d",
                 room_id,
                 channels[channel_idx_pair[0]]["id"],
                 channels[channel_idx_pair[1]]["id"],

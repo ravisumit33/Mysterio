@@ -1,104 +1,29 @@
-import json
-from django.contrib.auth import get_user_model, authenticate, login
-from django.contrib.auth.forms import AuthenticationForm
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_protect
-from django.views.decorators.debug import sensitive_post_parameters
-from django.middleware.csrf import get_token
-from django.views.generic.base import View
-from django.http import HttpResponse, JsonResponse
-from rest_framework import viewsets, mixins
-from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view, permission_classes
-from core.serializers import UserSerializer
-from core.permissions import UserPermission
+import logging
+from django.views.generic.base import TemplateView
+from django.template.exceptions import TemplateDoesNotExist
+from django.http import Http404
+from django.template.loader import get_template
+
+logger = logging.getLogger(__name__)
 
 
-class UserViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):  # pylint: disable=too-many-ancestors
-
-    """
-    API endpoint that allows users to be created or deleted.
+class FrontendView(TemplateView):
+    """Frontend View
+    Inherits django.views.generic.base.TemplateView to render index.html
+    from Frontend App
     """
 
-    queryset = get_user_model().objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [UserPermission]
+    template_name = "index.html"
 
-
-class Login(View):
-    """
-    Login view
-    """
-
-    @method_decorator(csrf_protect)
-    @method_decorator(never_cache)
     def get(self, request, *args, **kwargs):
-        """
-        GET method handler to return current user
-        """
-        user = request.user
-        if request.user.is_authenticated:
-            return JsonResponse({"username": user.username})
-        return HttpResponse(status=200)
-
-    @method_decorator(csrf_protect)
-    @method_decorator(never_cache)
-    @method_decorator(sensitive_post_parameters())
-    def post(self, request, *args, **kwargs):
-        """
-        POST method handler to login user
-        """
-        if request.user.is_authenticated:
-            return HttpResponse(status=400)
-
-        post_data = json.loads(request.body.decode("utf-8"))
-        login_form = AuthenticationForm(request, post_data)
-        if login_form.errors:
-            error_data = login_form.errors.get_json_data()
-            json_response = {}
-            status = 400
-            if error_data.get("username"):
-                json_response["username"] = [error_data["username"][0]["message"]]
-            if error_data.get("password"):
-                json_response["password"] = [error_data["password"][0]["message"]]
-            if error_data.get("__all__"):
-                json_response["__all__"] = [error_data["__all__"][0]["message"]]
-                if error_data["__all__"][0]["code"] == "invalid_login":
-                    status = 403
-            return JsonResponse(
-                json_response,
-                status=status,
-            )
-        username = post_data["username"]
-        password = post_data["password"]
-
-        user = authenticate(
-            request,
-            username=username,
-            password=password,
-        )
-
-        if not user:
-            return HttpResponse(status=401)
-
-        login(request, user)
-        return JsonResponse(
-            {"username": user.username, "csrf_token": request.META["CSRF_COOKIE"]}
-        )
-
-
-@api_view(["GET"])
-@permission_classes([AllowAny])
-def get_csrf_token(request):
-    """
-    Set csrf cookie on get request
-    """
-    csrf_token = get_token(request)
-    response = JsonResponse({"token": csrf_token})
-    response.set_cookie("csrftoken", csrf_token)
-    return response
+        try:
+            get_template(self.template_name)
+            return super().get(request, *args, **kwargs)
+        except TemplateDoesNotExist as exp:
+            raise Http404(
+                """
+                This URL is only used when you have built the production
+                version of the app. Visit https://localhost:3000/ instead, or
+                run 'npm run build' to test the production version.
+                """
+            ) from exp

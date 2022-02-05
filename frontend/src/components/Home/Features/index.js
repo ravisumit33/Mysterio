@@ -4,7 +4,7 @@ import { Container, Grid, Paper, Typography } from '@material-ui/core';
 import { ReactComponent as AnonymousIcon } from 'assets/images/anonymous.svg';
 import FeatureCard from './card';
 
-const Features = () => {
+function Features() {
   const featuresData = [
     {
       icon: AnonymousIcon,
@@ -53,7 +53,7 @@ const Features = () => {
             <Grid item style={{ textAlign: 'center' }}>
               <Typography variant="h4">Features</Typography>
             </Grid>
-            <Grid item container xs justify="center" style={{ paddingTop: 40 }}>
+            <Grid item container xs justifyContent="center" style={{ paddingTop: 40 }}>
               {featuresUI}
             </Grid>
           </Grid>
@@ -61,6 +61,6 @@ const Features = () => {
       </Box>
     </Paper>
   );
-};
+}
 
 export default Features;

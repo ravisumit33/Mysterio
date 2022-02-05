@@ -5,12 +5,13 @@ class Message(models.Model):
     """Base message model for chat messages."""
 
     group_room = models.ForeignKey(
-        "chat.GroupRoom", on_delete=models.CASCADE, related_name="group_messages"
+        "chat.GroupRoom", on_delete=models.CASCADE, related_name="%(class)ss"
     )
     sender_channel = models.ForeignKey(
         "chat.GroupChannel",
         on_delete=models.SET_NULL,
-        related_name="group_messages",
+        related_name="%(class)ss",
+        related_query_name="%(class)s",
         null=True,
     )
     sent_at = models.DateTimeField(auto_now_add=True)

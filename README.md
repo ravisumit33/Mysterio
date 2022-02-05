@@ -13,9 +13,9 @@ Anonymous chat web app
 
 # Requirements
 
-- Python >= 3.7
-- Node >= 12.14.0
-- npm >= 6.13.4
+- Python >= 3.9
+- Node >= 16.13.2
+- npm >= 8.1.2
 - Postgres >= 13.0
 - Redis >= 6.0.8
 
@@ -39,12 +39,21 @@ Anonymous chat web app
 
 3. Setup postgres
     - Install & run postgres on `localhost:5432`(default)
+    - Create a user and give `CREATEDB` permission to the user (for unit testing)
+
+    ```sh
+    createuser --interactive --pwprompt
+    ```
+
     - Create a database
-    - Create a user and give all privileges on above database
-    - Grant `CREATEDB` permission to the user (for unit testing)
+
+    ```sh
+    createdb --owner=<your_user> <your_db>
+    ```
 
 4. Setup redis
     - Install & run redis on `localhost:6379`(default)
+     (Use [docker](https://hub.docker.com/_/redis) for easy setup)
 
 5. Setup environment variables
     - Copy `.env.example` to `.env`

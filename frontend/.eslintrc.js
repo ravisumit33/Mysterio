@@ -18,6 +18,13 @@ module.exports = {
   rules: {
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': [
+      'error',
+      {
+        additionalHooks: '(useAsync|useAsyncCallback)',
+      },
+    ],
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/scripts/*.js'] }],
   },
   settings: {

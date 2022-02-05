@@ -21,7 +21,7 @@ const useStyle = makeStyles((theme) => ({
     backgroundColor: '#38d2d9',
   },
 }));
-const Card = (props) => {
+function Card(props) {
   const classes = useStyle();
   const { icon, title, description, href } = props;
 
@@ -46,7 +46,7 @@ const Card = (props) => {
       </Grid>
     </Box>
   );
-};
+}
 
 Card.propTypes = {
   icon: PropTypes.string,

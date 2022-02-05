@@ -1,46 +1,58 @@
 import React, { useEffect } from 'react';
+import PullToRefresh from 'pulltorefreshjs';
+import { Switch, Route } from 'react-router-dom';
 import {
-  Box,
   CssBaseline,
   makeStyles,
-  createMuiTheme,
+  createTheme,
   ThemeProvider,
   responsiveFontSizes,
+  Grid,
 } from '@material-ui/core';
-import { NavBar, Home, Footer, ChatContainer } from 'components';
-import UserInfoDialog from 'components/UserInfoDialog';
-import Alert from 'components/Alert';
-import LoginSignupDialog from 'components/LoginSignupDialog';
+import {
+  NavBar,
+  Home,
+  Footer,
+  ChatContainer,
+  UserInfoDialog,
+  Alert,
+  Auth,
+  Account,
+  AppWait,
+  NewRoom,
+} from 'components';
 import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
-import PullToRefresh from 'pulltorefreshjs';
 
 const useStyles = makeStyles(() => ({
   root: {
     width: '100%',
-    height: '100%',
+    minHeight: '100vh',
     position: 'relative',
   },
 }));
 
-let theme = createMuiTheme();
+let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
-const App = () => {
+function App() {
   const classes = useStyles();
 
   useEffect(() => {
-    const csrfPromise = fetchUrl('/api/csrf/');
-    csrfPromise.then((resp) => {
-      if (isCordovaEnv()) {
-        window.localStorage.setItem('token', resp.data.token);
-      }
-      fetchUrl('/api/login/').then((response) => {
-        if (response.data && response.data.username) {
-          profileStore.setUsername(response.data.username);
+    fetchUrl('/api/account/user/')
+      .then((response) => {
+        const responseData = response.data;
+        if (responseData) {
+          // @ts-ignore
+          const { email } = responseData;
+          // @ts-ignore
+          const isSociallyRegistered = responseData.is_socially_registered;
+          email && profileStore.setEmail(email);
+          isSociallyRegistered && profileStore.setSocial(isSociallyRegistered);
         }
-      });
-    });
+      })
+      .catch(() => {})
+      .finally(() => profileStore.setProfileInitialized(true));
     PullToRefresh.init({
       mainElement: 'body',
       onRefresh() {
@@ -58,18 +70,52 @@ const App = () => {
   return (
     <CssBaseline>
       <ThemeProvider theme={theme}>
-        <Box className={classes.root}>
+        <Grid container direction="column" className={classes.root}>
           <Alert />
-          <NavBar />
-          <Home />
-          <Footer />
-          <ChatContainer />
+          <AppWait />
           <UserInfoDialog />
-          <LoginSignupDialog />
-        </Box>
+          <Grid item>
+            <NavBar />
+          </Grid>
+          <Switch>
+            <Route exact path="/">
+              <Grid item>
+                <Home />
+              </Grid>
+              <Grid item>
+                <Footer />
+              </Grid>
+            </Route>
+            <Route path="/login">
+              <Grid item xs>
+                <Auth />
+              </Grid>
+            </Route>
+            <Route path="/register">
+              <Grid item xs>
+                <Auth shouldRegister />
+              </Grid>
+            </Route>
+            <Route path="/account">
+              <Grid item>
+                <Account />
+              </Grid>
+            </Route>
+            <Route path="/chat">
+              <Grid item container xs>
+                <ChatContainer />
+              </Grid>
+            </Route>
+            <Route path="/room">
+              <Grid item>
+                <NewRoom />
+              </Grid>
+            </Route>
+          </Switch>
+        </Grid>
       </ThemeProvider>
     </CssBaseline>
   );
-};
+}
 
 export default App;

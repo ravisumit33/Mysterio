@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { configure } from 'mobx';
 import 'index.css';
 import App from 'app';
@@ -10,9 +11,9 @@ configure({ isolateGlobalState: true });
 
 const renderReactDom = () => {
   ReactDOM.render(
-    <React.StrictMode>
+    <Router>
       <App />
-    </React.StrictMode>,
+    </Router>,
     document.getElementById('root')
   );
 };

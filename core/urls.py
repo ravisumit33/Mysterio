@@ -1,13 +1,15 @@
-from django.urls import path
-from rest_framework import routers
-import core.views as CoreView
+from django.conf import settings
+from django.urls import re_path
+from . import views as CoreViews
 
-router = routers.SimpleRouter()
-router.register(r"users", CoreView.UserViewSet)
+frontend_routes = settings.FRONTEND_ROUTES
 
-urlpatterns = router.urls + [
-    path("login/", CoreView.Login.as_view(), name="login"),
-    path("csrf/", CoreView.get_csrf_token, name="csrf_token"),
+urlpatterns = [
+    re_path(
+        r"^(%s)?$" % "|".join(frontend_routes),  # pylint: disable=C0209
+        CoreViews.FrontendView.as_view(),
+        name="frontend",
+    ),
 ]
 
 app_name = "core"

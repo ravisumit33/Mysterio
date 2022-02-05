@@ -3,7 +3,7 @@ import Box from '@material-ui/core/Box';
 import { Container, Grid, Paper, Typography } from '@material-ui/core';
 import ContributorCard from './card';
 
-const Contributors = () => {
+function Contributors() {
   const contributorsData = [
     {
       icon: 'https://avatars3.githubusercontent.com/u/19284116?s=400&u=9e05e3d1ec7622cb55bc0af0ec58f81ce639e48e&v=4',
@@ -37,7 +37,7 @@ const Contributors = () => {
             <Grid item style={{ paddingTop: 40, textAlign: 'center' }}>
               <Typography variant="h4">Contributors</Typography>
             </Grid>
-            <Grid item container justify="center" style={{ paddingTop: 40 }}>
+            <Grid item container justifyContent="center" style={{ paddingTop: 40 }}>
               {contributorsUI}
             </Grid>
           </Grid>
@@ -45,6 +45,6 @@ const Contributors = () => {
       </Box>
     </Paper>
   );
-};
+}
 
 export default Contributors;

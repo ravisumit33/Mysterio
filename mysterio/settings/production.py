@@ -9,15 +9,32 @@ ALLOWED_HOSTS = ["mysterio-chat.herokuapp.com"]
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
 
+
 CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": [os.getenv("REDIS_URL")],
 }
 
+
+STATICFILES_DIRS = [
+    os.path.join(FRONTEND_DIR, "build", "static"),
+]
+
+
+CELERY_BROKER_URL = "redis://127.0.0.1:6379"
+
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
+
+
+SITE_ID = 1
+
+
 LOGGING["handlers"]["console"]["formatter"] = "verbose"
 
-REST_FRAMEWORK = {
-    "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",)
-}
+
+REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = ("rest_framework.renderers.JSONRenderer",)
+
+
+# TODO Fix these after moving to native mobile app
 
 CSRF_COOKIE_SECURE = True
 
@@ -26,3 +43,16 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SAMESITE = "None"
 
 SESSION_COOKIE_SAMESITE = "None"
+
+
+# Email SMTP server configurations
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = "smtp.gmail.com"
+
+EMAIL_PORT = 587
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")

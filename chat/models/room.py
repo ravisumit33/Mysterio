@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password
 
 
 class Room(models.Model):
@@ -8,6 +7,7 @@ class Room(models.Model):
 
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    player = models.OneToOneField("chat.Player", on_delete=models.SET_NULL, null=True)
 
     class Meta:
         abstract = True
@@ -16,23 +16,29 @@ class Room(models.Model):
 class IndividualRoom(Room):
     """Room for individual chat"""
 
-    channel1 = models.ForeignKey(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="rooms1"
+    id = models.CharField(max_length=36, primary_key=True)
+    channel1 = models.OneToOneField(
+        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="room1"
     )
-    channel2 = models.ForeignKey(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="rooms2"
+    channel2 = models.OneToOneField(
+        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="room2"
     )
 
 
 class GroupRoom(Room):
     """Room for group chat"""
 
+    avatar_url = models.URLField(blank=True)
     zscore = models.FloatField(null=True)
-    is_protected = models.BooleanField(default=False)
-    password = models.CharField(max_length=128, default=make_password(""))
-    admin = models.ForeignKey(
+    password = models.CharField(max_length=128, blank=True)
+    admins = models.ManyToManyField(
         get_user_model(),
-        on_delete=models.CASCADE,
         related_name="group_rooms",
-        null=True,
     )
+
+    @property
+    def is_protected(self):
+        """
+        Returns a boolean value indicating if the room is password protected
+        """
+        return bool(self.password)

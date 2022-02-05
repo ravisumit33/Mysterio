@@ -1,5 +1,6 @@
 {
   "name": "mysterio",
+  "version": "05.02.2022.1",
   "description": "Anonymous chat web app",
   "main": "frontend/src/index.js",
   "engines": {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme) => ({
 function GroupChatUI() {
   const classes = useStyles();
   const history = useHistory();
-  const AddCircleAvatar = useMemo(
+  const AddCircleAvatar = useCallback(
     () => (
       <Avatar>
         <AddCircleIcon />

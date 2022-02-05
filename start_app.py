@@ -24,7 +24,17 @@ def start_background_tasks():
     """
     Run periodic background tasks
     """
-    subprocess.run(["python", "manage.py", "run_periodic"], check=True)
+    subprocess.run(
+        [
+            "celery",
+            "-A mysterio",
+            "worker",
+            "-B",
+            "-l INFO",
+            "--scheduler django_celery_beat.schedulers:DatabaseScheduler",
+        ],
+        check=True,
+    )
 
 
 def start_dev_frontend_server():

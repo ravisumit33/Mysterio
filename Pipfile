@@ -4,29 +4,28 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-channels = "*"
-channels-redis = "*"
-psycopg2 = "*"
-colorlog = "*"
-celery = {extras = ["redis"], version = "*"}
-django-celery-beat = "*"
-Django = "*"
-djangorestframework = "*"
-django-cors-headers = "*"
-whitenoise = "*"
-dj-database-url = "*"
-python-dotenv = {extras = ["cli"], version = "*"}
-dj_rest_auth = {extras = ["with_social"], version = "*"}
-google-api-python-client = "*"
-google-auth-oauthlib = "*"
-google-auth-httplib2 = "*"
-djangorestframework-simplejwt = "*"
+channels = ">=3.0.4"
+channels-redis = ">=3.3.1"
+psycopg2 = ">=2.9.3"
+colorlog = ">=6.6.0"
+celery = {extras = ["redis"], version = ">=5.2.3"}
+django-celery-beat = ">=2.2.1"
+Django = ">=3.2.12"
+djangorestframework = ">=3.13.1"
+django-cors-headers = ">=3.11.0"
+whitenoise = ">=5.3.0"
+dj-database-url = ">=0.5.0"
+python-dotenv = {extras = ["cli"], version = ">=0.19.2"}
+dj-rest-auth = {extras = ["with_social"], version = ">=2.2.2"}
+google-auth-oauthlib = ">=0.4.6"
+google-auth-httplib2 = ">=0.1.0"
+djangorestframework-simplejwt = ">=5.0.0"
 
 [dev-packages]
-pylint = "*"
-pylint-django = "*"
-black = "==22.1.0" # Temporary workaround for black (https://github.com/pypa/pipenv/issues/1760)
-pre-commit = "*"
-django-extensions = "*"
-pyparsing = "*"
-pydot = "*"
+pylint = ">=2.12.2"
+pylint-django = ">=2.5.0"
+black = ">=22.1.0"
+pre-commit = ">=2.17.0"
+django-extensions = ">=3.1.5"
+pyparsing = ">=3.0.7"
+pydot = ">=1.4.2"

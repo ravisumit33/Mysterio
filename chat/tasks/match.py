@@ -81,6 +81,7 @@ def process_unmatched_channels():
                             "id": sessions_data[match_channel_idx].session_id,
                             "name": sessions_data[match_channel_idx].name,
                             "avatarUrl": sessions_data[match_channel_idx].avatar_url,
+                            "pubKey": sessions_data[match_channel_idx].pub_key,
                         },
                     },
                 )

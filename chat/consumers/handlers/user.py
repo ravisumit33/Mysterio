@@ -17,6 +17,7 @@ def handle_user_info(consumer, message_data):
     logger.debug(message_data)
     name = message_data["name"]
     avatar_url = message_data["avatarUrl"] if "avatarUrl" in message_data else ""
+    pub_key = message_data["pubKey"]
     tab_session_id = message_data["sessionId"]
     tab_session_id = tab_session_id if tab_session_id else consumer.channel_name
 
@@ -27,6 +28,7 @@ def handle_user_info(consumer, message_data):
         tab_session_id=tab_session_id,
         avatar_url=avatar_url,
         session=session,
+        pub_key=pub_key,
     )
     consumer.chat_session_id = chat_session.id
     consumer.profile = {

@@ -9,6 +9,7 @@ class ChatSession(models.Model):
     tab_session_id = models.CharField(max_length=100)
     name = models.CharField(max_length=50)
     avatar_url = models.URLField()
+    pub_key = models.CharField(max_length=2000)
     session = models.ForeignKey(
         "sessions.Session",
         on_delete=models.SET_NULL,

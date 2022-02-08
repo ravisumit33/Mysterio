@@ -7,9 +7,16 @@ import profileStore from '../ProfileStore';
 class Socket {
   maxRetries = 60;
 
+  keyPair = null;
+
+  secretKey = null;
+
+  iv = null;
+
   constructor(chatWindowStore) {
     this.chatWindowStore = chatWindowStore;
     this.init();
+    this.iv = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
   }
 
   init() {
@@ -36,12 +43,97 @@ class Socket {
     this.socket.addEventListener('error', this.handleError);
   }
 
+  generateKeyPair = async () => {
+    this.keyPair = await window.crypto.subtle.generateKey(
+      {
+        name: 'ECDH',
+        namedCurve: 'P-384',
+      },
+      true,
+      ['deriveKey']
+    );
+  };
+
+  deriveSecretKey = async (newUserPubKeyStr) => {
+    const newUserPubKeyJson = JSON.parse(newUserPubKeyStr);
+    const newUserPubKey = await window.crypto.subtle.importKey(
+      'jwk',
+      newUserPubKeyJson,
+      {
+        name: 'ECDH',
+        namedCurve: 'P-384',
+      },
+      true,
+      []
+    );
+
+    this.secretKey = await window.crypto.subtle.deriveKey(
+      {
+        name: 'ECDH',
+        public: newUserPubKey,
+      },
+      this.keyPair.privateKey,
+      {
+        name: 'AES-GCM',
+        length: 256,
+      },
+      true,
+      ['encrypt', 'decrypt']
+    );
+  };
+
+  encryptTextMsg = async (textMsg) => {
+    const encoder = new TextEncoder();
+    const encodedMsg = encoder.encode(textMsg);
+    const ciphertext = await window.crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: this.iv,
+      },
+      this.secretKey,
+      encodedMsg
+    );
+    const ctArray = Array.from(new Uint8Array(ciphertext)); // ciphertext as byte array
+    const ctStr = ctArray.map((byte) => String.fromCharCode(byte)).join(''); // ciphertext as string
+    console.log(ciphertext);
+    return btoa(ctStr);
+  };
+
+  decryptTextMsg = async (encodedTextMsg) => {
+    console.log(encodedTextMsg);
+    let decryptedTextMsg;
+    try {
+      const ctStr = atob(encodedTextMsg); // decode base64 ciphertext
+      const buff = new Uint8Array(Array.from(ctStr).map((ch) => ch.charCodeAt(0)));
+      console.log(buff);
+      decryptedTextMsg = await window.crypto.subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv: this.iv,
+        },
+        this.secretKey,
+        buff
+      );
+    } catch (e) {
+      log.error('Error in decrypting');
+      log.error(e);
+      return '';
+    }
+    const decoder = new TextDecoder();
+    return decoder.decode(decryptedTextMsg);
+  };
+
   handleOpen = () => {
     log.info('socket connection established');
-    this.send(MessageType.USER_INFO, {
-      sessionId: profileStore.sessionId,
-      name: profileStore.name,
-      avatarUrl: profileStore.avatarUrl,
+
+    this.generateKeyPair().then(async () => {
+      const pubKey = await window.crypto.subtle.exportKey('jwk', this.keyPair.publicKey);
+      this.send(MessageType.USER_INFO, {
+        sessionId: profileStore.sessionId,
+        name: profileStore.name,
+        avatarUrl: profileStore.avatarUrl,
+        pubKey: JSON.stringify(pubKey),
+      });
     });
   };
 
@@ -67,8 +159,9 @@ class Socket {
 
   handleMessage = (event) => {
     const payload = JSON.parse(event.data);
-    const processedMessage = this.chatWindowStore.processMessage(payload);
-    !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
+    this.chatWindowStore.processMessage(payload).then((processedMessage) => {
+      !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
+    });
   };
 
   handleError = (error) => {
@@ -86,10 +179,14 @@ class Socket {
     }
   };
 
-  send = (msgType, msgData = {}) => {
+  send = async (msgType, msgData = {}) => {
+    const payloadData = msgData;
+    if (msgType === MessageType.TEXT) {
+      payloadData.text = await this.encryptTextMsg(payloadData.text);
+    }
     const payload = {
       type: msgType,
-      data: msgData,
+      data: payloadData,
     };
     this.socket.send(JSON.stringify(payload));
   };

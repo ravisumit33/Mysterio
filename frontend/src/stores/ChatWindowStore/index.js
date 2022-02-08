@@ -234,7 +234,7 @@ class ChatWindowStore {
       });
   };
 
-  processMessage = (payload, isInitMsg) => {
+  processMessage = async (payload, isInitMsg) => {
     const messageType = payload.type;
     const messageData = payload.data;
     switch (messageType) {
@@ -266,8 +266,10 @@ class ChatWindowStore {
             this.setAvatarUrl(messageData.match.avatarUrl);
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
           }
-          this.setChatStatus(ChatStatus.ONGOING);
-          this.setInitDone(true);
+          this.socket.deriveSecretKey(messageData.match.pubKey).then(() => {
+            this.setChatStatus(ChatStatus.ONGOING);
+            this.setInitDone(true);
+          });
         }
         break;
       case MessageType.USER_LEFT:
@@ -282,6 +284,8 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
+        const decryptedText = await this.socket.decryptTextMsg(messageData.content);
+        messageData.content = decryptedText;
         break;
       }
       case MessageType.PLAYER_INFO: {

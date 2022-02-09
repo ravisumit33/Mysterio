@@ -35,6 +35,7 @@ def handle_user_info(consumer, message_data):
         "session_id": tab_session_id,
         "name": chat_session.name,
         "avatarUrl": chat_session.avatar_url,
+        "pubKey": chat_session.pub_key,
     }
 
     channel_layer_info = consumer.channel_layer_info

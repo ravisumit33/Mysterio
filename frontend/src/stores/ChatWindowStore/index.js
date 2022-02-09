@@ -265,12 +265,27 @@ class ChatWindowStore {
             this.setName(messageData.match.name);
             this.setAvatarUrl(messageData.match.avatarUrl);
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
+            messageData.content = `You are connected to ${messageData.match.name}`;
+            this.socket.encrypter
+              .deriveSecretKey(messageData.match.id, messageData.match.pubKey)
+              .then(() => {
+                this.setChatStatus(ChatStatus.ONGOING);
+                this.chatStartedPromiseObj.resolve();
+              });
+          } else {
+            if (!this.initDone) {
+              this.setChatStatus(ChatStatus.ONGOING);
+              this.chatStartedPromiseObj.resolve();
+            } else {
+              await this.socket.encrypter.deriveSecretKey(
+                messageData.newJoinee.id,
+                messageData.newJoinee.pubKey
+              );
+            }
+            messageData.content = `${messageData.newJoinee.name} entered`;
           }
-          this.socket.deriveSecretKey(messageData.match.pubKey).then(() => {
-            this.setChatStatus(ChatStatus.ONGOING);
-            this.setInitDone(true);
-          });
         }
+
         break;
       case MessageType.USER_LEFT:
         messageData.content = `${messageData.resignee.name} left`;

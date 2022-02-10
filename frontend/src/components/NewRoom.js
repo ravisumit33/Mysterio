@@ -43,7 +43,6 @@ function NewRoom() {
         name: roomName,
         password: roomPwd,
         is_protected: shouldUsePwd,
-        isGroupRoom: true,
       },
     })
       .then((response) => {
@@ -55,6 +54,7 @@ function NewRoom() {
           // @ts-ignore
           name: responseData.name,
           password: roomPwd,
+          isGroupRoom: true,
         };
         addChatWindow(chatWindowData);
         history.push('/chat');

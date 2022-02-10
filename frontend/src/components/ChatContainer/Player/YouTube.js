@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useConstant } from 'hooks';
+import { isDevEnv } from 'utils';
+import { MysterioOrigin } from 'appConstants';
 
 function YouTube(props) {
   const { videoId, setPlayer, size, onReady, onStateChange, showControls } = props;
@@ -13,6 +15,7 @@ function YouTube(props) {
         playerVars: {
           autoplay: 0,
           controls: showControls ? 1 : 0,
+          origin: isDevEnv() ? 'http://localhost:3000' : MysterioOrigin,
         },
         events: {
           onReady,

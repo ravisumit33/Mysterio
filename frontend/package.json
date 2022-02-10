@@ -9,7 +9,7 @@
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
     "awesome-debounce-promise": "^2.1.0",
-    "axios": "^0.23.0",
+    "axios": "^0.25.0",
     "clsx": "^1.1.1",
     "eslint": "^8.8.0",
     "eslint-config-airbnb": "^19.0.4",

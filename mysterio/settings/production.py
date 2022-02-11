@@ -47,9 +47,7 @@ SESSION_COOKIE_SAMESITE = "None"
 
 # Email SMTP server configurations
 
-EMAIL_USE_TLS = False
-
-EMAIL_USE_SSL = True
+EMAIL_USE_TLS = True
 
 EMAIL_HOST = "smtpout.secureserver.net"
 

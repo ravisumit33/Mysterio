@@ -36,7 +36,8 @@ const useStyles = makeStyles((theme) => ({
 function ChatHeader(props) {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, reconnect, chatStatus, roomId, avatarUrl } = chatWindowStore;
+  const { name, reconnect, chatStatus, roomInfo, avatarUrl } = chatWindowStore;
+  const { roomId } = roomInfo;
   const history = useHistory();
   const location = useLocation();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =

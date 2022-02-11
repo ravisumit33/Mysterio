@@ -126,6 +126,7 @@ function PlayerActions() {
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 size="small"
+                helperText="Some videos may not be available due to copyright restrictions"
               />
             </Grid>
             <Grid item>

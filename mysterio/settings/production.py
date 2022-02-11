@@ -5,7 +5,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["mysterio-chat.herokuapp.com"]
+ALLOWED_HOSTS = ["www.mysterio-chat.com"]
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
 

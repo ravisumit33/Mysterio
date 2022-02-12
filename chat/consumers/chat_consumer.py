@@ -101,6 +101,8 @@ class ChatConsumer(WebsocketConsumer):
                 Player.objects.filter(host_id=self.profile["id"]).delete()
             logger.info("Group channel disconnected")
 
+        if self.player_id is not None:
+            handle_player_end(self)
         if self.room_id is not None:
             channel_layer.group_discard(
                 channel_layer_info["group_prefix"] + str(self.room_id),
@@ -114,9 +116,6 @@ class ChatConsumer(WebsocketConsumer):
             logger.info(
                 "Room id: %s, Channel id: %d", str(self.room_id), self.channel_id
             )
-
-        if self.player_id is not None:
-            handle_player_end(self)
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)

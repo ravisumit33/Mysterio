@@ -38,8 +38,8 @@ const renderPlayerName = (playerName) => {
   }
 };
 
-const MysterioOrigin = 'https://mysterio-chat.herokuapp.com';
-const MysterioHost = 'mysterio-chat.herokuapp.com';
+const MysterioOrigin = 'https://mysterio-chat.com';
+const MysterioHost = 'mysterio-chat.com';
 
 const MatchTimeout = 60 * 1000; // 1 minute
 

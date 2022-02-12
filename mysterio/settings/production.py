@@ -47,13 +47,11 @@ SESSION_COOKIE_SAMESITE = "None"
 
 # Email SMTP server configurations
 
-EMAIL_USE_TLS = False
-
-EMAIL_USE_SSL = True
+EMAIL_USE_TLS = True
 
 EMAIL_HOST = "smtpout.secureserver.net"
 
-EMAIL_PORT = 465
+EMAIL_PORT = 587
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 

@@ -69,26 +69,25 @@ function UserForm(props) {
       .catch((response) => {
         const responseData = response.data;
         const responseFields = ['email', 'password1'];
-        if (Object.keys(responseData).some((key) => responseFields.includes(key))) {
-          const newEmailFieldData = { ...emailFieldData };
-          const newPasswordFieldData = { ...passwordFieldData };
-          if (responseData.email) {
-            newEmailFieldData.help_text = getErrorString(responseData.email);
-            newEmailFieldData.error = true;
-          } else {
-            newEmailFieldData.help_text = '';
-            newEmailFieldData.error = false;
-          }
-          if (responseData.password1) {
-            newPasswordFieldData.help_text = getErrorString(responseData.password1);
-            newPasswordFieldData.error = true;
-          } else {
-            newPasswordFieldData.help_text = passwordHelpText;
-            newPasswordFieldData.error = false;
-          }
-          setEmailFieldData(newEmailFieldData);
-          setPasswordFieldData(newPasswordFieldData);
+        const newEmailFieldData = { ...emailFieldData };
+        const newPasswordFieldData = { ...passwordFieldData };
+        if (responseData.email) {
+          newEmailFieldData.help_text = getErrorString(responseData.email);
+          newEmailFieldData.error = true;
         } else {
+          newEmailFieldData.help_text = '';
+          newEmailFieldData.error = false;
+        }
+        if (responseData.password1) {
+          newPasswordFieldData.help_text = getErrorString(responseData.password1);
+          newPasswordFieldData.error = true;
+        } else {
+          newPasswordFieldData.help_text = passwordHelpText;
+          newPasswordFieldData.error = false;
+        }
+        setEmailFieldData(newEmailFieldData);
+        setPasswordFieldData(newPasswordFieldData);
+        if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
           const action = shouldRegister ? 'create an account' : 'login';
           appStore.showAlert({
             text: responseData.non_field_errors

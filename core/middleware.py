@@ -13,6 +13,7 @@ def set_ws_on_session(get_response):
     def middleware(request):
         if not request.session.get("ws", False):
             request.session["ws"] = True
+            request.session.save()
         return get_response(request)
 
     return middleware

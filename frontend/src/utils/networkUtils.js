@@ -31,7 +31,7 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const originalRequest = error.config;
     const resp = error.response;
-    if (resp.status === 401 && resp.statusText === 'Unauthorized') {
+    if (resp.status === 401) {
       return axios({
         method: 'post',
         url: getCompleteUrl('/api/account/token/refresh/'),

@@ -1,12 +1,15 @@
 import React from 'react';
-import Box from '@material-ui/core/Box';
-import { Grid, makeStyles, Typography } from '@material-ui/core';
+import EmailIcon from '@material-ui/icons/Email';
+import { Grid, Link, makeStyles, Typography } from '@material-ui/core';
 
 const useStyle = makeStyles((theme) => ({
   footer: {
-    height: theme.spacing(5),
+    padding: `${theme.spacing(1)}px 0 ${theme.spacing(0.5)}px 0`,
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.getContrastText(theme.palette.primary.main),
+  },
+  icon: {
+    padding: `0 ${theme.spacing(1)}px`,
   },
 }));
 
@@ -14,13 +17,21 @@ function Footer() {
   const classes = useStyle();
 
   return (
-    <Box>
-      <Grid className={classes.footer} container justifyContent="center" alignContent="center">
+    <Grid className={classes.footer} container alignItems="center" direction="column">
+      <Grid item container justifyContent="center">
+        <Grid item className={classes.icon}>
+          <EmailIcon fontSize="medium" />
+        </Grid>
         <Grid item>
-          <Typography variant="body2">© 2020 Mysterio - Anonymous Chat</Typography>
+          <Link href="mailto:support@mysterio-chat.com" variant="subtitle2" color="inherit">
+            support@mysterio-chat.com
+          </Link>
         </Grid>
       </Grid>
-    </Box>
+      <Grid item>
+        <Typography variant="caption">© 2022 Mysterio Chat</Typography>
+      </Grid>
+    </Grid>
   );
 }
 

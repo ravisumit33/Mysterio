@@ -49,7 +49,7 @@ SESSION_COOKIE_SAMESITE = "None"
 
 EMAIL_USE_TLS = True
 
-EMAIL_HOST = "smtpout.secureserver.net"
+EMAIL_HOST = "smtp.gmail.com"
 
 EMAIL_PORT = 587
 

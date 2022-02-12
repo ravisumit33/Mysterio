@@ -45,26 +45,25 @@ function ChangePassword() {
       .catch((response) => {
         const responseData = response.data;
         const responseFields = ['old_password', 'new_password2'];
-        if (Object.keys(responseData).some((key) => responseFields.includes(key))) {
-          const newOldPasswordFieldData = { ...oldPasswordFieldData };
-          const newNewPasswordFieldData = { ...newPasswordFieldData };
-          if (responseData.old_password) {
-            newOldPasswordFieldData.help_text = getErrorString(responseData.old_password);
-            newOldPasswordFieldData.error = true;
-          } else {
-            newOldPasswordFieldData.help_text = '';
-            newOldPasswordFieldData.error = false;
-          }
-          if (responseData.new_password2) {
-            newNewPasswordFieldData.help_text = getErrorString(responseData.new_password2);
-            newNewPasswordFieldData.error = true;
-          } else {
-            newNewPasswordFieldData.help_text = passwordHelpText;
-            newNewPasswordFieldData.error = false;
-          }
-          setOldPasswordFieldData(newOldPasswordFieldData);
-          setNewPasswordFieldData(newNewPasswordFieldData);
+        const newOldPasswordFieldData = { ...oldPasswordFieldData };
+        const newNewPasswordFieldData = { ...newPasswordFieldData };
+        if (responseData.old_password) {
+          newOldPasswordFieldData.help_text = getErrorString(responseData.old_password);
+          newOldPasswordFieldData.error = true;
         } else {
+          newOldPasswordFieldData.help_text = '';
+          newOldPasswordFieldData.error = false;
+        }
+        if (responseData.new_password2) {
+          newNewPasswordFieldData.help_text = getErrorString(responseData.new_password2);
+          newNewPasswordFieldData.error = true;
+        } else {
+          newNewPasswordFieldData.help_text = passwordHelpText;
+          newNewPasswordFieldData.error = false;
+        }
+        setOldPasswordFieldData(newOldPasswordFieldData);
+        setNewPasswordFieldData(newNewPasswordFieldData);
+        if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
           appStore.showAlert({
             text: responseData.detail
               ? getErrorString(responseData.detail)

@@ -117,7 +117,7 @@ function PlayerActions() {
             setVideoIdFromUrl(videoUrl);
           }}
         >
-          <Grid container alignItems="center" spacing={1}>
+          <Grid container spacing={1}>
             <Grid item xs>
               <TextField
                 variant="outlined"

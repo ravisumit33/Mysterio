@@ -10,7 +10,6 @@ import Player from './Player';
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
   player: ({ shouldOpenPlayer }) => ({
-    paddingTop: theme.spacing(1),
     position: 'relative',
     transition: theme.transitions.create('all', {
       easing: theme.transitions.easing.easeInOut,

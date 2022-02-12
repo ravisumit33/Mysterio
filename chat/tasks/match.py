@@ -31,15 +31,14 @@ def match_channels(channels):
 
 def process_unmatched_channels():
     """Match individual channels and create rooms for them"""
-    unmatched_channels = (
-        IndividualChannel.objects.select_for_update()
-        .filter(is_matched=False)
-        .order_by("created_at")[
-            :100
-        ]  # TODO: set limit and scheduler interval after inspection
-    )
-
     with transaction.atomic():
+        unmatched_channels = (
+            IndividualChannel.objects.select_for_update()
+            .filter(is_matched=False)
+            .order_by("created_at")[
+                :100
+            ]  # TODO: set limit and scheduler interval after inspection
+        )
         channels = unmatched_channels.values("id", "name", "chat_session")
 
         (channel_idx_pairs, matched_ids) = match_channels(channels)

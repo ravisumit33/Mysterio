@@ -188,7 +188,7 @@
               style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
               <p style="margin: 0;">Tap the button below to confirm your email address. If you didn't create an account
                 with <a href="{{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'core:frontend' %}"
-                  target="_blank" rel="noopener" {{ current_site.name }}</a>, you can safely delete this email.</p>
+                  target="_blank" rel="noopener">{{ current_site.name }}</a>, you can safely delete this email.</p>
             </td>
           </tr>
           <!-- end copy -->
@@ -269,7 +269,7 @@
           <tr>
             <td align="center" bgcolor="#e9ecef"
               style="padding: 12px 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 14px; line-height: 20px; color: #666;">
-              <p style="margin: 0;">© 2020 Mysterio - Anonymous Chat</p>
+              <p style="margin: 0;">© 2022 Mysterio Chat</p>
             </td>
           </tr>
           <!-- end unsubscribe -->

@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Button, Grid, makeStyles, Typography } from '@material-ui/core';
+import { Button, Grid, Typography } from '@material-ui/core';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
-import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
+import Animation from 'components/Animation';
+import welcomeJson from 'assets/animations/welcome.json';
 import { appStore } from 'stores';
 
-const useStyles = makeStyles((theme) => ({
-  quickChatImg: {
-    height: 150,
-    [theme.breakpoints.down('sm')]: {
-      height: 75,
-    },
-  },
-}));
-
 const ConfirmEmail = () => {
-  const classes = useStyles();
   // @ts-ignore
   const { key } = useParams();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
@@ -39,12 +30,17 @@ const ConfirmEmail = () => {
 
   const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>
-      <Grid container direction="column" justifyContent="space-around" spacing={3}>
-        <Grid item container justifyContent="center">
-          <Grid item xs={12} md={7}>
-            <Box py={3}>
-              <QuickChatImg width="100%" className={classes.quickChatImg} />
-            </Box>
+      <Grid container direction="column" justifyContent="space-around" spacing={1}>
+        <Grid item container justifyContent="center" xs={12}>
+          <Grid item>
+            <Animation
+              width={50}
+              height={50}
+              smallScreenWidth={25}
+              smallScreenHeight={25}
+              containerId="welcome"
+              animationData={welcomeJson}
+            />
           </Grid>
         </Grid>
         <Grid item container>
@@ -62,7 +58,7 @@ const ConfirmEmail = () => {
         <Grid item container justifyContent="center">
           <Grid item>
             <RouterLink to={{ pathname: '/login', state: { from: '/account' } }} tabIndex={-1}>
-              <Button color="primary" variant="contained" size="large">
+              <Button color="secondary" variant="contained" size="large">
                 Login
               </Button>
             </RouterLink>

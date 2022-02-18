@@ -73,12 +73,12 @@ function App() {
         <Grid container direction="column" className={classes.root}>
           <Alert />
           <AppWait />
-          <UserInfoDialog />
           <Grid item>
             <NavBar />
           </Grid>
           <Switch>
             <Route exact path="/">
+              <UserInfoDialog />
               <Grid item>
                 <Home />
               </Grid>

@@ -31,9 +31,9 @@ class ChatWindowStore {
   }
 
   reset = () => {
-    this.shouldOpenPlayer = false;
+    this.setShouldOpenPlayer(false);
     this.chatStartedPromiseObj = createDeferredPromiseObj();
-    this.initDone = false;
+    this.setInitDone(false);
     // @ts-ignore
     this.messageList.clear();
   };
@@ -56,86 +56,92 @@ class ChatWindowStore {
   };
 
   initializeForGroup = () => {
-    const groupDetail = fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
-      headers: { 'X-Group-Password': this.roomInfo.password },
-    }).then((response) => {
-      const { data } = response;
-      // @ts-ignore
-      this.setPlayerData(data.player || {});
-      // @ts-ignore
-      const adminAccess = data.admin_access;
-      this.setRoomInfo({ ...this.roomInfo, adminAccess });
-      return data;
-    });
-    // @ts-ignore
-    const groupMessages = groupDetail.then((responseData) => responseData.group_messages);
-    groupMessages
-      .catch((err) => {
-        this.setInitDone(true);
-        this.appStore.removeChatWindow();
-        this.appStore.showAlert({
-          text: 'Error occured while connecting to server.',
-          severity: 'error',
-        });
-        throw err;
-      })
-      .then((messages) => {
-        let detailMessages;
-        if (!messages) {
-          detailMessages = [
-            {
-              type: MessageType.CHAT_DELETE,
-              data: {
-                text: 'Room is deleted',
-              },
-            },
-          ];
-          this.addInitMessageList(detailMessages);
-          this.setInitDone(true);
-          this.closeChatWindow();
-        } else {
-          detailMessages = messages.map((msg) => {
-            const message = {
-              data: {},
-            };
-            message.data.text = msg.text;
-            message.type = msg.message_type;
-            const chatSessionData = msg.sender_channel.chat_session;
-            switch (message.type) {
-              case MessageType.TEXT:
-                message.data.sender = chatSessionData;
-                break;
-              case MessageType.USER_JOINED:
-                message.data.newJoinee = chatSessionData;
-                break;
-              case MessageType.USER_LEFT:
-                message.data.resignee = chatSessionData;
-                break;
-              case MessageType.PLAYER_INFO:
-              case MessageType.PLAYER_END:
-                message.data.host = chatSessionData;
-                break;
-              default:
-                log.error('Unknown message type');
-                break;
-            }
-            return message;
-          });
-        }
-        this.roomInfo.prevMessageList = [];
-        const { prevMessageList } = this.roomInfo;
-        detailMessages.forEach((msg) => {
-          const processedMessage = this.processMessage(msg, true);
-          if (!isEmptyObj(processedMessage)) {
-            prevMessageList.push(processedMessage);
-          }
-        });
-        prevMessageList.reverse();
-        this.chatStartedPromiseObj.promise.then(() => {
-          this.addInitMessageList(prevMessageList);
-          this.setInitDone(true);
-        });
+    fetchUrl('/api/account/token/refresh/', { method: 'post' }).finally(() => {
+      const groupDetail = fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
+        headers: { 'X-Group-Password': this.roomInfo.password },
+      }).then((response) => {
+        const { data } = response;
+        // @ts-ignore
+        this.setPlayerData(data.player || {});
+        // @ts-ignore
+        const adminAccess = data.admin_access;
+        // @ts-ignore
+        const isFavorite = data.is_favorite;
+        // @ts-ignore
+        const isCreator = data.is_creator;
+        this.setRoomInfo({ ...this.roomInfo, adminAccess, isFavorite, isCreator });
+        return data;
       });
+      // @ts-ignore
+      const groupMessages = groupDetail.then((responseData) => responseData.group_messages);
+      groupMessages
+        .catch((err) => {
+          log.error(err);
+          this.setInitDone(true);
+          this.appStore.removeChatWindow();
+          this.appStore.showAlert({
+            text: 'Error occured while connecting to server.',
+            severity: 'error',
+          });
+          throw err;
+        })
+        .then((messages) => {
+          let detailMessages;
+          if (!messages) {
+            detailMessages = [
+              {
+                type: MessageType.CHAT_DELETE,
+                data: {
+                  text: 'Room is deleted',
+                },
+              },
+            ];
+            this.addInitMessageList(detailMessages);
+            this.setInitDone(true);
+            this.closeChatWindow();
+          } else {
+            detailMessages = messages.map((msg) => {
+              const message = {
+                data: {},
+              };
+              message.data.text = msg.text;
+              message.type = msg.message_type;
+              const chatSessionData = msg.sender_channel.chat_session;
+              switch (message.type) {
+                case MessageType.TEXT:
+                  message.data.sender = chatSessionData;
+                  break;
+                case MessageType.USER_JOINED:
+                  message.data.newJoinee = chatSessionData;
+                  break;
+                case MessageType.USER_LEFT:
+                  message.data.resignee = chatSessionData;
+                  break;
+                case MessageType.PLAYER_INFO:
+                case MessageType.PLAYER_END:
+                  message.data.host = chatSessionData;
+                  break;
+                default:
+                  log.error('Unknown message type');
+                  break;
+              }
+              return message;
+            });
+          }
+          this.roomInfo.prevMessageList = [];
+          const { prevMessageList } = this.roomInfo;
+          detailMessages.forEach((msg) => {
+            const processedMessage = this.processMessage(msg, true);
+            if (!isEmptyObj(processedMessage)) {
+              prevMessageList.push(processedMessage);
+            }
+          });
+          this.chatStartedPromiseObj.promise.then(() => {
+            this.addInitMessageList(prevMessageList);
+            this.setInitDone(true);
+          });
+        });
+    });
   };
 
   setName = (newName) => {
@@ -148,6 +154,10 @@ class ChatWindowStore {
 
   setInitDone = (initDone) => {
     this.initDone = initDone;
+  };
+
+  setShouldOpenPlayer = (shouldOpenPlayer) => {
+    this.shouldOpenPlayer = shouldOpenPlayer;
   };
 
   setRoomInfo = (newRoomInfo) => {
@@ -234,8 +244,6 @@ class ChatWindowStore {
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
-          lastMessage.data.sender &&
-          messageData.sender &&
           lastMessage.data.sender.session_id === messageData.sender.session_id
         ) {
           const newLastMessage = { ...lastMessage };
@@ -250,15 +258,13 @@ class ChatWindowStore {
       }
       case MessageType.PLAYER_INFO: {
         if (!isInitMsg) {
-          this.shouldOpenPlayer && this.setPlayerData(messageData);
+          this.setPlayerData(messageData);
           messageData.text = [`${messageData.host.name} started video player`];
         }
         break;
       }
       case MessageType.PLAYER_SYNC: {
-        this.shouldOpenPlayer &&
-          !this.isHost &&
-          this.setPlayerData({ ...this.playerData, ...messageData });
+        !this.isHost && this.setPlayerData({ ...this.playerData, ...messageData });
         return {};
       }
       case MessageType.PLAYER_END: {
@@ -304,6 +310,31 @@ class ChatWindowStore {
     this.chatStatus = status;
   };
 
+  toggleLikeRoom = () => {
+    let fetchData = { body: { like: !this.roomInfo.isFavorite } };
+    if (this.isGroupChat) {
+      fetchData = {
+        ...fetchData,
+        headers: { 'X-Group-Password': this.roomInfo.password },
+      };
+    }
+    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/set_like/`, {
+      ...fetchData,
+      method: 'post',
+    })
+      .then(() => this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }))
+      .catch(() => {
+        const alertText = profileStore.isLoggedIn
+          ? 'Unable to change favorite status.'
+          : 'Login required to change favorite status';
+        this.appStore.showAlert({
+          severity: 'error',
+          action: 'login',
+          text: alertText,
+        });
+      });
+  };
+
   syncPlayer = () => {
     let fetchData;
     if (this.isGroupChat) {
@@ -317,7 +348,7 @@ class ChatWindowStore {
         () =>
           this.shouldOpenPlayer &&
           this.appStore.showAlert({
-            type: 'error',
+            severity: 'error',
             text: 'Error occurred while fetching player data',
           })
       );

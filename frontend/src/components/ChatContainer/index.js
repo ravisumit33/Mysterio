@@ -1,9 +1,19 @@
 import React from 'react';
-import { Box, CardMedia, Grid, makeStyles, Typography, useMediaQuery } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  CardMedia,
+  Grid,
+  makeStyles,
+  Typography,
+  useMediaQuery,
+} from '@material-ui/core';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import PlayerBG from 'assets/images/player_bg.webp';
+import RouterLink from 'components/RouterLink';
+import CenterPaper from 'components/CenterPaper';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 
@@ -48,15 +58,24 @@ function ChatContainer() {
       </Grid>
     </ChatWindowStoreContext.Provider>
   ) : (
-    <Grid container alignItems="center" direction="column">
-      <Box my={3}>
-        <Grid item>
-          <Typography variant="h6" align="center">
-            No chat session found
-          </Typography>
+    <Box width="100%">
+      <CenterPaper>
+        <Grid container alignItems="center" direction="column" spacing={2}>
+          <Grid item>
+            <Typography variant="h4">
+              Probably your chat session ended!! Start a chat and enjoy the anonymous experience.
+            </Typography>
+          </Grid>
+          <Grid item>
+            <RouterLink to="/" tabIndex={-1}>
+              <Button color="secondary" variant="contained" size="large">
+                Home
+              </Button>
+            </RouterLink>
+          </Grid>
         </Grid>
-      </Box>
-    </Grid>
+      </CenterPaper>
+    </Box>
   );
 }
 

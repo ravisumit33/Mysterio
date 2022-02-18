@@ -1,7 +1,6 @@
-import React, { useContext, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useContext, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
-  Button,
   Grid,
   IconButton,
   ListItem,
@@ -14,13 +13,17 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PlayerIcon from '@material-ui/icons/PlayCircleFilledRounded';
-import Avatar from 'components/Avatar';
-import { ChatWindowStoreContext } from 'contexts';
+import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
 import { observer } from 'mobx-react-lite';
-import { appStore, profileStore } from 'stores';
+import CustomAvatar from 'components/Avatar';
+import { ChatWindowStoreContext } from 'contexts';
+import { appStore } from 'stores';
 import { ChatStatus } from 'appConstants';
 import { fetchUrl } from 'utils';
 import ConfirmationDialog from 'components/ConfirmationDialog';
+import Animation from 'components/Animation';
+import playingJson from 'assets/animations/playing.json';
+import likeJson from 'assets/animations/like.json';
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -33,15 +36,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ChatHeader(props) {
+function ChatHeader() {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, reconnect, chatStatus, roomInfo, avatarUrl } = chatWindowStore;
-  const { roomId } = roomInfo;
+  const { name, avatarUrl, reconnect, chatStatus, roomInfo, toggleLikeRoom } = chatWindowStore;
+  const { roomId, isFavorite } = roomInfo;
   const history = useHistory();
-  const location = useLocation();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
+  const [shouldShowCloseConfirmationDialog, setShouldShowCloseConfirmationDialog] = useState(false);
 
   const handleReconnect = () => {
     reconnect();
@@ -51,13 +54,6 @@ function ChatHeader(props) {
     appStore.removeChatWindow();
     history.push('/');
   };
-
-  const handleLogin = () => {
-    handleAlertClose();
-    history.push('/login', { from: location });
-  };
-
-  const handleAlertClose = () => appStore.setShouldShowAlert(false);
 
   const handleDeleteRoom = () => {
     appStore.showWaitScreen('Deleting Room');
@@ -72,24 +68,35 @@ function ChatHeader(props) {
         });
       })
       .catch(() => {
-        const alertAction = profileStore.isLoggedIn ? undefined : (
-          <>
-            <Button color="secondary" size="small" onClick={handleLogin} variant="text">
-              login
-            </Button>
-            <IconButton size="small" aria-label="close" color="inherit" onClick={handleAlertClose}>
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </>
-        );
         appStore.showAlert({
-          text: 'Only admin can delete the room.',
-          action: alertAction,
+          text: 'Only creator can delete the room.',
+          action: 'login',
           severity: 'error',
         });
       })
-      .finally(() => appStore.setShouldShowWaitScreen(false));
+      .finally(() => {
+        appStore.setShouldShowWaitScreen(false);
+        setShouldShowDeleteConfirmationDialog(false);
+      });
   };
+
+  const PlayingAnimation = useMemo(
+    () => (
+      <div>
+        <Animation containerId="videoPlaying" animationData={playingJson} />
+      </div>
+    ),
+    []
+  );
+
+  const LikeAnimation = useMemo(
+    () => (
+      <div>
+        <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
+      </div>
+    ),
+    []
+  );
 
   const individualChatIcons = (
     <IconButton
@@ -100,21 +107,29 @@ function ChatHeader(props) {
       className={classes.icon}
     >
       <Tooltip title="Find someone else" arrow>
-        <ReplayIcon fontSize="small" />
+        <ReplayIcon />
       </Tooltip>
     </IconButton>
   );
 
   const groupChatIcons = (
-    <IconButton
-      disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-      onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-      className={classes.icon}
-    >
-      <Tooltip title="Delete room" arrow>
-        <DeleteIcon fontSize="small" />
-      </Tooltip>
-    </IconButton>
+    <>
+      <IconButton
+        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
+        onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+        className={classes.icon}
+      >
+        <Tooltip title="Delete room" arrow>
+          <DeleteIcon />
+        </Tooltip>
+      </IconButton>
+
+      <IconButton onClick={() => toggleLikeRoom()} className={classes.icon}>
+        <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
+          {isFavorite ? <div>{LikeAnimation}</div> : <FavoriteIcon />}
+        </Tooltip>
+      </IconButton>
+    </>
   );
 
   return (
@@ -123,7 +138,7 @@ function ChatHeader(props) {
         <Grid item className={classes.infoWindow}>
           <ListItem disableGutters>
             <ListItemAvatar>
-              <Avatar name={name} avatarUrl={avatarUrl} />
+              <CustomAvatar name={name} avatarUrl={avatarUrl} />
             </ListItemAvatar>
             <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
           </ListItem>
@@ -145,15 +160,15 @@ function ChatHeader(props) {
               title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
               arrow
             >
-              <PlayerIcon
-                fontSize="small"
-                color={chatWindowStore.shouldOpenPlayer ? 'secondary' : 'inherit'}
-              />
+              {chatWindowStore.playerExists ? <div>{PlayingAnimation}</div> : <PlayerIcon />}
             </Tooltip>
           </IconButton>
-          <IconButton onClick={handleClose} className={classes.icon}>
+          <IconButton
+            onClick={() => setShouldShowCloseConfirmationDialog(true)}
+            className={classes.icon}
+          >
             <Tooltip title="Close" arrow>
-              <CloseIcon fontSize="small" />
+              <CloseIcon />
             </Tooltip>
           </IconButton>
         </Grid>
@@ -165,6 +180,14 @@ function ChatHeader(props) {
         onContinue={handleDeleteRoom}
         title="Delete this room?"
         description="This will permanently delete this room and all its messages."
+      />
+      <ConfirmationDialog
+        shouldShow={shouldShowCloseConfirmationDialog}
+        onClose={() => setShouldShowCloseConfirmationDialog(false)}
+        onCancel={() => setShouldShowCloseConfirmationDialog(false)}
+        onContinue={handleClose}
+        title="Do you want to close this chat?"
+        description="This will terminate this chat session."
       />
     </>
   );

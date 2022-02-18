@@ -48,6 +48,10 @@ class ProfileStore {
   get username() {
     return this.email.split('@')[0];
   }
+
+  get hasCompleteUserInfo() {
+    return this.name !== '';
+  }
 }
 
 const profileStore = new ProfileStore();

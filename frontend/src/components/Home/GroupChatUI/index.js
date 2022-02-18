@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   Avatar,
-  Box,
   Button,
   Container,
   Grid,
@@ -17,9 +16,10 @@ import {
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
-import { ReactComponent as GroupChatImg } from 'assets/images/group_chat.svg';
+import groupChatJson from 'assets/animations/group-chat.json';
 import CustomAvatar from 'components/Avatar';
 import CustomAutoComplete from 'components/customAutoComplete';
+import Animation from 'components/Animation';
 import { appStore } from 'stores';
 import GroupPasswordDialog from './GroupPasswordDialog';
 
@@ -147,10 +147,17 @@ function GroupChatUI() {
     <>
       <Container>
         <Grid container justifyContent="space-between" spacing={2} alignItems="flex-start">
-          <Grid item xs={12} md={6}>
-            <Box pt={1}>
-              <GroupChatImg width="100%" className={classes.groupChatImg} />
-            </Box>
+          <Grid item container justifyContent="center" xs={12} md={6}>
+            <Grid item>
+              <Animation
+                containerId="group-chat"
+                width={60}
+                height={60}
+                smallScreenWidth={30}
+                smallScreenHeight={30}
+                animationData={groupChatJson}
+              />
+            </Grid>
           </Grid>
           <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
             <Grid item container xs={12} spacing={2} className={classes.groupSearch}>

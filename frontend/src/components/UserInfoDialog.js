@@ -11,7 +11,6 @@ import {
 import { appStore, profileStore } from 'stores';
 
 function UserInfoDialog() {
-  const [shouldOpen, setShouldOpen] = useState(true);
   const [textFieldValue, setTextFieldValue] = useState('');
 
   const handleTextFieldChange = (e) => {
@@ -28,11 +27,12 @@ function UserInfoDialog() {
     }
     appStore.setShouldShowAlert(false);
     profileStore.setName(textFieldValue);
-    setShouldOpen(false);
   };
 
+  const shouldOpen = !profileStore.hasCompleteUserInfo;
+
   return (
-    <Dialog open={shouldOpen} onClose={() => profileStore.name && setShouldOpen(false)}>
+    <Dialog open={shouldOpen}>
       <DialogTitle>Let&apos;s get started!</DialogTitle>
       <form
         onSubmit={(evt) => {

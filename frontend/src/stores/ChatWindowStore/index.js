@@ -121,6 +121,7 @@ class ChatWindowStore {
             prevMessageList.push(processedMessage);
           }
         });
+        prevMessageList.reverse();
         this.chatStartedPromiseObj.promise.then(() => {
           this.addInitMessageList(prevMessageList);
           this.setInitDone(true);

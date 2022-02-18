@@ -5,11 +5,10 @@ import { isDevEnv } from 'utils';
 import { MysterioOrigin } from 'appConstants';
 
 function YouTube(props) {
-  const { videoId, setPlayer, size, onReady, onStateChange, showControls } = props;
+  const { setPlayer, size, onReady, onStateChange, showControls } = props;
   useConstant(() => {
     globalThis.youtubeIframePromise.then(() => {
       const ytPlayer = new globalThis.YT.Player('YouTube', {
-        videoId,
         width: 16 * size,
         height: 9.75 * size,
         playerVars: {
@@ -30,7 +29,6 @@ function YouTube(props) {
 }
 
 YouTube.propTypes = {
-  videoId: PropTypes.string.isRequired,
   setPlayer: PropTypes.func.isRequired,
   size: PropTypes.number,
   onReady: PropTypes.func,

@@ -70,7 +70,7 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
         Provide group messageds sorted by sent_at
         """
         # TODO: Only text messages are supported currently
-        messages = group_room.textmessages.order_by("sent_at")
+        messages = group_room.textmessages.order_by("-sent_at")
         return TextMessageSerializer(messages, many=True).data
 
     def get_admin_access(self, group_room):

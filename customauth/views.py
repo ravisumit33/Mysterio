@@ -2,10 +2,7 @@ from django.views.generic.base import View
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import api_view
 from dj_rest_auth.views import LogoutView
-from dj_rest_auth.registration.views import (
-    SocialLoginView,
-    VerifyEmailView as RestAuthVerifyEmailView,
-)
+from dj_rest_auth.registration.views import SocialLoginView
 from customauth.adapter import GoogleOAuth2AdapterIdToken
 
 
@@ -30,14 +27,8 @@ def delete_user(request):
 class VerifyEmailView(View):
     """
     GET request to take user to site for verification
-    POST request to confirm email
     """
 
     def get(self, request, key=None):
         """Redirect to frontend"""
         return HttpResponseRedirect(f"/account/confirm-email/{key}")
-
-    def post(self, request, *args, **kwargs):
-        """Post handler to confirm email"""
-        rest_auth_view = RestAuthVerifyEmailView.as_view()
-        return rest_auth_view(request, *args, **kwargs)

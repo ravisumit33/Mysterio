@@ -17,6 +17,13 @@ TEMPLATE_DEBUG = True
 
 INSTALLED_APPS.append("django_extensions")
 
+TEMPLATES[0]["DIRS"] = [
+    os.path.join(FRONTEND_DIR, "public"),
+]
+
+STATICFILES_DIRS = [
+    os.path.join(FRONTEND_DIR, "public", "static"),
+]
 
 SITE_ID = 4
 
@@ -45,7 +52,6 @@ LOGGING["loggers"] = {
 EMAIL_HOST = "localhost"
 
 EMAIL_PORT = 1025
-
 
 # AUTH configurations
 

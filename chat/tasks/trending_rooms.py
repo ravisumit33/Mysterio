@@ -54,7 +54,9 @@ def update_trending_rooms():
     group_stats = get_group_stats()
     zscores = {}
     for room_id, message_stats in group_stats.items():
-        observed_message_count = message_stats.pop(timezone.now().date(), None)
+        observed_message_count = message_stats.pop(
+            timezone.localtime(timezone.now()).date(), None
+        )
         message_count_history = list(message_stats.values())
         zscores[room_id] = get_zscore(observed_message_count, message_count_history)
 

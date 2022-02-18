@@ -24,8 +24,11 @@ class DefaultGroupRoomSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
+        user = self.context.get("request").user
+        validated_data["creator"] = user
         instance = super().create(validated_data)
-        instance.admins.add(self.context.get("request").user)
+        instance.admins.add(user)
+        instance.likers.add(user)
         if password:
             instance.password = make_password(password)
         instance.save()
@@ -63,6 +66,10 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
 
     admin_access = serializers.SerializerMethodField()
 
+    is_creator = serializers.SerializerMethodField()
+
+    is_favorite = serializers.SerializerMethodField()
+
     player = PlayerSerializer(read_only=True)
 
     def get_group_messages(self, group_room):  # pylint: disable=no-self-use
@@ -80,10 +87,26 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         return user in group_room.admins.all()
 
+    def get_is_favorite(self, group_room):
+        """
+        Return true if request user has marked group room favorite
+        """
+        user = self.context.get("request").user
+        return user in group_room.likers.all()
+
+    def get_is_creator(self, group_room):
+        """
+        Return true if request user has created the group room
+        """
+        user = self.context.get("request").user
+        return user is group_room.creator
+
     class Meta:
         model = GroupRoom
         fields = [
             "group_messages",
             "admin_access",
+            "is_creator",
+            "is_favorite",
             "player",
         ]

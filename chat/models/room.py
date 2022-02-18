@@ -31,9 +31,21 @@ class GroupRoom(Room):
     avatar_url = models.URLField(blank=True)
     zscore = models.FloatField(null=True)
     password = models.CharField(max_length=128, blank=True)
+    creator = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name="group_rooms",
+        related_query_name="group_room",
+    )
     admins = models.ManyToManyField(
         get_user_model(),
-        related_name="group_rooms",
+        related_name="accessible_group_rooms",
+        related_query_name="accessible_group_room",
+    )
+    likers = models.ManyToManyField(
+        get_user_model(),
+        related_name="favorite_rooms",
+        related_query_name="favorite_room",
     )
 
     @property

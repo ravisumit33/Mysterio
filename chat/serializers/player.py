@@ -19,4 +19,4 @@ class PlayerSerializer(serializers.ModelSerializer):
             "state",
             "current_time",
         ]
-        read_only_fields = ["name"]
+        read_only_fields = ["name", "host"]

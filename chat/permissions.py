@@ -1,7 +1,7 @@
 import logging
 from django.contrib.sessions.models import Session
-from django.contrib.auth.hashers import check_password
 from rest_framework import permissions
+from chat.utils import check_group_password
 
 logger = logging.getLogger(__name__)
 
@@ -19,17 +19,20 @@ class GroupRoomPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        if view.action == "retrieve":
+        password_valid = check_group_password(request, obj)
+        get_permission_restricted = {
+            "set_like": True,
+            "update_player": request.user in obj.admins.all(),
+            "delete": request.user in obj.creator,
+        }
+        if view.action in ("retrieve", "get_player"):
+            return password_valid
+        if view.action in get_permission_restricted:
+            remove_restriction = request.user.is_authenticated and password_valid
             return (
-                check_password(
-                    request.META.get("HTTP_X_GROUP_PASSWORD", ""), obj.password
-                )
-                if obj.password
-                else True
+                get_permission_restricted[view.action] if remove_restriction else False
             )
-        if not request.user.is_authenticated:
-            return False
-        return request.user in obj.admins.all()
+        return False
 
 
 class IndividualRoomPermission(permissions.BasePermission):

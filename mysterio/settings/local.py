@@ -26,6 +26,14 @@ DATABASES = {
     }
 }
 
+TEMPLATES[0]["DIRS"] = [
+    os.path.join(FRONTEND_DIR, "public"),
+]
+
+STATICFILES_DIRS = [
+    os.path.join(FRONTEND_DIR, "public", "static"),
+]
+
 
 CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": ["redis://127.0.0.1:6379"],
@@ -66,7 +74,6 @@ LOGGING["handlers"]["console"]["formatter"] = "simple"
 EMAIL_HOST = "localhost"
 
 EMAIL_PORT = 1025
-
 
 # AUTH configurations
 

@@ -13,15 +13,18 @@ ALLOWED_HOSTS = [
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
 
-
-CHANNEL_LAYERS["default"]["CONFIG"] = {
-    "hosts": [os.getenv("REDIS_URL")],
-}
-
+TEMPLATES[0]["DIRS"] = [
+    os.path.join(FRONTEND_DIR, "build"),
+]
 
 STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, "build", "static"),
 ]
+
+
+CHANNEL_LAYERS["default"]["CONFIG"] = {
+    "hosts": [os.getenv("REDIS_URL")],
+}
 
 
 CELERY_BROKER_URL = os.getenv("REDIS_URL")

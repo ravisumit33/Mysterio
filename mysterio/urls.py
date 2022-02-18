@@ -29,7 +29,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
     ),
     # allauth requires following url name in global namespace
-    # "account_confirm_email" for reverse resolving & handling requests from verification email
+    # "account_confirm_email" for reverse resolving requests for email verification
     re_path(
         r"^confirm-email/(?P<key>[-:\w]+)/$",
         VerifyEmailView.as_view(),

@@ -146,6 +146,7 @@ function Player(props) {
     switch (playerData.name) {
       case PlayerName.YOUTUBE: {
         syncPlayerTime();
+        evt.target.loadVideoById(playerData.video_id);
         evt.target.playVideo();
         break;
       }
@@ -166,7 +167,6 @@ function Player(props) {
       case PlayerName.YOUTUBE:
         return (
           <YouTube
-            videoId={playerData.video_id}
             setPlayer={setEmbedPlayerRef}
             size={isSmallScreen ? 20 : 50}
             onReady={onPlayerReady}

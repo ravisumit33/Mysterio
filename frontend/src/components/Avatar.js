@@ -13,9 +13,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function ImageAvatar(props) {
-  const { name, avatarUrl, className } = props;
+  const { name, avatarUrl, className, ...rest } = props;
 
-  return <Avatar className={className} alt={name} src={avatarUrl} />;
+  // eslint-disable-next-line react/jsx-props-no-spreading
+  return <Avatar className={className} alt={name} src={avatarUrl} {...rest} />;
 }
 
 ImageAvatar.propTypes = {
@@ -29,7 +30,7 @@ ImageAvatar.defaultProps = {
 };
 
 export function TextAvatar(props) {
-  const { name, className } = props;
+  const { name, className, ...rest } = props;
   const isFirstLetterAlpha = name.charAt(0).match(/[a-zA-Z]/);
 
   // Get first character & capitalize if it is alphabet
@@ -38,7 +39,11 @@ export function TextAvatar(props) {
   const txt = isFirstLetterAlpha ? name.charAt(0).toUpperCase() : [...name][0];
 
   return (
-    <Avatar className={clsx(useStyles({ avatarBg: generateRandomColor(name) }).avatar, className)}>
+    <Avatar
+      className={clsx(useStyles({ avatarBg: generateRandomColor(name) }).avatar, className)}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...rest}
+    >
       {txt}
     </Avatar>
   );
@@ -54,12 +59,14 @@ TextAvatar.defaultProps = {
 };
 
 function CustomAvatar(props) {
-  const { name, avatarUrl, className } = props;
+  const { name, avatarUrl, className, avatarProps } = props;
   if (avatarUrl) {
-    return <ImageAvatar name={name} avatarUrl={avatarUrl} className={className} />;
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <ImageAvatar name={name} avatarUrl={avatarUrl} className={className} {...avatarProps} />;
   }
   if (name) {
-    return <TextAvatar name={name} className={className} />;
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <TextAvatar name={name} className={className} {...avatarProps} />;
   }
   return (
     <Avatar>
@@ -72,12 +79,14 @@ CustomAvatar.propTypes = {
   name: PropTypes.string,
   avatarUrl: PropTypes.string,
   className: PropTypes.string,
+  avatarProps: PropTypes.shape({}),
 };
 
 CustomAvatar.defaultProps = {
   name: '',
   avatarUrl: '',
   className: '',
+  avatarProps: {},
 };
 
 export default CustomAvatar;

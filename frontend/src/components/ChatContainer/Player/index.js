@@ -13,7 +13,7 @@ import { ChatWindowStoreContext } from 'contexts';
 import { createDeferredPromiseObj, fetchUrl } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
-import { useConstant } from 'hooks';
+import { useGetPlayer, useHandlePlayer, useConstant } from 'hooks';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
@@ -27,7 +27,15 @@ function Player(props) {
   const { isSmallScreen } = props;
 
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { roomInfo, playerData, roomType, playerExists, isHost } = chatWindowStore;
+  const {
+    roomInfo,
+    playerData,
+    roomType,
+    playerExists,
+    isHost,
+    setShouldOpenPlayer,
+    handlePlayerDelete,
+  } = chatWindowStore;
   const { adminAccess, roomId } = roomInfo;
 
   const classes = useStyles();
@@ -44,52 +52,8 @@ function Player(props) {
     },
     []
   );
-  const getPlayerState = useCallback((data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE:
-        return embedPlayerRef.current.getPlayerState();
-      default:
-        return -1;
-    }
-  }, []);
-  const getPlayerTime = useCallback((data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE:
-        return embedPlayerRef.current.getCurrentTime();
-      default:
-        return -1;
-    }
-  }, []);
-  const handlePlay = useCallback((data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        embedPlayerRef.current.playVideo();
-        break;
-      }
-      default:
-        break;
-    }
-  }, []);
-  const handlePause = useCallback((data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        embedPlayerRef.current.pauseVideo();
-        break;
-      }
-      default:
-        break;
-    }
-  }, []);
-  const handleSeek = useCallback((data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        embedPlayerRef.current.seekTo(data.current_time);
-        break;
-      }
-      default:
-        break;
-    }
-  }, []);
+  const [getPlayerState, getPlayerTime] = useGetPlayer(embedPlayerRef);
+  const [handlePlay, handlePause, handleSeek] = useHandlePlayer(embedPlayerRef);
   useEffect(() => {
     if (!playerExists || isHost) return;
     playerReady.promise.then(() => {
@@ -117,9 +81,9 @@ function Player(props) {
     });
   }, [
     playerData,
-    playerReady,
     isHost,
     playerExists,
+    playerReady.promise,
     getPlayerState,
     getPlayerTime,
     handleSeek,
@@ -207,22 +171,44 @@ function Player(props) {
         )}
       </ThemeProvider>
       {playerExists && (
-        <Grid item container direction="column" alignItems="center" justifyContent="space-evenly">
+        <Grid
+          item
+          container
+          direction="column"
+          alignItems="center"
+          justifyContent="space-evenly"
+          spacing={1}
+          className={classes.section}
+        >
           <Grid item className={classes.section}>
             {getEmbedPlayer()}
           </Grid>
-          {!isHost && (
-            <Grid item className={classes.section}>
+          <Grid item container justifyContent="center" className={classes.section} spacing={2}>
+            {!isHost && (
+              <Grid item>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  endIcon={<SyncIcon />}
+                  onClick={() => handleSyncFromHost()}
+                >
+                  Sync
+                </Button>
+              </Grid>
+            )}
+            <Grid item>
               <Button
                 variant="contained"
                 color="secondary"
-                endIcon={<SyncIcon />}
-                onClick={() => handleSyncFromHost()}
+                onClick={() => {
+                  setShouldOpenPlayer(false);
+                  handlePlayerDelete();
+                }}
               >
-                Sync with host
+                Close
               </Button>
             </Grid>
-          )}
+          </Grid>
         </Grid>
       )}
     </Grid>

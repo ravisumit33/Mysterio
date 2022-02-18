@@ -1,9 +1,11 @@
 import React from 'react';
-import { Box, Snackbar, Typography } from '@material-ui/core';
+import { useLocation, useHistory } from 'react-router-dom';
+import { Box, Button, IconButton, Snackbar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from '@material-ui/lab/Alert';
+import CloseIcon from '@material-ui/icons/Close';
 import { observer } from 'mobx-react-lite';
-import { appStore } from 'stores';
+import { appStore, profileStore } from 'stores';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -14,9 +16,39 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function AppAlert(props) {
+function LoginAction() {
+  const location = useLocation();
+  const history = useHistory();
+  const handleLogin = () => {
+    handleAlertClose();
+    history.push('/login', { from: location });
+  };
+
+  const handleAlertClose = () => appStore.setShouldShowAlert(false);
+  return profileStore.isLoggedIn ? null : (
+    <>
+      <Button color="secondary" size="small" onClick={handleLogin} variant="text">
+        login
+      </Button>
+      <IconButton size="small" aria-label="close" color="inherit" onClick={handleAlertClose}>
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </>
+  );
+}
+
+function AppAlert() {
   const classes = useStyles();
   const { alert, shouldShowAlert, setShouldShowAlert } = appStore;
+
+  const getAlertAction = () => {
+    switch (alert.action) {
+      case 'login':
+        return <LoginAction />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Box className={classes.root}>
@@ -25,12 +57,11 @@ function AppAlert(props) {
         autoHideDuration={5000}
         onClose={() => setShouldShowAlert(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        action={alert.action}
       >
         <Alert
           onClose={() => setShouldShowAlert(false)}
           severity={alert.severity}
-          action={alert.action}
+          action={getAlertAction()}
         >
           <Typography variant="body2">{alert.text}</Typography>
         </Alert>

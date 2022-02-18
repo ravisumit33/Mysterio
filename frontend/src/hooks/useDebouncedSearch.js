@@ -1,14 +1,7 @@
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useAsync } from 'react-async-hook';
-
-const useConstant = (getConstantFunc) => {
-  const ref = useRef(null);
-  if (!ref.current) {
-    ref.current = { val: getConstantFunc() };
-  }
-  return ref.current.val;
-};
+import useConstant from './useConstant';
 
 const useDebouncedSearch = (searchFunc) => {
   const [inputText, setInputText] = useState('');
@@ -27,10 +20,4 @@ const useDebouncedSearch = (searchFunc) => {
   };
 };
 
-const useAudio = (sound) =>
-  useConstant(() => {
-    const audio = new Audio(sound);
-    return audio;
-  });
-
-export { useDebouncedSearch, useConstant, useAudio };
+export default useDebouncedSearch;

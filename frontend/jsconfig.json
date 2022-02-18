@@ -5,6 +5,7 @@
     "checkJs": true,
     "allowJs": true,
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "jsx": "react",
     "experimentalDecorators": true,
     "esModuleInterop": true,

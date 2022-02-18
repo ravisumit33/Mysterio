@@ -8,10 +8,7 @@ import { appStore } from 'stores';
 
 const useStyles = makeStyles((theme) => ({
   jumbotron: {
-    display: 'flex',
-    flexDirection: 'column',
     position: 'relative',
-    width: '100%',
   },
   bg: {
     position: 'absolute',
@@ -21,9 +18,6 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     zIndex: -1,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  gridRoot: {
-    flex: 1,
   },
   quickChatImg: {
     height: 300,
@@ -56,49 +50,38 @@ function Jumbotron() {
   };
 
   return (
-    <Box id="jumbotron">
-      <Box className={classes.jumbotron}>
-        <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-        <Grid
-          container
-          direction="column"
-          className={classes.gridRoot}
-          justifyContent="space-around"
-        >
+    <Box id="jumbotron" className={classes.jumbotron}>
+      <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
+      <Grid container>
+        <Grid item>
+          <Box py={3}>
+            <QuickChatImg width="100%" className={classes.quickChatImg} />
+          </Box>
+        </Grid>
+        <Grid item container className={classes.quickChatTxtSection} direction="column">
+          <Grid item>
+            <Box>
+              <Typography variant="h3" className={classes.quickChatDesc} align="center">
+                Free Anonymous Chat
+              </Typography>
+            </Box>
+          </Grid>
           <Grid item container justifyContent="center">
-            <Grid item xs={12} md={7}>
-              <Box py={3}>
-                <QuickChatImg width="100%" className={classes.quickChatImg} />
+            <Grid item>
+              <Box py={2}>
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  size="large"
+                  onClick={handleStartIndividualChat}
+                >
+                  Chat Now
+                </Button>
               </Box>
             </Grid>
           </Grid>
-          <Grid item container className={classes.quickChatTxtSection} direction="column">
-            <Grid item container justifyContent="center">
-              <Grid item xs={12}>
-                <Box>
-                  <Typography variant="h3" className={classes.quickChatDesc} align="center">
-                    Free Anonymous Chat
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-            <Grid item container justifyContent="center">
-              <Grid item>
-                <Box py={2}>
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    size="large"
-                    onClick={handleStartIndividualChat}
-                  >
-                    Chat Now
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </Grid>
         </Grid>
-      </Box>
+      </Grid>
     </Box>
   );
 }

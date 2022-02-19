@@ -5,7 +5,6 @@ from channels.exceptions import DenyConnection
 from django.db.utils import IntegrityError
 from chat.consumers.handlers.message import add_text_message
 import chat.models.channel as Channel
-from chat.models import Player
 from chat.constants import MessageType, GroupPrefix
 from chat.utils import channel_layer
 from .handlers import (
@@ -92,13 +91,12 @@ class ChatConsumer(WebsocketConsumer):
             )
             logger.info("Individual channel deleted")
         else:
-            add_text_message(
-                self,
-                text=f"{self.profile['name']} left",
-                msg_type=MessageType.USER_LEFT,
-            )
-            if "id" in self.profile:
-                Player.objects.filter(host_id=self.profile["id"]).delete()
+            if "name" in self.profile:
+                add_text_message(
+                    self,
+                    text=f"{self.profile['name']} left",
+                    msg_type=MessageType.USER_LEFT,
+                )
             logger.info("Group channel disconnected")
 
         if self.player_id is not None:

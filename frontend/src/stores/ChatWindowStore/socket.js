@@ -5,6 +5,8 @@ import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 
 class Socket {
+  maxRetries = 60;
+
   constructor(chatWindowStore) {
     this.chatWindowStore = chatWindowStore;
     this.init();
@@ -24,7 +26,9 @@ class Socket {
     const { roomInfo } = this.chatWindowStore;
     const groupChatURL = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
     this.socket = new ReconnectingWebSocket(
-      `${websocketProtocol}://${serverHost}/chat${groupChatURL}/`
+      `${websocketProtocol}://${serverHost}/chat${groupChatURL}/`,
+      undefined,
+      { maxRetries: this.maxRetries }
     );
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
@@ -52,13 +56,18 @@ class Socket {
   };
 
   handleError = (error) => {
-    const { appStore } = this.chatWindowStore;
-    appStore.removeChatWindow();
-    appStore.setShouldShowAlert(false);
-    appStore.showAlert({
-      text: `Error occured while connecting to server.`,
-      severity: 'error',
-    });
+    if (this.socket.retryCount >= this.maxRetries) {
+      const { appStore } = this.chatWindowStore;
+      appStore.removeChatWindow();
+      appStore.setShouldShowAlert(false);
+      appStore.showAlert({
+        text: `Error occured while connecting to server.`,
+        severity: 'error',
+      });
+    } else {
+      log.error('Error connecting to server', error);
+      log.error('Reconnecting...');
+    }
   };
 
   send = (msgType, msgData = {}) => {

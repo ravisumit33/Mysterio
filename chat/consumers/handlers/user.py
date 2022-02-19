@@ -22,13 +22,12 @@ def handle_user_info(consumer, message_data):
 
     session_key = consumer.scope["session"].session_key
     session = Session.objects.get(pk=session_key)
-    chat_session = ChatSession(
+    chat_session = ChatSession.objects.create(
         name=name,
         tab_session_id=tab_session_id,
         avatar_url=avatar_url,
         session=session,
     )
-    chat_session.save()
     consumer.chat_session_id = chat_session.id
     consumer.profile = {
         "session_id": tab_session_id,

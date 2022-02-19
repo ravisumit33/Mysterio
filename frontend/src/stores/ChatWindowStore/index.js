@@ -234,6 +234,8 @@ class ChatWindowStore {
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
+          lastMessage.data.sender &&
+          messageData.sender &&
           lastMessage.data.sender.session_id === messageData.sender.session_id
         ) {
           const newLastMessage = { ...lastMessage };

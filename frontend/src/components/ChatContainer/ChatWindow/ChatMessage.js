@@ -87,8 +87,8 @@ function ChatMessage({ messages, sender, side }) {
       {isGroupChat && side === 'left' && (
         <Grid item>
           <Avatar
-            name={sender.name || '?'}
-            avatarUrl={sender.avatarUrl}
+            name={(sender && sender.name) || '?'}
+            avatarUrl={sender && sender.avatarUrl}
             className={classes.avatar}
           />
         </Grid>

@@ -27,4 +27,10 @@ const useDebouncedSearch = (searchFunc) => {
   };
 };
 
-export { useDebouncedSearch, useConstant };
+const useAudio = (sound) =>
+  useConstant(() => {
+    const audio = new Audio(sound);
+    return audio;
+  });
+
+export { useDebouncedSearch, useConstant, useAudio };

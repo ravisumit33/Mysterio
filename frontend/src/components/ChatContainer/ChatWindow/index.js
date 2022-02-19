@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
+import { useAudio } from 'hooks';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -54,16 +55,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const playIncomingMessageSound = () => {
-  const audio = new Audio(incomingMessageSound);
-  audio.play();
-};
-
-const playChatStartedSound = () => {
-  const audio = new Audio(chatStartedSound);
-  audio.play();
-};
-
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { messageList, chatStatus, isGroupChat, initDone, appStore } = chatWindowStore;
@@ -72,6 +63,8 @@ function ChatWindow(props) {
   const scrollToBottom = () => {
     endBox.current && endBox.current.scrollIntoView({ behavior: 'smooth' });
   };
+  const incomingMessageAudio = useAudio(incomingMessageSound);
+  const chatStartedAudio = useAudio(chatStartedSound);
   useEffect(
     () => () => {
       appStore.removeChatWindow();
@@ -87,17 +80,25 @@ function ChatWindow(props) {
     const lastMessage = messageList.length && messageList[messageList.length - 1];
     if (chatStatus === ChatStatus.ONGOING && lastMessage) {
       const isLastMessageText = lastMessage.type === MessageType.TEXT;
-      if (isLastMessageText && lastMessage.data.sender.session_id !== profileStore.sessionId) {
-        playIncomingMessageSound();
+      if (isLastMessageText) {
+        if (
+          !lastMessage.data.sender ||
+          lastMessage.data.sender.session_id !== profileStore.sessionId
+        ) {
+          incomingMessageAudio.play();
+        }
       }
     }
   });
-  useEffect(() => initDone && playChatStartedSound(), [initDone]);
+  useEffect(() => initDone && chatStartedAudio.play(), [chatStartedAudio, initDone]);
 
   const chatMessages = messageList.map((message, idx) => {
     const messageData = message.data;
     if (message.type === MessageType.TEXT) {
-      const side = messageData.sender.session_id === profileStore.sessionId ? 'right' : 'left';
+      const side =
+        messageData.sender && messageData.sender.session_id === profileStore.sessionId
+          ? 'right'
+          : 'left';
       return (
         // eslint-disable-next-line react/no-array-index-key
         <Grid item key={idx}>

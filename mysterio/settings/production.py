@@ -27,6 +27,23 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 
 SITE_ID = 2
 
+LOGGING["loggers"] = {
+    "mysterio": {
+        "level": "INFO",
+    },
+    "chat": {
+        "level": "INFO",
+    },
+    "core": {
+        "level": "INFO",
+    },
+    "customauth": {
+        "level": "INFO",
+    },
+    "celery.task": {
+        "level": "INFO",
+    },
+}
 
 LOGGING["handlers"]["console"]["formatter"] = "verbose"
 

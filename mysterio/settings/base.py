@@ -49,6 +49,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "core.middleware.redirect_herokuapp",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -65,6 +66,7 @@ FRONTEND_ROUTES = [
     "login/",
     "register/",
     "account/",
+    "chat/",
     "account/confirm-email/(?P<key>[-:\w]+)/",  # pylint: disable=anomalous-backslash-in-string
 ]
 

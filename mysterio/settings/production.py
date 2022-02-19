@@ -5,7 +5,11 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["www.mysterio-chat.com", "mysterio-chat.com"]
+ALLOWED_HOSTS = [
+    "www.mysterio-chat.com",
+    "mysterio-chat.com",
+    "mysterio-chat.herokuapp.com",
+]
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
 
@@ -27,6 +31,23 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 
 SITE_ID = 2
 
+LOGGING["loggers"] = {
+    "mysterio": {
+        "level": "INFO",
+    },
+    "chat": {
+        "level": "INFO",
+    },
+    "core": {
+        "level": "INFO",
+    },
+    "customauth": {
+        "level": "INFO",
+    },
+    "celery.task": {
+        "level": "INFO",
+    },
+}
 
 LOGGING["handlers"]["console"]["formatter"] = "verbose"
 

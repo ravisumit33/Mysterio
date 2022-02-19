@@ -70,6 +70,15 @@ class ChatWindowStore {
     // @ts-ignore
     const groupMessages = groupDetail.then((responseData) => responseData.group_messages);
     groupMessages
+      .catch((err) => {
+        this.setInitDone(true);
+        this.appStore.removeChatWindow();
+        this.appStore.showAlert({
+          text: 'Error occured while connecting to server.',
+          severity: 'error',
+        });
+        throw err;
+      })
       .then((messages) => {
         let detailMessages;
         if (!messages) {
@@ -125,15 +134,6 @@ class ChatWindowStore {
         this.chatStartedPromiseObj.promise.then(() => {
           this.addInitMessageList(prevMessageList);
           this.setInitDone(true);
-        });
-      })
-      .catch((err) => {
-        log.error(err);
-        this.setInitDone(true);
-        this.appStore.removeChatWindow();
-        this.appStore.showAlert({
-          text: 'Error occured while connecting to server.',
-          severity: 'error',
         });
       });
   };

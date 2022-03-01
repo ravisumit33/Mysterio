@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: theme.spacing(2),
     },
     [theme.breakpoints.up('sm')]: {
-      margin: `${theme.spacing(3)}px 0`,
+      margin: theme.spacing(3, 0),
     },
   },
   groupSearchLabel: {

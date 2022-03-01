@@ -26,4 +26,4 @@ class GroupPrefix:
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"
 
 
-MESSAGE_PAGE_SIZE = 100
+MESSAGE_PAGE_SIZE = 250

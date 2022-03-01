@@ -62,7 +62,7 @@ class ChatWindowStore {
   };
 
   initializeForGroup = () =>
-    fetchUrl('/api/account/token/refresh/', { method: 'post' }).finally(() => {
+    fetchUrl('/api/account/token/refresh/', { method: 'post' }).finally(() =>
       fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
         headers: { 'X-Group-Password': this.roomInfo.password },
       })
@@ -95,8 +95,8 @@ class ChatWindowStore {
           // @ts-ignore
           this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
           await this.loadPreviousMessages();
-        });
-    });
+        })
+    );
 
   setName = (newName) => {
     this.name = newName;

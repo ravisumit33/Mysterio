@@ -97,7 +97,6 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
         Return url to get paginated messages for group room
         """
         room_pk = group_room.pk
-        request = self.context.get("request")
         view = self.context.get("view")
         return view.reverse_action("get-messages", args=[room_pk])
 

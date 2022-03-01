@@ -22,15 +22,14 @@ def set_ws_on_session(get_response):
 
 def redirect_herokuapp(get_response):
     """
-    Redirect all requests from mysterio-chat.herokuapp.com to mysterio-chat.com
+    Redirect all requests from mysterio-chat.herokuapp.com to mysterio-chat.com securely
     """
 
     def middleware(request):
         host = request.get_host()
         if host == "mysterio-chat.herokuapp.com":
-            redirect_url = (
-                f"{request.scheme}://mysterio-chat.com{request.get_full_path()}"
-            )
+            scheme = "wss" if request.scheme == "ws" else "https"
+            redirect_url = f"{scheme}://mysterio-chat.com{request.get_full_path()}"
             return HttpResponsePermanentRedirect(redirect_url)
         return get_response(request)
 

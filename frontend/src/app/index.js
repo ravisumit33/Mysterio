@@ -27,7 +27,7 @@ import { profileStore } from 'stores';
 const useStyles = makeStyles(() => ({
   root: {
     width: '100%',
-    minHeight: '100vh',
+    minHeight: '100%',
     position: 'relative',
   },
 }));

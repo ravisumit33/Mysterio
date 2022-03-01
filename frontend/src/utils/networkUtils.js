@@ -7,6 +7,10 @@ const getCompleteUrl = (url) => {
   try {
     completeUrl = new URL(url);
     completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
+    if (isDevEnv() && completeUrl.port === '8000') {
+      // change port to react server to avoid CORS issues
+      completeUrl.port = '3000';
+    }
     completeUrl = completeUrl.href;
   } catch (_) {
     // url is relative
@@ -19,23 +23,27 @@ const getCompleteUrl = (url) => {
   return completeUrl;
 };
 
+const commonHeaders = {
+  'X-CSRFToken': getCookie('csrftoken'),
+  Accept: 'application/json',
+  'Content-Type': 'application/json',
+};
+
 const axiosInstance = axios.create({
-  headers: {
-    'X-CSRFToken': getCookie('csrftoken'),
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-  },
+  headers: commonHeaders,
 });
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     const originalRequest = error.config;
     const resp = error.response;
-    if (resp.status === 401) {
+    const tokenRefreshUrl = getCompleteUrl('/api/account/token/refresh/');
+    if (originalRequest.url !== tokenRefreshUrl && (resp.status === 401 || resp.status === 403)) {
       return axios({
         method: 'post',
-        url: getCompleteUrl('/api/account/token/refresh/'),
+        url: tokenRefreshUrl,
         data: {},
+        headers: commonHeaders,
       }).then(() => axios(originalRequest));
     }
     return Promise.reject(error);

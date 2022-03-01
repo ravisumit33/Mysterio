@@ -11,11 +11,15 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => {
   const borderRadius = theme.spacing(2.5);
-  const avatarSize = theme.spacing(4);
+  const avatarSize = theme.spacing(5);
   return {
     avatar: {
       width: avatarSize,
       height: avatarSize,
+    },
+    avatarContainer: {
+      padding: theme.spacing(0.5, 1, 0.5, 0),
+      width: theme.spacing(6), // avatarSize + paddingRight
     },
     rightRow: {
       marginLeft: 'auto',
@@ -23,7 +27,7 @@ const useStyles = makeStyles((theme) => {
     msgBox: {
       display: 'flex',
       alignItems: 'center',
-      marginBottom: theme.spacing(0.5),
+      padding: theme.spacing(0.5, 0),
     },
     leftMsgBox: {
       textAlign: 'left',
@@ -41,7 +45,7 @@ const useStyles = makeStyles((theme) => {
       fontFamily:
         // eslint-disable-next-line max-len
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      fontSize: '1.1rem',
+      fontSize: '1rem',
     },
     left: {
       borderTopRightRadius: borderRadius,
@@ -69,56 +73,56 @@ const useStyles = makeStyles((theme) => {
   };
 });
 
-function ChatMessage({ messages, sender, side }) {
+function ChatMessage({ message, sender, side, first, last }) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { isGroupChat } = chatWindowStore;
   const classes = useStyles();
-  const attachClass = (index) => {
-    if (index === 0) {
-      return classes[`${side}First`];
-    }
-    if (index === messages.length - 1) {
-      return classes[`${side}Last`];
-    }
-    return '';
-  };
   return (
-    <Grid container spacing={2} justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}>
+    <Grid container justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
-        <Grid item>
-          <Avatar
-            name={(sender && sender.name) || '?'}
-            avatarUrl={sender && sender.avatarUrl}
-            className={classes.avatar}
-          />
+        <Grid item className={classes.avatarContainer}>
+          {first && (
+            <Avatar
+              name={(sender && sender.name) || '?'}
+              avatarUrl={sender && sender.avatarUrl}
+              className={classes.avatar}
+            />
+          )}
         </Grid>
       )}
       <Grid item xs>
-        {messages.map((msg, i) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <Box key={i} className={classes[`${side}Row`]}>
-            <Box className={clsx(classes.msgBox, classes[`${side}MsgBox`])}>
-              <Typography align="left" className={clsx(classes.msg, classes[side], attachClass(i))}>
-                {msg}
-              </Typography>
-            </Box>
+        <Box className={classes[`${side}Row`]}>
+          <Box className={clsx(classes.msgBox, classes[`${side}MsgBox`])}>
+            <Typography
+              align="left"
+              className={clsx(classes.msg, classes[side], {
+                [classes[`${side}First`]]: first,
+                [classes[`${side}Last`]]: last,
+              })}
+            >
+              {message}
+            </Typography>
           </Box>
-        ))}
+        </Box>
       </Grid>
     </Grid>
   );
 }
 
 ChatMessage.propTypes = {
-  messages: PropTypes.arrayOf(PropTypes.string).isRequired,
+  message: PropTypes.string.isRequired,
   side: PropTypes.oneOf(['left', 'right']),
   sender: PropTypes.shape({
     name: PropTypes.string.isRequired,
     avatarUrl: PropTypes.string,
   }).isRequired,
+  first: PropTypes.bool,
+  last: PropTypes.bool,
 };
 ChatMessage.defaultProps = {
   side: 'left',
+  first: false,
+  last: false,
 };
 
 export default observer(ChatMessage);

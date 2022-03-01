@@ -1,6 +1,16 @@
 import useConstant from './useConstant';
 import useDebouncedSearch from './useDebouncedSearch';
-import useGetPlayer from './useGetPlayer';
-import useHandlePlayer from './useHandlePlayer';
+import { useGetPlayer, useHandlePlayer } from './player';
+import { useChatSound, useNewMessage, useGoToBottom } from './chat';
+import useOnScreen from './useOnScreen';
 
-export { useConstant, useDebouncedSearch, useGetPlayer, useHandlePlayer };
+export {
+  useConstant,
+  useDebouncedSearch,
+  useGetPlayer,
+  useHandlePlayer,
+  useOnScreen,
+  useChatSound,
+  useNewMessage,
+  useGoToBottom,
+};

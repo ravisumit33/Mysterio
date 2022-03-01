@@ -24,3 +24,6 @@ class GroupPrefix:
     GROUP_CHANNEL = "grp_GroupChannel_"
     GROUP_ROOM = "grp_GroupRoom_"
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"
+
+
+MESSAGE_PAGE_SIZE = 100

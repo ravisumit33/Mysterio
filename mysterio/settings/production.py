@@ -50,6 +50,9 @@ LOGGING["loggers"] = {
     "celery.task": {
         "level": "INFO",
     },
+    "django": {
+        "level": "WARNING",
+    },
 }
 
 LOGGING["handlers"]["console"]["formatter"] = "verbose"

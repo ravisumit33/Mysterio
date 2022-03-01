@@ -1,15 +1,31 @@
 from rest_framework import serializers
-from chat.models import TextMessage
+from chat.models import Message, TextData
 from .channel import GroupChannelSerializer
 
 
-class TextMessageSerializer(serializers.ModelSerializer):
+class MessageContentField(serializers.RelatedField):  # pylint:disable=abstract-method
+    """
+    A custom field to use for the content_object generic relationship on Message model
+    """
+
+    def to_representation(self, value):
+        """
+        Serialize message content objects to a simple textual representation.
+        """
+        if isinstance(value, TextData):
+            return value.text
+        raise Exception("Unexpected type of message content_object")
+
+
+class MessageSerializer(serializers.ModelSerializer):
     """
     Serializer for messages
     """
 
     sender_channel = GroupChannelSerializer(read_only=True)
 
+    content_type = MessageContentField(read_only=True, source="content")
+
     class Meta:
-        model = TextMessage
-        fields = ["sender_channel", "text", "message_type"]
+        model = Message
+        fields = ["sender_channel", "message_type", "content_type"]

@@ -136,6 +136,7 @@ class ChatWindowStore {
               prevMessageList.push(processedMessage);
             }
           });
+          prevMessageList.reverse();
           this.chatStartedPromiseObj.promise.then(() => {
             this.addInitMessageList(prevMessageList);
             this.setInitDone(true);
@@ -239,21 +240,24 @@ class ChatWindowStore {
         break;
       case MessageType.TEXT: {
         const msgList = isInitMsg ? this.roomInfo.prevMessageList : this.messageList;
+        const textMsg = (messageData.content && messageData.content.text) || '';
         const lastMessageIdx = msgList.length - 1;
         const lastMessage = lastMessageIdx >= 0 && msgList[lastMessageIdx];
         if (
           lastMessage &&
           lastMessage.type === MessageType.TEXT &&
+          lastMessage.data.sender &&
+          messageData.sender &&
           lastMessage.data.sender.session_id === messageData.sender.session_id
         ) {
           const newLastMessage = { ...lastMessage };
           isInitMsg
-            ? newLastMessage.data.text.unshift(messageData.text)
-            : newLastMessage.data.text.push(messageData.text);
+            ? newLastMessage.data.text.unshift(textMsg)
+            : newLastMessage.data.text.push(textMsg);
           msgList[lastMessageIdx] = newLastMessage;
           return {};
         }
-        messageData.text = [messageData.text];
+        messageData.text = [textMsg];
         break;
       }
       case MessageType.PLAYER_INFO: {

@@ -91,7 +91,7 @@ class ChatConsumer(WebsocketConsumer):
             )
             logger.info("Individual channel deleted")
         else:
-            if "name" in self.profile:
+            if self.profile:
                 add_text_message(
                     self,
                     text=f"{self.profile['name']} left",
@@ -106,11 +106,12 @@ class ChatConsumer(WebsocketConsumer):
                 channel_layer_info["group_prefix"] + str(self.room_id),
                 self.channel_name,
             )
-            channel_layer.group_send(
-                channel_layer_info["group_prefix"] + str(self.room_id),
-                MessageType.USER_LEFT,
-                {"resignee": self.profile},
-            )
+            if self.profile:
+                channel_layer.group_send(
+                    channel_layer_info["group_prefix"] + str(self.room_id),
+                    MessageType.USER_LEFT,
+                    {"resignee": self.profile},
+                )
             logger.info(
                 "Room id: %s, Channel id: %d", str(self.room_id), self.channel_id
             )

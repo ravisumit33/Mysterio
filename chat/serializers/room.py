@@ -3,7 +3,6 @@ from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from chat.models import GroupRoom
 from .player import PlayerSerializer
-from .message import TextMessageSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ class DefaultGroupRoomSerializer(serializers.ModelSerializer):
         """
         Getter function for message_count serializer field
         """
-        return group_room.textmessages.count()
+        return group_room.messages.count()
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -62,8 +61,6 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
     Serializer for retrieve action of group room API endpoint
     """
 
-    group_messages = serializers.SerializerMethodField()
-
     admin_access = serializers.SerializerMethodField()
 
     is_creator = serializers.SerializerMethodField()
@@ -71,14 +68,6 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
     is_favorite = serializers.SerializerMethodField()
 
     player = PlayerSerializer(read_only=True)
-
-    def get_group_messages(self, group_room):  # pylint: disable=no-self-use
-        """
-        Provide group messageds sorted by sent_at
-        """
-        # TODO: Only text messages are supported currently
-        messages = group_room.textmessages.order_by("-sent_at")
-        return TextMessageSerializer(messages, many=True).data
 
     def get_admin_access(self, group_room):
         """
@@ -104,9 +93,10 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupRoom
         fields = [
-            "group_messages",
             "admin_access",
             "is_creator",
             "is_favorite",
             "player",
+            "name",
+            "avatar_url",
         ]

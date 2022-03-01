@@ -25,7 +25,7 @@ class GroupRoomPermission(permissions.BasePermission):
             "update_player": request.user in obj.admins.all(),
             "delete": request.user in obj.creator,
         }
-        if view.action in ("retrieve", "get_player"):
+        if view.action in ("retrieve", "get_player", "get_messages"):
             return password_valid
         if view.action in get_permission_restricted:
             remove_restriction = request.user.is_authenticated and password_valid

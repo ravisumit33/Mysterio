@@ -21,30 +21,26 @@ def get_zscore(obs, pop):
 
 def get_group_stats():
     """Get group message stats per day"""
-    message_models = Message.__subclasses__()  # pylint: disable=no-member
     days_window = 10
-    start_time = timezone.localtime(timezone.now()) - timezone.timedelta(
-        days=days_window
-    )
+    start_time = timezone.localtime() - timezone.timedelta(days=days_window)
     initial_message_counts = {
-        (timezone.localdate(timezone.now()) - timezone.timedelta(days=days_num)): 0
+        (timezone.localdate() - timezone.timedelta(days=days_num)): 0
         for days_num in range(days_window + 1)
     }
     group_stats = {}
-    for message_model in message_models:
-        annotated_model = (
-            message_model.objects.filter(sent_at__gt=start_time)
-            .annotate(date=TruncDay("sent_at"))
-            .values("date", "group_room_id")
-            .annotate(count=Count("id"))
-        )
-        for entry in annotated_model:
-            room_id = entry["group_room_id"]
-            date = entry["date"].date()
-            count = entry["count"]
-            if room_id not in group_stats:
-                group_stats[room_id] = dict(initial_message_counts)
-            group_stats[room_id][date] += count
+    annotated_model = (
+        Message.objects.filter(sent_at__gt=start_time)
+        .annotate(date=TruncDay("sent_at"))
+        .values("date", "group_room_id")
+        .annotate(count=Count("id"))
+    )
+    for entry in annotated_model:
+        room_id = entry["group_room_id"]
+        date = entry["date"].date()
+        count = entry["count"]
+        if room_id not in group_stats:
+            group_stats[room_id] = dict(initial_message_counts)
+        group_stats[room_id][date] += count
 
     return group_stats
 
@@ -54,9 +50,7 @@ def update_trending_rooms():
     group_stats = get_group_stats()
     zscores = {}
     for room_id, message_stats in group_stats.items():
-        observed_message_count = message_stats.pop(
-            timezone.localtime(timezone.now()).date(), None
-        )
+        observed_message_count = message_stats.pop(timezone.localdate(), None)
         message_count_history = list(message_stats.values())
         zscores[room_id] = get_zscore(observed_message_count, message_count_history)
 

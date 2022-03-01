@@ -1,6 +1,6 @@
 import logging
 from django.db.utils import IntegrityError
-import chat.models.message as Message
+from chat.models import Message, TextData
 from chat.constants import MessageType
 from chat.utils import channel_layer
 
@@ -12,11 +12,12 @@ def add_text_message(consumer, text, msg_type, fail_action=None):
     Add entry to Text message model
     """
     try:
-        Message.TextMessage.objects.create(
+        text_data = TextData.objects.create(text=text)
+        Message.objects.create(
             group_room_id=consumer.room_id,
             sender_channel_id=consumer.channel_id,
-            text=text,
             message_type=msg_type,
+            content_object=text_data,
         )
     except IntegrityError:
         if fail_action is not None:

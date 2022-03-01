@@ -31,10 +31,10 @@ const useStyles = makeStyles((theme) => ({
   },
   quickChatDesc: {
     [theme.breakpoints.down('sm')]: {
-      padding: `${theme.spacing(1)}px 0`,
+      padding: theme.spacing(1, 0),
     },
     [theme.breakpoints.up('sm')]: {
-      padding: `${theme.spacing(2)}px 0`,
+      padding: theme.spacing(2, 0),
     },
     color: theme.palette.common.white,
   },

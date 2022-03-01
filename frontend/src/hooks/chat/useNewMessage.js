@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { MessageType } from 'appConstants';
 
 const useNewMessage = ({ initialRenderingDone, lastMessage }) => {
-  const [lastNewRenderedMessage, setLastRenderedMessage] = useState(null);
+  const [lastRenderedNewMessage, setLastRenderedNewMessage] = useState(null);
   const hasNewMessage =
     initialRenderingDone &&
     lastMessage &&
-    (lastMessage !== lastNewRenderedMessage ||
-      lastMessage.data.content.length !== lastNewRenderedMessage.data.content.length);
+    lastMessage.type === MessageType.TEXT &&
+    lastMessage !== lastRenderedNewMessage;
   useEffect(() => {
     if (initialRenderingDone && hasNewMessage) {
-      setLastRenderedMessage(lastMessage);
+      setLastRenderedNewMessage(lastMessage);
     }
   }, [hasNewMessage, initialRenderingDone, lastMessage]);
 

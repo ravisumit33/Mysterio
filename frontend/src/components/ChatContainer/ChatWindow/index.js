@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Grid, LinearProgress, makeStyles, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
@@ -8,7 +8,7 @@ import { profileStore } from 'stores';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
-import { useChatSound, useConstant, useNewMessage } from 'hooks';
+import { useChatSound, useNewMessage } from 'hooks';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -58,23 +58,19 @@ function ChatWindow(props) {
 
   const classes = useStyles({ chatStatus });
 
-  const initialRenderingDoneRef = useRef(false);
+  const [initialRenderingDone, setInitialRenderingDone] = useState(false);
   useEffect(() => {
     if (initDone) {
-      initialRenderingDoneRef.current = true;
+      setInitialRenderingDone(true);
     }
   }, [initDone]);
 
   const { hasNewMessage } = useNewMessage({
-    initialRenderingDone: initialRenderingDoneRef.current,
+    initialRenderingDone,
     lastMessage,
   });
 
-  const newMessageNotifyTypes = useConstant(() => [MessageType.TEXT]);
-  const shouldNotify =
-    hasNewMessage &&
-    chatStatus === ChatStatus.ONGOING &&
-    newMessageNotifyTypes.includes(lastMessage.type);
+  const shouldNotify = hasNewMessage && chatStatus === ChatStatus.ONGOING;
   useChatSound({ incomingMessageSound, chatStartedSound, shouldNotify, initDone });
 
   useEffect(

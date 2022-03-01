@@ -35,4 +35,4 @@ class CacheKey:
 
 MATCH_DELAY = 5  # Seconds to wait before scheduling match task
 
-MESSAGE_PAGE_SIZE = 100
+MESSAGE_PAGE_SIZE = 250

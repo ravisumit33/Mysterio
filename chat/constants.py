@@ -26,11 +26,13 @@ class GroupPrefix:
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"
 
 
-MATCH_DELAY = 5  # Seconds to wait before scheduling match task
-
-
 @dataclass
 class CacheKey:
     """Keys used to store data in cache"""
 
     LAST_MATCH_SCHEDULED_TIME = "last_match_scheduled_time"
+
+
+MATCH_DELAY = 5  # Seconds to wait before scheduling match task
+
+MESSAGE_PAGE_SIZE = 100

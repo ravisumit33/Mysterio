@@ -64,12 +64,12 @@ def handle_user_info(consumer, message_data):
     )
 
     if channel_layer_info["is_group_consumer"]:
-        add_text_message(
-            consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED
-        )
         channel_layer.group_send(
             channel_layer_info["group_prefix"] + str(consumer.room_id),
             MessageType.USER_JOINED,
             {"newJoinee": consumer.profile},
+        )
+        add_text_message(
+            consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED
         )
     logger.info("User joined.")

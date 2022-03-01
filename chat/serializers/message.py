@@ -24,8 +24,8 @@ class MessageSerializer(serializers.ModelSerializer):
 
     sender_channel = GroupChannelSerializer(read_only=True)
 
-    content_type = MessageContentField(read_only=True, source="content")
+    content = MessageContentField(read_only=True, source="content_object")
 
     class Meta:
         model = Message
-        fields = ["sender_channel", "message_type", "content_type"]
+        fields = ["sender_channel", "message_type", "content"]

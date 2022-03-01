@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -7,7 +7,10 @@ class Message(models.Model):
     """Model for chat messages."""
 
     group_room = models.ForeignKey(
-        "chat.GroupRoom", on_delete=models.CASCADE, related_name="%(class)ss"
+        "chat.GroupRoom",
+        on_delete=models.CASCADE,
+        related_name="messages",
+        related_query_name="message",
     )
     sender_channel = models.ForeignKey(
         "chat.GroupChannel",
@@ -23,8 +26,33 @@ class Message(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
+    class Meta:
+        unique_together = (
+            "content_type",
+            "object_id",
+        )
 
-class TextData(models.Model):
+
+class ContentData(models.Model):
+    """
+    Mixin for reverse querying message relation
+    https://stackoverflow.com/a/60343738/6842304
+    """
+
+    message_relation = GenericRelation(Message, related_query_name="%(class)s")
+
+    @property
+    def message(self):
+        """
+        Get message object
+        """
+        return self.message_relation.first()  # pylint:disable=no-member
+
+    class Meta:
+        abstract = True
+
+
+class TextData(ContentData):
     """Model to store text messages"""
 
     text = models.CharField(max_length=65535)

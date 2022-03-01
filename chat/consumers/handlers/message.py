@@ -49,7 +49,7 @@ def handle_text_message(consumer, message_data):
         channel_layer_info["group_prefix"] + str(consumer.room_id),
         MessageType.TEXT,
         {
-            "text": message_data["text"],
+            "content": message_data["text"],
             "sender": consumer.profile,
         },
     )

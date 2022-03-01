@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, pagination
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
@@ -9,7 +9,8 @@ from chat.serializers import (
 )
 from chat.models import GroupRoom
 from chat.permissions import GroupRoomPermission, IndividualRoomPermission
-from chat.constants import GroupPrefix, MessageType
+from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
+from chat.serializers.message import MessageSerializer
 from chat.utils import channel_layer, check_group_password
 from .base import RoomViewSet
 
@@ -36,6 +37,7 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
     permission_classes = [GroupRoomPermission]
     serializer_classes = RoomViewSet.serializer_classes | {
         "retrieve": RetrieveGroupRoomSerializer,
+        "get_messages": MessageSerializer,
     }
 
     @property
@@ -75,12 +77,27 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
             group_room.likers.remove(request.user)
         return Response(status=status.HTTP_200_OK)
 
+    @action(methods=["get"], detail=True)
+    def get_messages(
+        self, request, pk=None
+    ):  # pylint: disable=unused-argument,invalid-name
+        """
+        Action for getting messages of group room
+        """
+        group_room = self.get_object()
+        messages = group_room.messages.order_by("-sent_at")
+        paginator = pagination.PageNumberPagination()
+        paginator.page_size = MESSAGE_PAGE_SIZE
+        page = paginator.paginate_queryset(messages, request, view=self)
+        serializer = self.get_serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
     @action(methods=["get"], detail=True, permission_classes=[AllowAny])
     def check_password(
         self, request, pk=None
     ):  # pylint: disable=unused-argument,invalid-name
         """
-        action for checking group room password
+        Action for checking group room password
         """
         group_room = self.get_object()
         password_valid = check_group_password(request, group_room)

@@ -23,7 +23,7 @@ class GroupRoomPermission(permissions.BasePermission):
         get_permission_restricted = {
             "set_like": True,
             "update_player": request.user in obj.admins.all(),
-            "delete": request.user in obj.creator,
+            "destroy": request.user == obj.creator,
         }
         if view.action in ("retrieve", "get_player", "get_messages"):
             return password_valid

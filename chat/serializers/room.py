@@ -69,6 +69,8 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
 
     player = PlayerSerializer(read_only=True)
 
+    messages = serializers.SerializerMethodField()
+
     def get_admin_access(self, group_room):
         """
         Return true if request user had admin access
@@ -90,6 +92,15 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
         user = self.context.get("request").user
         return user is group_room.creator
 
+    def get_messages(self, group_room):
+        """
+        Return url to get paginated messages for group room
+        """
+        room_pk = group_room.pk
+        request = self.context.get("request")
+        view = self.context.get("view")
+        return view.reverse_action("get-messages", args=[room_pk])
+
     class Meta:
         model = GroupRoom
         fields = [
@@ -99,4 +110,5 @@ class RetrieveGroupRoomSerializer(serializers.ModelSerializer):
             "player",
             "name",
             "avatar_url",
+            "messages",
         ]

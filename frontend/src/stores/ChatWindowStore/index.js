@@ -18,6 +18,8 @@ class ChatWindowStore {
 
   roomInfo = {};
 
+  previousMessagesInfo = {};
+
   shouldOpenPlayer = false;
 
   playerData = {};
@@ -27,7 +29,6 @@ class ChatWindowStore {
     this.appStore = appStore;
     this.chatStartedPromiseObj = createDeferredPromiseObj();
     this.initState(data || {});
-    this.socket = new Socket(this);
   }
 
   reset = () => {
@@ -47,34 +48,24 @@ class ChatWindowStore {
       isGroupRoom,
       password,
     });
-    isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
+    this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: false });
+    const initPromise = isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
+    initPromise.then(() => {
+      this.socket = new Socket(this);
+      this.chatStartedPromiseObj.promise.then(() => this.setInitDone(true));
+    });
   };
 
   initializeForIndividual = () => {
-    this.chatStartedPromiseObj.promise.then(() => this.setInitDone(true));
     this.setRoomInfo({ ...this.roomInfo, adminAccess: true });
+    return Promise.resolve();
   };
 
-  initializeForGroup = () => {
+  initializeForGroup = () =>
     fetchUrl('/api/account/token/refresh/', { method: 'post' }).finally(() => {
-      const groupDetail = fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
+      fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
         headers: { 'X-Group-Password': this.roomInfo.password },
-      }).then((response) => {
-        const { data } = response;
-        // @ts-ignore
-        this.setPlayerData(data.player || {});
-        // @ts-ignore
-        const adminAccess = data.admin_access;
-        // @ts-ignore
-        const isFavorite = data.is_favorite;
-        // @ts-ignore
-        const isCreator = data.is_creator;
-        this.setRoomInfo({ ...this.roomInfo, adminAccess, isFavorite, isCreator });
-        return data;
-      });
-      // @ts-ignore
-      const groupMessages = groupDetail.then((responseData) => responseData.group_messages);
-      groupMessages
+      })
         .catch((err) => {
           log.error(err);
           this.setInitDone(true);
@@ -85,65 +76,27 @@ class ChatWindowStore {
           });
           throw err;
         })
-        .then((messages) => {
-          let detailMessages;
-          if (!messages) {
-            detailMessages = [
-              {
-                type: MessageType.CHAT_DELETE,
-                data: {
-                  text: 'Room is deleted',
-                },
-              },
-            ];
-            this.addInitMessageList(detailMessages);
-            this.setInitDone(true);
-            this.closeChatWindow();
-          } else {
-            detailMessages = messages.map((msg) => {
-              const message = {
-                data: {},
-              };
-              message.data.text = msg.text;
-              message.type = msg.message_type;
-              const chatSessionData = msg.sender_channel.chat_session;
-              switch (message.type) {
-                case MessageType.TEXT:
-                  message.data.sender = chatSessionData;
-                  break;
-                case MessageType.USER_JOINED:
-                  message.data.newJoinee = chatSessionData;
-                  break;
-                case MessageType.USER_LEFT:
-                  message.data.resignee = chatSessionData;
-                  break;
-                case MessageType.PLAYER_INFO:
-                case MessageType.PLAYER_END:
-                  message.data.host = chatSessionData;
-                  break;
-                default:
-                  log.error('Unknown message type');
-                  break;
-              }
-              return message;
-            });
-          }
-          this.roomInfo.prevMessageList = [];
-          const { prevMessageList } = this.roomInfo;
-          detailMessages.forEach((msg) => {
-            const processedMessage = this.processMessage(msg, true);
-            if (!isEmptyObj(processedMessage)) {
-              prevMessageList.push(processedMessage);
-            }
+        .then(async (response) => {
+          const { data } = response;
+          // @ts-ignore
+          this.setPlayerData(data.player || {});
+          // @ts-ignore
+          const adminAccess = data.admin_access;
+          // @ts-ignore
+          const isFavorite = data.is_favorite;
+          // @ts-ignore
+          const isCreator = data.is_creator;
+          this.setRoomInfo({
+            ...this.roomInfo,
+            adminAccess,
+            isFavorite,
+            isCreator,
           });
-          prevMessageList.reverse();
-          this.chatStartedPromiseObj.promise.then(() => {
-            this.addInitMessageList(prevMessageList);
-            this.setInitDone(true);
-          });
+          // @ts-ignore
+          this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
+          await this.loadPreviousMessages();
         });
     });
-  };
 
   setName = (newName) => {
     this.name = newName;
@@ -163,6 +116,10 @@ class ChatWindowStore {
 
   setRoomInfo = (newRoomInfo) => {
     this.roomInfo = newRoomInfo;
+  };
+
+  setPreviousMessagesInfo = (newPreviousMessagesInfo) => {
+    this.previousMessagesInfo = newPreviousMessagesInfo;
   };
 
   setPlayerData = (newPlayerData) => {
@@ -189,6 +146,96 @@ class ChatWindowStore {
     return false;
   }
 
+  loadPreviousMessages = () => {
+    const { next } = this.previousMessagesInfo;
+    if (!next) return Promise.resolve(0);
+    this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: true });
+    return fetchUrl(`${next}`, {
+      headers: { 'X-Group-Password': this.roomInfo.password },
+    })
+      .catch((err) => {
+        log.error(err);
+        this.appStore.showAlert({
+          text: 'Error occured while fetching previous messages.',
+          severity: 'error',
+        });
+        throw err;
+      })
+      .then((response) => {
+        const responseData = response.data;
+        // @ts-ignore
+        const { results: messages } = responseData;
+        let detailMessages;
+        if (!messages) {
+          detailMessages = [
+            {
+              type: MessageType.CHAT_DELETE,
+              data: {
+                text: 'Room is deleted',
+              },
+            },
+          ];
+          this.addInitMessageList(detailMessages);
+          this.closeChatWindow();
+        } else {
+          // @ts-ignore
+          detailMessages = messages.map((msg) => {
+            const message = {
+              data: {},
+            };
+            message.data.content = msg.content;
+            message.type = msg.message_type;
+            const chatSessionData = (msg.sender_channel && msg.sender_channel.chat_session) || {};
+            switch (message.type) {
+              case MessageType.TEXT:
+                message.data.sender = chatSessionData;
+                break;
+              case MessageType.USER_JOINED:
+                message.data.newJoinee = chatSessionData;
+                break;
+              case MessageType.USER_LEFT:
+                message.data.resignee = chatSessionData;
+                break;
+              case MessageType.PLAYER_INFO:
+              case MessageType.PLAYER_END:
+                message.data.host = chatSessionData;
+                break;
+              default:
+                log.error('Unknown message type');
+                break;
+            }
+            return message;
+          });
+        }
+        const prevMessageList = [];
+        detailMessages.forEach((msg) => {
+          const processedMessage = this.processMessage(msg, true);
+          if (!isEmptyObj(processedMessage)) {
+            prevMessageList.push(processedMessage);
+          }
+        });
+        prevMessageList.reverse();
+        this.addInitMessageList(prevMessageList);
+        this.setPreviousMessagesInfo({
+          ...this.previousMessagesInfo,
+          // @ts-ignore
+          next: responseData.next,
+          previousMessagesCount:
+            // @ts-ignore
+            this.previousMessagesInfo.previousMessagesCount || responseData.count,
+        });
+        return prevMessageList.length;
+      })
+      .finally((resp) => {
+        this.setPreviousMessagesInfo({
+          ...this.previousMessagesInfo,
+          fetchingPreviousMessages: false,
+        });
+        if (resp instanceof Error) throw resp;
+        return resp;
+      });
+  };
+
   processMessage = (payload, isInitMsg) => {
     const messageType = payload.type;
     const messageData = payload.data;
@@ -211,6 +258,9 @@ class ChatWindowStore {
         this.setChatStatus(ChatStatus.NOT_STARTED);
         return {};
       case MessageType.USER_JOINED:
+        messageData.content = this.isGroupChat
+          ? `${messageData.newJoinee.name} entered`
+          : `You are connected to ${messageData.match.name}`;
         if (!isInitMsg) {
           if ('match' in messageData) {
             clearTimeout(this.timeout);
@@ -220,16 +270,13 @@ class ChatWindowStore {
               roomId: messageData.room_id,
             });
           }
-          messageData.text = this.isGroupChat
-            ? [`${messageData.newJoinee.name} entered`]
-            : [`You are connected to ${messageData.match.name}`];
           this.setChatStatus(ChatStatus.ONGOING);
           this.chatStartedPromiseObj.resolve();
         }
         break;
       case MessageType.USER_LEFT:
+        messageData.content = `${messageData.resignee.name} left`;
         if (!isInitMsg) {
-          messageData.text = [`${messageData.resignee.name} left`];
           if (!this.isGroupChat) {
             this.socket.close();
             this.socket = null;
@@ -239,31 +286,12 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
-        const msgList = isInitMsg ? this.roomInfo.prevMessageList : this.messageList;
-        const textMsg = (messageData.content && messageData.content.text) || '';
-        const lastMessageIdx = msgList.length - 1;
-        const lastMessage = lastMessageIdx >= 0 && msgList[lastMessageIdx];
-        if (
-          lastMessage &&
-          lastMessage.type === MessageType.TEXT &&
-          lastMessage.data.sender &&
-          messageData.sender &&
-          lastMessage.data.sender.session_id === messageData.sender.session_id
-        ) {
-          const newLastMessage = { ...lastMessage };
-          isInitMsg
-            ? newLastMessage.data.text.unshift(textMsg)
-            : newLastMessage.data.text.push(textMsg);
-          msgList[lastMessageIdx] = newLastMessage;
-          return {};
-        }
-        messageData.text = [textMsg];
         break;
       }
       case MessageType.PLAYER_INFO: {
+        messageData.content = `${messageData.host.name} started video player`;
         if (!isInitMsg) {
           this.setPlayerData(messageData);
-          messageData.text = [`${messageData.host.name} started video player`];
         }
         break;
       }
@@ -272,8 +300,8 @@ class ChatWindowStore {
         return {};
       }
       case MessageType.PLAYER_END: {
+        messageData.content = `${messageData.host.name} stopped video player`;
         if (!isInitMsg) {
-          messageData.text = [`${messageData.host.name} stopped video player`];
           this.setPlayerData({});
         }
         break;

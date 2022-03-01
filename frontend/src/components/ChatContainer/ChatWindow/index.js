@@ -1,17 +1,18 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import { Box, Grid, LinearProgress, makeStyles, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
+import clsx from 'clsx';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
 import { profileStore } from 'stores';
-import clsx from 'clsx';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
-import { useAudio } from 'hooks';
+import { useChatSound, useConstant, useNewMessage } from 'hooks';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
+import MessageBox from './MessageBox';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   infoMsg: {
     fontWeight: 500,
     color: 'rgba(0,0,0,0.4)',
-    margin: theme.spacing(1, 0),
+    padding: theme.spacing(1, 0),
     fontSize: '0.9rem',
     textAlign: 'center',
   },
@@ -33,13 +34,6 @@ const useStyles = makeStyles((theme) => ({
   header: {
     backgroundColor: 'rgba(0,0,0,0.08)',
   },
-  // @ts-ignore
-  messageBox: ({ chatStatus }) => ({
-    overflowY: 'scroll',
-    ...((chatStatus === ChatStatus.ENDED || chatStatus === ChatStatus.NO_MATCH_FOUND) && {
-      opacity: 0.5,
-    }),
-  }),
   backdrop: {
     position: 'absolute',
     zIndex: 1,
@@ -57,14 +51,32 @@ const useStyles = makeStyles((theme) => ({
 
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, chatStatus, isGroupChat, initDone, appStore } = chatWindowStore;
+  const { messageList, chatStatus, isGroupChat, initDone, appStore, previousMessagesInfo } =
+    chatWindowStore;
+  const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
+  const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
+
   const classes = useStyles({ chatStatus });
-  const endBox = useRef(null);
-  const scrollToBottom = () => {
-    endBox.current && endBox.current.scrollIntoView({ behavior: 'smooth' });
-  };
-  const incomingMessageAudio = useAudio(incomingMessageSound);
-  const chatStartedAudio = useAudio(chatStartedSound);
+
+  const initialRenderingDoneRef = useRef(false);
+  useEffect(() => {
+    if (initDone) {
+      initialRenderingDoneRef.current = true;
+    }
+  }, [initDone]);
+
+  const { hasNewMessage } = useNewMessage({
+    initialRenderingDone: initialRenderingDoneRef.current,
+    lastMessage,
+  });
+
+  const newMessageNotifyTypes = useConstant(() => [MessageType.TEXT]);
+  const shouldNotify =
+    hasNewMessage &&
+    chatStatus === ChatStatus.ONGOING &&
+    newMessageNotifyTypes.includes(lastMessage.type);
+  useChatSound({ incomingMessageSound, chatStartedSound, shouldNotify, initDone });
+
   useEffect(
     () => () => {
       appStore.removeChatWindow();
@@ -75,47 +87,48 @@ function ChatWindow(props) {
     },
     [appStore]
   );
-  useEffect(scrollToBottom);
-  useEffect(() => {
-    const lastMessage = messageList.length && messageList[messageList.length - 1];
-    if (chatStatus === ChatStatus.ONGOING && lastMessage) {
-      const isLastMessageText = lastMessage.type === MessageType.TEXT;
-      if (isLastMessageText) {
-        if (
-          !lastMessage.data.sender ||
-          lastMessage.data.sender.session_id !== profileStore.sessionId
-        ) {
-          incomingMessageAudio.play();
-        }
-      }
-    }
-  });
-  useEffect(() => initDone && chatStartedAudio.play(), [chatStartedAudio, initDone]);
 
-  const chatMessages = messageList.map((message, idx) => {
+  const chatMessages = messageList.map((message, idx, list) => {
     const messageData = message.data;
+    const previousMessageData = idx ? list[idx - 1].data : null;
+    const nextMessageData = idx + 1 === list.length ? null : list[idx + 1].data;
+    const { sender } = messageData;
+    const previousSender = previousMessageData && previousMessageData.sender;
+    const nextSender = nextMessageData && nextMessageData.sender;
     if (message.type === MessageType.TEXT) {
-      const side =
-        messageData.sender && messageData.sender.session_id === profileStore.sessionId
-          ? 'right'
-          : 'left';
+      let side;
+      let isFirst;
+      let isLast;
+      if (!sender) {
+        side = 'left';
+        isFirst = true;
+        isLast = false;
+      } else {
+        side = sender.session_id === profileStore.sessionId ? 'right' : 'left';
+        isFirst = !previousSender || sender.session_id !== previousSender.session_id;
+        isLast = !isFirst && (!nextSender || sender.session_id !== nextSender.session_id);
+      }
       return (
         // eslint-disable-next-line react/no-array-index-key
-        <Grid item key={idx}>
-          <ChatMessage side={side} messages={messageData.text} sender={messageData.sender} />
-        </Grid>
+        <Box key={idx} className={classes.section}>
+          <ChatMessage
+            side={side}
+            message={messageData.content}
+            sender={messageData.sender}
+            first={isFirst}
+            last={isLast}
+          />
+        </Box>
       );
     }
     return (
       // eslint-disable-next-line react/no-array-index-key
-      <Grid item key={idx}>
-        <Typography className={classes.infoMsg}>{messageData.text}</Typography>
-      </Grid>
+      <Box key={idx} className={classes.section}>
+        <Box className={classes.infoMsg}>{messageData.content}</Box>
+      </Box>
     );
   });
-
-  const shouldDisplayLoadingMessage =
-    isGroupChat && !initDone && chatStatus !== ChatStatus.NOT_STARTED;
+  const shouldDisplayLoadingMessage = isGroupChat && fetchingPreviousMessages;
 
   return (
     <Grid
@@ -139,14 +152,7 @@ function ChatWindow(props) {
           />
         </Box>
       )}
-      <Grid
-        item
-        xs
-        container
-        direction="column"
-        wrap="nowrap"
-        className={clsx(classes.messageBox, classes.section)}
-      >
+      <Grid item xs container direction="column" wrap="nowrap">
         <WaitScreen
           className={classes.backdrop}
           shouldOpen={
@@ -154,9 +160,13 @@ function ChatWindow(props) {
           }
           waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
         />
-        {chatMessages}
-        {/* https://github.com/mui-org/material-ui/issues/17010 */}
-        <div ref={endBox} />
+        {initDone && (
+          <MessageBox
+            firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
+            hasNewMessage={hasNewMessage}
+            chatMessages={chatMessages}
+          />
+        )}
       </Grid>
       {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
         <Typography className={classes.infoMsg}>Looks like no one is online &#128542;</Typography>

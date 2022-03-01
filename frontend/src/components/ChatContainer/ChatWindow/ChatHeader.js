@@ -46,10 +46,6 @@ function ChatHeader() {
     useState(false);
   const [shouldShowCloseConfirmationDialog, setShouldShowCloseConfirmationDialog] = useState(false);
 
-  const handleReconnect = () => {
-    reconnect();
-  };
-
   const handleClose = () => {
     appStore.removeChatWindow();
     history.push('/');
@@ -98,39 +94,47 @@ function ChatHeader() {
     []
   );
 
-  const individualChatIcons = (
-    <IconButton
-      disabled={
-        chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
-      }
-      onClick={handleReconnect}
-      className={classes.icon}
-    >
-      <Tooltip title="Find someone else" arrow>
-        <ReplayIcon />
-      </Tooltip>
-    </IconButton>
-  );
-
-  const groupChatIcons = (
-    <>
-      <IconButton
-        disabled={chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED}
-        onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-        className={classes.icon}
-      >
-        <Tooltip title="Delete room" arrow>
-          <DeleteIcon />
+  const individualChatIcons = useMemo(() => {
+    const handleReconnect = () => {
+      reconnect();
+    };
+    const shouldDisable =
+      chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED;
+    return (
+      <IconButton disabled={shouldDisable} onClick={handleReconnect} className={classes.icon}>
+        <Tooltip title="Find someone else" arrow>
+          <ReplayIcon />
         </Tooltip>
       </IconButton>
+    );
+  }, [chatStatus, classes.icon, reconnect]);
 
-      <IconButton onClick={() => toggleLikeRoom()} className={classes.icon}>
-        <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
-          {isFavorite ? <div>{LikeAnimation}</div> : <FavoriteIcon />}
-        </Tooltip>
-      </IconButton>
-    </>
-  );
+  const groupChatIcons = useMemo(() => {
+    const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;
+    return (
+      <>
+        <IconButton
+          disabled={shouldDisable}
+          onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+          className={classes.icon}
+        >
+          <Tooltip title="Delete room" arrow>
+            <DeleteIcon />
+          </Tooltip>
+        </IconButton>
+
+        <IconButton
+          disabled={shouldDisable}
+          onClick={() => toggleLikeRoom()}
+          className={classes.icon}
+        >
+          <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
+            {!shouldDisable && isFavorite ? <div>{LikeAnimation}</div> : <FavoriteIcon />}
+          </Tooltip>
+        </IconButton>
+      </>
+    );
+  }, [LikeAnimation, chatStatus, classes.icon, isFavorite, toggleLikeRoom]);
 
   return (
     <>
@@ -140,7 +144,7 @@ function ChatHeader() {
             <ListItemAvatar>
               <CustomAvatar name={name} avatarUrl={avatarUrl} />
             </ListItemAvatar>
-            <ListItemText primary={name} primaryTypographyProps={{ noWrap: true }} />
+            <ListItemText primary={name} primaryTypographyProps={{ variant: 'h5', noWrap: true }} />
           </ListItem>
         </Grid>
         <Grid item>

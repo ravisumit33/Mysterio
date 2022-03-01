@@ -1,3 +1,4 @@
+from django.http.response import HttpResponseBadRequest
 from django.views.generic.base import View
 from django.http import HttpResponseRedirect
 from rest_framework.decorators import api_view
@@ -31,4 +32,6 @@ class VerifyEmailView(View):
 
     def get(self, request, key=None):
         """Redirect to frontend"""
+        if not key:
+            HttpResponseBadRequest()
         return HttpResponseRedirect(f"/account/confirm-email/{key}")

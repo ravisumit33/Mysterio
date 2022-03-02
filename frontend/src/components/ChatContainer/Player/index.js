@@ -142,10 +142,9 @@ function Player(props) {
 
   const onPlayerReady = (evt) => {
     playerReady.resolve();
-    if (!isHost) return;
     switch (playerData.name) {
       case PlayerName.YOUTUBE: {
-        syncPlayerTime();
+        isHost && syncPlayerTime();
         evt.target.loadVideoById(playerData.video_id);
         evt.target.playVideo();
         break;

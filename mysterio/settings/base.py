@@ -157,6 +157,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+# Referrer policy setting needed to embed iframes (e.g. YouTube player)
+
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+
 # Logging configuration
 
 BASE_LOG_FORMAT = (

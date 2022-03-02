@@ -25,7 +25,7 @@ app.autodiscover_tasks()
 @worker_ready.connect
 def at_start(sender, **kwargs):
     """
-    Run periodic tasks at start. This has been done to overcome heroku dyno sleep issue.
+    Run periodic tasks at start.
     """
     with sender.app.connection() as conn:
         sender.app.send_task("chat.tasks.trending_rooms", connection=conn)

@@ -23,7 +23,7 @@ class ChatConsumer(WebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.channel_id = None  # Id of channel model
-        self.room_id = None  # int for group consumer, str for individual consumer
+        self.room_id = None  # Id of room model
         self.player_id = None  # Id of player model if this channel is host
         self.chat_session_id = None  # Id of ChatSession model related to this channel
         self.profile = {}
@@ -55,7 +55,7 @@ class ChatConsumer(WebsocketConsumer):
             except IntegrityError as excp:
                 logger.error("Cannot create group channel")
                 logger.error("Channel name: %s", self.channel_name)
-                logger.error("Room id: %s", str(self.room_id))
+                logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
             channel_layer.group_add(
                 GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name
@@ -112,22 +112,27 @@ class ChatConsumer(WebsocketConsumer):
                     MessageType.USER_LEFT,
                     {"resignee": self.profile},
                 )
-            logger.info(
-                "Room id: %s, Channel id: %d", str(self.room_id), self.channel_id
-            )
+            logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)
         message_type = payload_json["type"]
         message_data = payload_json["data"]
-        if message_type == MessageType.TEXT:
-            handle_text_message(self, message_data)
-        elif message_type == MessageType.USER_INFO:
+        if message_type == MessageType.USER_INFO:
             handle_user_info(self, message_data)
-        elif message_type == MessageType.PLAYER_INFO:
-            handle_player_info(self, message_data)
-        elif message_type == MessageType.PLAYER_END:
-            handle_player_end(self)
+        else:
+            if not self.profile:
+                logger.error(
+                    "SuspiciousOperation : Socket message received without user info"
+                )
+                self.close()
+                return
+            if message_type == MessageType.TEXT:
+                handle_text_message(self, message_data)
+            elif message_type == MessageType.PLAYER_INFO:
+                handle_player_info(self, message_data)
+            elif message_type == MessageType.PLAYER_END:
+                handle_player_end(self)
 
     def group_msg_receive(self, event):
         """Group message receiver"""

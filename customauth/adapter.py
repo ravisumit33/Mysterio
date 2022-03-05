@@ -47,7 +47,6 @@ class AccountAdapter(RestAuthAccountAdapter):
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         current_site = get_current_site(request)
         frontend_url = reverse("core:frontend")
-        print(settings.DEBUG)
         if settings.DEBUG:
             frontend_root_url = "http://localhost:3000"
             frontend_url = frontend_root_url + frontend_url

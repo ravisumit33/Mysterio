@@ -13,13 +13,13 @@ import { ChatWindowStoreContext } from 'contexts';
 import { createDeferredPromiseObj, fetchUrl } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
-import { useGetPlayer, useHandlePlayer, useConstant } from 'hooks';
+import { useConstant, useGetPlayer, useHandlePlayer } from 'hooks';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
 const useStyles = makeStyles((theme) => ({
   section: {
-    padding: `${theme.spacing(1)}px`,
+    padding: theme.spacing(1),
   },
 }));
 
@@ -31,7 +31,7 @@ function Player(props) {
     roomInfo,
     playerData,
     roomType,
-    playerExists,
+    playerSynced,
     isHost,
     setShouldOpenPlayer,
     handlePlayerDelete,
@@ -41,7 +41,7 @@ function Player(props) {
   const classes = useStyles();
   const embedPlayerRef = useRef(null);
   const playerReady = useConstant(createDeferredPromiseObj);
-  const setEmbedPlayerRef = useCallback((player) => {
+  const setEmbedPlayer = useCallback((player) => {
     embedPlayerRef.current = player;
   }, []);
   const syncTimeoutRef = useRef(null);
@@ -52,15 +52,15 @@ function Player(props) {
     },
     []
   );
-  const [getPlayerState, getPlayerTime] = useGetPlayer(embedPlayerRef);
-  const [handlePlay, handlePause, handleSeek] = useHandlePlayer(embedPlayerRef);
+  const { getPlayerState, getPlayerTime } = useGetPlayer(embedPlayerRef);
+  const { handlePlay, handlePause, handleSeek } = useHandlePlayer(embedPlayerRef);
   useEffect(() => {
-    if (!playerExists || isHost) return;
+    if (!playerSynced || isHost) return;
     playerReady.promise.then(() => {
       if (getPlayerState(playerData) !== playerData.state) {
+        handleSeek(playerData);
         switch (playerData.state) {
           case PlayerStatus.PLAYING: {
-            handleSeek(playerData);
             handlePlay(playerData);
             break;
           }
@@ -69,7 +69,6 @@ function Player(props) {
             break;
           }
           case PlayerStatus.BUFFERING: {
-            handleSeek(playerData);
             break;
           }
           default:
@@ -82,7 +81,7 @@ function Player(props) {
   }, [
     playerData,
     isHost,
-    playerExists,
+    playerSynced,
     playerReady.promise,
     getPlayerState,
     getPlayerTime,
@@ -91,50 +90,67 @@ function Player(props) {
     handlePause,
   ]);
 
-  const syncPlayerTime = () => {
-    syncTimeoutRef.current = setTimeout(() => {
-      fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
-        method: 'patch',
-        body: { current_time: getPlayerTime(playerData) },
-      }).finally(() => {
-        if (syncTimeoutRef.current) {
-          syncPlayerTime();
+  const onPlayerReady = useCallback(
+    (evt) => {
+      const syncPlayerTime = () => {
+        syncTimeoutRef.current = setTimeout(() => {
+          fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
+            method: 'patch',
+            body: { current_time: getPlayerTime(playerData) },
+          }).finally(() => {
+            if (syncTimeoutRef.current) {
+              syncPlayerTime();
+            }
+          });
+        }, 1000);
+      };
+      switch (playerData.name) {
+        case PlayerName.YOUTUBE: {
+          evt.target.cueVideoById({
+            videoId: playerData.video_id,
+            startSeconds: playerData.current_time,
+          });
+          isHost && syncPlayerTime();
+          break;
         }
-      });
-    }, 1000);
-  };
-
-  const onPlayerReady = (evt) => {
-    playerReady.resolve();
-    switch (playerData.name) {
-      case PlayerName.YOUTUBE: {
-        isHost && syncPlayerTime();
-        evt.target.loadVideoById(playerData.video_id);
-        evt.target.playVideo();
-        break;
+        default:
+          break;
       }
-      default:
-        break;
-    }
-  };
-  const onPlayerStateChange = (state) => {
-    if (!isHost) return;
-    fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
-      method: 'patch',
-      body: { state, current_time: getPlayerTime(playerData) },
-    });
-  };
+    },
+    [getPlayerTime, isHost, playerData, roomId, roomType]
+  );
+  const onPlayerStateChange = useCallback(
+    (state) => {
+      switch (state) {
+        case PlayerStatus.CUED: {
+          isHost && handlePlay(playerData);
+          playerReady.resolve();
+          break;
+        }
+        default:
+          break;
+      }
+      isHost &&
+        playerReady.promise.then(() => {
+          fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
+            method: 'patch',
+            body: { state, current_time: getPlayerTime(playerData) },
+          });
+        });
+    },
+    [getPlayerTime, handlePlay, isHost, playerData, playerReady, roomId, roomType]
+  );
 
   const getEmbedPlayer = () => {
     switch (playerData.name) {
       case PlayerName.YOUTUBE:
         return (
           <YouTube
-            setPlayer={setEmbedPlayerRef}
             size={isSmallScreen ? 20 : 50}
             onReady={onPlayerReady}
             onStateChange={(evt) => onPlayerStateChange(evt.data)}
             showControls={isHost}
+            setPlayer={setEmbedPlayer}
           />
         );
       default:
@@ -144,7 +160,7 @@ function Player(props) {
 
   const handleSyncFromHost = () => chatWindowStore.syncPlayer();
 
-  const shouldShowPlayerActions = playerExists ? isHost : adminAccess;
+  const shouldShowPlayerActions = playerSynced ? isHost : adminAccess;
 
   const darkModeTheme = useMemo(() => createTheme({ palette: { type: 'dark' } }), []);
   return (
@@ -162,7 +178,7 @@ function Player(props) {
             <PlayerActions />
           </Grid>
         )}
-        {!playerExists && !adminAccess && (
+        {!playerSynced && !adminAccess && (
           <Grid item className={classes.section}>
             <Typography variant="h5" color="textSecondary" align="center">
               No video. Ask admin to play.
@@ -170,7 +186,7 @@ function Player(props) {
           </Grid>
         )}
       </ThemeProvider>
-      {playerExists && (
+      {playerSynced && (
         <Grid
           item
           container

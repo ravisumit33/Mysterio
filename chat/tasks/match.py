@@ -1,5 +1,4 @@
 import logging
-import uuid
 from django.db import transaction
 from chat.utils import channel_layer
 from chat.models.channel import IndividualChannel
@@ -48,7 +47,6 @@ def process_unmatched_channels():
         for channel_idx1, channel_idx2 in channel_idx_pairs:
             individual_room_list.append(
                 IndividualRoom(
-                    id=str(uuid.uuid4()),
                     name="Anonymous",
                     channel1_id=channels[channel_idx1]["id"],
                     channel2_id=channels[channel_idx2]["id"],
@@ -62,7 +60,7 @@ def process_unmatched_channels():
         for room_idx, channel_idx_pair in enumerate(channel_idx_pairs):
             room_id = individual_room_list[room_idx].id
             logger.info(
-                "Room id %s is allocated to user ids %d and %d",
+                "Room id %d is allocated to user ids %d and %d",
                 room_id,
                 channels[channel_idx_pair[0]]["id"],
                 channels[channel_idx_pair[1]]["id"],

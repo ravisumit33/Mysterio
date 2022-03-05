@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { ChatWindowStoreContext } from 'contexts';
 import { Virtuoso } from 'react-virtuoso';
-import { Badge, Grid, IconButton, makeStyles, Tooltip } from '@material-ui/core';
-import { ChatStatus } from 'appConstants';
+import { alpha, Badge, Grid, IconButton, makeStyles, Tooltip } from '@material-ui/core';
+import { ChatStatus, MessageSenderType } from 'appConstants';
 import { useGoToBottom } from 'hooks';
 
 const useStyles = makeStyles((theme) => ({
@@ -15,13 +15,14 @@ const useStyles = makeStyles((theme) => ({
     }),
   }),
   bottomButton: {
-    fontWeight: 'bold',
     fontSize: '2rem',
     color: theme.palette.common.black,
+    backgroundColor: alpha(theme.palette.common.white, 0.8),
+    borderRadius: '50%',
   },
 }));
 function MessageBox(props) {
-  const { firstItemIndex, hasNewMessage, chatMessages } = props;
+  const { firstItemIndex, hasNewMessage, newMessageInfo, chatMessages } = props;
 
   const [firstItemIdx, setFirstItemIdx] = useState(firstItemIndex);
   const messageListRef = useRef(null);
@@ -46,7 +47,9 @@ function MessageBox(props) {
         data={chatMessages}
         startReached={handleChatWindowTopReached}
         firstItemIndex={firstItemIdx}
-        followOutput="auto"
+        followOutput={(isAtBottom) =>
+          isAtBottom || (newMessageInfo && newMessageInfo.senderType === MessageSenderType.SELF)
+        }
         atBottomStateChange={setAtBottom}
         ref={messageListRef}
       />
@@ -76,11 +79,15 @@ function MessageBox(props) {
 MessageBox.propTypes = {
   firstItemIndex: PropTypes.number.isRequired,
   hasNewMessage: PropTypes.bool,
+  newMessageInfo: PropTypes.shape({
+    senderType: PropTypes.oneOf(Object.values(MessageSenderType)),
+  }),
   chatMessages: PropTypes.arrayOf(PropTypes.element),
 };
 
 MessageBox.defaultProps = {
   hasNewMessage: false,
+  newMessageInfo: undefined,
   chatMessages: [],
 };
 

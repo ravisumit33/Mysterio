@@ -99,8 +99,9 @@ function ChatMessage({ message, sender, side, first, last }) {
                 [classes[`${side}First`]]: first,
                 [classes[`${side}Last`]]: last,
               })}
+              component="pre"
             >
-              {message}
+              {message.trim()}
             </Typography>
           </Box>
         </Box>

@@ -55,6 +55,9 @@ def handle_text_message(consumer, message_data):
     )
     logger.info("Text message received")
     logger.debug("In room id: %s", str(consumer.room_id))
-    logger.debug("By %s", consumer.profile["name"])
+    if "name" in consumer.profile:
+        logger.debug("By %s", consumer.profile["name"])
+    else:
+        logger.error("Undefined sender for text message")
     logger.debug("%s", message_data["text"])
     # TODO: remove this log as messages will be encrypted

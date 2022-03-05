@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { alpha, makeStyles } from '@material-ui/core/styles';
 import InputBase from '@material-ui/core/InputBase';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
-import { Box, IconButton } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { ChatWindowStoreContext } from 'contexts';
 import { ChatStatus, MessageType } from 'appConstants';
 import clsx from 'clsx';
@@ -11,8 +11,8 @@ import clsx from 'clsx';
 const useStyles = makeStyles((theme) => ({
   root: {
     paddingLeft: theme.spacing(2),
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    height: theme.spacing(6),
+    backgroundColor: alpha(theme.palette.common.black, 0.04),
+    minHeight: theme.spacing(6),
     fontSize: '1rem',
     width: '100%',
     transition: 'background-color .2s ease,box-shadow .2s ease',
@@ -21,16 +21,16 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: 'white',
     boxShadow: '0px -5px 20px 0px rgba(150, 165, 190, 0.2)',
   },
-  icon: {
-    height: theme.spacing(4),
-    width: theme.spacing(4),
-    marginRight: theme.spacing(1),
+  adornment: {
+    alignSelf: 'end',
+    marginBottom: theme.spacing(2.25),
   },
 }));
 
 function InputBar() {
   const classes = useStyles();
   const input = useRef(null);
+  const focusInputTimeoutRef = useRef(null);
   const [active, setActive] = useState(false);
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { socket, chatStatus } = chatWindowStore;
@@ -48,29 +48,45 @@ function InputBar() {
   };
 
   useEffect(() => {
-    chatStatus === ChatStatus.ONGOING && input.current.focus();
+    let cleanup;
+    if (chatStatus === ChatStatus.ONGOING) {
+      focusInputTimeoutRef.current = setTimeout(() => input.current.focus(), 500);
+      cleanup = () => clearTimeout(focusInputTimeoutRef.current);
+    }
+    return cleanup;
   }, [chatStatus]);
 
   return (
-    <Box
+    <form
       onFocus={() => setActive(true)}
       onBlur={() => setActive(false)}
-      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+      onSubmit={(evt) => {
+        evt.preventDefault();
+        handleSendMessage();
+      }}
     >
       <InputBase
         className={clsx(classes.root, { [classes.active]: active })}
         disabled={!(chatStatus === ChatStatus.ONGOING)}
         placeholder="Type a message..."
         inputRef={input}
+        multiline
+        maxRows={10}
         endAdornment={
-          <InputAdornment position="end">
-            <IconButton className={classes.icon} onClick={handleSendMessage}>
+          <InputAdornment position="end" className={classes.adornment}>
+            <IconButton type="submit" disabled={!(chatStatus === ChatStatus.ONGOING)}>
               <SendIcon />
             </IconButton>
           </InputAdornment>
         }
+        onKeyPress={(evt) => {
+          if (evt.which === 13 && !evt.shiftKey) {
+            evt.preventDefault();
+            handleSendMessage();
+          }
+        }}
       />
-    </Box>
+    </form>
   );
 }
 

@@ -39,13 +39,11 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 1,
   },
   loadingMessageBackDrop: {
-    display: 'flex',
     flexDirection: 'column',
     bottom: 'auto',
   },
-  loadingMessage: {
+  msgBoxContainer: {
     position: 'relative',
-    height: theme.spacing(3.5),
   },
 }));
 
@@ -65,7 +63,7 @@ function ChatWindow(props) {
     }
   }, [initDone]);
 
-  const { hasNewMessage } = useNewMessage({
+  const { hasNewMessage, newMessageInfo } = useNewMessage({
     initialRenderingDone,
     lastMessage,
   });
@@ -102,7 +100,7 @@ function ChatWindow(props) {
       } else {
         side = sender.session_id === profileStore.sessionId ? 'right' : 'left';
         isFirst = !previousSender || sender.session_id !== previousSender.session_id;
-        isLast = !isFirst && (!nextSender || sender.session_id !== nextSender.session_id);
+        isLast = !nextSender || sender.session_id !== nextSender.session_id;
       }
       return (
         // eslint-disable-next-line react/no-array-index-key
@@ -138,28 +136,27 @@ function ChatWindow(props) {
       <Grid item className={clsx(classes.header, classes.section)}>
         <ChatHeader />
       </Grid>
-      {shouldDisplayLoadingMessage && (
-        <Box className={classes.loadingMessage}>
-          <WaitScreen
-            className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-            shouldOpen={shouldDisplayLoadingMessage}
-            waitScreenText="Loading previous messages"
-            progressComponent={<LinearProgress style={{ width: '100%' }} />}
-          />
-        </Box>
-      )}
-      <Grid item xs container direction="column" wrap="nowrap">
+      <Grid item xs container direction="column" wrap="nowrap" className={classes.msgBoxContainer}>
+        {shouldDisplayLoadingMessage && (
+          <Box>
+            <WaitScreen
+              className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+              shouldOpen={shouldDisplayLoadingMessage}
+              waitScreenText="Loading previous messages"
+              progressComponent={<LinearProgress style={{ width: '100%' }} />}
+            />
+          </Box>
+        )}
         <WaitScreen
           className={classes.backdrop}
-          shouldOpen={
-            chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED
-          }
+          shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
           waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
         />
         {initDone && (
           <MessageBox
             firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
             hasNewMessage={hasNewMessage}
+            newMessageInfo={newMessageInfo}
             chatMessages={chatMessages}
           />
         )}

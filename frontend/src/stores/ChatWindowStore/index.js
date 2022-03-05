@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MatchTimeout, MessageType } from 'appConstants';
 import log from 'loglevel';
-import { createDeferredPromiseObj, fetchUrl, isEmptyObj } from 'utils';
+import { fetchUrl, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 import Socket from './socket';
 
@@ -22,22 +22,15 @@ class ChatWindowStore {
 
   shouldOpenPlayer = false;
 
-  playerData = {};
+  playerExists = false; // player exists on server
+
+  playerData = {}; // synced player information if player is opened
 
   constructor({ appStore, data }) {
     makeAutoObservable(this);
     this.appStore = appStore;
-    this.chatStartedPromiseObj = createDeferredPromiseObj();
     this.initState(data || {});
   }
-
-  reset = () => {
-    this.setShouldOpenPlayer(false);
-    this.chatStartedPromiseObj = createDeferredPromiseObj();
-    this.setInitDone(false);
-    // @ts-ignore
-    this.messageList.clear();
-  };
 
   initState = ({ roomId = '', name = '', avatarUrl = '', password = '', isGroupRoom = false }) => {
     this.setName(name);
@@ -52,7 +45,6 @@ class ChatWindowStore {
     const initPromise = isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
     initPromise.then(() => {
       this.socket = new Socket(this);
-      this.chatStartedPromiseObj.promise.then(() => this.setInitDone(true));
     });
   };
 
@@ -62,41 +54,43 @@ class ChatWindowStore {
   };
 
   initializeForGroup = () =>
-    fetchUrl('/api/account/token/refresh/', { method: 'post' }).finally(() =>
-      fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
-        headers: { 'X-Group-Password': this.roomInfo.password },
+    fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
+      headers: { 'X-Group-Password': this.roomInfo.password },
+    })
+      .catch((err) => {
+        log.error(err);
+        this.setInitDone(true);
+        this.appStore.removeChatWindow();
+        this.appStore.showAlert({
+          text: 'Error occured while connecting to server.',
+          severity: 'error',
+        });
+        throw err;
       })
-        .catch((err) => {
-          log.error(err);
-          this.setInitDone(true);
-          this.appStore.removeChatWindow();
-          this.appStore.showAlert({
-            text: 'Error occured while connecting to server.',
-            severity: 'error',
-          });
-          throw err;
-        })
-        .then(async (response) => {
-          const { data } = response;
-          // @ts-ignore
-          this.setPlayerData(data.player || {});
-          // @ts-ignore
-          const adminAccess = data.admin_access;
-          // @ts-ignore
-          const isFavorite = data.is_favorite;
-          // @ts-ignore
-          const isCreator = data.is_creator;
-          this.setRoomInfo({
-            ...this.roomInfo,
-            adminAccess,
-            isFavorite,
-            isCreator,
-          });
-          // @ts-ignore
-          this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
-          await this.loadPreviousMessages();
-        })
-    );
+      .then(async (response) => {
+        const { data } = response;
+        // @ts-ignore
+        const { player } = data;
+        if (player) {
+          this.setPlayerData(player);
+          this.setPlayerExists(true);
+        }
+        // @ts-ignore
+        const adminAccess = data.admin_access;
+        // @ts-ignore
+        const isFavorite = data.is_favorite;
+        // @ts-ignore
+        const isCreator = data.is_creator;
+        this.setRoomInfo({
+          ...this.roomInfo,
+          adminAccess,
+          isFavorite,
+          isCreator,
+        });
+        // @ts-ignore
+        this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
+        await this.loadPreviousMessages();
+      });
 
   setName = (newName) => {
     this.name = newName;
@@ -126,6 +120,10 @@ class ChatWindowStore {
     this.playerData = newPlayerData;
   };
 
+  setPlayerExists = (newPlayerExists) => {
+    this.playerExists = newPlayerExists;
+  };
+
   get isGroupChat() {
     return this.roomInfo.isGroupRoom;
   }
@@ -134,12 +132,12 @@ class ChatWindowStore {
     return this.roomInfo.isGroupRoom ? 'group' : 'individual';
   }
 
-  get playerExists() {
-    return this.playerData.name;
+  get playerSynced() {
+    return !isEmptyObj(this.playerData);
   }
 
   get isHost() {
-    if (this.playerExists) {
+    if (this.playerSynced) {
       const { host } = this.playerData;
       return profileStore.sessionId === host.session_id;
     }
@@ -226,13 +224,11 @@ class ChatWindowStore {
         });
         return prevMessageList.length;
       })
-      .finally((resp) => {
+      .finally(() => {
         this.setPreviousMessagesInfo({
           ...this.previousMessagesInfo,
           fetchingPreviousMessages: false,
         });
-        if (resp instanceof Error) throw resp;
-        return resp;
       });
   };
 
@@ -264,14 +260,12 @@ class ChatWindowStore {
         if (!isInitMsg) {
           if ('match' in messageData) {
             clearTimeout(this.timeout);
-            this.initState({
-              name: messageData.match.name,
-              avatarUrl: messageData.match.avatarUrl,
-              roomId: messageData.room_id,
-            });
+            this.setName(messageData.match.name);
+            this.setAvatarUrl(messageData.match.avatarUrl);
+            this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
           }
           this.setChatStatus(ChatStatus.ONGOING);
-          this.chatStartedPromiseObj.resolve();
+          this.setInitDone(true);
         }
         break;
       case MessageType.USER_LEFT:
@@ -281,7 +275,7 @@ class ChatWindowStore {
             this.socket.close();
             this.socket = null;
             this.setChatStatus(ChatStatus.ENDED);
-            this.shouldOpenPlayer = false;
+            this.setShouldOpenPlayer(false);
           }
         }
         break;
@@ -291,6 +285,7 @@ class ChatWindowStore {
       case MessageType.PLAYER_INFO: {
         messageData.content = `${messageData.host.name} started video player`;
         if (!isInitMsg) {
+          this.setPlayerExists(true);
           this.setPlayerData(messageData);
         }
         break;
@@ -302,6 +297,7 @@ class ChatWindowStore {
       case MessageType.PLAYER_END: {
         messageData.content = `${messageData.host.name} stopped video player`;
         if (!isInitMsg) {
+          this.setPlayerExists(false);
           this.setPlayerData({});
         }
         break;
@@ -322,20 +318,13 @@ class ChatWindowStore {
     this.messageList = messageList.concat(this.messageList);
   };
 
-  reconnect = () => {
-    this.setChatStatus(ChatStatus.RECONNECT_REQUESTED);
-    this.reset();
-    this.initState({});
+  closeChatWindow = () => {
+    this.setChatStatus(ChatStatus.ENDED);
     if (this.socket) {
       this.handlePlayerDelete();
       this.socket.close();
+      this.socket = null;
     }
-    this.socket = new Socket(this);
-  };
-
-  closeChatWindow = () => {
-    this.setChatStatus(ChatStatus.ENDED);
-    this.socket && this.socket.close();
   };
 
   setChatStatus = (status) => {
@@ -374,23 +363,31 @@ class ChatWindowStore {
         headers: { 'X-Group-Password': this.roomInfo.password },
       };
     }
-    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/get_player/`, fetchData)
-      .then((response) => this.shouldOpenPlayer && this.setPlayerData(response.data))
-      .catch(
-        () =>
-          this.shouldOpenPlayer &&
-          this.appStore.showAlert({
-            severity: 'error',
-            text: 'Error occurred while fetching player data',
-          })
-      );
+    this.appStore.showWaitScreen('Syncing player');
+    return fetchUrl(
+      `/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/get_player/`,
+      fetchData
+    )
+      .then((response) => {
+        this.setPlayerData(response.data || {});
+      })
+      .catch(() => {
+        this.appStore.showAlert({
+          severity: 'error',
+          text: 'Error occurred while fetching player data',
+        });
+      })
+      .finally(() => {
+        this.appStore.setShouldShowWaitScreen(false);
+      });
   };
 
   handlePlayerDelete = () => {
     if (this.isHost) {
-      this.setPlayerData({});
+      this.setPlayerExists(false);
       this.socket.send(MessageType.PLAYER_END);
     }
+    this.setPlayerData({});
   };
 
   togglePlayerOpen = () => {
@@ -399,7 +396,7 @@ class ChatWindowStore {
     } else {
       this.handlePlayerDelete();
     }
-    this.shouldOpenPlayer = !this.shouldOpenPlayer;
+    this.setShouldOpenPlayer(!this.shouldOpenPlayer);
   };
 }
 

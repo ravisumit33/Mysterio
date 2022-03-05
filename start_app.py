@@ -1,6 +1,7 @@
 from multiprocessing import Process
 import subprocess
 import os
+import argparse
 
 
 def start_dev_smtp_server():
@@ -13,11 +14,14 @@ def start_dev_smtp_server():
     )
 
 
-def start_dev_backend_server():
+def start_dev_backend_server(port_forward):
     """
     Start backend server
     """
-    subprocess.run(["python", "manage.py", "runserver"], check=True)
+    cmd = ["python", "manage.py", "runserver"]
+    if port_forward:
+        cmd.append("0.0.0.0:8000")
+    subprocess.run(cmd, check=True)
 
 
 def start_background_tasks():
@@ -27,11 +31,14 @@ def start_background_tasks():
     subprocess.run(
         [
             "celery",
-            "-A mysterio",
+            "-A",
+            "mysterio",
             "worker",
             "-B",
-            "-l INFO",
-            "--scheduler django_celery_beat.schedulers:DatabaseScheduler",
+            "-l",
+            "INFO",
+            "--scheduler",
+            "django_celery_beat.schedulers:DatabaseScheduler",
         ],
         check=True,
     )
@@ -46,7 +53,14 @@ def start_dev_frontend_server():
 
 
 if __name__ == "__main__":
-    backend_server = Process(target=start_dev_backend_server)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--port_forward",
+        action="store_true",
+        help="Allow test on same network devices",
+    )
+    args = parser.parse_args()
+    backend_server = Process(target=start_dev_backend_server, args=(args.port_forward,))
     smtp_server = Process(target=start_dev_smtp_server)
     background_tasks = Process(target=start_background_tasks)
     frontend_server = Process(target=start_dev_frontend_server)

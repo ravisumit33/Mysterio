@@ -14,7 +14,11 @@ const ChatStatus = Object.freeze({
   ONGOING: 1,
   ENDED: 2,
   NO_MATCH_FOUND: 3,
-  RECONNECT_REQUESTED: 4,
+});
+
+const MessageSenderType = Object.freeze({
+  SELF: 0,
+  OTHER: 1,
 });
 
 const PlayerName = Object.freeze({
@@ -27,6 +31,7 @@ const PlayerStatus = Object.freeze({
   PLAYING: 1,
   PAUSED: 2,
   BUFFERING: 3,
+  CUED: 5,
 });
 
 const renderPlayerName = (playerName) => {
@@ -45,6 +50,7 @@ const MatchTimeout = 60 * 1000; // 1 minute
 
 export {
   MessageType,
+  MessageSenderType,
   ChatStatus,
   MysterioOrigin,
   MysterioHost,

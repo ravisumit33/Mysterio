@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import PullToRefresh from 'pulltorefreshjs';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useLocation } from 'react-router-dom';
 import {
   CssBaseline,
   makeStyles,
@@ -25,18 +24,24 @@ import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
 
 const useStyles = makeStyles(() => ({
-  root: {
+  // @ts-ignore
+  root: ({ pathname }) => ({
     width: '100%',
     minHeight: '100%',
     position: 'relative',
-  },
+    ...(/\/chat.*/.test(pathname) && {
+      position: 'fixed',
+      inset: 0,
+    }),
+  }),
 }));
 
 let theme = createTheme();
 theme = responsiveFontSizes(theme);
 
 function App() {
-  const classes = useStyles();
+  const { pathname } = useLocation();
+  const classes = useStyles({ pathname });
 
   useEffect(() => {
     fetchUrl('/api/account/user/')
@@ -53,17 +58,10 @@ function App() {
       })
       .catch(() => {})
       .finally(() => profileStore.setProfileInitialized(true));
-    PullToRefresh.init({
-      mainElement: 'body',
-      onRefresh() {
-        window.location.reload();
-      },
-    });
     return () => {
       if (isCordovaEnv()) {
         window.localStorage.removeItem('token');
       }
-      PullToRefresh.destroyAll();
     };
   }, []);
 

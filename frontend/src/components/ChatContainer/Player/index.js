@@ -14,6 +14,7 @@ import { createDeferredPromiseObj, fetchUrl } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
 import { useConstant, useGetPlayer, useHandlePlayer } from 'hooks';
+import RouterLink from 'components/RouterLink';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
@@ -181,7 +182,8 @@ function Player(props) {
         {!playerSynced && !adminAccess && (
           <Grid item className={classes.section}>
             <Typography variant="h5" color="textSecondary" align="center">
-              No video. Ask admin to play.
+              No video. Only admin can play. If you have admin rights,
+              <RouterLink to="/login"> login </RouterLink> and try again.
             </Typography>
           </Grid>
         )}

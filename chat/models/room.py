@@ -16,7 +16,6 @@ class Room(models.Model):
 class IndividualRoom(Room):
     """Room for individual chat"""
 
-    id = models.CharField(max_length=36, primary_key=True)
     channel1 = models.OneToOneField(
         "chat.IndividualChannel", on_delete=models.CASCADE, related_name="room1"
     )

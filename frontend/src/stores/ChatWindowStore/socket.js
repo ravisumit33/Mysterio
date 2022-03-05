@@ -1,6 +1,6 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import { MessageType, MysterioHost } from 'appConstants';
+import { ChatStatus, MessageType, MysterioHost } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 
@@ -37,7 +37,7 @@ class Socket {
   }
 
   handleOpen = () => {
-    log.info('socket connection established, try sending messages');
+    log.info('socket connection established');
     this.send(MessageType.USER_INFO, {
       sessionId: profileStore.sessionId,
       name: profileStore.name,
@@ -46,7 +46,23 @@ class Socket {
   };
 
   handleClose = () => {
-    log.info('socket connection closed, try later', this.socket);
+    log.info('socket connection closed', this.socket);
+    if (this.chatWindowStore.chatStatus === ChatStatus.ONGOING) {
+      this.chatWindowStore.setChatStatus(ChatStatus.NOT_STARTED);
+      // Show self left message by emulating server message
+      const message = {
+        type: MessageType.USER_LEFT,
+        data: {
+          resignee: {
+            session_id: profileStore.sessionId,
+            name: profileStore.name,
+            avatarUrl: profileStore.avatarUrl,
+          },
+        },
+      };
+      const evt = { data: JSON.stringify(message) };
+      this.handleMessage(evt);
+    }
   };
 
   handleMessage = (event) => {
@@ -56,6 +72,7 @@ class Socket {
   };
 
   handleError = (error) => {
+    log.error('Error connecting to server', error);
     if (this.socket.retryCount >= this.maxRetries) {
       const { appStore } = this.chatWindowStore;
       appStore.removeChatWindow();
@@ -65,8 +82,7 @@ class Socket {
         severity: 'error',
       });
     } else {
-      log.error('Error connecting to server', error);
-      log.error('Reconnecting...');
+      log.info('Reconnecting...');
     }
   };
 

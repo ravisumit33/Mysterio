@@ -185,6 +185,10 @@ function GroupChatUI() {
                       if (newSelectedGroup.id === -1) {
                         setGroupAction('Create');
                         if (!pendingNewGroupName) {
+                          appStore.showAlert({
+                            text: 'Room name cannot be empty',
+                            severity: 'error',
+                          });
                           setSelectedGroup(null);
                           return;
                         }

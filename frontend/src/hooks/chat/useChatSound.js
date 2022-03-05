@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 const useChatSound = ({ incomingMessageSound, chatStartedSound, shouldNotify, initDone }) => {
   useEffect(() => {
-    const incomingMessageAudio = new Audio(incomingMessageSound);
     if (shouldNotify) {
+      const incomingMessageAudio = new Audio(incomingMessageSound);
       incomingMessageAudio.play();
     }
   });

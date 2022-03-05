@@ -71,6 +71,11 @@ class AppStore {
     this.chatWindowData = {};
   };
 
+  reconnect = () => {
+    this.removeChatWindow();
+    this.addChatWindow();
+  };
+
   setGroupRooms = (groupRooms) => {
     this.groupRooms = groupRooms;
   };

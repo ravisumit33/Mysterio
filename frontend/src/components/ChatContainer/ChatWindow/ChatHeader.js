@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 function ChatHeader() {
   const classes = useStyles();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { name, avatarUrl, reconnect, chatStatus, roomInfo, toggleLikeRoom } = chatWindowStore;
+  const { name, avatarUrl, chatStatus, roomInfo, toggleLikeRoom } = chatWindowStore;
   const { roomId, isFavorite } = roomInfo;
   const history = useHistory();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
@@ -96,10 +96,9 @@ function ChatHeader() {
 
   const individualChatIcons = useMemo(() => {
     const handleReconnect = () => {
-      reconnect();
+      appStore.reconnect();
     };
-    const shouldDisable =
-      chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.RECONNECT_REQUESTED;
+    const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
       <IconButton disabled={shouldDisable} onClick={handleReconnect} className={classes.icon}>
         <Tooltip title="Find someone else" arrow>
@@ -107,7 +106,7 @@ function ChatHeader() {
         </Tooltip>
       </IconButton>
     );
-  }, [chatStatus, classes.icon, reconnect]);
+  }, [chatStatus, classes.icon]);
 
   const groupChatIcons = useMemo(() => {
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;
@@ -150,11 +149,7 @@ function ChatHeader() {
         <Grid item>
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
           <IconButton
-            disabled={
-              chatStatus === ChatStatus.NOT_STARTED ||
-              chatStatus === ChatStatus.RECONNECT_REQUESTED ||
-              chatStatus === ChatStatus.ENDED
-            }
+            disabled={chatStatus !== ChatStatus.ONGOING}
             onClick={() => {
               chatWindowStore.togglePlayerOpen();
             }}

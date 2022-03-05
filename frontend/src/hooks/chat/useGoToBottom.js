@@ -14,15 +14,16 @@ const useGoToBottom = ({ hasNewMessage }) => {
     }
   }, [hasNewMessage, showButton]);
 
-  useEffect(() => () => clearTimeout(showButtonTimeoutRef.current));
   useEffect(() => {
-    clearTimeout(showButtonTimeoutRef.current);
+    let cleanup;
     if (!atBottom) {
       showButtonTimeoutRef.current = setTimeout(() => setShowButton(true), 500);
+      cleanup = () => clearTimeout(showButtonTimeoutRef.current);
     } else {
       setShowButton(false);
       setUnreadMessagesCount(0);
     }
+    return cleanup;
   }, [atBottom]);
 
   return {

@@ -23,6 +23,7 @@ class Player(models.Model):
         (1, "playing"),
         (2, "paused"),
         (3, "buffering"),
+        (5, "video cued"),
     )
     state = models.SmallIntegerField(choices=STATE_CHOICES, default=-1)
     current_time = models.FloatField(default=0)

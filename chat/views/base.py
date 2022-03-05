@@ -39,6 +39,8 @@ class RoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
         """
         room = self.get_object()
         player = room.player
+        if not player:
+            return Response(status=status.HTTP_200_OK)
         serializer = self.get_serializer(player)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

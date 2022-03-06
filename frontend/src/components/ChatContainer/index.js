@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  alpha,
   Box,
   Button,
   CardMedia,
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: alpha(theme.palette.common.black, 0.1),
   },
 }));
 

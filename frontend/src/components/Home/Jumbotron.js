@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import Box from '@material-ui/core/Box';
-import { Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
+import { alpha, Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
 import { appStore } from 'stores';
@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: alpha(theme.palette.common.black, 0.1),
   },
   quickChatImg: {
     height: 300,
@@ -26,8 +26,13 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   quickChatTxtSection: {
-    background:
-      'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0.75), rgba(0,0,0,0.5), rgba(0,0,0,0.25), rgba(0,0,0,0))',
+    background: `linear-gradient(to bottom, ${alpha(theme.palette.common.black, 1)}, ${alpha(
+      theme.palette.common.black,
+      0.75
+    )}, ${alpha(theme.palette.common.black, 0.5)}, ${alpha(
+      theme.palette.common.black,
+      0.25
+    )}, ${alpha(theme.palette.common.black, 0)})`,
   },
   quickChatDesc: {
     [theme.breakpoints.down('sm')]: {

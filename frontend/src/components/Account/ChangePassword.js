@@ -115,8 +115,7 @@ function ChangePassword() {
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
-                      onMouseDown={() => setShouldUnmaskPassword(true)}
-                      onMouseUp={() => setShouldUnmaskPassword(false)}
+                      onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskNewPassword)}
                       disableRipple
                     >
                       {shouldUnmaskNewPassword ? <Visibility /> : <VisibilityOff />}

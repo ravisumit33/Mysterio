@@ -45,7 +45,6 @@ const useStyles = makeStyles((theme) => {
       fontFamily:
         // eslint-disable-next-line max-len
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      fontSize: '1rem',
     },
     left: {
       borderTopRightRadius: borderRadius,
@@ -56,7 +55,7 @@ const useStyles = makeStyles((theme) => {
       borderTopLeftRadius: borderRadius,
       borderBottomLeftRadius: borderRadius,
       backgroundColor: theme.palette.primary.main,
-      color: theme.palette.common.white,
+      color: theme.palette.primary.contrastText,
     },
     leftFirst: {
       borderTopLeftRadius: borderRadius,

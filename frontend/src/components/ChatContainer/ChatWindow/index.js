@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Box, Grid, LinearProgress, makeStyles, Typography } from '@material-ui/core';
+import { alpha, Box, Grid, LinearProgress, makeStyles, Typography } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { ChatStatus, MessageType } from 'appConstants';
@@ -17,22 +17,17 @@ import MessageBox from './MessageBox';
 const useStyles = makeStyles((theme) => ({
   root: {
     boxSizing: 'border-box',
-    boxShadow: '0px 7px 40px 2px rgba(148, 149, 150, 0.3)',
     backgroundColor: theme.palette.common.white,
     borderRadius: theme.spacing(1, 1, 0, 0),
   },
   infoMsg: {
-    fontWeight: 500,
-    color: 'rgba(0,0,0,0.4)',
     padding: theme.spacing(1, 0),
-    fontSize: '0.9rem',
-    textAlign: 'center',
   },
   section: {
     padding: theme.spacing(0, 1),
   },
   header: {
-    backgroundColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: alpha(theme.palette.common.black, 0.08),
   },
   backdrop: {
     position: 'absolute',
@@ -118,7 +113,15 @@ function ChatWindow(props) {
     return (
       // eslint-disable-next-line react/no-array-index-key
       <Box key={idx} className={classes.section}>
-        <Box className={classes.infoMsg}>{messageData.content}</Box>
+        <Typography
+          align="center"
+          variant="caption"
+          component="p"
+          color="textSecondary"
+          className={classes.infoMsg}
+        >
+          {messageData.content}
+        </Typography>
       </Box>
     );
   });

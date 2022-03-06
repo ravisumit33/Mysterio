@@ -7,14 +7,12 @@ const getCompleteUrl = (url) => {
   try {
     completeUrl = new URL(url);
     completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
-    if (isDevEnv() && completeUrl.port === '8000') {
-      if (window.origin !== completeUrl.origin) {
-        // If accessing from device other than the frontend host, change origin to window origin
-        const newCompleteUrl = new URL(`${window.origin}${completeUrl.pathname}`);
-        completeUrl = newCompleteUrl;
-      }
-      // change port to react server to avoid CORS issues
-      completeUrl.port = '3000';
+    if (isDevEnv() && window.origin !== completeUrl.origin) {
+      // change origin to window origin to avoid CORS issues
+      const newCompleteUrl = new URL(
+        `${window.origin}${completeUrl.pathname}${completeUrl.search}${completeUrl.hash}`
+      );
+      completeUrl = newCompleteUrl;
     }
     completeUrl = completeUrl.href;
   } catch (_) {

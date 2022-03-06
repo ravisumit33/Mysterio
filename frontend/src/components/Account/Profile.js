@@ -21,7 +21,7 @@ function Profile() {
       method: 'post',
       body: {},
     })
-      .then((response) => {
+      .then(() => {
         appStore.showAlert({
           text: `Account deleted successfully.`,
           severity: 'success',

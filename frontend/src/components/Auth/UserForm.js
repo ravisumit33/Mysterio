@@ -162,8 +162,7 @@ function UserForm(props) {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onMouseDown={() => setShouldUnmaskPassword(true)}
-                    onMouseUp={() => setShouldUnmaskPassword(false)}
+                    onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
                     disableRipple
                   >
                     {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}

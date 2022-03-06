@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
-import { Grid } from '@material-ui/core';
+import { Divider, Grid, Typography } from '@material-ui/core';
 import { profileStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';
@@ -29,9 +29,22 @@ function Auth(props) {
           <UserForm shouldRegister={shouldRegister} from={from} />
         </Grid>
         {!shouldRegister && (
-          <Grid item>
-            <SocialAuth />
-          </Grid>
+          <>
+            <Grid item container alignItems="center" spacing={1}>
+              <Grid item xs>
+                <Divider />
+              </Grid>
+              <Grid item>
+                <Typography variant="caption">OR</Typography>
+              </Grid>
+              <Grid item xs>
+                <Divider />
+              </Grid>
+            </Grid>
+            <Grid item>
+              <SocialAuth />
+            </Grid>
+          </>
         )}
       </Grid>
     </CenterPaper>

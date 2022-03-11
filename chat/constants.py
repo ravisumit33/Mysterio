@@ -14,6 +14,7 @@ class MessageType(IntEnum):
     PLAYER_INFO = 6
     PLAYER_SYNC = 7
     PLAYER_END = 8
+    SECRET_KEY = 9
 
 
 @dataclass

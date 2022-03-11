@@ -104,7 +104,10 @@ class Socket {
   send = async (msgType, msgData = {}) => {
     const payloadData = msgData;
     if (msgType === MessageType.TEXT) {
-      payloadData.text = await this.encrypter.encryptTextMsg(payloadData.text);
+      payloadData.text = await this.encrypter.encryptTextMsg(
+        payloadData.text,
+        this.encrypter.secretKey
+      );
     }
     const payload = {
       type: msgType,

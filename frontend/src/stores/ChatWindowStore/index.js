@@ -265,19 +265,31 @@ class ChatWindowStore {
             this.setName(messageData.match.name);
             this.setAvatarUrl(messageData.match.avatarUrl);
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
-            messageData.content = `You are connected to ${messageData.match.name}`;
             this.socket.encrypter
-              .deriveSecretKey(messageData.match.id, messageData.match.pubKey)
+              .derivePairwiseSecretKey(messageData.match.id, messageData.match.pubKey)
               .then(() => {
-                this.setChatStatus(ChatStatus.ONGOING);
-                this.chatStartedPromiseObj.resolve();
+                this.socket.encrypter.checkOrGenerateSecretKey().then(async () => {
+                  const matchPairWiseSecretKey = this.socket.encrypter.pairWiseSecretKeys.get(
+                    messageData.match.id
+                  );
+                  const encryptedSecretKey = await this.socket.encrypter.encryptTextMsg(
+                    this.socket.encrypter.secretKey,
+                    matchPairWiseSecretKey
+                  );
+                  this.socket.send(MessageType.SECRET_KEY, {
+                    secretKey: encryptedSecretKey,
+                    receiverId: messageData.match.id,
+                  });
+                  this.setChatStatus(ChatStatus.ONGOING);
+                  this.setInitDone(true);
+                });
               });
           } else {
             if (!this.initDone) {
               this.setChatStatus(ChatStatus.ONGOING);
-              this.chatStartedPromiseObj.resolve();
+              this.setInitDone(true);
             } else {
-              await this.socket.encrypter.deriveSecretKey(
+              await this.socket.encrypter.derivePairwiseSecretKey(
                 messageData.newJoinee.id,
                 messageData.newJoinee.pubKey
               );
@@ -287,6 +299,25 @@ class ChatWindowStore {
         }
 
         break;
+      case MessageType.SECRET_KEY: {
+        const decryptedSecretKeyJson = await this.socket.encrypter.decryptTextMsg(
+          messageData.content,
+          this.socket.encrypter.pairWiseSecretKeys.get(messageData.sender.id)
+        );
+        const decryptedSecretKey = await window.crypto.subtle.importKey(
+          'jwk',
+          decryptedSecretKeyJson,
+          {
+            name: 'AES-GCM',
+            length: 256,
+          },
+          true,
+          ['encrypt', 'decrypt']
+        );
+
+        this.socket.encrypter.pairWiseSecretKeys.set(messageData.sender.id, decryptedSecretKey);
+        break;
+      }
       case MessageType.USER_LEFT:
         messageData.content = `${messageData.resignee.name} left`;
         if (!isInitMsg) {
@@ -299,7 +330,10 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
-        const decryptedText = await this.socket.decryptTextMsg(messageData.content);
+        const decryptedText = await this.socket.encrypter.decryptTextMsg(
+          messageData.content,
+          this.socket.encrypter.pairWiseSecretKeys.get(messageData.sender.id)
+        );
         messageData.content = decryptedText;
         break;
       }

@@ -87,7 +87,7 @@ class Encrption {
   };
 
   decryptTextMsg = async (encodedTextMsg, key) => {
-    console.log(encodedTextMsg);
+    console.log(encodedTextMsg, key);
     let decryptedTextMsg;
     try {
       const ctStr = atob(encodedTextMsg); // decode base64 ciphertext

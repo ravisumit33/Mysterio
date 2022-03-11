@@ -12,6 +12,7 @@ from .handlers import (
     handle_user_info,
     handle_player_info,
     handle_player_end,
+    handle_secret_key,
 )
 
 logger = logging.getLogger(__name__)
@@ -133,6 +134,8 @@ class ChatConsumer(WebsocketConsumer):
                 handle_player_info(self, message_data)
             elif message_type == MessageType.PLAYER_END:
                 handle_player_end(self)
+            elif message_type == MessageType.SECRET_KEY:
+                handle_secret_key(self, message_data)
 
     def group_msg_receive(self, event):
         """Group message receiver"""

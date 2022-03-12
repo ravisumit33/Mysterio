@@ -32,6 +32,7 @@ def handle_user_info(consumer, message_data):
     )
     consumer.chat_session_id = chat_session.id
     consumer.profile = {
+        "id": consumer.chat_session_id,
         "session_id": tab_session_id,
         "name": chat_session.name,
         "avatarUrl": chat_session.avatar_url,
@@ -60,13 +61,13 @@ def handle_user_info(consumer, message_data):
         channel_layer_info["group_prefix_channel"] + str(consumer.channel_id),
         MessageType.USER_INFO,
         {
-            "session_id": consumer.profile["session_id"],
+            "profile": consumer.profile,
         },
     )
 
     if channel_layer_info["is_group_consumer"]:
         channel_layer.group_send(
-            channel_layer_info["group_prefix"] + str(consumer.room_id),
+            channel_layer_info["group_prefix_room"] + str(consumer.room_id),
             MessageType.USER_JOINED,
             {"newJoinee": consumer.profile},
         )

@@ -6,6 +6,8 @@ import profileStore from '../ProfileStore';
 import Socket from './socket';
 
 class ChatWindowStore {
+  chatSessionId = '';
+
   avatarUrl = '';
 
   name = '';
@@ -44,7 +46,7 @@ class ChatWindowStore {
     this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: false });
     const initPromise = isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
     initPromise.then(() => {
-      this.socket = new Socket(this);
+      this.socket = new Socket(this, profileStore);
     });
   };
 
@@ -82,16 +84,23 @@ class ChatWindowStore {
         const isFavorite = data.is_favorite;
         // @ts-ignore
         const isCreator = data.is_creator;
+        // @ts-ignore
+        const onlineUsers = data.online_users;
         this.setRoomInfo({
           ...this.roomInfo,
           adminAccess,
           isFavorite,
           isCreator,
+          onlineUsers,
         });
         // @ts-ignore
         this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
         await this.loadPreviousMessages();
       });
+  };
+
+  setChatSessionId = (newChatSessionId) => {
+    this.chatSessionId = newChatSessionId;
   };
 
   setName = (newName) => {
@@ -208,8 +217,8 @@ class ChatWindowStore {
           });
         }
         const prevMessageList = [];
-        detailMessages.forEach((msg) => {
-          const processedMessage = this.processMessage(msg, true);
+        detailMessages.forEach(async (msg) => {
+          const processedMessage = await this.processMessage(msg, true);
           if (!isEmptyObj(processedMessage)) {
             prevMessageList.push(processedMessage);
           }
@@ -238,8 +247,10 @@ class ChatWindowStore {
     const messageType = payload.type;
     const messageData = payload.data;
     switch (messageType) {
-      case MessageType.USER_INFO:
-        profileStore.setSessionId(messageData.session_id);
+      case MessageType.USER_INFO: {
+        const { profile } = messageData;
+        this.setChatSessionId(profile.id);
+        profileStore.setSessionId(profile.session_id);
         if (!this.isGroupChat) {
           clearTimeout(this.timeout);
           this.timeout = setTimeout(
@@ -255,68 +266,59 @@ class ChatWindowStore {
         }
         this.setChatStatus(ChatStatus.NOT_STARTED);
         return {};
-      case MessageType.USER_JOINED:
+      }
+      case MessageType.USER_JOINED: {
         messageData.content = this.isGroupChat
           ? `${messageData.newJoinee.name} entered`
           : `You are connected to ${messageData.match.name}`;
         if (!isInitMsg) {
+          let chatSetupPromise;
           if ('match' in messageData) {
+            // Dual chat
             clearTimeout(this.timeout);
             this.setName(messageData.match.name);
             this.setAvatarUrl(messageData.match.avatarUrl);
-            this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
-            this.socket.encrypter
-              .derivePairwiseSecretKey(messageData.match.id, messageData.match.pubKey)
-              .then(() => {
-                this.socket.encrypter.checkOrGenerateSecretKey().then(async () => {
-                  const matchPairWiseSecretKey = this.socket.encrypter.pairWiseSecretKeys.get(
-                    messageData.match.id
-                  );
-                  const encryptedSecretKey = await this.socket.encrypter.encryptTextMsg(
-                    this.socket.encrypter.secretKey,
-                    matchPairWiseSecretKey
-                  );
-                  this.socket.send(MessageType.SECRET_KEY, {
-                    secretKey: encryptedSecretKey,
-                    receiverId: messageData.match.id,
-                  });
-                  this.setChatStatus(ChatStatus.ONGOING);
-                  this.setInitDone(true);
-                });
-              });
+            this.setRoomInfo({
+              ...this.roomInfo,
+              roomId: messageData.room_id,
+              initialConnectionsCount: 1,
+            });
+            chatSetupPromise = this.socket.sendSecretKey(
+              messageData.match.id,
+              messageData.match.pubKey
+            );
+          } else if (this.initDone) {
+            // Others join in group chat
+            this.socket.sendSecretKey(messageData.newJoinee.id, messageData.newJoinee.pubKey);
           } else {
-            if (!this.initDone) {
-              this.setChatStatus(ChatStatus.ONGOING);
-              this.setInitDone(true);
-            } else {
-              await this.socket.encrypter.derivePairwiseSecretKey(
-                messageData.newJoinee.id,
-                messageData.newJoinee.pubKey
+            // Self join in group chat
+            const { onlineUsers } = this.roomInfo;
+            const userSetupPromises = [];
+            onlineUsers.forEach((user) => {
+              userSetupPromises.push(
+                this.socket.sendSecretKey(user.chat_session.id, user.chat_session.pub_key)
               );
-            }
-            messageData.content = `${messageData.newJoinee.name} entered`;
+            });
+            chatSetupPromise = Promise.all(userSetupPromises);
+          }
+          if (chatSetupPromise) {
+            this.setChatStatus(ChatStatus.ONGOING);
+            this.setInitDone(true);
+            chatSetupPromise.catch((err) => {
+              this.appStore.setShouldShowAlert(false);
+              this.appStore.showAlert({
+                text: 'Something went wrong. Messages may not show properly.',
+                severity: 'error',
+              });
+            });
           }
         }
 
         break;
+      }
       case MessageType.SECRET_KEY: {
-        const decryptedSecretKeyJson = await this.socket.encrypter.decryptTextMsg(
-          messageData.content,
-          this.socket.encrypter.pairWiseSecretKeys.get(messageData.sender.id)
-        );
-        const decryptedSecretKey = await window.crypto.subtle.importKey(
-          'jwk',
-          decryptedSecretKeyJson,
-          {
-            name: 'AES-GCM',
-            length: 256,
-          },
-          true,
-          ['encrypt', 'decrypt']
-        );
-
-        this.socket.encrypter.pairWiseSecretKeys.set(messageData.sender.id, decryptedSecretKey);
-        break;
+        this.socket.receiveSecretKey(messageData.sender.id, messageData.secretKey);
+        return {};
       }
       case MessageType.USER_LEFT:
         messageData.content = `${messageData.resignee.name} left`;
@@ -330,11 +332,12 @@ class ChatWindowStore {
         }
         break;
       case MessageType.TEXT: {
-        const decryptedText = await this.socket.encrypter.decryptTextMsg(
+        const decryptedTextMsg = await this.socket.receiveTextMsg(
           messageData.content,
-          this.socket.encrypter.pairWiseSecretKeys.get(messageData.sender.id)
+          messageData.sender.id,
+          messageData.sender.id === this.chatSessionId
         );
-        messageData.content = decryptedText;
+        messageData.content = decryptedTextMsg;
         break;
       }
       case MessageType.PLAYER_INFO: {
@@ -359,7 +362,7 @@ class ChatWindowStore {
       }
       case MessageType.CHAT_DELETE:
         this.closeChatWindow();
-        break;
+        return {};
       default:
         log.error('Unsupported message type', messageType);
         return {};

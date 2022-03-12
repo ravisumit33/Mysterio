@@ -79,12 +79,12 @@ function ChatWindow(props) {
 
   const chatMessages = messageList.map((message, idx, list) => {
     const messageData = message.data;
-    const previousMessageData = idx ? list[idx - 1].data : null;
-    const nextMessageData = idx + 1 === list.length ? null : list[idx + 1].data;
-    const { sender } = messageData;
-    const previousSender = previousMessageData && previousMessageData.sender;
-    const nextSender = nextMessageData && nextMessageData.sender;
     if (message.type === MessageType.TEXT) {
+      const previousMessageData = idx ? list[idx - 1].data : null;
+      const nextMessageData = idx + 1 === list.length ? null : list[idx + 1].data;
+      const { sender } = messageData;
+      const previousSender = previousMessageData && previousMessageData.sender;
+      const nextSender = nextMessageData && nextMessageData.sender;
       let side;
       let isFirst;
       let isLast;

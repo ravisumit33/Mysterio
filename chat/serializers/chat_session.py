@@ -17,4 +17,4 @@ class ChatSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatSession
-        fields = ["session_id", "name", "avatar_url"]
+        fields = ["id", "session_id", "name", "avatar_url", "pub_key"]

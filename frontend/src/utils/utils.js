@@ -55,9 +55,37 @@ export const getErrorString = (errorResponse) => {
 export const createDeferredPromiseObj = () => {
   let resolve = null;
   let reject = null;
+  let status = 'pending';
   const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
+    resolve = (val) => {
+      res(val);
+      status = 'resolved';
+    };
+    reject = (err) => {
+      rej(err);
+      status = 'rejected';
+    };
   });
-  return { promise, resolve, reject };
+  return { promise, resolve, reject, status };
+};
+
+export const createSyncedMap = () => {
+  const map = new Map();
+  const setKeyWaitIfUndefined = (key) => {
+    if (!map.get(key)) {
+      map.set(key, createDeferredPromiseObj());
+    }
+  };
+  return {
+    get: async (key) => {
+      setKeyWaitIfUndefined(key);
+      const val = await map.get(key).promise;
+      return val;
+    },
+    set: (key, val) => {
+      setKeyWaitIfUndefined(key);
+      map.get(key).resolve(val);
+    },
+    _map: map,
+  };
 };

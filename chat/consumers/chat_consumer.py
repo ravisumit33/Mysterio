@@ -39,7 +39,7 @@ class ChatConsumer(WebsocketConsumer):
         if "room_id" in self.scope["url_route"]["kwargs"]:
             self.channel_layer_info = {
                 "is_group_consumer": True,
-                "group_prefix": GroupPrefix.GROUP_ROOM,
+                "group_prefix_room": GroupPrefix.GROUP_ROOM,
                 "group_prefix_channel": GroupPrefix.GROUP_CHANNEL,
             }
             try:
@@ -72,7 +72,7 @@ class ChatConsumer(WebsocketConsumer):
         else:
             self.channel_layer_info = {
                 "is_group_consumer": False,
-                "group_prefix": GroupPrefix.INDIVIDUAL_ROOM,
+                "group_prefix_room": GroupPrefix.INDIVIDUAL_ROOM,
                 "group_prefix_channel": GroupPrefix.INDIVIDUAL_CHANNEL,
             }
 
@@ -86,12 +86,11 @@ class ChatConsumer(WebsocketConsumer):
         channel_layer_info = self.channel_layer_info
         if not channel_layer_info["is_group_consumer"]:
             Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
-            channel_layer.group_discard(
-                channel_layer_info["group_prefix_channel"] + str(self.channel_id),
-                self.channel_name,
-            )
             logger.info("Individual channel deleted")
         else:
+            Channel.GroupChannel.objects.filter(pk=self.channel_id).update(
+                is_active=False
+            )
             if self.profile:
                 add_text_message(
                     self,
@@ -100,16 +99,20 @@ class ChatConsumer(WebsocketConsumer):
                 )
             logger.info("Group channel disconnected")
 
+        channel_layer.group_discard(
+            channel_layer_info["group_prefix_channel"] + str(self.channel_id),
+            self.channel_name,
+        )
         if self.player_id is not None:
             handle_player_end(self)
         if self.room_id is not None:
             channel_layer.group_discard(
-                channel_layer_info["group_prefix"] + str(self.room_id),
+                channel_layer_info["group_prefix_room"] + str(self.room_id),
                 self.channel_name,
             )
             if self.profile:
                 channel_layer.group_send(
-                    channel_layer_info["group_prefix"] + str(self.room_id),
+                    channel_layer_info["group_prefix_room"] + str(self.room_id),
                     MessageType.USER_LEFT,
                     {"resignee": self.profile},
                 )

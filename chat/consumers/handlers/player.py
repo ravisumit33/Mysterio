@@ -37,7 +37,7 @@ def handle_player_info(consumer, message_data):
             msg_type=MessageType.PLAYER_INFO,
         )
     channel_layer.group_send(
-        channel_layer_info["group_prefix"] + str(consumer.room_id),
+        channel_layer_info["group_prefix_room"] + str(consumer.room_id),
         MessageType.PLAYER_INFO,
         {
             "name": message_data["name"],
@@ -66,7 +66,7 @@ def handle_player_end(consumer):
             msg_type=MessageType.PLAYER_INFO,
         )
     channel_layer.group_send(
-        channel_layer_info["group_prefix"] + str(consumer.room_id),
+        channel_layer_info["group_prefix_room"] + str(consumer.room_id),
         MessageType.PLAYER_END,
         {
             "host": consumer.profile,

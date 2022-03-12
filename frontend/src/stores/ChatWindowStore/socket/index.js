@@ -2,11 +2,10 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { ChatStatus, MessageType, MysterioHost } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
-import profileStore from '../ProfileStore';
-import Encryption from './encryption';
+import Cryptor from './cryptor';
 
 class Socket {
-  maxRetries = 60;
+  maxRetries = 5;
 
   keyPair = null;
 
@@ -14,10 +13,11 @@ class Socket {
 
   iv = null;
 
-  encrypter = new Encryption();
+  cryptor = new Cryptor();
 
-  constructor(chatWindowStore) {
+  constructor(chatWindowStore, profileStore) {
     this.chatWindowStore = chatWindowStore;
+    this.profileStore = profileStore;
     this.init();
   }
 
@@ -48,12 +48,12 @@ class Socket {
   handleOpen = () => {
     log.info('socket connection established');
 
-    this.encrypter.generateKeyPair().then(async () => {
-      const pubKey = await window.crypto.subtle.exportKey('jwk', this.encrypter.keyPair.publicKey);
+    this.cryptor.getKeyPair().then(async (keyPair) => {
+      const pubKey = await Cryptor.exportKey(keyPair.publicKey);
       this.send(MessageType.USER_INFO, {
-        sessionId: profileStore.sessionId,
-        name: profileStore.name,
-        avatarUrl: profileStore.avatarUrl,
+        sessionId: this.profileStore.sessionId,
+        name: this.profileStore.name,
+        avatarUrl: this.profileStore.avatarUrl,
         pubKey: JSON.stringify(pubKey),
       });
     });
@@ -68,9 +68,9 @@ class Socket {
         type: MessageType.USER_LEFT,
         data: {
           resignee: {
-            session_id: profileStore.sessionId,
-            name: profileStore.name,
-            avatarUrl: profileStore.avatarUrl,
+            session_id: this.profileStore.sessionId,
+            name: this.profileStore.name,
+            avatarUrl: this.profileStore.avatarUrl,
           },
         },
       };
@@ -90,12 +90,12 @@ class Socket {
     log.error('Error connecting to server', error);
     if (this.socket.retryCount >= this.maxRetries) {
       const { appStore } = this.chatWindowStore;
-      appStore.removeChatWindow();
       appStore.setShouldShowAlert(false);
       appStore.showAlert({
         text: `Error occured while connecting to server.`,
         severity: 'error',
       });
+      appStore.removeChatWindow();
     } else {
       log.info('Reconnecting...');
     }
@@ -103,11 +103,19 @@ class Socket {
 
   send = async (msgType, msgData = {}) => {
     const payloadData = msgData;
-    if (msgType === MessageType.TEXT) {
-      payloadData.text = await this.encrypter.encryptTextMsg(
-        payloadData.text,
-        this.encrypter.secretKey
-      );
+    switch (msgType) {
+      case MessageType.TEXT: {
+        const secretKey = await this.cryptor.getSecretKey();
+        payloadData.content = await Cryptor.encryptText(payloadData.content, secretKey);
+        break;
+      }
+      case MessageType.SECRET_KEY: {
+        const pairWiseSecretKey = await this.cryptor.getPairwiseSecretKey(payloadData.receiverId);
+        payloadData.secretKey = await Cryptor.encryptText(payloadData.secretKey, pairWiseSecretKey);
+        break;
+      }
+      default:
+        break;
     }
     const payload = {
       type: msgType,
@@ -121,6 +129,34 @@ class Socket {
       this.socket.close();
       this.socket = null;
     }
+  };
+
+  sendSecretKey = async (userId, pubKey) => {
+    await this.cryptor.derivePairwiseSecretKey(userId, pubKey);
+    const secretKey = await this.cryptor.getSecretKey();
+    const secretKeyJson = await Cryptor.exportKey(secretKey);
+    this.send(MessageType.SECRET_KEY, {
+      secretKey: JSON.stringify(secretKeyJson),
+      receiverId: userId,
+    });
+  };
+
+  receiveSecretKey = async (userId, secretKeyStr) => {
+    const pairWiseSecretKey = await this.cryptor.getPairwiseSecretKey(userId);
+    const decryptedSecretKeyStr = await Cryptor.decryptText(secretKeyStr, pairWiseSecretKey);
+    const decryptedSecretKey = await Cryptor.importKey(
+      JSON.parse(decryptedSecretKeyStr),
+      Cryptor.secretKeyConfig
+    );
+    this.cryptor.setSecretKeyForUser(userId, decryptedSecretKey);
+  };
+
+  receiveTextMsg = async (text, senderId, isOwnMsg) => {
+    const senderSecretKey = await (isOwnMsg
+      ? this.cryptor.getSecretKey()
+      : this.cryptor.getSecretKeyForUser(senderId));
+    const decryptedText = await Cryptor.decryptText(text, senderSecretKey);
+    return decryptedText;
   };
 }
 

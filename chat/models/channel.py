@@ -52,3 +52,5 @@ class GroupChannel(Channel):
         related_name="group_channels",
         related_query_name="group_channel",
     )
+
+    is_active = models.BooleanField(default=True)

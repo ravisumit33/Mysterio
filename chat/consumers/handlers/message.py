@@ -37,19 +37,19 @@ def handle_text_message(consumer, message_data):
     if channel_layer_info["is_group_consumer"]:
         add_text_message(
             consumer,
-            text=message_data["text"],
+            text=message_data["content"],
             msg_type=MessageType.TEXT,
             fail_action=lambda: channel_layer.group_send(
-                channel_layer_info["group_prefix"] + str(consumer.room_id),
+                channel_layer_info["group_prefix_room"] + str(consumer.room_id),
                 MessageType.CHAT_DELETE,
                 {"text": "Group is deleted"},
             ),
         )
     channel_layer.group_send(
-        channel_layer_info["group_prefix"] + str(consumer.room_id),
+        channel_layer_info["group_prefix_room"] + str(consumer.room_id),
         MessageType.TEXT,
         {
-            "content": message_data["text"],
+            "content": message_data["content"],
             "sender": consumer.profile,
         },
     )
@@ -59,5 +59,5 @@ def handle_text_message(consumer, message_data):
         logger.debug("By %s", consumer.profile["name"])
     else:
         logger.error("Undefined sender for text message")
-    logger.debug("%s", message_data["text"])
+    logger.debug("%s", message_data["content"])
     # TODO: remove this log as messages will be encrypted

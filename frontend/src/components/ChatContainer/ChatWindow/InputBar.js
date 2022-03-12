@@ -39,7 +39,7 @@ function InputBar() {
     const msgTxt = input.current.value;
     if (msgTxt) {
       const message = {
-        text: msgTxt,
+        content: msgTxt,
       };
       socket.send(MessageType.TEXT, message);
       input.current.value = '';

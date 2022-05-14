@@ -1,5 +1,5 @@
 import logging
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,18 @@ def set_ws_on_session(get_response):
 
     return middleware
 
+def health_check_middleware(get_response):
+    """
+    Respond to AWS ELB health checks. ELB does not set HTTP_HOST header.
+    Response is sent before ALLOWED_HOSTS is checked.
+    """
+
+    def middleware(request):
+        if request.META["PATH_INFO"] == "/ping/":
+            return HttpResponse("pong")
+        return get_response(request)
+
+    return middleware
 
 def redirect_herokuapp(get_response):
     """

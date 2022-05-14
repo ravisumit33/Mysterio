@@ -1,4 +1,3 @@
-import dj_database_url
 from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from core import secret_manager
 

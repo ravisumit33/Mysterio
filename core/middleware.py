@@ -19,7 +19,7 @@ def set_ws_on_session(get_response):
 
     return middleware
 
-def health_check_middleware(get_response):
+def aws_health_check_middleware(get_response):
     """
     Respond to AWS ELB health checks. ELB does not set HTTP_HOST header.
     Response is sent before ALLOWED_HOSTS is checked.

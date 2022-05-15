@@ -26,8 +26,8 @@ def aws_health_check_middleware(get_response):
     """
 
     def middleware(request):
-        if request.META["PATH_INFO"] == "/ping/":
-            return HttpResponse("pong")
+        if request.path == '/health':
+            return HttpResponse('ok')
         return get_response(request)
 
     return middleware

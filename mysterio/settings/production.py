@@ -1,3 +1,4 @@
+import dj_database_url
 from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from core import secret_manager
 
@@ -11,23 +12,10 @@ ALLOWED_HOSTS = [
     "www.mysterio-chat.com",
     "mysterio-chat.com",
     "mysterio-chat.herokuapp.com",
-    "mysterio-env.eba-8drambpi.us-west-2.elasticbeanstalk.com",
+    "mysterio-env.eba-wfpfpphk.ap-south-1.elasticbeanstalk.com",
 ]
 
-if 'RDS_HOSTNAME' in os.environ:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
-        }
-    }
-else:
-    raise Exception("Unable to connect to RDS")
-
+DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
 
 CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": [os.getenv("REDIS_URL")],

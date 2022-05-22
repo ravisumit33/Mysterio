@@ -1,3 +1,4 @@
+import requests
 import dj_database_url
 from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from core import secret_manager
@@ -14,6 +15,15 @@ ALLOWED_HOSTS = [
     "mysterio-chat.herokuapp.com",
     "mysterio-env.eba-wfpfpphk.ap-south-1.elasticbeanstalk.com",
 ]
+
+try:
+    aws_local_ip = requests.get(
+      'http://169.254.169.254/latest/meta-data/local-ipv4',
+      timeout=0.01
+    ).text
+    ALLOWED_HOSTS.append(aws_local_ip)
+except requests.exceptions.ConnectionError:
+    pass
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
 

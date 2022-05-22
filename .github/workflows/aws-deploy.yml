@@ -2,7 +2,7 @@ name: deploy-to-awseb
 
 on:
   workflow_run:
-    workflows: ["Build app"]
+    workflows: ["build-app"]
     types:
       - completed 
 jobs:
@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-
 
     steps:
       - uses: actions/checkout@v2

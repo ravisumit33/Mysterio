@@ -1,5 +1,8 @@
 import dj_database_url
 from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from core import secret_manager
+
+secret_manager.load_secrets()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
@@ -9,10 +12,10 @@ ALLOWED_HOSTS = [
     "www.mysterio-chat.com",
     "mysterio-chat.com",
     "mysterio-chat.herokuapp.com",
+    "mysterio-env.eba-wfpfpphk.ap-south-1.elasticbeanstalk.com",
 ]
 
-DATABASES = {"default": dj_database_url.config(conn_max_age=600, ssl_require=True)}
-
+DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
 
 CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": [os.getenv("REDIS_URL")],

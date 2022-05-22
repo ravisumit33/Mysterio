@@ -5,7 +5,7 @@ import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 
 class Socket {
-  maxRetries = 60;
+  maxRetries = 20;
 
   constructor(chatWindowStore) {
     this.chatWindowStore = chatWindowStore;
@@ -26,7 +26,7 @@ class Socket {
     const { roomInfo } = this.chatWindowStore;
     const groupChatURL = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
     this.socket = new ReconnectingWebSocket(
-      `${websocketProtocol}://${serverHost}/chat${groupChatURL}/`,
+      `${websocketProtocol}://${serverHost}/ws/chat${groupChatURL}/`,
       undefined,
       { maxRetries: this.maxRetries }
     );

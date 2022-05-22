@@ -13,7 +13,7 @@ ALLOWED_HOSTS = [
     "www.mysterio-chat.com",
     "mysterio-chat.com",
     "mysterio-chat.herokuapp.com",
-    "mysterio-env.eba-wfpfpphk.ap-south-1.elasticbeanstalk.com",
+    "mysterio-env.eba-jmukjigp.ap-south-1.elasticbeanstalk.com"
 ]
 
 try:

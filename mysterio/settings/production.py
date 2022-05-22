@@ -21,9 +21,12 @@ CHANNEL_LAYERS["default"]["CONFIG"] = {
     "hosts": [os.getenv("REDIS_URL")],
 }
 
+TEMPLATES[0]["DIRS"] = [
+    os.path.join(FRONTEND_DIR, "dist"),
+]
 
 STATICFILES_DIRS = [
-    os.path.join(FRONTEND_DIR, "build", "static"),
+    os.path.join(FRONTEND_DIR, "dist", "static"),
 ]
 
 

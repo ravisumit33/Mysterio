@@ -5,6 +5,8 @@ on:
     workflows: ["build-app"]
     types:
       - completed 
+    branches: [master]
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,6 +30,7 @@ jobs:
           cd frontend
           npm ci
           npm run build
+          rm -rf node_modules
           cd ..
 
       - name: Create ZIP deployment package

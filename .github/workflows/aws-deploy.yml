@@ -1,0 +1,43 @@
+name: deploy-to-awseb
+
+on:
+  workflow_run:
+    workflows: ["Build app"]
+    types:
+      - completed 
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build frontend dist
+        env:
+          BUILD_PATH: './dist'
+        run: npm run build
+
+      - name: Create ZIP deployment package
+        run: zip -r deploy_package.zip ./
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
+          aws-region: "ap-south-1"
+
+      - name: Upload package to S3 bucket
+        run: aws s3 cp deploy_package.zip s3://mysterio-github-deploy/
+
+      - name: Create new ElasticBeanstalk Application Version
+        run: |
+          aws elasticbeanstalk create-application-version \
+          --application-name mysterio \
+          --source-bundle S3Bucket="mysterio-github-deploy",S3Key="deploy_package.zip" \
+          --version-label "ver-${{ github.sha }}" \
+          --description "commit-sha-${{ github.sha }}"
+
+      - name: Deploy new ElasticBeanstalk Application Version
+        run: aws elasticbeanstalk update-environment --environment-name mysterio-env --version-label "ver-${{ github.sha }}"

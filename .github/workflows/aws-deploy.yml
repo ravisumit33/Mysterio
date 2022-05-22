@@ -16,7 +16,9 @@ jobs:
       - name: Build frontend dist
         env:
           BUILD_PATH: './dist'
-        run: npm run build
+        run: |
+          npm ci
+          npm run build
 
       - name: Create ZIP deployment package
         run: zip -r deploy_package.zip ./

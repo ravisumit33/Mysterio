@@ -13,7 +13,7 @@ Anonymous chat web app
 
 # Requirements
 
-- Python >= 3.9
+- Python >= 3.8
 - Node >= 16.13.2
 - npm >= 8.1.2
 - Postgres >= 13.0

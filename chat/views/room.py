@@ -35,10 +35,13 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
 
     queryset = GroupRoom.objects.all()
     permission_classes = [GroupRoomPermission]
-    serializer_classes = RoomViewSet.serializer_classes | {
-        "retrieve": RetrieveGroupRoomSerializer,
-        "get_messages": MessageSerializer,
-    }
+    serializer_classes = dict(
+        RoomViewSet.serializer_classes,
+        **{
+            "retrieve": RetrieveGroupRoomSerializer,
+            "get_messages": MessageSerializer,
+        }
+    )
 
     @property
     def is_group_room(self):

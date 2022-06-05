@@ -67,7 +67,7 @@ class AccountAdapter(RestAuthAccountAdapter):
             email_template = "account/email/email_confirmation"
         self.send_mail(email_template, emailconfirmation.email_address.email, ctx)
 
-    def render_mail(self, template_prefix, email, context):
+    def render_mail(self, template_prefix, email, context, headers=None):
         to_email = [email] if isinstance(email, str) else email
         subject = render_to_string(f"{template_prefix}_subject.txt", context)
         # remove superfluous line breaks
@@ -77,7 +77,9 @@ class AccountAdapter(RestAuthAccountAdapter):
         html = render_to_string(
             f"{template_prefix}_message.html", context, self.request
         ).strip()
-        msg = EmailMultiAlternatives(subject, html, from_email, to_email)
+        msg = EmailMultiAlternatives(
+            subject, html, from_email, to_email, headers=headers
+        )
         msg.content_subtype = "html"
         msg.mixed_subtype = "related"
         img_path = staticfiles_storage.path("quick_chat.png")

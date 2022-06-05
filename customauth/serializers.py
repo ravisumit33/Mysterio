@@ -19,7 +19,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
 
     is_socially_registered = serializers.SerializerMethodField(read_only=True)
 
-    def get_is_socially_registered(self, user):  # pylint: disable=R0201
+    def get_is_socially_registered(self, user):
         """
         Set if user is socially registered
         """

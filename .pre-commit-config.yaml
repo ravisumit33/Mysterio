@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/PyCQA/pylint
-  rev: v2.8.2
+  rev: v2.14.0
   hooks:
   - id: pylint
     language: system
@@ -15,7 +15,7 @@ repos:
     language: system
 
 - repo: https://github.com/pre-commit/mirrors-eslint
-  rev: v7.26.0
+  rev: v8.17.0
   hooks:
   - id: eslint
     language: system

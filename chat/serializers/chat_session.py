@@ -9,7 +9,7 @@ class ChatSessionSerializer(serializers.ModelSerializer):
 
     session_id = serializers.SerializerMethodField()
 
-    def get_session_id(self, chat_session):  # pylint: disable=no-self-use
+    def get_session_id(self, chat_session):
         """
         Get session id from chat session
         """

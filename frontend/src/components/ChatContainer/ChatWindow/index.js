@@ -95,7 +95,7 @@ function ChatWindow(props) {
       } else {
         side = sender.session_id === profileStore.sessionId ? 'right' : 'left';
         isFirst = !previousSender || sender.session_id !== previousSender.session_id;
-        isLast = !nextSender || sender.session_id !== nextSender.session_id;
+        isLast = !isFirst && (!nextSender || sender.session_id !== nextSender.session_id);
       }
       return (
         // eslint-disable-next-line react/no-array-index-key
@@ -165,11 +165,13 @@ function ChatWindow(props) {
         )}
       </Grid>
       {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
-        <Typography className={classes.infoMsg}>Looks like no one is online &#128542;</Typography>
+        <Typography align="center" className={classes.infoMsg}>
+          Looks like no one is online &#128542;
+        </Typography>
       )}
       {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
         !isGroupChat && (
-          <Typography className={classes.infoMsg}>
+          <Typography align="center" className={classes.infoMsg}>
             Click &#x21BA; above to reconnect to someone
           </Typography>
         )}

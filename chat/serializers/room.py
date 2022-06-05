@@ -15,7 +15,7 @@ class DefaultGroupRoomSerializer(serializers.ModelSerializer):
 
     message_count = serializers.SerializerMethodField()
 
-    def get_message_count(self, group_room):  # pylint: disable=no-self-use
+    def get_message_count(self, group_room):
         """
         Getter function for message_count serializer field
         """

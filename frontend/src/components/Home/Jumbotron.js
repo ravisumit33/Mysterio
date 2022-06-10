@@ -1,14 +1,13 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import Box from '@material-ui/core/Box';
 import { alpha, Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
-import { ReactComponent as QuickChatImg } from 'assets/images/quick_chat.svg';
 import { appStore } from 'stores';
 
 const useStyles = makeStyles((theme) => ({
   jumbotron: {
     position: 'relative',
+    minHeight: '55vh',
   },
   bg: {
     position: 'absolute',
@@ -39,9 +38,12 @@ const useStyles = makeStyles((theme) => ({
       padding: theme.spacing(1, 0),
     },
     [theme.breakpoints.up('sm')]: {
-      padding: theme.spacing(2, 0),
+      padding: theme.spacing(2, 0, 1, 0),
     },
     color: theme.palette.common.white,
+  },
+  chatNowButton: {
+    padding: theme.spacing(2, 0, 2, 0),
   },
 }));
 
@@ -55,39 +57,34 @@ function Jumbotron() {
   };
 
   return (
-    <Box id="jumbotron" className={classes.jumbotron}>
+    <Grid
+      container
+      id="jumbotron"
+      className={classes.jumbotron}
+      direction="column"
+      justifyContent="flex-end"
+    >
       <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-      <Grid container>
+      <Grid item container className={classes.quickChatTxtSection} direction="column">
         <Grid item>
-          <Box py={3}>
-            <QuickChatImg width="100%" className={classes.quickChatImg} />
-          </Box>
+          <Typography variant="h3" className={classes.quickChatDesc} align="center">
+            Free Anonymous Chat
+          </Typography>
         </Grid>
-        <Grid item container className={classes.quickChatTxtSection} direction="column">
-          <Grid item>
-            <Box>
-              <Typography variant="h3" className={classes.quickChatDesc} align="center">
-                Free Anonymous Chat
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item container justifyContent="center">
-            <Grid item>
-              <Box py={2}>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  size="large"
-                  onClick={handleStartIndividualChat}
-                >
-                  Chat Now
-                </Button>
-              </Box>
-            </Grid>
+        <Grid item container justifyContent="center">
+          <Grid item className={classes.chatNowButton}>
+            <Button
+              color="secondary"
+              variant="contained"
+              size="large"
+              onClick={handleStartIndividualChat}
+            >
+              Chat Now
+            </Button>
           </Grid>
         </Grid>
       </Grid>
-    </Box>
+    </Grid>
   );
 }
 

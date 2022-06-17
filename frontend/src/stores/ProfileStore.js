@@ -50,7 +50,7 @@ class ProfileStore {
   }
 
   get hasCompleteUserInfo() {
-    return this.name !== '';
+    return this.name !== '' && this.avatarUrl !== '';
   }
 }
 

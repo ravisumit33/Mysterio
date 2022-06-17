@@ -83,7 +83,7 @@ function ChatMessage({ message, sender, side, first, last }) {
           {first && (
             <Avatar
               name={(sender && sender.name) || '?'}
-              avatarUrl={sender && sender.avatarUrl}
+              avatarUrl={sender && sender.avatar_url}
               className={classes.avatar}
             />
           )}
@@ -114,7 +114,7 @@ ChatMessage.propTypes = {
   side: PropTypes.oneOf(['left', 'right']),
   sender: PropTypes.shape({
     name: PropTypes.string.isRequired,
-    avatarUrl: PropTypes.string,
+    avatar_url: PropTypes.string,
   }).isRequired,
   first: PropTypes.bool,
   last: PropTypes.bool,

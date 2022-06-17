@@ -264,7 +264,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Cors headers configurations
 
-CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOW_ALL_ORIGINS = False
 
 CELERY_BEAT_SCHEDULE = {
     "trending_rooms": {
@@ -281,6 +281,10 @@ CELERY_BEAT_SCHEDULE = {
     },
     "backup_db": {
         "task": "core.tasks.backup_db",
+        "schedule": timedelta(days=1),
+    },
+    "clear_expired_sessions": {
+        "task": "customauth.tasks.clear_sessions",
         "schedule": timedelta(days=1),
     },
 }

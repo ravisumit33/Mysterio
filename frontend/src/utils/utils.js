@@ -61,3 +61,34 @@ export const createDeferredPromiseObj = () => {
   });
   return { promise, resolve, reject };
 };
+
+export const resizeImg = async (fileUrl, maxWidth, maxHeight) => {
+  const img = new Image();
+  const imgLoadPromise = new Promise((resolve) => {
+    img.onload = resolve;
+  });
+  img.src = fileUrl;
+  await imgLoadPromise;
+  const canvas = document.createElement('canvas');
+  let ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  let width = img.naturalWidth;
+  let height = img.naturalHeight;
+  if (width > height) {
+    if (width > maxWidth) {
+      height *= maxWidth / width;
+      width = maxWidth;
+    }
+  } else if (height > maxHeight) {
+    width *= maxHeight / height;
+    height = maxHeight;
+  }
+  canvas.width = width;
+  canvas.height = height;
+  ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+  const result = await new Promise((resolve) => {
+    canvas.toBlob(resolve, 'image/jpeg', 0.95);
+  });
+  return result;
+};

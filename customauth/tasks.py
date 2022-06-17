@@ -11,3 +11,11 @@ def flush_tokens():
     logger.debug("Going to flush expired tokens")
     call_command("flushexpiredtokens")
     logger.info("Expired tokens flushed")
+
+
+@shared_task
+def clear_sessions():
+    """Job for clearing expired sessions"""
+    logger.debug("Going to clear expired sessions")
+    call_command("clearsessions")
+    logger.info("Expired sessions cleared")

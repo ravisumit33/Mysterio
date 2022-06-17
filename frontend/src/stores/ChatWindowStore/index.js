@@ -239,7 +239,6 @@ class ChatWindowStore {
     const messageData = payload.data;
     switch (messageType) {
       case MessageType.USER_INFO:
-        profileStore.setSessionId(messageData.session_id);
         if (!this.isGroupChat) {
           clearTimeout(this.timeout);
           this.timeout = setTimeout(

@@ -10,9 +10,14 @@ import {
   Box,
   Button,
 } from '@material-ui/core';
+import { Group } from '@material-ui/icons';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
+import { useBasicInfo } from 'hooks';
 import CenterPaper from './CenterPaper';
+import BasicInfo from './BasicInfo';
+
+const roomAvatarSprites = ['identicon', 'initials', 'bottts', 'jdenticon'];
 
 function NewRoom() {
   const history = useHistory();
@@ -20,7 +25,15 @@ function NewRoom() {
   // @ts-ignore
   const { name } = location.state || { name: '' };
 
-  const [roomName, setRoomName] = useState(name);
+  const {
+    name: roomName,
+    setName: setRoomName,
+    avatarUrl,
+    setAvatarUrl,
+    getUploadedAvatar,
+    setUploadedAvatar,
+  } = useBasicInfo(name);
+
   const [shouldUsePwd, setShouldUsePwd] = useState(false);
   const [roomPwd, setRoomPwd] = useState('');
   const [nameFieldData, setNameFieldData] = useState({
@@ -36,55 +49,92 @@ function NewRoom() {
     appStore;
 
   const handleCreateRoom = () => {
+    if (!avatarUrl) {
+      appStore.showAlert({
+        text: 'No image chosen. Upload your own or click on choose random.',
+        severity: 'error',
+      });
+      return;
+    }
     showWaitScreen('Creating new room');
-    fetchUrl('/api/chat/group_rooms/', {
-      method: 'post',
-      body: {
-        name: roomName,
-        password: roomPwd,
-        is_protected: shouldUsePwd,
-      },
-    })
-      .then((response) => {
-        setShouldShowAlert(false);
-        const responseData = response.data;
-        const chatWindowData = {
-          // @ts-ignore
-          roomId: responseData.id,
-          // @ts-ignore
-          name: responseData.name,
-          password: roomPwd,
-          isGroupRoom: true,
-        };
-        addChatWindow(chatWindowData);
-        history.push('/chat');
+
+    let fileUploadPromise = Promise.resolve(avatarUrl);
+    if (/^blob:.*$/.test(avatarUrl)) {
+      const formData = new FormData();
+      formData.append('file', getUploadedAvatar());
+      fileUploadPromise = fetchUrl('/api/upload_avatar/', {
+        method: 'post',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }).then((resp) => {
+        const responseData = resp.data;
+        // @ts-ignore
+        const { url } = responseData;
+        return url;
+      });
+    }
+
+    fileUploadPromise
+      .then((url) => {
+        fetchUrl('/api/chat/group_rooms/', {
+          method: 'post',
+          body: {
+            name: roomName,
+            password: roomPwd,
+            avatar_url: url,
+            is_protected: shouldUsePwd,
+          },
+        })
+          .then((response) => {
+            setShouldShowAlert(false);
+            const responseData = response.data;
+            const chatWindowData = {
+              // @ts-ignore
+              roomId: responseData.id,
+              // @ts-ignore
+              name: responseData.name,
+              password: roomPwd,
+              avatarUrl: url,
+              isGroupRoom: true,
+            };
+            addChatWindow(chatWindowData);
+            history.push('/chat');
+          })
+          .catch((response) => {
+            const responseData = response.data;
+            const groupNameFieldData = { ...nameFieldData };
+            const groupPasswordFieldData = { ...pwdFieldData };
+            if (responseData.name) {
+              [groupNameFieldData.help_text] = responseData.name;
+              groupNameFieldData.error = true;
+            } else {
+              groupNameFieldData.help_text = '';
+              groupNameFieldData.error = false;
+            }
+            if (responseData.password) {
+              [groupPasswordFieldData.help_text] = responseData.password;
+              groupPasswordFieldData.error = true;
+            } else {
+              groupPasswordFieldData.help_text = '';
+              groupPasswordFieldData.error = false;
+            }
+            showAlert({
+              text: 'Error occurred while creating room.',
+              severity: 'error',
+            });
+            setNameFieldData(groupNameFieldData);
+            setPwdFieldData(groupPasswordFieldData);
+          })
+          .finally(() => setShouldShowWaitScreen(false));
       })
-      .catch((response) => {
-        const responseData = response.data;
-        const groupNameFieldData = { ...nameFieldData };
-        const groupPasswordFieldData = { ...pwdFieldData };
-        if (responseData.name) {
-          [groupNameFieldData.help_text] = responseData.name;
-          groupNameFieldData.error = true;
-        } else {
-          groupNameFieldData.help_text = '';
-          groupNameFieldData.error = false;
-        }
-        if (responseData.password) {
-          [groupPasswordFieldData.help_text] = responseData.password;
-          groupPasswordFieldData.error = true;
-        } else {
-          groupPasswordFieldData.help_text = '';
-          groupPasswordFieldData.error = false;
-        }
-        showAlert({
-          text: 'Error occurred while creating room.',
+      .catch(() => {
+        appStore.showAlert({
+          text: 'Error occured while creating avatar. Try choosing random one.',
           severity: 'error',
         });
-        setNameFieldData(groupNameFieldData);
-        setPwdFieldData(groupPasswordFieldData);
-      })
-      .finally(() => setShouldShowWaitScreen(false));
+      });
   };
 
   return !profileStore.isLoggedIn ? (
@@ -107,15 +157,20 @@ function NewRoom() {
             <Typography variant="h6">New Room</Typography>
           </Grid>
           <Grid item>
-            <TextField
-              margin="dense"
-              label="Name"
-              fullWidth
-              value={roomName}
-              onChange={(evt) => setRoomName(evt.target.value)}
-              helperText={nameFieldData.help_text}
-              error={nameFieldData.error}
-              required
+            <BasicInfo
+              name={roomName}
+              onNameChange={setRoomName}
+              nameProps={{
+                error: nameFieldData.error,
+                helpText: nameFieldData.help_text,
+              }}
+              avatarUrl={avatarUrl}
+              setAvatarUrl={setAvatarUrl}
+              setUploadedAvatar={setUploadedAvatar}
+              avatarProps={{
+                DefaultIcon: Group,
+                sprites: roomAvatarSprites[Math.floor(Math.random() * 4)],
+              }}
             />
           </Grid>
           <Grid item>

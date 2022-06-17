@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+from corsheaders.defaults import default_headers
 
 env_path = Path(".") / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -25,7 +26,7 @@ STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, "public", "static"),
 ]
 
-SITE_ID = 4
+SITE_ID = 5
 
 
 LOGGING["loggers"] = {
@@ -63,4 +64,10 @@ SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"] = timedelta(minutes=60)
 
 # Cors headers configurations
 
-CORS_ORIGIN_WHITELIST = ("http://localhost:3000",)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-group-password",
+]

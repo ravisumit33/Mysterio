@@ -19,7 +19,6 @@ def handle_user_info(consumer, message_data):
     name = message_data["name"]
     avatar_url = message_data["avatarUrl"] if "avatarUrl" in message_data else ""
     tab_session_id = message_data["sessionId"]
-    tab_session_id = tab_session_id if tab_session_id else consumer.channel_name
 
     session_key = consumer.scope["session"].session_key
     session = Session.objects.get(pk=session_key)
@@ -33,7 +32,7 @@ def handle_user_info(consumer, message_data):
     consumer.profile = {
         "session_id": tab_session_id,
         "name": chat_session.name,
-        "avatarUrl": chat_session.avatar_url,
+        "avatar_url": chat_session.avatar_url,
     }
 
     channel_layer_info = consumer.channel_layer_info

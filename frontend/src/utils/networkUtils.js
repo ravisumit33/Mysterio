@@ -7,13 +7,6 @@ const getCompleteUrl = (url) => {
   try {
     completeUrl = new URL(url);
     completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
-    if (isDevEnv() && window.origin !== completeUrl.origin) {
-      // change origin to window origin to avoid CORS issues
-      const newCompleteUrl = new URL(
-        `${window.origin}${completeUrl.pathname}${completeUrl.search}${completeUrl.hash}`
-      );
-      completeUrl = newCompleteUrl;
-    }
     completeUrl = completeUrl.href;
   } catch (_) {
     // url is relative

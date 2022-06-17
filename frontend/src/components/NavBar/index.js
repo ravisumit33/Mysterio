@@ -69,7 +69,7 @@ function NavBar() {
     data: {
       key: 'account',
       text: 'Account',
-      icon: profileStore.isLoggedIn
+      icon: profileStore.avatarUrl
         ? () => (
             <Avatar
               name={profileStore.email}

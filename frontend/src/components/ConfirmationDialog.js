@@ -10,7 +10,16 @@ import {
 } from '@material-ui/core';
 
 function ConfirmationDialog(props) {
-  const { shouldShow, onClose, onCancel, onContinue, title, description } = props;
+  const {
+    shouldShow,
+    onClose,
+    onCancel,
+    onConfirm,
+    title,
+    description,
+    cancelButtonText,
+    confirmButtonText,
+  } = props;
   return (
     <Dialog open={shouldShow} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
@@ -19,10 +28,10 @@ function ConfirmationDialog(props) {
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel} color="primary">
-          Cancel
+          {cancelButtonText}
         </Button>
-        <Button onClick={onContinue} color="primary">
-          Continue
+        <Button onClick={onConfirm} color="primary">
+          {confirmButtonText}
         </Button>
       </DialogActions>
     </Dialog>
@@ -33,15 +42,19 @@ ConfirmationDialog.propTypes = {
   shouldShow: PropTypes.bool.isRequired,
   onClose: PropTypes.func,
   onCancel: PropTypes.func,
-  onContinue: PropTypes.func.isRequired,
+  onConfirm: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string,
+  cancelButtonText: PropTypes.string,
+  confirmButtonText: PropTypes.string,
 };
 
 ConfirmationDialog.defaultProps = {
   onClose: () => {},
   onCancel: () => {},
   description: '',
+  cancelButtonText: 'Cancel',
+  confirmButtonText: 'Confirm',
 };
 
 export default ConfirmationDialog;

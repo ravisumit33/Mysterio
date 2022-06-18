@@ -90,7 +90,7 @@ function Profile() {
         shouldShow={shouldShowDeleteConfirmationDialog}
         onClose={() => setShouldShowDeleteConfirmationDialog(false)}
         onCancel={() => setShouldShowDeleteConfirmationDialog(false)}
-        onContinue={handleDeleteAccount}
+        onConfirm={handleDeleteAccount}
         title="Delete your account?"
         description="This will permanently delete your account and you will no longer be admin of your rooms."
       />

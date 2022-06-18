@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Grid, Typography } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
-import Animation from 'components/Animation';
+import Notification from 'components/Notification';
 import welcomeJson from 'assets/animations/welcome.json';
 import { appStore } from 'stores';
 
@@ -30,30 +30,13 @@ const ConfirmEmail = () => {
 
   const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>
-      <Grid container direction="column" justifyContent="space-around" spacing={1}>
-        <Grid item container justifyContent="center" xs={12}>
-          <Grid item>
-            <Animation
-              width={50}
-              height={50}
-              smallScreenWidth={25}
-              smallScreenHeight={25}
-              containerId="welcome"
-              animationData={welcomeJson}
-            />
-          </Grid>
-        </Grid>
-        <Grid item container>
-          <Grid item xs={12}>
-            <Typography variant="h4">Welcome to Mysterio!!</Typography>
-          </Grid>
-        </Grid>
-        <Grid item container justifyContent="center">
-          <Grid item xs={12}>
-            <Typography variant="body1">
-              Thank you for signing up. Wear the anonymous gown and get ready to enter mysterio.
-            </Typography>
-          </Grid>
+      <Grid container direction="column" justifyContent="space-around" spacing={2}>
+        <Grid item>
+          <Notification
+            animationProps={{ containerId: 'welcome', animationData: welcomeJson }}
+            title="Welcome to Mysterio!!"
+            description="Thank you for signing up. Wear the anonymous gown and get ready to enter mysterio."
+          />
         </Grid>
         <Grid item container justifyContent="center">
           <Grid item>

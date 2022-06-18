@@ -8,6 +8,7 @@ import { profileStore } from 'stores';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
+import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import { useChatSound, useNewMessage } from 'hooks';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
@@ -69,10 +70,6 @@ function ChatWindow(props) {
   useEffect(
     () => () => {
       appStore.removeChatWindow();
-      appStore.showAlert({
-        text: `Chat sesssion ended.`,
-        severity: 'success',
-      });
     },
     [appStore]
   );
@@ -128,57 +125,72 @@ function ChatWindow(props) {
   const shouldDisplayLoadingMessage = isGroupChat && fetchingPreviousMessages;
 
   return (
-    <Grid
-      item
-      container
-      direction="column"
-      justifyContent="space-between"
-      className={classes.root}
-      xs
-    >
-      <Grid item className={clsx(classes.header, classes.section)}>
-        <ChatHeader />
-      </Grid>
-      <Grid item xs container direction="column" wrap="nowrap" className={classes.msgBoxContainer}>
-        {shouldDisplayLoadingMessage && (
-          <Box>
-            <WaitScreen
-              className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-              shouldOpen={shouldDisplayLoadingMessage}
-              waitScreenText="Loading previous messages"
-              progressComponent={<LinearProgress style={{ width: '100%' }} />}
-            />
-          </Box>
-        )}
-        <WaitScreen
-          className={classes.backdrop}
-          shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
-          waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
-        />
-        {initDone && (
-          <MessageBox
-            firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
-            hasNewMessage={hasNewMessage}
-            newMessageInfo={newMessageInfo}
-            chatMessages={chatMessages}
+    <>
+      <RouteLeavingGuard
+        dialogProps={{
+          title: 'Do you want to close this chat?',
+          description: 'This will terminate this chat session.',
+        }}
+      />
+      <Grid
+        item
+        container
+        direction="column"
+        justifyContent="space-between"
+        className={classes.root}
+        xs
+      >
+        <Grid item className={clsx(classes.header, classes.section)}>
+          <ChatHeader />
+        </Grid>
+        <Grid
+          item
+          xs
+          container
+          direction="column"
+          wrap="nowrap"
+          className={classes.msgBoxContainer}
+        >
+          {shouldDisplayLoadingMessage && (
+            <Box>
+              <WaitScreen
+                className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+                shouldOpen={shouldDisplayLoadingMessage}
+                waitScreenText="Loading previous messages"
+                progressComponent={<LinearProgress style={{ width: '100%' }} />}
+              />
+            </Box>
+          )}
+          <WaitScreen
+            className={classes.backdrop}
+            shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
+            waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
           />
-        )}
-      </Grid>
-      {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
-        <Typography align="center" className={classes.infoMsg}>
-          Looks like no one is online &#128542;
-        </Typography>
-      )}
-      {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
-        !isGroupChat && (
+          {initDone && (
+            <MessageBox
+              firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
+              hasNewMessage={hasNewMessage}
+              newMessageInfo={newMessageInfo}
+              chatMessages={chatMessages}
+            />
+          )}
+        </Grid>
+        {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
           <Typography align="center" className={classes.infoMsg}>
-            Click &#x21BA; above to reconnect to someone
+            Looks like no one is online &#128542;
           </Typography>
         )}
-      <Grid item>
-        <InputBar />
+        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
+          !isGroupChat && (
+            <Typography align="center" className={classes.infoMsg}>
+              Click &#x21BA; above to reconnect to someone
+            </Typography>
+          )}
+        <Grid item>
+          <InputBar />
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 }
 

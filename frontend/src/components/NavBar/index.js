@@ -15,7 +15,6 @@ import {
   Typography,
 } from '@material-ui/core';
 import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@material-ui/icons';
-import clsx from 'clsx';
 import { appStore, profileStore } from 'stores';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
@@ -29,6 +28,10 @@ const useStyles = makeStyles((theme) => ({
   smallAvatar: {
     width: theme.spacing(3),
     height: theme.spacing(3),
+  },
+  largeAvatar: {
+    width: theme.spacing(6),
+    height: theme.spacing(6),
   },
   drawerPlaceholder: {
     width: 240,
@@ -74,7 +77,7 @@ function NavBar() {
             <Avatar
               name={profileStore.email}
               avatarUrl={profileStore.avatarUrl}
-              className={clsx({ [classes.smallAvatar]: hamburgerTriggerElement })}
+              className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
             />
           )
         : () => <AccountCircle fontSize="large" />,

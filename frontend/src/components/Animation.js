@@ -6,6 +6,7 @@ import { Box, useMediaQuery, useTheme } from '@material-ui/core';
 function Animation(props) {
   const {
     containerId,
+    containerClassName,
     animationData,
     width,
     height,
@@ -32,11 +33,19 @@ function Animation(props) {
     smallScreenWidth && (containerWidth = theme.spacing(smallScreenWidth));
     smallScreenHeight && (containerHeight = theme.spacing(smallScreenHeight));
   }
-  return <Box id={containerId} width={containerWidth} height={containerHeight} />;
+  return (
+    <Box
+      id={containerId}
+      width={containerWidth}
+      height={containerHeight}
+      className={containerClassName}
+    />
+  );
 }
 
 Animation.propTypes = {
   containerId: PropTypes.string.isRequired,
+  containerClassName: PropTypes.string,
   animationData: PropTypes.shape({}).isRequired,
   width: PropTypes.number,
   height: PropTypes.number,
@@ -47,6 +56,7 @@ Animation.propTypes = {
 };
 
 Animation.defaultProps = {
+  containerClassName: '',
   width: 5,
   height: 5,
   smallScreenWidth: null,

@@ -44,12 +44,6 @@ function ChatHeader() {
   const history = useHistory();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
-  const [shouldShowCloseConfirmationDialog, setShouldShowCloseConfirmationDialog] = useState(false);
-
-  const handleClose = () => {
-    appStore.removeChatWindow();
-    history.push('/');
-  };
 
   const handleDeleteRoom = () => {
     appStore.showWaitScreen('Deleting Room');
@@ -57,18 +51,26 @@ function ChatHeader() {
       method: 'delete',
     })
       .then(() => {
-        handleClose();
+        appStore.removeChatWindow();
+        history.push('/');
         appStore.showAlert({
           text: 'Room deleted successfully.',
           severity: 'success',
         });
       })
-      .catch(() => {
-        appStore.showAlert({
-          text: 'Only creator can delete the room.',
-          action: 'login',
-          severity: 'error',
-        });
+      .catch((error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          appStore.showAlert({
+            text: 'Only creator can delete the room.',
+            action: 'login',
+            severity: 'error',
+          });
+        } else {
+          appStore.showAlert({
+            text: 'Error occurred while deleting. Try again later.',
+            severity: 'error',
+          });
+        }
       })
       .finally(() => {
         appStore.setShouldShowWaitScreen(false);
@@ -162,10 +164,7 @@ function ChatHeader() {
               {chatWindowStore.playerExists ? <div>{PlayingAnimation}</div> : <PlayerIcon />}
             </Tooltip>
           </IconButton>
-          <IconButton
-            onClick={() => setShouldShowCloseConfirmationDialog(true)}
-            className={classes.icon}
-          >
+          <IconButton onClick={() => history.push('/')} className={classes.icon}>
             <Tooltip title="Close" arrow>
               <CloseIcon />
             </Tooltip>
@@ -176,17 +175,9 @@ function ChatHeader() {
         shouldShow={shouldShowDeleteConfirmationDialog}
         onClose={() => setShouldShowDeleteConfirmationDialog(false)}
         onCancel={() => setShouldShowDeleteConfirmationDialog(false)}
-        onContinue={handleDeleteRoom}
+        onConfirm={handleDeleteRoom}
         title="Delete this room?"
         description="This will permanently delete this room and all its messages."
-      />
-      <ConfirmationDialog
-        shouldShow={shouldShowCloseConfirmationDialog}
-        onClose={() => setShouldShowCloseConfirmationDialog(false)}
-        onCancel={() => setShouldShowCloseConfirmationDialog(false)}
-        onContinue={handleClose}
-        title="Do you want to close this chat?"
-        description="This will terminate this chat session."
       />
     </>
   );

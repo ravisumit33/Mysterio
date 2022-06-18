@@ -1,20 +1,13 @@
 import React from 'react';
-import {
-  alpha,
-  Box,
-  Button,
-  CardMedia,
-  Grid,
-  makeStyles,
-  Typography,
-  useMediaQuery,
-} from '@material-ui/core';
+import { alpha, Box, Button, CardMedia, Grid, makeStyles, useMediaQuery } from '@material-ui/core';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import PlayerBG from 'assets/images/player_bg.webp';
 import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
+import Notification from 'components/Notification';
+import notFoundJson from 'assets/animations/not-found.json';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 
@@ -37,6 +30,9 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     zIndex: -1,
     backgroundColor: alpha(theme.palette.common.black, 0.1),
+  },
+  notFound: {
+    marginBottom: theme.spacing(2),
   },
 }));
 
@@ -61,13 +57,21 @@ function ChatContainer() {
   ) : (
     <Box width="100%">
       <CenterPaper>
-        <Grid container alignItems="center" direction="column" spacing={2}>
+        <Grid container justifyContent="space-around" direction="column" spacing={2}>
           <Grid item>
-            <Typography variant="h4">
-              Probably your chat session ended!! Start a chat and enjoy the anonymous experience.
-            </Typography>
+            <Notification
+              animationProps={{
+                containerId: 'noChatSession',
+                containerClassName: classes.notFound,
+                animationData: notFoundJson,
+                width: 40,
+                height: 40,
+              }}
+              title="No active chat session!!"
+              description="Probably your chat session ended. Go to home to start a new chat."
+            />
           </Grid>
-          <Grid item>
+          <Grid item container justifyContent="center">
             <RouterLink to="/" tabIndex={-1}>
               <Button color="secondary" variant="contained" size="large">
                 Home

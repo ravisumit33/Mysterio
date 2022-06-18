@@ -33,7 +33,7 @@ function CustomButton(props) {
   const handleClick = () => {
     onClickHandler(key);
   };
-  const IconComponent = data.icon;
+  const { icon } = data;
   const disableRipple = isHamburgerMenu;
   let buttonComponent;
   if (type === 'text') {
@@ -57,7 +57,7 @@ function CustomButton(props) {
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...commonIconBtnProps}
         className={clsx(classes.buttonCommon, classes.buttonText)}
-        endIcon={<IconComponent />}
+        endIcon={icon}
         size="small"
       >
         {data.text}
@@ -68,9 +68,7 @@ function CustomButton(props) {
         <Tooltip title={data.text} arrow>
           {/* Need to wrap icon component in Box for tooltip to support functional components. */}
           {/* https://stackoverflow.com/a/57528471/6842304  */}
-          <Box>
-            <IconComponent />
-          </Box>
+          <Box>{icon}</Box>
         </Tooltip>
       </IconButton>
     );
@@ -95,7 +93,7 @@ CustomButton.propTypes = {
   data: PropTypes.shape({
     key: PropTypes.string.isRequired,
     text: PropTypes.string,
-    icon: PropTypes.elementType,
+    icon: PropTypes.element,
     action: PropTypes.func,
   }),
   focused: PropTypes.bool,

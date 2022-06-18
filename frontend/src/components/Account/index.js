@@ -11,7 +11,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
 import { appStore, profileStore } from 'stores';
-import { Grid } from '@material-ui/core';
+import { Grid, ListItemAvatar } from '@material-ui/core';
 import { AccountCircle, ExitToApp, Favorite } from '@material-ui/icons';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
@@ -58,9 +58,9 @@ function Account(props) {
     <>
       <Toolbar>
         <ListItem disableGutters>
-          <ListItemIcon>
+          <ListItemAvatar>
             <Avatar name={profileStore.email} avatarUrl={profileStore.avatarUrl} />
-          </ListItemIcon>
+          </ListItemAvatar>
           <ListItemText primary={profileStore.username} />
         </ListItem>
       </Toolbar>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Autocomplete } from '@material-ui/lab';
 import {
@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import { TextAvatar } from './Avatar';
+import CustomAvatar from './Avatar';
 
 const useStyles = makeStyles((theme) => ({
   inputLabel: {
@@ -37,15 +37,23 @@ function CustomAutoComplete(props) {
     autoCompleteProps,
   } = props;
   const classes = useStyles();
-  let startInputAvatar;
-  if (value) {
-    startInputAvatar = value.avatar ? <value.avatar /> : <TextAvatar name={value[nameField]} />;
-  } else {
-    startInputAvatar = (
+  const searchIconAvatar = useMemo(
+    () => (
       <Avatar>
         <SearchIcon />
       </Avatar>
+    ),
+    []
+  );
+  let startInputAvatar;
+  if (value) {
+    startInputAvatar = value.avatar ? (
+      <value.avatar />
+    ) : (
+      <CustomAvatar name={value[nameField]} avatarUrl={value.avatar_url} />
     );
+  } else {
+    startInputAvatar = searchIconAvatar;
   }
   return (
     <Autocomplete
@@ -76,7 +84,11 @@ function CustomAutoComplete(props) {
         <Tooltip title={option[nameField]} arrow>
           <>
             <ListItemAvatar>
-              {option.avatar ? <option.avatar /> : <TextAvatar name={option[nameField]} />}
+              {option.avatar ? (
+                <option.avatar />
+              ) : (
+                <CustomAvatar name={option[nameField]} avatarUrl={option.avatar_url} />
+              )}
             </ListItemAvatar>
             <ListItemText
               primary={option[nameField]}
@@ -100,7 +112,7 @@ CustomAutoComplete.propTypes = {
   setValue: PropTypes.func.isRequired,
   getSecondaryText: PropTypes.func.isRequired,
   autoCompleteProps: PropTypes.shape({}),
-  value: PropTypes.shape({ avatar: PropTypes.elementType }),
+  value: PropTypes.shape({ avatar: PropTypes.elementType, avatar_url: PropTypes.string }),
 };
 
 CustomAutoComplete.defaultProps = {

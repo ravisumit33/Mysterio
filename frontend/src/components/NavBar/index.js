@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
@@ -67,20 +67,26 @@ function NavBar() {
     appStore.setShouldOpenAccountsDrawer(!appStore.shouldOpenAccountsDrawer);
   };
 
+  const { email, avatarUrl } = profileStore;
+  const avatarIcon = useMemo(
+    () => (
+      <Avatar
+        name={email}
+        avatarUrl={avatarUrl}
+        className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
+      />
+    ),
+    [avatarUrl, classes.largeAvatar, classes.smallAvatar, email, hamburgerTriggerElement]
+  );
+
+  const accountCircleIcon = useMemo(() => <AccountCircle fontSize="large" />, []);
+
   const accountCircle = {
     type: 'icon',
     data: {
       key: 'account',
       text: 'Account',
-      icon: profileStore.avatarUrl
-        ? () => (
-            <Avatar
-              name={profileStore.email}
-              avatarUrl={profileStore.avatarUrl}
-              className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
-            />
-          )
-        : () => <AccountCircle fontSize="large" />,
+      icon: profileStore.avatarUrl ? avatarIcon : accountCircleIcon,
       action: () => {
         setHamburgerTriggerElement(null);
         history.push('/account');
@@ -115,13 +121,14 @@ function NavBar() {
     },
   ];
 
+  const logoutIcon = useMemo(() => <ExitToApp />, []);
   const accountNavbarButtons = [
     {
       type: 'icon',
       data: {
         key: 'logout',
         text: 'Logout',
-        icon: ExitToApp,
+        icon: logoutIcon,
         action: () => {
           setHamburgerTriggerElement(null);
           appStore.showWaitScreen('Logging you out');

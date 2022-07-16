@@ -97,6 +97,9 @@ class ChatConsumer(WebsocketConsumer):
                     text=f"{self.profile['name']} left",
                     msg_type=MessageType.USER_LEFT,
                 )
+            Channel.GroupChannel.objects.filter(pk=self.channel_id).update(
+                is_active=False
+            )
             logger.info("Group channel disconnected")
 
         if self.player_id is not None:

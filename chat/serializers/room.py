@@ -2,6 +2,7 @@ import logging
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from chat.models import GroupRoom
+from chat.serializers.channel import GroupChannelSerializer
 from .player import PlayerSerializer
 
 
@@ -15,11 +16,21 @@ class DefaultGroupRoomSerializer(serializers.ModelSerializer):
 
     message_count = serializers.SerializerMethodField()
 
+    online_users = serializers.SerializerMethodField()
+
     def get_message_count(self, group_room):
         """
         Getter function for message_count serializer field
         """
         return group_room.messages.count()
+
+    def get_online_users(self, group_room):
+        """
+        Getter function for online_users serializer field
+        """
+        online_users = group_room.group_channels.filter(is_active=True)
+        serializer = GroupChannelSerializer(online_users, many=True)
+        return serializer.data
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -46,11 +57,13 @@ class DefaultGroupRoomSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            "description",
             "avatar_url",
             "password",
             "zscore",
             "is_protected",
             "message_count",
+            "online_users",
         ]
         read_only_fields = ["zscore"]
         extra_kwargs = {"password": {"write_only": True}}

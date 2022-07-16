@@ -6,11 +6,11 @@ from chat.models.room import IndividualRoom
 from chat.serializers import (
     DefaultGroupRoomSerializer,
     RetrieveGroupRoomSerializer,
+    MessageSerializer,
 )
 from chat.models import GroupRoom
 from chat.permissions import GroupRoomPermission, IndividualRoomPermission
 from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
-from chat.serializers.message import MessageSerializer
 from chat.utils import channel_layer, check_group_password
 from .base import RoomViewSet
 

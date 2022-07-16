@@ -36,11 +36,16 @@ function NewRoom() {
 
   const [shouldUsePwd, setShouldUsePwd] = useState(false);
   const [roomPwd, setRoomPwd] = useState('');
+  const [description, setDescription] = useState('');
   const [nameFieldData, setNameFieldData] = useState({
     help_text: '',
     error: false,
   });
   const [pwdFieldData, setPwdFieldData] = useState({
+    help_text: '',
+    error: false,
+  });
+  const [descriptionFieldData, setDescriptionFieldData] = useState({
     help_text: '',
     error: false,
   });
@@ -82,6 +87,7 @@ function NewRoom() {
           method: 'post',
           body: {
             name: roomName,
+            description,
             password: roomPwd,
             avatar_url: url,
             is_protected: shouldUsePwd,
@@ -95,6 +101,8 @@ function NewRoom() {
               roomId: responseData.id,
               // @ts-ignore
               name: responseData.name,
+              // @ts-ignore
+              description: responseData.description,
               password: roomPwd,
               avatarUrl: url,
               isGroupRoom: true,
@@ -106,6 +114,7 @@ function NewRoom() {
             const responseData = response.data;
             const groupNameFieldData = { ...nameFieldData };
             const groupPasswordFieldData = { ...pwdFieldData };
+            const groupDescriptionFieldData = { ...descriptionFieldData };
             if (responseData.name) {
               [groupNameFieldData.help_text] = responseData.name;
               groupNameFieldData.error = true;
@@ -120,12 +129,20 @@ function NewRoom() {
               groupPasswordFieldData.help_text = '';
               groupPasswordFieldData.error = false;
             }
+            if (responseData.description) {
+              [groupDescriptionFieldData.help_text] = responseData.description;
+              groupDescriptionFieldData.error = true;
+            } else {
+              groupDescriptionFieldData.help_text = '';
+              groupDescriptionFieldData.error = false;
+            }
             showAlert({
               text: 'Error occurred while creating room.',
               severity: 'error',
             });
             setNameFieldData(groupNameFieldData);
             setPwdFieldData(groupPasswordFieldData);
+            setDescriptionFieldData(groupDescriptionFieldData);
           })
           .finally(() => setShouldShowWaitScreen(false));
       })
@@ -163,6 +180,7 @@ function NewRoom() {
               nameProps={{
                 error: nameFieldData.error,
                 helpText: nameFieldData.help_text,
+                label: 'Name',
               }}
               avatarUrl={avatarUrl}
               setAvatarUrl={setAvatarUrl}
@@ -171,6 +189,18 @@ function NewRoom() {
                 DefaultIcon: Group,
                 sprites: roomAvatarSprites[Math.floor(Math.random() * 4)],
               }}
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              margin="dense"
+              label="description"
+              fullWidth
+              multiline
+              value={description}
+              onChange={(evt) => setDescription(evt.target.value)}
+              helperText={descriptionFieldData.help_text}
+              error={descriptionFieldData.error}
             />
           </Grid>
           <Grid item>

@@ -35,25 +35,14 @@ function BasicInfo(props) {
 
   const handleRandomAvatar = () => {
     if (!randomClicked) setRandomClicked(true);
-    const randomAvatarUrl = `https://avatars.dicebear.com/api/${sprites}/${name}${Math.random()}.svg`;
+    const randomAvatarUrl = encodeURI(
+      `https://avatars.dicebear.com/api/${sprites}/${name}${Math.random()}.svg`
+    );
     setAvatarUrl(randomAvatarUrl);
   };
 
   return (
     <Grid container direction="column" spacing={2}>
-      <Grid item>
-        <TextField
-          autoFocus
-          margin="dense"
-          label={label}
-          fullWidth
-          value={name}
-          onChange={(evt) => onNameChange(evt.target.value)}
-          helperText={helpText}
-          error={error}
-          required
-        />
-      </Grid>
       <Grid item container justifyContent="center">
         <Grid item>
           {avatarUrl ? (
@@ -77,6 +66,18 @@ function BasicInfo(props) {
             Choose {!randomClicked ? 'random' : 'again'}
           </Button>
         </Grid>
+      </Grid>
+      <Grid item>
+        <TextField
+          margin="dense"
+          label={label}
+          fullWidth
+          value={name}
+          onChange={(evt) => onNameChange(evt.target.value)}
+          helperText={helpText}
+          error={error}
+          required
+        />
       </Grid>
     </Grid>
   );

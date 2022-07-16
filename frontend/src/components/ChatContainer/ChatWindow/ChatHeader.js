@@ -59,7 +59,7 @@ function ChatHeader() {
         });
       })
       .catch((error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        if (error.status === 401 || error.status === 403) {
           appStore.showAlert({
             text: 'Only creator can delete the room.',
             action: 'login',

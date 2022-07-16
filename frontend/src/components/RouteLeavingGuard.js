@@ -24,7 +24,7 @@ function RouteLeavingGuard(props) {
   };
   useEffect(() => {
     if (confirmedNavigation && toLocation) {
-      history.push(toLocation.pathname);
+      history.push(toLocation.pathname, toLocation.state);
     }
   }, [confirmedNavigation, history, toLocation]);
 

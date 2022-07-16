@@ -1,29 +1,20 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import {
-  Avatar,
-  Button,
-  Container,
-  Grid,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
+import { Avatar, Box, Button, Container, Grid, makeStyles } from '@material-ui/core';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import groupChatJson from 'assets/animations/group-chat.json';
-import CustomAvatar from 'components/Avatar';
 import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
 import { appStore } from 'stores';
+import TrendingGroups from './TrendingGroups';
 import GroupPasswordDialog from './GroupPasswordDialog';
 
 const useStyles = makeStyles((theme) => ({
+  root: {
+    backgroundColor: theme.palette.grey[100],
+  },
   groupChatUI: {
     [theme.breakpoints.down('sm')]: {
       alignItems: 'center',
@@ -55,11 +46,6 @@ const useStyles = makeStyles((theme) => ({
   },
   groupSearchLabelShrinked: {
     right: 'unset', // show complete label if shrinked
-  },
-  trendingGroupsTitle: {
-    [theme.breakpoints.down('sm')]: {
-      textAlign: 'center',
-    },
   },
 }));
 
@@ -144,9 +130,15 @@ function GroupChatUI() {
   };
 
   return (
-    <>
+    <Box className={classes.root}>
       <Container>
-        <Grid container justifyContent="space-between" spacing={2} alignItems="flex-start">
+        <Grid
+          container
+          justifyContent="space-between"
+          spacing={2}
+          alignItems="stretch"
+          className={classes.root}
+        >
           <Grid item container justifyContent="center" xs={12} md={6}>
             <Grid item>
               <Animation
@@ -160,7 +152,7 @@ function GroupChatUI() {
             </Grid>
           </Grid>
           <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
-            <Grid item container xs={12} spacing={2} className={classes.groupSearch}>
+            <Grid item container spacing={2} className={classes.groupSearch}>
               <Grid item xs>
                 <CustomAutoComplete
                   autoCompleteProps={{
@@ -222,30 +214,8 @@ function GroupChatUI() {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h4" className={classes.trendingGroupsTitle}>
-                Trending Rooms <TrendingUpIcon />
-              </Typography>
-              <List>
-                {trendingGroups.map((group) => (
-                  <ListItem
-                    button
-                    onClick={() => handleStartChat(group)}
-                    key={group.id}
-                    style={{ maxWidth: 'max-content' }}
-                  >
-                    <ListItemAvatar>
-                      <CustomAvatar name={group.name} avatarUrl={group.avatar_url} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={group.name}
-                      secondary={`${group.message_count} messages`}
-                      primaryTypographyProps={{ noWrap: true }}
-                      secondaryTypographyProps={{ noWrap: true }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+            <Grid item container xs>
+              <TrendingGroups trendingGroups={trendingGroups} onStartChat={handleStartChat} />
             </Grid>
           </Grid>
         </Grid>
@@ -256,7 +226,7 @@ function GroupChatUI() {
         handleStartGroupChat={handleStartGroupChat}
         chatWindowData={chatWindowData}
       />
-    </>
+    </Box>
   );
 }
 

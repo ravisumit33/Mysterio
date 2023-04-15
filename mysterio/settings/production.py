@@ -1,11 +1,10 @@
 import requests
 import dj_database_url
-from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import
 from core import secret_manager
 
 secret_manager.load_secrets()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
 
 DEBUG = False
 

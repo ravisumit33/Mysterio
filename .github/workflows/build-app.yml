@@ -40,9 +40,9 @@ jobs:
       db:
         image: postgres
         env:
-          POSTGRES_DB: mysterio
-          POSTGRES_USER: ci
-          POSTGRES_PASSWORD: cipass
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -63,9 +63,11 @@ jobs:
         pipenv sync
     - name: Run Tests
       env:
-        DB_NAME: mysterio
-        DB_USER: ci
-        DB_PASSWORD: cipass
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DJANGO_SETTINGS_MODULE: mysterio.settings.ci
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
         pipenv run python manage.py makemigrations
         pipenv run python manage.py migrate

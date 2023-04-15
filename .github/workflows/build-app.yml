@@ -69,7 +69,6 @@ jobs:
         DJANGO_SETTINGS_MODULE: mysterio.settings.ci
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
       run: |
-        pipenv run python manage.py makemigrations
         pipenv run python manage.py migrate
         pipenv run python manage.py collectstatic --noinput
         pipenv run python manage.py test --failfast --noinput --parallel -v 2

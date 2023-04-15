@@ -12,14 +12,12 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "www.mysterio-chat.com",
     "mysterio-chat.com",
-    "mysterio-chat.herokuapp.com",
-    "mysterio-env.eba-jmukjigp.ap-south-1.elasticbeanstalk.com"
+    "mysterio-env.eba-jmukjigp.ap-south-1.elasticbeanstalk.com",
 ]
 
 try:
     aws_local_ip = requests.get(
-      'http://169.254.169.254/latest/meta-data/local-ipv4',
-      timeout=0.01
+        "http://169.254.169.254/latest/meta-data/local-ipv4", timeout=0.01
     ).text
     ALLOWED_HOSTS.append(aws_local_ip)
 except requests.exceptions.ConnectionError:

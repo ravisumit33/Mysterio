@@ -1,5 +1,5 @@
 import logging
-from django.http import HttpResponse, HttpResponsePermanentRedirect
+from django.http import HttpResponse
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ def set_ws_on_session(get_response):
 
     return middleware
 
+
 def aws_health_check_middleware(get_response):
     """
     Respond to AWS ELB health checks. ELB does not set HTTP_HOST header.
@@ -26,24 +27,8 @@ def aws_health_check_middleware(get_response):
     """
 
     def middleware(request):
-        if request.path == '/health':
-            return HttpResponse('ok')
-        return get_response(request)
-
-    return middleware
-
-def redirect_herokuapp(get_response):
-    """
-    Redirect all requests from mysterio-chat.herokuapp.com to mysterio-chat.com
-    """
-
-    def middleware(request):
-        host = request.get_host()
-        if host == "mysterio-chat.herokuapp.com":
-            redirect_url = (
-                f"{request.scheme}://mysterio-chat.com{request.get_full_path()}"
-            )
-            return HttpResponsePermanentRedirect(redirect_url)
+        if request.path == "/health":
+            return HttpResponse("ok")
         return get_response(request)
 
     return middleware

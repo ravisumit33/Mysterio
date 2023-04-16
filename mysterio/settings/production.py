@@ -42,7 +42,7 @@ CELERY_BROKER_URL = os.getenv("REDIS_URL")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 
 
-SITE_ID = 2
+SITE_ID = 3
 
 LOGGING["loggers"] = {
     "mysterio": {

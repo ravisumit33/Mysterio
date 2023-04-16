@@ -1,4 +1,3 @@
-
 # Mysterio
 
 ![GitHub](https://img.shields.io/github/license/ravisumit33/Mysterio?color=dark%20green)
@@ -11,7 +10,7 @@
 
 Anonymous chat web app
 
-# Requirements
+## Requirements
 
 - Python >= 3.8
 - Node >= 16.13.2
@@ -19,65 +18,91 @@ Anonymous chat web app
 - Postgres >= 13.0
 - Redis >= 6.0.8
 
-# Steps for local development
+## Steps for local development
 
 1. Install python dependencies and pre-commit hook
    (You may need to add pipenv location to PATH)
 
-    ```sh
-    pip install --user pipenv
-    pipenv install --dev
-    pipenv shell
-    pre-commit install
-    ```
+   ```sh
+   pip install --user pipenv
+   pipenv sync --dev
+   pipenv shell
+   pre-commit install
+   ```
 
 2. Install node modules for frontend
 
-    ```sh
-    cd frontend && npm install && cd ..
-    ```
+   ```sh
+   cd frontend && npm install && cd ..
+   ```
 
 3. Setup postgres
-    - Install & run postgres on `localhost:5432`(default)
-    - Create a user and give `CREATEDB` permission to the user (for unit testing)
 
-    ```sh
-    createuser --interactive --pwprompt
-    ```
+   - Install & run postgres on `localhost:5432`(default)
+   - Create a user and give `CREATEDB` permission to the user (for unit testing)
 
-    - Create a database
+   ```sh
+   createuser --interactive --pwprompt
+   ```
 
-    ```sh
-    createdb --owner=<your_user> <your_db>
-    ```
+   - Create a database
+
+   ```sh
+   createdb --owner=<your_user> <your_db>
+   ```
 
 4. Setup redis
-    - Install & run redis on `localhost:6379`(default)
-     (Use [docker](https://hub.docker.com/_/redis) for easy setup)
+
+   - Install & run redis on `localhost:6379`(default)
 
 5. Setup environment variables
-    - Copy `.env.example` to `.env`
-    - Replace all variables having `<>` with your local values
-    - Add other environment variables if required
+
+   - Copy `.env.example` to `.env`
+   - Replace all variables having `<>` with your local values
+   - Add other environment variables if required
 
 6. Apply migrations
 
-      ```sh
-      python manage.py makemigrations
-      python manage.py migrate
-      ```
+   ```sh
+   python manage.py migrate
+   ```
 
 7. Start the app
 
-    ```sh
-    python start_app.py
-    ```
+   ```sh
+   python start_app.py
+   ```
 
-# Contributing
+## Social authentication setup
+
+1. Create a super user
+
+   ```sh
+   python manage.py createsuperuser
+   ```
+
+2. Open `http://localhost:8000/admin`(admin panel) and create a site with
+   `Domain name` as `localhost:8000` and `Display name` as `localhost`.
+   Click on the newly created site and note down the integer ID in the URL.
+
+3. Update `SITE_ID` in local settings to the above noted ID
+
+4. Add social apps in adming panel as below:
+   - **Google**
+     - Follow [tutorial](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)
+       by google to get google api client id and secret key.
+     - Select `Google Modified` in `Provider` and `Google` in `Name` fields.
+     - Use client id and secret key from google to fill `Client id` and
+       `Secret key` fields.
+     - Leave out `Key` field as it is.
+     - Select `localhost:8000` in `Available sites` and move it to `Chosen sites`.
+     - Click on `SAVE`.
+
+## Contributing
 
 Pull requests are welcome.
 For major changes, please open an issue first to discuss what you would like to change.
 
-# License
+## License
 
 [MIT](https://choosealicense.com/licenses/mit/)

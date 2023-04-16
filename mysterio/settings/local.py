@@ -26,7 +26,7 @@ STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, "public", "static"),
 ]
 
-SITE_ID = 5
+SITE_ID = 6
 
 
 LOGGING["loggers"] = {

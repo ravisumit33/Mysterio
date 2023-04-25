@@ -60,18 +60,12 @@ jobs:
   github-release:
     needs: deploy
     runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: "v$(date +'%d.%m.%Y_%H.%M.%S')"
     steps:
-    - uses: actions/checkout@v2
-    - name: Conventional Changelog Action
-      id: changelog
-      uses: TriPSs/conventional-changelog-action@v3
-      with:
-        github-token: ${{ secrets.github_token }}
-        output-file: "false"
+    - uses: actions/checkout@v3
     - name: Create Release
       uses: softprops/action-gh-release@v1
-      if: ${{ steps.changelog.outputs.skipped == 'false' }}
       with:
-        tag_name: ${{ steps.changelog.outputs.tag }}
-        name: ${{ steps.changelog.outputs.tag }}
-        body: ${{ steps.changelog.outputs.clean_changelog }}
+        tag_name: ${{ env.RELEASE_VERSION }}
+        name: ${{ env.RELEASE_VERSION }}

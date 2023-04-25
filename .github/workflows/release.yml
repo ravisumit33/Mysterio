@@ -1,4 +1,4 @@
-name: deploy-to-awseb
+name: release
 
 on:
   workflow_run:
@@ -16,10 +16,10 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node.version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -37,7 +37,7 @@ jobs:
         run: zip -r deploy_package.zip ./
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }}
@@ -56,3 +56,22 @@ jobs:
 
       - name: Deploy new ElasticBeanstalk Application Version
         run: aws elasticbeanstalk update-environment --environment-name mysterio-env --version-label "ver-${{ github.sha }}"
+
+  github-release:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Conventional Changelog Action
+      id: changelog
+      uses: TriPSs/conventional-changelog-action@v3
+      with:
+        github-token: ${{ secrets.github_token }
+        output-file: "false"
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ steps.changelog.outputs.skipped == 'false' }
+      with:
+        tag_name: ${{ steps.changelog.outputs.tag }
+        name: ${{ steps.changelog.outputs.tag }
+        body: ${{ steps.changelog.outputs.clean_changelog }

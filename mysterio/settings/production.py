@@ -60,6 +60,9 @@ LOGGING["loggers"] = {
     "celery.task": {
         "level": "INFO",
     },
+    "daphne": {
+        "level": "WARNING",
+    },
 }
 
 LOGGING["handlers"]["console"]["formatter"] = "verbose"

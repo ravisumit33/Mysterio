@@ -12,8 +12,15 @@ updates:
     reviewers:
       - "ravisumit33"
 
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/frontend" # Location of package manifests
+  - package-ecosystem: "npm"
+    directory: "/frontend" 
+    schedule:
+      interval: "monthly"
+    reviewers:
+      - "ravisumit33"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "monthly"
     reviewers:

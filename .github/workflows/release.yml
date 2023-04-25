@@ -60,10 +60,10 @@ jobs:
   github-release:
     needs: deploy
     runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: $(date +'%d.%m.%Y_%H.%M.%S')
     steps:
     - uses: actions/checkout@v3
+    - name: Set environment variable
+      run: echo "RELEASE_VERSION=$(date +'%d.%m.%Y_%H.%M.%S')" >> $GITHUB_ENV
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:

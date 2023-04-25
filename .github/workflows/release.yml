@@ -61,11 +61,11 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     env:
-      RELEASE_VERSION: "v$(date +'%d.%m.%Y_%H.%M.%S')"
+      RELEASE_VERSION: $(date +'%d.%m.%Y_%H.%M.%S')
     steps:
     - uses: actions/checkout@v3
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ env.RELEASE_VERSION }}
-        name: ${{ env.RELEASE_VERSION }}
+        tag_name: "v${{ env.RELEASE_VERSION }}"
+        name: "v${{ env.RELEASE_VERSION }}"

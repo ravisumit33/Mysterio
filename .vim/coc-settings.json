@@ -1,0 +1,7 @@
+{
+  "python.linting.pylintEnabled": true,
+  "python.formatting.provider": "black",
+  "coc.preferences.formatOnSave": true,
+  "eslint.autoFixOnSave": true,
+  "eslint.format.enable": true
+}

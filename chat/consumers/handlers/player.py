@@ -1,8 +1,9 @@
 import logging
-from chat.consumers.handlers.message import add_text_message
+
 import chat.models.room as Room
-from chat.models import Player
 from chat.constants import MessageType
+from chat.consumers.handlers.message import add_text_message
+from chat.models import Player
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -23,11 +24,7 @@ def handle_player_info(consumer, message_data):
 
     channel_layer_info = consumer.channel_layer_info
 
-    room_cls = (
-        Room.GroupRoom
-        if channel_layer_info["is_group_consumer"]
-        else Room.IndividualRoom
-    )
+    room_cls = Room.GroupRoom if channel_layer_info["is_group_consumer"] else Room.IndividualRoom
     room_cls.objects.filter(id=consumer.room_id).update(player=player)
 
     if channel_layer_info["is_group_consumer"]:

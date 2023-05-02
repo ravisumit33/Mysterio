@@ -1,14 +1,16 @@
 from abc import abstractmethod
+
 from django.contrib.sessions.models import Session
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from chat.constants import GroupPrefix, MessageType
 from chat.serializers import PlayerSerializer
 from chat.utils import channel_layer
 
 
-class RoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
+class RoomViewSet(viewsets.ModelViewSet):
     """
     Base viewset for rooms
     """
@@ -31,9 +33,7 @@ class RoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
         return self.serializer_classes[self.action]
 
     @action(methods=["get"], detail=True)
-    def get_player(
-        self, request, pk=None
-    ):  # pylint: disable=unused-argument,invalid-name
+    def get_player(self, request, pk=None):
         """
         Action for retrieving player details
         """
@@ -45,9 +45,7 @@ class RoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=["patch"], detail=True)
-    def update_player(
-        self, request, pk=None
-    ):  # pylint: disable=unused-argument,invalid-name
+    def update_player(self, request, pk=None):
         """
         Action for updating player state and current_time
         """
@@ -64,9 +62,7 @@ class RoomViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
         if "state" in request.data:
             serializer_data = serializer.data
             room_prefix = (
-                GroupPrefix.GROUP_ROOM
-                if self.is_group_room
-                else GroupPrefix.INDIVIDUAL_ROOM
+                GroupPrefix.GROUP_ROOM if self.is_group_room else GroupPrefix.INDIVIDUAL_ROOM
             )
             channel_layer.group_send(
                 room_prefix + str(room.id),

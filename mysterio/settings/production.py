@@ -2,7 +2,7 @@ from core import secret_manager
 
 secret_manager.load_secrets()
 
-from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+from mysterio.settings.base import *
 
 DEBUG = False
 

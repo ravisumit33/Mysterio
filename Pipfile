@@ -7,32 +7,32 @@ name = "pypi"
 python_version = "3.8"
 
 [packages]
-channels = ">=3.0.4"
-channels-redis = ">=3.3.1"
-psycopg2 = ">=2.9.3"
-colorlog = ">=6.6.0"
-celery = {extras = ["redis"], version = ">=5.2.3"}
-django-celery-beat = ">=2.2.1"
-Django = ">=3.2.12"
-djangorestframework = ">=3.13.1"
-django-cors-headers = ">=3.11.0"
-whitenoise = {extras = ["brotli"], version = ">=5.3.0"}
-dj-rest-auth = {extras = ["with_social"], version = ">=2.2.3"}
-google-auth-oauthlib = ">=0.4.6"
-google-auth-httplib2 = ">=0.1.0"
-djangorestframework-simplejwt = ">=5.0.0"
-boto3 = ">=1.22.9"
-gunicorn = ">=20.1.0"
-dj-database-url = ">=0.5.0"
+channels = "==3.*"
+channels-redis = "==3.*"
+psycopg2 = "==2.*"
+colorlog = "==6.*"
+celery = { extras = ["redis"], version = "==5.*" }
+django-celery-beat = "==2.*"
+Django = "==3.*"
+djangorestframework = "==3.*"
+django-cors-headers = "==3.*"
+whitenoise = { extras = ["brotli"], version = "==5.*" }
+dj-rest-auth = { extras = ["with_social"], version = "==2.*" }
+google-auth-oauthlib = "==0.*"
+google-auth-httplib2 = "==0.*"
+djangorestframework-simplejwt = "==5.*"
+boto3 = "==1.*"
+gunicorn = "==20.*"
+dj-database-url = "==0.*"
 
 [dev-packages]
-pylint = ">=2.14.0"
-pylint-django = ">=2.5.0"
-black = ">=22.1.0"
-pre-commit = ">=2.17.0"
-python-dotenv = {extras = ["cli"], version = ">=0.19.2"}
-django-extensions = ">=3.1.5"
-pyparsing = ">=3.0.7"
-pydot = ">=1.4.2"
-awsebcli = ">=3.20.3"
-django-stubs = ">=1.10.1"
+black = "==22.*"
+pre-commit = "==2.*"
+python-dotenv = { extras = ["cli"], version = "==0.*" }
+django-extensions = "==3.*"
+pyparsing = "==3.*"
+pydot = "==1.*"
+awsebcli = "==3.*"
+django-stubs = "==1.*"
+ipython = "==8.*"
+ruff = "==0.*"

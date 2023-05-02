@@ -1,7 +1,7 @@
-from multiprocessing import Process
-import subprocess
-import os
 import argparse
+import os
+import subprocess
+from multiprocessing import Process
 
 
 def start_dev_smtp_server():

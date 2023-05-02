@@ -1,5 +1,6 @@
 {
-  "python.linting.pylintEnabled": true,
+  "ruff.enable": true,
+  "ruff.autoFixOnSave": true,
   "python.formatting.provider": "black",
   "coc.preferences.formatOnSave": true,
   "eslint.autoFixOnSave": true,

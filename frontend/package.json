@@ -39,8 +39,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "precommit-lint": "python scripts/precommit_lint.py"
+    "eject": "react-scripts eject"
   },
   "browserslist": {
     "production": [

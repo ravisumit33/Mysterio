@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from chat.models import GroupChannel
+
 from .chat_session import ChatSessionSerializer
 
 

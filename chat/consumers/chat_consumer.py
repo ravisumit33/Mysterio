@@ -1,17 +1,20 @@
-import logging
 import json
-from channels.generic.websocket import WebsocketConsumer
+import logging
+
 from channels.exceptions import DenyConnection
+from channels.generic.websocket import WebsocketConsumer
 from django.db.utils import IntegrityError
-from chat.consumers.handlers.message import add_text_message
+
 import chat.models.channel as Channel
-from chat.constants import MessageType, GroupPrefix
+from chat.constants import GroupPrefix, MessageType
+from chat.consumers.handlers.message import add_text_message
 from chat.utils import channel_layer
+
 from .handlers import (
+    handle_player_end,
+    handle_player_info,
     handle_text_message,
     handle_user_info,
-    handle_player_info,
-    handle_player_end,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,9 +60,7 @@ class ChatConsumer(WebsocketConsumer):
                 logger.error("Channel name: %s", self.channel_name)
                 logger.error("Room id: %d", self.room_id)
                 raise DenyConnection from excp
-            channel_layer.group_add(
-                GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name
-            )
+            channel_layer.group_add(GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name)
             logger.info("New group channel created")
             self.channel_id = new_channel.id
             channel_layer.group_add(
@@ -97,9 +98,7 @@ class ChatConsumer(WebsocketConsumer):
                     text=f"{self.profile['name']} left",
                     msg_type=MessageType.USER_LEFT,
                 )
-            Channel.GroupChannel.objects.filter(pk=self.channel_id).update(
-                is_active=False
-            )
+            Channel.GroupChannel.objects.filter(pk=self.channel_id).update(is_active=False)
             logger.info("Group channel disconnected")
 
         if self.player_id is not None:
@@ -125,9 +124,7 @@ class ChatConsumer(WebsocketConsumer):
             handle_user_info(self, message_data)
         else:
             if not self.profile:
-                logger.error(
-                    "SuspiciousOperation : Socket message received without user info"
-                )
+                logger.error("SuspiciousOperation : Socket message received without user info")
                 self.close()
                 return
             if message_type == MessageType.TEXT:

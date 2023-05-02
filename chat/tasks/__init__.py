@@ -8,9 +8,9 @@ from celery.utils.log import get_task_logger
 from chat.constants import MATCH_DELAY, CacheKey
 from chat.models.channel import IndividualChannel
 
+from .group_room import delete_old_group_channels
 from .match import process_unmatched_channels
 from .trending_rooms import update_trending_rooms
-from .group_room import delete_old_group_channels
 
 logger = get_task_logger(__name__)
 

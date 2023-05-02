@@ -1,8 +1,10 @@
 from math import sqrt
-from django.utils import timezone
+
 from django.db.models import Count
 from django.db.models.functions import TruncDay
-from chat.models import Message, GroupRoom
+from django.utils import timezone
+
+from chat.models import GroupRoom, Message
 
 
 def get_zscore(obs, pop):

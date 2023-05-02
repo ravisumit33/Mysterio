@@ -1,5 +1,6 @@
 import json
 import logging
+
 from django.conf import settings
 from django.urls import reverse_lazy
 
@@ -23,16 +24,14 @@ def add_jwt_cookie_to_request_body(get_response):
             if request.body != b"":
                 try:
                     data = json.loads(request.body)
-                except:  # pylint: disable=W0702
+                except json.JSONDecodeError:
                     logger.error("Content-Type should be json")
                     return get_response(request)
                 if settings.JWT_AUTH_REFRESH_COOKIE in request.COOKIES:
                     data["refresh"] = request.COOKIES[settings.JWT_AUTH_REFRESH_COOKIE]
                 if settings.JWT_AUTH_COOKIE in request.COOKIES:
                     data["token"] = request.COOKIES[settings.JWT_AUTH_COOKIE]
-                request._body = json.dumps(data).encode(  # pylint: disable=W0212
-                    "utf-8"
-                )
+                request._body = json.dumps(data).encode("utf-8")
             else:
                 logger.error("Request body should not be empty")
         return get_response(request)

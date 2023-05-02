@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
-from datetime import timedelta
 import os
+from datetime import timedelta
 from pathlib import Path
 
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -79,7 +79,7 @@ FRONTEND_ROUTES = [
     "register/",
     "account/",
     "chat/",
-    "account/confirm-email/(?P<key>[-:\w]+)/",  # pylint: disable=anomalous-backslash-in-string
+    "account/confirm-email/(?P<key>[-:\w]+)/",
 ]
 
 
@@ -211,9 +211,7 @@ LOGGING = {
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("dj_rest_auth.jwt_auth.JWTCookieAuthentication",),
 }
 
 REST_AUTH_SERIALIZERS = {

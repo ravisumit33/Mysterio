@@ -1,6 +1,8 @@
 import logging
+
 from django.contrib.sessions.models import Session
 from rest_framework import permissions
+
 from chat.utils import check_group_password
 
 logger = logging.getLogger(__name__)
@@ -29,9 +31,7 @@ class GroupRoomPermission(permissions.BasePermission):
             return password_valid
         if view.action in get_permission_restricted:
             remove_restriction = request.user.is_authenticated and password_valid
-            return (
-                get_permission_restricted[view.action] if remove_restriction else False
-            )
+            return get_permission_restricted[view.action] if remove_restriction else False
         return False
 
 

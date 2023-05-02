@@ -1,9 +1,10 @@
-import os
 import json
+import os
+
 import boto3
 
 
-class AWSSecretManager:  # pylint: disable=too-few-public-methods
+class AWSSecretManager:
     """
     Manager for getting secrets from AWS
     """
@@ -23,9 +24,7 @@ class AWSSecretManager:  # pylint: disable=too-few-public-methods
         try:
             if secret_name == "":
                 raise Exception("Secret Name cannot be Null ")
-            get_secret_value_response = self.client.get_secret_value(
-                SecretId=secret_name
-            )
+            get_secret_value_response = self.client.get_secret_value(SecretId=secret_name)
             if "SecretString" in get_secret_value_response:
                 secret = get_secret_value_response["SecretString"]
                 secret = json.loads(secret)

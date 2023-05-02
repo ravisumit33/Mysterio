@@ -1,8 +1,9 @@
 import logging
 from unittest.mock import patch
-from django.test import TestCase
-from django.template.loader import get_template
+
 from django.template.exceptions import TemplateDoesNotExist
+from django.template.loader import get_template
+from django.test import TestCase
 
 
 class FrontendViewTests(TestCase):
@@ -16,7 +17,7 @@ class FrontendViewTests(TestCase):
         self.assertTemplateUsed(response, "index.html")
 
     @patch("core.views.get_template", side_effect=TemplateDoesNotExist("index.html"))
-    def test_index_page_404(self, mock_get_template):  # pylint: disable=unused-argument
+    def test_index_page_404(self, mock_get_template):
         """Test if 404 returned if index page not available"""
         logging.disable(logging.CRITICAL)
         response = self.client.get("/")

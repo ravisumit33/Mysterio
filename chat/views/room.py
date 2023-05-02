@@ -1,21 +1,23 @@
-from rest_framework import status, pagination
-from rest_framework.response import Response
+from rest_framework import pagination, status
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
+from chat.models import GroupRoom
 from chat.models.room import IndividualRoom
+from chat.permissions import GroupRoomPermission, IndividualRoomPermission
 from chat.serializers import (
     DefaultGroupRoomSerializer,
-    RetrieveGroupRoomSerializer,
     MessageSerializer,
+    RetrieveGroupRoomSerializer,
 )
-from chat.models import GroupRoom
-from chat.permissions import GroupRoomPermission, IndividualRoomPermission
-from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
 from chat.utils import channel_layer, check_group_password
+
 from .base import RoomViewSet
 
 
-class IndividualRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
+class IndividualRoomViewSet(RoomViewSet):
     """
     API endpoint for individual room
     """
@@ -28,7 +30,7 @@ class IndividualRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
         return False
 
 
-class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
+class GroupRoomViewSet(RoomViewSet):
     """
     API endpoint that for group room
     """
@@ -64,9 +66,7 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
         return super().destroy(request, *args, **kwargs)
 
     @action(methods=["post"], detail=True)
-    def set_like(
-        self, request, pk=None
-    ):  # pylint: disable=invalid-name,unused-argument
+    def set_like(self, request, pk=None):
         """
         Action to like group room
         """
@@ -81,9 +81,7 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=True)
-    def get_messages(
-        self, request, pk=None
-    ):  # pylint: disable=unused-argument,invalid-name
+    def get_messages(self, request, pk=None):
         """
         Action for getting messages of group room
         """
@@ -96,9 +94,7 @@ class GroupRoomViewSet(RoomViewSet):  # pylint: disable=too-many-ancestors
         return paginator.get_paginated_response(serializer.data)
 
     @action(methods=["get"], detail=True, permission_classes=[AllowAny])
-    def check_password(
-        self, request, pk=None
-    ):  # pylint: disable=unused-argument,invalid-name
+    def check_password(self, request, pk=None):
         """
         Action for checking group room password
         """

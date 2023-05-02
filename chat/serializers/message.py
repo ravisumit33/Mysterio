@@ -1,9 +1,11 @@
 from rest_framework import serializers
+
 from chat.models import Message, TextData
+
 from .channel import GroupChannelSerializer
 
 
-class MessageContentField(serializers.RelatedField):  # pylint:disable=abstract-method
+class MessageContentField(serializers.RelatedField):
     """
     A custom field to use for the content_object generic relationship on Message model
     """

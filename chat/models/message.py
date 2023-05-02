@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
 
 
 class Message(models.Model):
@@ -46,7 +46,7 @@ class ContentData(models.Model):
         """
         Get message object
         """
-        return self.message_relation.first()  # pylint:disable=no-member
+        return self.message_relation.first()
 
     class Meta:
         abstract = True

@@ -1,19 +1,21 @@
 from email.mime.image import MIMEImage
-from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import EmailMultiAlternatives
-from django.contrib.staticfiles.storage import staticfiles_storage
-from django.template.loader import render_to_string
-from django.urls.base import reverse
-from allauth.utils import build_absolute_uri
+
 from allauth.account.adapter import DefaultAccountAdapter as RestAuthAccountAdapter
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.views import (
     OAuth2CallbackView,
     OAuth2LoginView,
 )
+from allauth.utils import build_absolute_uri
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.urls.base import reverse
 from google.auth.transport import requests
 from google.oauth2 import id_token
+
 from .provider import GoogleModifiedProvider
 
 
@@ -25,9 +27,7 @@ class GoogleOAuth2AdapterIdToken(GoogleOAuth2Adapter):
     provider_id = GoogleModifiedProvider.id
 
     def complete_login(self, request, app, token, **kwargs):
-        idinfo = id_token.verify_oauth2_token(
-            token.token, requests.Request(), app.client_id
-        )
+        idinfo = id_token.verify_oauth2_token(token.token, requests.Request(), app.client_id)
         if idinfo["iss"] not in ["accounts.google.com", "https://accounts.google.com"]:
             raise ValueError("Wrong issuer.")
         extra_data = idinfo
@@ -74,12 +74,8 @@ class AccountAdapter(RestAuthAccountAdapter):
         subject = " ".join(subject.splitlines()).strip()
         subject = self.format_email_subject(subject)
         from_email = self.get_from_email()
-        html = render_to_string(
-            f"{template_prefix}_message.html", context, self.request
-        ).strip()
-        msg = EmailMultiAlternatives(
-            subject, html, from_email, to_email, headers=headers
-        )
+        html = render_to_string(f"{template_prefix}_message.html", context, self.request).strip()
+        msg = EmailMultiAlternatives(subject, html, from_email, to_email, headers=headers)
         msg.content_subtype = "html"
         msg.mixed_subtype = "related"
         img_path = staticfiles_storage.path("quick_chat.png")

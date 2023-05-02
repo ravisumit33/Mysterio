@@ -1,7 +1,9 @@
 import logging
+
 from django.db.utils import IntegrityError
-from chat.models import Message, TextData
+
 from chat.constants import MessageType
+from chat.models import Message, TextData
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)

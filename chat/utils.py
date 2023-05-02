@@ -1,6 +1,6 @@
-from django.contrib.auth.hashers import check_password
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.contrib.auth.hashers import check_password
 
 
 class ChannelLayerOps:
@@ -49,7 +49,5 @@ def check_group_password(request, group_room):
     """
     request_password = request.META.get("HTTP_X_GROUP_PASSWORD", "")
     return (
-        check_password(request_password, group_room.password)
-        if group_room.is_protected
-        else True
+        check_password(request_password, group_room.password) if group_room.is_protected else True
     )

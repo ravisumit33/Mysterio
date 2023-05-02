@@ -1,9 +1,11 @@
 import logging
-from django.test import TestCase, override_settings
+
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import Http404
-from django.core.exceptions import SuspiciousOperation, PermissionDenied
+from django.test import TestCase, override_settings
 from django.urls import path
 from django.views.defaults import server_error
+
 from mysterio.urls import urlpatterns as RootUrlPatterns
 
 
@@ -72,9 +74,7 @@ class ErrorCodeHandlerTests(TestCase):
         """Test if correct template and error code exists in response after http errors"""
         for expected_response in self.responses:
             with self.subTest(status_code=expected_response["status_code"]):
-                client_response = self.client.get(
-                    "/" + str(expected_response["status_code"]) + "/"
-                )
+                client_response = self.client.get("/" + str(expected_response["status_code"]) + "/")
                 self.assertTemplateUsed(client_response, expected_response["template"])
                 self.assertEqual(
                     client_response.status_code,

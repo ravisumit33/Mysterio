@@ -1,5 +1,5 @@
-from allauth.socialaccount.providers.google.provider import GoogleProvider
 from allauth.account.models import EmailAddress
+from allauth.socialaccount.providers.google.provider import GoogleProvider
 
 
 class GoogleModifiedProvider(GoogleProvider):

@@ -1,8 +1,9 @@
 from django.db import models
+
 from .chat_session import ChatSession
 
 
-def delete_session(sender, instance, **kwargs):  # pylint: disable=unused-argument
+def delete_session(sender, instance, **kwargs):
     """
     Receiver function to delete session after channel delete
     """
@@ -13,9 +14,7 @@ class Channel(models.Model):
     """Channel Model for individual chat"""
 
     name = models.CharField(max_length=100, unique=True)
-    chat_session = models.OneToOneField(
-        "chat.ChatSession", on_delete=models.CASCADE, null=True
-    )
+    chat_session = models.OneToOneField("chat.ChatSession", on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @classmethod

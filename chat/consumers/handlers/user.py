@@ -1,8 +1,10 @@
 import logging
+
 from django.contrib.sessions.models import Session
+
+import chat.models.channel as Channel
 from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
-import chat.models.channel as Channel
 from chat.models import ChatSession
 from chat.tasks import match_channels
 from chat.utils import channel_layer
@@ -68,7 +70,5 @@ def handle_user_info(consumer, message_data):
             MessageType.USER_JOINED,
             {"newJoinee": consumer.profile},
         )
-        add_text_message(
-            consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED
-        )
+        add_text_message(consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED)
     logger.info("User joined.")

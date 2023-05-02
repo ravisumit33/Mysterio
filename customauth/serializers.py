@@ -1,9 +1,9 @@
+from dj_rest_auth.serializers import LoginSerializer as RestAuthLoginSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from dj_rest_auth.serializers import LoginSerializer as RestAuthLoginSerializer
 
 
-class LoginSerializer(RestAuthLoginSerializer):  # pylint: disable=abstract-method
+class LoginSerializer(RestAuthLoginSerializer):
     """
     Custom login serializer to remove username field & make email field required
     """

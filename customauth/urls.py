@@ -1,5 +1,6 @@
 from django.urls import path
 from django.urls.conf import include
+
 import customauth.views as CustomAuthViews
 
 urlpatterns = [

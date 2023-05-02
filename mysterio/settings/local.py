@@ -1,12 +1,13 @@
-from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
+from pathlib import Path
+
 from corsheaders.defaults import default_headers
+from dotenv import load_dotenv
 
 env_path = Path(".") / ".env"
 load_dotenv(dotenv_path=env_path)
 
-from mysterio.settings.base import *  # pylint: disable=wildcard-import,unused-wildcard-import,wrong-import-position
+from mysterio.settings.base import *
 
 SECRET_KEY = "=8%vvj-i)i^=1@16^cevdpy(lc9_66!bq_w_hg*d1*nxnzow"
 

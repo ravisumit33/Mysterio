@@ -1,26 +1,25 @@
 repos:
-- repo: https://github.com/PyCQA/pylint
-  rev: v2.14.0
-  hooks:
-  - id: pylint
-    language: system
-    verbose: true
-    exclude: "^.*/migrations/.*$"
-    args: ["--django-settings-module=mysterio.settings.local", "--disable=W0511"]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.263
+    hooks:
+      - id: ruff
+        language: system
+        exclude: "^.*/migrations/.*$"
+        args: [--fix, --exit-non-zero-on-fix]
 
-- repo: https://github.com/psf/black
-  rev: 22.3.0
-  hooks:
-  - id: black
-    language: system
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        language: system
+        exclude: "^.*/migrations/.*$"
 
-- repo: https://github.com/pre-commit/mirrors-eslint
-  rev: v8.17.0
-  hooks:
-  - id: eslint
-    language: system
-    language_version: default
-    verbose: true
-    entry: npm run --silent --prefix frontend precommit-lint
-    args: ["--", "--max-warnings=0", "--rule", "no-console:0", "--files"] # --files arg indicate start of filenames
-    additional_dependencies: []
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.17.0
+    hooks:
+      - id: eslint
+        language: system
+        language_version: default
+        entry: npx --prefix frontend eslint
+        args: ["--max-warnings=0", "--rule", "no-console:0"]
+        additional_dependencies: []

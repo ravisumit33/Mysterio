@@ -1,10 +1,12 @@
 import logging
+
 from django.db import transaction
-from chat.utils import channel_layer
+
+from chat.constants import GroupPrefix, MessageType
 from chat.models.channel import IndividualChannel
 from chat.models.chat_session import ChatSession
 from chat.models.room import IndividualRoom
-from chat.constants import MessageType, GroupPrefix
+from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
 

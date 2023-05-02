@@ -1,10 +1,12 @@
 import logging
+
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
+
 from chat.models import GroupRoom
 from chat.serializers.channel import GroupChannelSerializer
-from .player import PlayerSerializer
 
+from .player import PlayerSerializer
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from chat.models import Player
+
 from .chat_session import ChatSessionSerializer
 
 

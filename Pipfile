@@ -16,7 +16,7 @@ django-celery-beat = "==2.*"
 Django = "==3.*"
 djangorestframework = "==3.*"
 django-cors-headers = "==3.*"
-whitenoise = { extras = ["brotli"], version = "==5.*" }
+whitenoise = { extras = ["brotli"], version = "==6.*" }
 dj-rest-auth = { extras = ["with_social"], version = "==2.*" }
 google-auth-oauthlib = "==0.*"
 google-auth-httplib2 = "==0.*"

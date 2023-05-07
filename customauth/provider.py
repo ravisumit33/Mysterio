@@ -5,6 +5,7 @@ from allauth.socialaccount.providers.google.provider import GoogleProvider
 class GoogleModifiedProvider(GoogleProvider):
     """
     Provider to support new google sign in apis
+    https://github.com/pennersr/django-allauth/issues/418#issuecomment-576937532
     """
 
     id = "google_modified"

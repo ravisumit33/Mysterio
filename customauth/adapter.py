@@ -22,6 +22,7 @@ from .provider import GoogleModifiedProvider
 class GoogleOAuth2AdapterIdToken(GoogleOAuth2Adapter):
     """
     Adapter to support new google sign in apis
+    https://github.com/pennersr/django-allauth/issues/418#issuecomment-583017614
     """
 
     provider_id = GoogleModifiedProvider.id

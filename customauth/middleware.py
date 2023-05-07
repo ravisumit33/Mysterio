@@ -12,6 +12,7 @@ def add_jwt_cookie_to_request_body(get_response):
     For some of the dj_rest_auth's POST endpoints JWT tokens are required in the body.
     Check for JWT_AUTH_REFRESH_COOKIE in the request.COOKIES.
     If there, move it to the body payload.
+    https://github.com/iMerica/dj-rest-auth/issues/97#issuecomment-739942573
     """
 
     def middleware(request):

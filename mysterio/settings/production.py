@@ -1,4 +1,3 @@
-import dj_database_url
 from core import secret_manager
 
 secret_manager.load_secrets()
@@ -13,11 +12,6 @@ ALLOWED_HOSTS = [
     "mysterio-env.eba-jmukjigp.ap-south-1.elasticbeanstalk.com",
 ]
 
-DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
-
-CHANNEL_LAYERS["default"]["CONFIG"] = {
-    "hosts": [os.getenv("REDIS_URL")],
-}
 
 TEMPLATES[0]["DIRS"] = [
     os.path.join(FRONTEND_DIR, "dist"),
@@ -26,11 +20,6 @@ TEMPLATES[0]["DIRS"] = [
 STATICFILES_DIRS = [
     os.path.join(FRONTEND_DIR, "dist", "static"),
 ]
-
-
-CELERY_BROKER_URL = os.getenv("REDIS_URL")
-
-CELERY_RESULT_BACKEND = os.getenv("REDIS_URL")
 
 
 SITE_ID = 3

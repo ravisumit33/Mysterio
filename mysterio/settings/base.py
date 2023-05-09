@@ -292,4 +292,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "customauth.tasks.flush_tokens",
         "schedule": timedelta(days=1),
     },
+    "backup_db": {
+        "task": "core.tasks.backup_db",
+        "schedule": timedelta(days=1),
+    },
 }

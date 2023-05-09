@@ -2,7 +2,7 @@ import os
 from logging.config import dictConfig
 from django.conf import settings
 from celery import Celery
-from celery.signals import worker_ready, setup_logging
+from celery.signals import setup_logging
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysterio.settings.local")
 
@@ -20,14 +20,3 @@ def config_loggers(*args, **kwags):  # pylint: disable=unused-argument
 
 
 app.autodiscover_tasks()
-
-
-@worker_ready.connect
-def at_start(sender, **kwargs):
-    """
-    Run periodic tasks at start.
-    """
-    with sender.app.connection() as conn:
-        sender.app.send_task("chat.tasks.trending_rooms", connection=conn)
-        sender.app.send_task("chat.tasks.group_rooms", connection=conn)
-        sender.app.send_task("customauth.tasks.flush_tokens", connection=conn)

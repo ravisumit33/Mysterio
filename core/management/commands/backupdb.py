@@ -29,7 +29,6 @@ class Command(BaseCommand):
                 f"--no-password "
                 f"--file={filename}"
             )
-            logger.info(cmd.split())
             try:
                 subprocess.run(
                     cmd,

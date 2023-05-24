@@ -11,7 +11,12 @@ class Player(models.Model):
         default="YT",
     )
     video_id = models.SlugField()
-    host = models.OneToOneField("chat.ChatSession", on_delete=models.CASCADE)
+    host = models.ForeignKey(
+        "chat.ChatSession",
+        on_delete=models.CASCADE,
+        related_name="players",
+        related_query_name="player",
+    )
     STATE_CHOICES = (
         (-1, "unstarted"),
         (0, "ended"),

@@ -122,8 +122,6 @@ CHANNEL_LAYERS = {
 
 CELERY_BROKER_URL = "redis://127.0.0.1:6379"
 
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379"
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -203,11 +201,7 @@ LOGGING = {
             "datefmt": "%H:%M:%S",
         },
     },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        }
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
     "formatter": "simple",
     "root": {
         "handlers": ["console"],
@@ -276,10 +270,6 @@ SOCIALACCOUNT_PROVIDERS = {
 CORS_ORIGIN_ALLOW_ALL = False
 
 CELERY_BEAT_SCHEDULE = {
-    "match": {
-        "task": "chat.tasks.match_channels",
-        "schedule": timedelta(seconds=1),
-    },
     "trending_rooms": {
         "task": "chat.tasks.trending_rooms",
         "schedule": timedelta(hours=12),

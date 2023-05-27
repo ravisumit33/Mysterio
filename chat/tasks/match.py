@@ -35,9 +35,7 @@ def process_unmatched_channels():
         unmatched_channels = (
             IndividualChannel.objects.select_for_update()
             .filter(is_matched=False)
-            .order_by("created_at")[
-                :100
-            ]  # TODO: set limit and scheduler interval after inspection
+            .order_by("created_at")
         )
         channels = unmatched_channels.values("id", "name", "chat_session")
 

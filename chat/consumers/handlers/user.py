@@ -4,6 +4,7 @@ from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
 import chat.models.channel as Channel
 from chat.models import ChatSession
+from chat.tasks import match_channels
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,7 @@ def handle_user_info(consumer, message_data):
         )
         logger.info("New individual channel created")
         logger.info("Channel id: %d", consumer.channel_id)
+        match_channels()
     else:
         Channel.GroupChannel.objects.filter(name=consumer.channel_name).update(
             chat_session_id=chat_session.id

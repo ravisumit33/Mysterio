@@ -24,3 +24,13 @@ class GroupPrefix:
     GROUP_CHANNEL = "grp_GroupChannel_"
     GROUP_ROOM = "grp_GroupRoom_"
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"
+
+
+MATCH_DELAY = 5  # Seconds to wait before scheduling match task
+
+
+@dataclass
+class CacheKey:
+    """Keys used to store data in cache"""
+
+    LAST_MATCH_SCHEDULED_TIME = "last_match_scheduled_time"

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Grid } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
 import GoogleLogin from './Google';

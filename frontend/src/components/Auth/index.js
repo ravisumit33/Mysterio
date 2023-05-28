@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
-import { Divider, Grid, Typography } from '@material-ui/core';
+import { Divider, Grid, Typography } from '@mui/material';
 import { profileStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';

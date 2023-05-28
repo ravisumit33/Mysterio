@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import lottie from 'lottie-web/build/player/lottie_light';
-import { Box, useMediaQuery, useTheme } from '@material-ui/core';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
 
 function Animation(props) {
   const {
@@ -17,7 +17,7 @@ function Animation(props) {
   } = props;
   const theme = useTheme();
   // @ts-ignore
-  const isSmallScreen = useMediaQuery((tm) => tm.breakpoints.down('sm'));
+  const isSmallScreen = useMediaQuery((tm) => tm.breakpoints.down('md'));
   useEffect(() => {
     lottie.loadAnimation({
       container: document.querySelector(`#${containerId}`),

@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import {
-  FormControlLabel,
-  Grid,
-  TextField,
-  Typography,
-  Switch,
-  Box,
-  Button,
-} from '@material-ui/core';
-import { Group } from '@material-ui/icons';
+import { FormControlLabel, Grid, TextField, Typography, Switch, Box, Button } from '@mui/material';
+import { Group } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';
@@ -193,8 +185,8 @@ function NewRoom() {
           </Grid>
           <Grid item>
             <TextField
-              margin="dense"
               label="description"
+              size="small"
               fullWidth
               multiline
               value={description}
@@ -217,8 +209,8 @@ function NewRoom() {
               <TextField
                 autoFocus
                 disabled={!shouldUsePwd}
-                margin="dense"
                 label="Password"
+                size="small"
                 fullWidth
                 value={roomPwd}
                 onChange={(evt) => setRoomPwd(evt.target.value)}

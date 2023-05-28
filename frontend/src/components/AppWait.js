@@ -1,6 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
 import WaitScreen from './WaitScreen';
 

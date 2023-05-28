@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { Box, Button, IconButton, Snackbar, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import Alert from '@material-ui/lab/Alert';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Button, IconButton, Snackbar, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import Alert from '@mui/material/Alert';
+import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { appStore, profileStore } from 'stores';
 

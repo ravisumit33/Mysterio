@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Box, Grid, Link, makeStyles, Typography } from '@material-ui/core';
+import { Avatar, Box, Grid, Link, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
 const useStyle = makeStyles((theme) => ({
   root: {

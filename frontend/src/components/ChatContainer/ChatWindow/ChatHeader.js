@@ -1,19 +1,12 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  Grid,
-  IconButton,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  makeStyles,
-  Tooltip,
-} from '@material-ui/core';
-import ReplayIcon from '@material-ui/icons/Replay';
-import CloseIcon from '@material-ui/icons/Close';
-import DeleteIcon from '@material-ui/icons/Delete';
-import PlayerIcon from '@material-ui/icons/PlayCircleFilledRounded';
-import FavoriteIcon from '@material-ui/icons/FavoriteBorder';
+import { Grid, IconButton, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import ReplayIcon from '@mui/icons-material/Replay';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PlayerIcon from '@mui/icons-material/PlayCircleFilledRounded';
+import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import { observer } from 'mobx-react-lite';
 import CustomAvatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
@@ -102,7 +95,12 @@ function ChatHeader() {
     };
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
-      <IconButton disabled={shouldDisable} onClick={handleReconnect} className={classes.icon}>
+      <IconButton
+        disabled={shouldDisable}
+        onClick={handleReconnect}
+        className={classes.icon}
+        size="large"
+      >
         <Tooltip title="Find someone else" arrow>
           <ReplayIcon />
         </Tooltip>
@@ -118,6 +116,7 @@ function ChatHeader() {
           disabled={shouldDisable}
           onClick={() => setShouldShowDeleteConfirmationDialog(true)}
           className={classes.icon}
+          size="large"
         >
           <Tooltip title="Delete room" arrow>
             <DeleteIcon />
@@ -128,6 +127,7 @@ function ChatHeader() {
           disabled={shouldDisable}
           onClick={() => toggleLikeRoom()}
           className={classes.icon}
+          size="large"
         >
           <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
             {!shouldDisable && isFavorite ? <div>{LikeAnimation}</div> : <FavoriteIcon />}
@@ -156,6 +156,7 @@ function ChatHeader() {
               chatWindowStore.togglePlayerOpen();
             }}
             className={classes.icon}
+            size="large"
           >
             <Tooltip
               title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
@@ -164,7 +165,7 @@ function ChatHeader() {
               {chatWindowStore.playerExists ? <div>{PlayingAnimation}</div> : <PlayerIcon />}
             </Tooltip>
           </IconButton>
-          <IconButton onClick={() => history.push('/')} className={classes.icon}>
+          <IconButton onClick={() => history.push('/')} className={classes.icon} size="large">
             <Tooltip title="Close" arrow>
               <CloseIcon />
             </Tooltip>

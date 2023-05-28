@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Box, Button, Grid, IconButton, InputAdornment, TextField } from '@material-ui/core';
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { Box, Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
@@ -87,8 +87,8 @@ function ChangePassword() {
           <Grid item>
             <TextField
               autoFocus
-              margin="dense"
               label="Old Password"
+              size="small"
               fullWidth
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
@@ -103,8 +103,8 @@ function ChangePassword() {
           </Grid>
           <Grid item>
             <TextField
-              margin="dense"
               label="New Password"
+              size="small"
               fullWidth
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -117,6 +117,7 @@ function ChangePassword() {
                     <IconButton
                       onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskNewPassword)}
                       disableRipple
+                      size="large"
                     >
                       {shouldUnmaskNewPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>

@@ -9,8 +9,8 @@ import {
   Select,
   TextField,
   Typography,
-} from '@material-ui/core';
-import YouTubeIcon from '@material-ui/icons/YouTube';
+} from '@mui/material';
+import YouTubeIcon from '@mui/icons-material/YouTube';
 import { appStore } from 'stores';
 import { ChatWindowStoreContext } from 'contexts';
 import { MessageType, PlayerName, renderPlayerName } from 'appConstants';
@@ -77,39 +77,31 @@ function PlayerActions() {
   };
 
   return (
-    <Grid container direction="column" alignItems="center">
-      <Grid item xs={12} container justifyContent="space-evenly" spacing={3} alignItems="center">
+    <Grid container direction="column" alignItems="center" mt={2}>
+      <Grid item container justifyContent="center" alignItems="center" columnSpacing={3}>
         <Grid item>
-          <Box maxWidth={120}>
-            <FormControl fullWidth>
-              <InputLabel id="video-player-select-label">Player</InputLabel>
-              <Select
-                labelId="video-player-select-label"
-                id="video-player-select"
-                value={videoPlayer}
-                label="Video Player Select"
-                // @ts-ignore
-                onChange={(evt) => setVideoPlayer(evt.target.value)}
-                renderValue={(value) => getPlayerIcon(value)}
-                MenuProps={{
-                  anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  },
-                  getContentAnchorEl: null,
-                }}
-              >
-                <MenuItem value={PlayerName.YOUTUBE}>
-                  {getPlayerIcon(PlayerName.YOUTUBE)}
-                  <Box component="span" px={1}>
-                    <Typography variant="subtitle1">
-                      {renderPlayerName(PlayerName.YOUTUBE)}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+          <FormControl fullWidth>
+            <InputLabel id="video-player-select-label">Player</InputLabel>
+            <Select
+              variant="standard"
+              labelId="video-player-select-label"
+              id="video-player-select"
+              value={videoPlayer}
+              label="Video Player Select"
+              // @ts-ignore
+              onChange={(evt) => setVideoPlayer(evt.target.value)}
+              renderValue={(value) => getPlayerIcon(value)}
+            >
+              <MenuItem value={PlayerName.YOUTUBE}>
+                {getPlayerIcon(PlayerName.YOUTUBE)}
+                <Box component="span" px={1}>
+                  <Typography variant="subtitle1">
+                    {renderPlayerName(PlayerName.YOUTUBE)}
+                  </Typography>
+                </Box>
+              </MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs sm={6}>
           <form
@@ -118,7 +110,7 @@ function PlayerActions() {
               setVideoIdFromUrl(videoUrl);
             }}
           >
-            <Grid container spacing={1} alignItems="center">
+            <Grid container columnSpacing={1} alignItems="center">
               <Grid item xs>
                 <TextField
                   variant="outlined"
@@ -144,7 +136,7 @@ function PlayerActions() {
           </form>
         </Grid>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item>
         <Typography variant="caption" color="textSecondary">
           ** Some videos may be unavailable due to copyright **
         </Typography>

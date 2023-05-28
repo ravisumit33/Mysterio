@@ -10,8 +10,8 @@ import {
   InputAdornment,
   TextField,
   Typography,
-} from '@material-ui/core';
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore, profileStore } from 'stores';
@@ -133,8 +133,8 @@ function UserForm(props) {
         <Grid item>
           <TextField
             autoFocus
-            margin="dense"
             label="Email"
+            size="small"
             fullWidth
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -149,8 +149,8 @@ function UserForm(props) {
         </Grid>
         <Grid item>
           <TextField
-            margin="dense"
             label="Password"
+            size="small"
             fullWidth
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -164,6 +164,7 @@ function UserForm(props) {
                   <IconButton
                     onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
                     disableRipple
+                    size="large"
                   >
                     {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>

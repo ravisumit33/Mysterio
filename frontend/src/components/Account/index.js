@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import Divider from '@material-ui/core/Divider';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Toolbar from '@material-ui/core/Toolbar';
-import { makeStyles } from '@material-ui/core/styles';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import Toolbar from '@mui/material/Toolbar';
+import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { Grid, ListItemAvatar } from '@material-ui/core';
-import { AccountCircle, ExitToApp, Favorite } from '@material-ui/icons';
+import { Box, Grid, ListItemAvatar } from '@mui/material';
+import { AccountCircle, ExitToApp, Favorite } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
 import Profile from './Profile';
@@ -23,9 +22,6 @@ import ConfirmEmail from './ConfirmEmail';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    display: 'flex',
-  },
   drawer: {
     [theme.breakpoints.up('sm')]: {
       width: drawerWidth,
@@ -150,7 +146,7 @@ function Account(props) {
             <Grid item container>
               <Grid item>
                 <nav className={classes.drawer} aria-label="account details">
-                  <Hidden smUp>
+                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                     <Drawer
                       variant="temporary"
                       anchor="left"
@@ -165,8 +161,8 @@ function Account(props) {
                     >
                       {drawer}
                     </Drawer>
-                  </Hidden>
-                  <Hidden xsDown>
+                  </Box>
+                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                     <Drawer
                       classes={{
                         paper: classes.drawerPaper,
@@ -176,7 +172,7 @@ function Account(props) {
                     >
                       {drawer}
                     </Drawer>
-                  </Hidden>
+                  </Box>
                 </nav>
               </Grid>
               <Grid item xs>

@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { ChatWindowStoreContext } from 'contexts';
 import { Virtuoso } from 'react-virtuoso';
-import { alpha, Badge, Grid, IconButton, makeStyles, Tooltip } from '@material-ui/core';
+import { alpha, Badge, Grid, IconButton, Tooltip } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType } from 'appConstants';
 import { useGoToBottom } from 'hooks';
 
@@ -62,6 +63,7 @@ function MessageBox(props) {
             });
           }}
           style={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
+          size="large"
         >
           <Tooltip title="Go to bottom" arrow>
             <Badge color="secondary" badgeContent={unreadMessagesCount}>

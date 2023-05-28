@@ -6,15 +6,14 @@ import {
   Box,
   Container,
   Grid,
-  Hidden,
   IconButton,
-  makeStyles,
   Menu,
   MenuItem,
   Toolbar,
   Typography,
-} from '@material-ui/core';
-import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@material-ui/icons';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
@@ -180,14 +179,20 @@ function NavBar() {
   }));
 
   const navbarMenu = navbarBtns.map((navbarBtn) => (
-    <Grid item key={navbarBtn.key}>
+    <Grid item key={navbarBtn.key} sx={{ display: { xs: 'none', sm: 'block' } }}>
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <NavbarButton {...navbarBtn.commonProps} />
     </Grid>
   ));
   const hamburgerMenu = (
-    <>
-      <IconButton edge="start" color="inherit" aria-label="menu" onClick={handleHamburgerClick}>
+    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+      <IconButton
+        edge="start"
+        color="inherit"
+        aria-label="menu"
+        onClick={handleHamburgerClick}
+        size="large"
+      >
         <MenuIcon />
       </IconButton>
       <Menu
@@ -203,27 +208,33 @@ function NavBar() {
           </MenuItem>
         ))}
       </Menu>
-    </>
+    </Box>
   );
 
   return (
     <AppBar position="sticky">
       <Toolbar disableGutters>
         {atAccountPage && (
-          <Hidden xsDown>
-            <Box className={classes.drawerPlaceholder} />
-          </Hidden>
+          <Box
+            sx={{ display: { xs: 'none', sm: 'block' } }}
+            className={classes.drawerPlaceholder}
+          />
         )}
         <Container>
           <Grid container alignItems="center" justifyContent="center">
             {atAccountPage && (
-              <Hidden smUp>
+              <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                 <Grid item xs>
-                  <IconButton onClick={handleAccountBtnClick} color="inherit" aria-label="account">
+                  <IconButton
+                    onClick={handleAccountBtnClick}
+                    color="inherit"
+                    aria-label="account"
+                    size="large"
+                  >
                     <AccountCircle fontSize="large" />
                   </IconButton>
                 </Grid>
-              </Hidden>
+              </Box>
             )}
             <Grid item>
               <RouterLink to="/">
@@ -233,8 +244,8 @@ function NavBar() {
               </RouterLink>
             </Grid>
             <Grid item container justifyContent="flex-end" xs alignItems="center">
-              <Hidden xsDown>{navbarMenu}</Hidden>
-              <Hidden smUp>{hamburgerMenu}</Hidden>
+              {navbarMenu}
+              {hamburgerMenu}
             </Grid>
           </Grid>
         </Container>

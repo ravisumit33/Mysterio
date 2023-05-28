@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Box, Grid, Icon, makeStyles, SvgIcon, Typography } from '@material-ui/core';
+import { Avatar, Box, Grid, Icon, SvgIcon, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
 const useStyle = makeStyles((theme) => ({
   root: {

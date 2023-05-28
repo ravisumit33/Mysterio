@@ -1,5 +1,6 @@
 import React from 'react';
-import { alpha, Box, Button, CardMedia, Grid, makeStyles, useMediaQuery } from '@material-ui/core';
+import { alpha, Box, Button, CardMedia, Grid, useMediaQuery } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
@@ -40,7 +41,7 @@ function ChatContainer() {
   const { chatWindow } = appStore;
   const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   return chatWindow ? (
     <ChatWindowStoreContext.Provider value={chatWindow}>

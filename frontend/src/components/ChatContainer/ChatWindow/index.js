@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { alpha, Box, Grid, LinearProgress, makeStyles, Typography } from '@material-ui/core';
+import { alpha, Box, Grid, LinearProgress, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { ChatStatus, MessageType } from 'appConstants';

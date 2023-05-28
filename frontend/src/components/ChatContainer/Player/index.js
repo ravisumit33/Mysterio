@@ -4,11 +4,11 @@ import {
   Button,
   createTheme,
   Grid,
-  makeStyles,
   ThemeProvider,
+  StyledEngineProvider,
   Typography,
-} from '@material-ui/core';
-import SyncIcon from '@material-ui/icons/Sync';
+} from '@mui/material';
+import SyncIcon from '@mui/icons-material/Sync';
 import { ChatWindowStoreContext } from 'contexts';
 import { createDeferredPromiseObj, fetchUrl } from 'utils';
 import { observer } from 'mobx-react-lite';
@@ -17,12 +17,6 @@ import { useConstant, useGetPlayer, useHandlePlayer } from 'hooks';
 import RouterLink from 'components/RouterLink';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
-
-const useStyles = makeStyles((theme) => ({
-  section: {
-    padding: theme.spacing(1),
-  },
-}));
 
 function Player(props) {
   const { isSmallScreen } = props;
@@ -39,7 +33,6 @@ function Player(props) {
   } = chatWindowStore;
   const { adminAccess, roomId } = roomInfo;
 
-  const classes = useStyles();
   const embedPlayerRef = useRef(null);
   const playerReady = useConstant(createDeferredPromiseObj);
   const setEmbedPlayer = useCallback((player) => {
@@ -163,72 +156,55 @@ function Player(props) {
 
   const shouldShowPlayerActions = playerSynced ? isHost : adminAccess;
 
-  const darkModeTheme = useMemo(() => createTheme({ palette: { type: 'dark' } }), []);
+  const darkModeTheme = useMemo(() => createTheme({ palette: { mode: 'dark' } }), []);
   return (
-    <Grid
-      item
-      container
-      direction="column"
-      xs
-      alignItems="stretch"
-      justifyContent={isSmallScreen ? 'space-evenly' : undefined}
-    >
-      <ThemeProvider theme={darkModeTheme}>
-        {shouldShowPlayerActions && (
-          <Grid item className={classes.section}>
-            <PlayerActions />
-          </Grid>
-        )}
-        {!playerSynced && !adminAccess && (
-          <Grid item className={classes.section}>
-            <Typography variant="h5" color="textSecondary" align="center">
-              No video. Only admin can play. If you have admin rights,
-              <RouterLink to="/login"> login </RouterLink> and try again.
-            </Typography>
-          </Grid>
-        )}
-      </ThemeProvider>
-      {playerSynced && (
-        <Grid
-          item
-          container
-          direction="column"
-          alignItems="center"
-          justifyContent="space-evenly"
-          spacing={1}
-          className={classes.section}
-        >
-          <Grid item className={classes.section}>
-            {getEmbedPlayer()}
-          </Grid>
-          <Grid item container justifyContent="center" className={classes.section} spacing={2}>
-            {!isHost && (
-              <Grid item>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  endIcon={<SyncIcon />}
-                  onClick={() => handleSyncFromHost()}
-                >
-                  Sync
-                </Button>
-              </Grid>
-            )}
+    <Grid item container direction="column" xs alignItems="stretch" rowSpacing={1}>
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={darkModeTheme}>
+          {shouldShowPlayerActions && (
+            <Grid item container alignItems="center">
+              <PlayerActions />
+            </Grid>
+          )}
+          {!playerSynced && !adminAccess && (
+            <Grid item>
+              <Typography variant="h5" color="textSecondary" align="center">
+                No video. Only admin can play. If you have admin rights,
+                <RouterLink to="/login"> login </RouterLink> and try again.
+              </Typography>
+            </Grid>
+          )}
+        </ThemeProvider>
+      </StyledEngineProvider>
+      <Grid item container direction="column" alignItems="center">
+        {playerSynced && <Grid item>{getEmbedPlayer()}</Grid>}
+        <Grid item container justifyContent="center" columnSpacing={2}>
+          {playerSynced && !isHost && (
             <Grid item>
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => {
-                  setShouldOpenPlayer(false);
-                  handlePlayerDelete();
-                }}
+                endIcon={<SyncIcon />}
+                onClick={() => handleSyncFromHost()}
               >
-                Close
+                Sync
               </Button>
             </Grid>
+          )}
+          <Grid item>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                setShouldOpenPlayer(false);
+                handlePlayerDelete();
+              }}
+            >
+              Close
+            </Button>
           </Grid>
         </Grid>
-      )}
+      </Grid>
     </Grid>
   );
 }

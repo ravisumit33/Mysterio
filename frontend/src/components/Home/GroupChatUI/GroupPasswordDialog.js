@@ -9,7 +9,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 
@@ -69,8 +69,8 @@ function GroupPasswordDialog(props) {
           <DialogContentText>This room is protected with a password</DialogContentText>
           <TextField
             autoFocus
-            margin="dense"
             label="Password"
+            size="small"
             fullWidth
             value={selectedGroupPassword}
             onChange={(evt) => setSelectedGroupPassword(evt.target.value)}

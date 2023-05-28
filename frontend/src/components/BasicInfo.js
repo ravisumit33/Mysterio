@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Button, Grid, makeStyles, TextField, useTheme } from '@material-ui/core';
+import { Avatar, Button, Grid, TextField, useTheme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { resizeImg } from 'utils';
-import { Face } from '@material-ui/icons';
+import { Face } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -69,8 +70,8 @@ function BasicInfo(props) {
       </Grid>
       <Grid item>
         <TextField
-          margin="dense"
           label={label}
+          size="small"
           fullWidth
           value={name}
           onChange={(evt) => onNameChange(evt.target.value)}

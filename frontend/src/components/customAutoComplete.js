@@ -1,16 +1,16 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Autocomplete } from '@material-ui/lab';
 import {
+  Autocomplete,
   Avatar,
   Grid,
   ListItemAvatar,
   ListItemText,
-  makeStyles,
   TextField,
   Tooltip,
-} from '@material-ui/core';
-import SearchIcon from '@material-ui/icons/Search';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import SearchIcon from '@mui/icons-material/Search';
 import CustomAvatar from './Avatar';
 
 const useStyles = makeStyles((theme) => ({
@@ -80,9 +80,10 @@ function CustomAutoComplete(props) {
           </Grid>
         </Grid>
       )}
-      renderOption={(option) => (
+      renderOption={(p, option) => (
         <Tooltip title={option[nameField]} arrow>
-          <>
+          {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+          <li {...p}>
             <ListItemAvatar>
               {option.avatar ? (
                 <option.avatar />
@@ -96,7 +97,7 @@ function CustomAutoComplete(props) {
               primaryTypographyProps={{ noWrap: true }}
               secondaryTypographyProps={{ noWrap: true }}
             />
-          </>
+          </li>
         </Tooltip>
       )}
       // eslint-disable-next-line react/jsx-props-no-spreading

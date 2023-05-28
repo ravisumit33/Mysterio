@@ -7,8 +7,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  makeStyles,
-} from '@material-ui/core';
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';

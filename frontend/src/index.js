@@ -5,14 +5,27 @@ import { configure } from 'mobx';
 import 'index.css';
 import App from 'app';
 import { isCordovaEnv } from 'utils';
+import {
+  createTheme,
+  responsiveFontSizes,
+  ThemeProvider,
+  StyledEngineProvider,
+} from '@mui/material';
 import * as serviceWorker from './serviceWorker';
 
 configure({ isolateGlobalState: true });
 
+let theme = createTheme();
+theme = responsiveFontSizes(theme);
+
 const renderReactDom = () => {
   ReactDOM.render(
     <Router>
-      <App />
+      <StyledEngineProvider injectFirst>
+        <ThemeProvider theme={theme}>
+          <App />
+        </ThemeProvider>
+      </StyledEngineProvider>
     </Router>,
     document.getElementById('root')
   );

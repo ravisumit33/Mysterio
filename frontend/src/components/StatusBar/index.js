@@ -2,7 +2,8 @@
 import React from 'react';
 import { chatContainerStore } from 'stores';
 
-import { Drawer, List, makeStyles } from '@material-ui/core';
+import { Drawer, List } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import ChatListItem from './ChatListItem';

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Grid } from '@material-ui/core';
+import { Button, Grid } from '@mui/material';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';

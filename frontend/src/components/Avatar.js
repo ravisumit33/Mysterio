@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Icon, makeStyles } from '@material-ui/core';
+import { Avatar, Icon } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import { generateRandomColor } from 'utils';
 import clsx from 'clsx';
 

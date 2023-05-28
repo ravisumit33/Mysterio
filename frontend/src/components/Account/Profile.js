@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Box, Button, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Grid, TextField, Typography } from '@mui/material';
 import { appStore, profileStore } from 'stores';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
@@ -43,14 +43,14 @@ function Profile() {
       <CenterPaper>
         <Grid item container direction="column" spacing={1}>
           <Grid item>
-            <TextField disabled margin="dense" fullWidth value={profileStore.email} label="Email" />
+            <TextField disabled size="small" fullWidth value={profileStore.email} label="Email" />
           </Grid>
           {!profileStore.social && (
             <Grid item>
               <TextField
                 disabled
-                margin="dense"
                 label="Password"
+                size="small"
                 fullWidth
                 value="Dummy Password"
                 InputProps={{

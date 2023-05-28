@@ -1,6 +1,6 @@
 import React from 'react';
-import Box from '@material-ui/core/Box';
-import { Container, Grid, Paper, Typography } from '@material-ui/core';
+import Box from '@mui/material/Box';
+import { Container, Grid, Paper, Typography } from '@mui/material';
 import { ReactComponent as AnonymousIcon } from 'assets/images/anonymous.svg';
 import FeatureCard from './card';
 

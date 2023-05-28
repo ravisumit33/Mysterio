@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Backdrop, Box, CircularProgress, makeStyles, Typography } from '@material-ui/core';
+import { Backdrop, Box, CircularProgress, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({

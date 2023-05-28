@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Container, Paper } from '@material-ui/core';
+import { Box, Container, Paper } from '@mui/material';
 
 function CenterPaper(props) {
   const { children } = props;

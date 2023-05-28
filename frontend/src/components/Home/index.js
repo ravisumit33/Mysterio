@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Grid } from '@material-ui/core';
+import { Divider, Grid } from '@mui/material';
 import Jumbotron from './Jumbotron';
 import Features from './Features';
 import Contributors from './Contributors';

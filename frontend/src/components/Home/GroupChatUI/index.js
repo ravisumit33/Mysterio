@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Avatar, Box, Button, Container, Grid, makeStyles } from '@material-ui/core';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import { Avatar, Box, Button, Container, Grid } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { createFilterOptions } from '@mui/material/Autocomplete';
 import groupChatJson from 'assets/animations/group-chat.json';
 import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
@@ -16,18 +17,18 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.grey[100],
   },
   groupChatUI: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       alignItems: 'center',
     },
   },
   groupChatImg: {
     height: 520,
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       height: 220,
     },
   },
   groupSearch: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       // justifyContent: 'center',
       flexDirection: 'column',
       alignItems: 'stretch',
@@ -135,7 +136,6 @@ function GroupChatUI() {
         <Grid
           container
           justifyContent="space-between"
-          spacing={2}
           alignItems="stretch"
           className={classes.root}
         >

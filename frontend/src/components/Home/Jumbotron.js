@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { alpha, Button, CardMedia, Grid, makeStyles, Typography } from '@material-ui/core';
+import { alpha, Button, CardMedia, Grid, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { appStore } from 'stores';
 
@@ -18,12 +19,6 @@ const useStyles = makeStyles((theme) => ({
     zIndex: -1,
     backgroundColor: alpha(theme.palette.common.black, 0.1),
   },
-  quickChatImg: {
-    height: 300,
-    [theme.breakpoints.down('sm')]: {
-      height: 200,
-    },
-  },
   quickChatTxtSection: {
     background: `linear-gradient(to bottom, ${alpha(theme.palette.common.black, 1)}, ${alpha(
       theme.palette.common.black,
@@ -32,18 +27,6 @@ const useStyles = makeStyles((theme) => ({
       theme.palette.common.black,
       0.25
     )}, ${alpha(theme.palette.common.black, 0)})`,
-  },
-  quickChatDesc: {
-    [theme.breakpoints.down('sm')]: {
-      padding: theme.spacing(1, 0),
-    },
-    [theme.breakpoints.up('sm')]: {
-      padding: theme.spacing(2, 0, 1, 0),
-    },
-    color: theme.palette.common.white,
-  },
-  chatNowButton: {
-    padding: theme.spacing(2, 0, 2, 0),
   },
 }));
 
@@ -66,22 +49,20 @@ function Jumbotron() {
     >
       <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
       <Grid item container className={classes.quickChatTxtSection} direction="column">
-        <Grid item>
-          <Typography variant="h3" className={classes.quickChatDesc} align="center">
+        <Grid item sx={{ my: 1 }}>
+          <Typography variant="h3" align="center" sx={{ color: 'common.white' }}>
             Free Anonymous Chat
           </Typography>
         </Grid>
-        <Grid item container justifyContent="center">
-          <Grid item className={classes.chatNowButton}>
-            <Button
-              color="secondary"
-              variant="contained"
-              size="large"
-              onClick={handleStartIndividualChat}
-            >
-              Chat Now
-            </Button>
-          </Grid>
+        <Grid item sx={{ my: 1, textAlign: 'center' }}>
+          <Button
+            color="secondary"
+            variant="contained"
+            size="large"
+            onClick={handleStartIndividualChat}
+          >
+            Chat Now
+          </Button>
         </Grid>
       </Grid>
     </Grid>

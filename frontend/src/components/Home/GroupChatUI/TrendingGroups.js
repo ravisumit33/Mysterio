@@ -7,23 +7,23 @@ import {
   CardContent,
   CardHeader,
   Grid,
-  makeStyles,
   Typography,
-} from '@material-ui/core';
-import { AvatarGroup } from '@material-ui/lab';
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+  AvatarGroup,
+} from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CustomAvatar from 'components/Avatar';
 
 const useStyles = makeStyles((theme) => ({
   groupCard: {
-    height: '80%',
+    // height: '80%',
   },
   groupCardAvatar: {
     width: theme.spacing(7),
     height: theme.spacing(7),
   },
   trendingGroupsTitle: {
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
       textAlign: 'center',
     },
     margin: theme.spacing(1, 0),
@@ -47,9 +47,11 @@ function TrendingGroups(props) {
               <Grid
                 container
                 direction="column"
-                style={{
-                  height: '100%',
-                }}
+                style={
+                  {
+                    // height: '100%',
+                  }
+                }
                 spacing={1}
               >
                 <Grid item>

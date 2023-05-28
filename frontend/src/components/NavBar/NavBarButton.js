@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, Grid, IconButton, makeStyles, Tooltip } from '@material-ui/core';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
@@ -74,16 +75,12 @@ function CustomButton(props) {
     );
   }
   return (
-    <Box width="100%">
-      <Grid
-        className={clsx({ [classes.buttonContainer]: !isHamburgerMenu })}
-        container
-        direction="column"
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...(type === 'text' && { onClick: handleClick })}
-      >
-        {buttonComponent}
-      </Grid>
+    <Box
+      className={clsx({ [classes.buttonContainer]: !isHamburgerMenu })}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...(type === 'text' && { onClick: handleClick })}
+    >
+      {buttonComponent}
     </Box>
   );
 }

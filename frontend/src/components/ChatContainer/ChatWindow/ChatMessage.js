@@ -1,12 +1,12 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@mui/styles';
+import Grid from '@mui/material/Grid';
 import Avatar from 'components/Avatar';
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
-import { Box } from '@material-ui/core';
+import { Box } from '@mui/material';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => {

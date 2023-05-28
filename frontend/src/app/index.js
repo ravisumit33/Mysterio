@@ -24,16 +24,11 @@ import { fetchUrl, isCordovaEnv } from 'utils';
 import { profileStore } from 'stores';
 
 const useStyles = makeStyles(() => ({
-  // @ts-ignore
-  root: ({ pathname }) => ({
+  root: {
     width: '100%',
     minHeight: '100%',
     position: 'relative',
-    ...(/\/chat.*/.test(pathname) && {
-      position: 'fixed',
-      inset: 0,
-    }),
-  }),
+  },
 }));
 
 let theme = createTheme();
@@ -42,6 +37,23 @@ theme = responsiveFontSizes(theme);
 function App() {
   const { pathname } = useLocation();
   const classes = useStyles({ pathname });
+
+  useEffect(() => {
+    const rootElement = document.querySelector('#root');
+    if (/\/chat.*/.test(pathname)) {
+      // @ts-ignore
+      rootElement.style.height = `${window.visualViewport.height}px`;
+      const handleViewPortResize = () => {
+        // @ts-ignore
+        rootElement.style.height = `${window.visualViewport.height}px`;
+      };
+      window.addEventListener('resize', handleViewPortResize);
+      return () => window.removeEventListener('resize', handleViewPortResize);
+    }
+    // @ts-ignore
+    rootElement.style.height = '';
+    return () => {};
+  }, [pathname, classes.root]);
 
   useEffect(() => {
     fetchUrl('/api/account/user/')

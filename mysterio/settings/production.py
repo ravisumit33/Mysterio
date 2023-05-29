@@ -2,7 +2,21 @@ from core import secret_manager
 
 secret_manager.load_secrets()
 
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+
 from mysterio.settings.base import *
+
+sentry_sdk.init(
+    dsn="https://60df3a0a2de84c9ab6745f88ecf1e42e@o4505268225048576.ingest.sentry.io/4505268391378944",
+    integrations=[
+        DjangoIntegration(),
+        CeleryIntegration(),
+    ],
+    traces_sample_rate=1.0,
+)
+
 
 DEBUG = False
 
@@ -35,9 +49,6 @@ LOGGING["loggers"] = {
         "level": "INFO",
     },
     "customauth": {
-        "level": "INFO",
-    },
-    "celery.task": {
         "level": "INFO",
     },
     "django": {

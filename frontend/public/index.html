@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC6E1K9JPF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FC6E1K9JPF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
       gtag('js', new Date());
 
       gtag('config', 'G-FC6E1K9JPF');
-  </script>
-  <meta charset="utf-8" />
-  <link rel="icon" href="%PUBLIC_URL%/static/quick_chat_32.ico" />
-  <meta name="format-detection" content="telephone=no">
-  <meta name="msapplication-tap-highlight" content="no">
-  <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-  <meta name="theme-color" content="#000000" />
-  <meta name="description" content="Mysterio is an anonymous chat web app. Talk to strangers online. No login. No sign up. Anonymous chat rooms to talk to people of your interest and watch videos together. Fast and secure with encrypted chat. Best site to chat anonymously." />
-  <link rel="apple-touch-icon" href="%PUBLIC_URL%/static/quick_chat_512.png" />
-  <!--
+    </script>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/static/quick_chat_32.ico" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, width=device-width, minimum-scale=1, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Mysterio is an anonymous chat web app. Talk to strangers online. No login. No sign up. Anonymous chat rooms to talk to people of your interest and watch videos together. Fast and secure with encrypted chat. Best site to chat anonymously."
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/static/quick_chat_512.png" />
+    <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-  <link rel="manifest" href="%PUBLIC_URL%/static/manifest.json" />
-  <!--
+    <link rel="manifest" href="%PUBLIC_URL%/static/manifest.json" />
+    <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
       Only files inside the `public` folder can be referenced from the HTML.
@@ -34,42 +39,49 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 
-  <!-- Material UI Fonts -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <!-- Material UI Fonts -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+    />
 
-  <!-- Material Icon: if needed, uncomment below link -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-  <link rel=“canonical” href=“https://mysterio-chat.com” />
-  <title>Mysterio - Anonymous Chat</title>
-  <script>
-    var loadReactPromise = new Promise((resolve, reject) => {
-      if (window.origin === "file://") {
-        var head = document.getElementsByTagName('head')[0];
-        var cordovaJs = document.createElement("script");
+    <!-- Material Icon: if needed, uncomment below link -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel=“canonical” href=“https://mysterio-chat.com” />
+    <title>Mysterio - Anonymous Chat</title>
+    <script>
+      var loadReactPromise = new Promise((resolve, reject) => {
+        if (window.origin === 'file://') {
+          var head = document.getElementsByTagName('head')[0];
+          var cordovaJs = document.createElement('script');
 
-        cordovaJs.type = "text/javascript";
-        cordovaJs.src = "cordova.js";
-        cordovaJs.async = false;
+          cordovaJs.type = 'text/javascript';
+          cordovaJs.src = 'cordova.js';
+          cordovaJs.async = false;
 
-        head.appendChild(cordovaJs);
-        cordovaJs.onload = () => resolve();
-      } else {
-        resolve();
-      }
-    })
-    var googleSignInResolve;
-    var googleSignInPromise = new Promise((resolve) => {googleSignInResolve=resolve});
+          head.appendChild(cordovaJs);
+          cordovaJs.onload = () => resolve();
+        } else {
+          resolve();
+        }
+      });
+      var googleSignInResolve;
+      var googleSignInPromise = new Promise((resolve) => {
+        googleSignInResolve = resolve;
+      });
 
-    var youtubeIframeResolve;
-    var youtubeIframePromise = new Promise((resolve) => {youtubeIframeResolve=resolve});
-    window.onYouTubeIframeAPIReady = youtubeIframeResolve;
-  </script>
-</head>
+      var youtubeIframeResolve;
+      var youtubeIframePromise = new Promise((resolve) => {
+        youtubeIframeResolve = resolve;
+      });
+      window.onYouTubeIframeAPIReady = youtubeIframeResolve;
+    </script>
+  </head>
 
-<body>
-  <noscript>You need to enable JavaScript to run this app.</noscript>
-  <div id="root"></div>
-  <!--
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
 
@@ -79,8 +91,12 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <script src="https://accounts.google.com/gsi/client" async defer onload="googleSignInResolve()"></script>
+    <script
+      src="https://accounts.google.com/gsi/client"
+      async
+      defer
+      onload="googleSignInResolve()"
+    ></script>
     <script src="https://www.youtube.com/iframe_api" async defer></script>
-</body>
-
+  </body>
 </html>

@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { fetchUrl } from 'utils';
+import { fetchUrl, isDevEnv } from 'utils';
 import { useBasicInfo } from 'hooks';
 import BasicInfo from './BasicInfo';
 
@@ -63,7 +63,11 @@ function UserInfoDialog() {
         appStore.setShouldShowAlert(false);
         profileStore.setName(name);
         profileStore.setAvatarUrl(url);
-        profileStore.setSessionId(crypto.randomUUID());
+        if (isDevEnv()) {
+          profileStore.setSessionId(Date.now());
+        } else {
+          profileStore.setSessionId(crypto.randomUUID());
+        }
       })
       .catch(() => {
         appStore.showAlert({

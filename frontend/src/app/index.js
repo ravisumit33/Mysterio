@@ -32,14 +32,24 @@ function App() {
   useEffect(() => {
     const rootElement = document.querySelector('#root');
     if (/\/chat.*/.test(pathname)) {
+      const getRootHeight = () =>
+        Math.min(
+          window.innerHeight,
+          document.documentElement.clientHeight,
+          Math.round(window.visualViewport.height)
+        );
       // @ts-ignore
-      rootElement.style.height = `${window.visualViewport.height}px`;
+      rootElement.style.height = `${getRootHeight()}px`;
       const handleViewPortResize = () => {
         // @ts-ignore
-        rootElement.style.height = `${window.visualViewport.height}px`;
+        rootElement.style.height = `${getRootHeight()}px`;
       };
       window.addEventListener('resize', handleViewPortResize);
-      return () => window.removeEventListener('resize', handleViewPortResize);
+      window.addEventListener('scroll', handleViewPortResize);
+      return () => {
+        window.removeEventListener('resize', handleViewPortResize);
+        window.removeEventListener('scroll', handleViewPortResize);
+      };
     }
     // @ts-ignore
     rootElement.style.height = '';

@@ -45,10 +45,8 @@ function App() {
         rootElement.style.height = `${getRootHeight()}px`;
       };
       window.addEventListener('resize', handleViewPortResize);
-      window.addEventListener('scroll', handleViewPortResize);
       return () => {
         window.removeEventListener('resize', handleViewPortResize);
-        window.removeEventListener('scroll', handleViewPortResize);
       };
     }
     // @ts-ignore

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 
-const useBasicInfo = (initialName = '', initialAvatarUrl = '') => {
-  const [name, setName] = useState(initialName);
-  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
+const useBasicInfo = (initialName, initialAvatarUrl) => {
+  const [name, setName] = useState(initialName || '');
+  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl || '');
   const uploadedAvatarRef = useRef(null);
 
   const setUploadedAvatar = (avatar) => {

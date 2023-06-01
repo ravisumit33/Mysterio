@@ -48,6 +48,13 @@ const MysterioHost = 'mysterio-chat.com';
 
 const MatchTimeout = 60 * 1000; // 1 minute
 
+const SessionStorageKeys = Object.freeze({
+  profileName: 'profile-name',
+  profileAvatarUrl: 'profile-avatar-url',
+});
+
+const SessionStorageKeysPrefix = 'mysterio-anon-chat-';
+
 export {
   MessageType,
   MessageSenderType,
@@ -58,4 +65,6 @@ export {
   PlayerName,
   PlayerStatus,
   renderPlayerName,
+  SessionStorageKeys,
+  SessionStorageKeysPrefix,
 };

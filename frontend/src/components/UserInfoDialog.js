@@ -12,6 +12,7 @@ import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl, isDevEnv } from 'utils';
 import { useBasicInfo } from 'hooks';
+import { SessionStorageKeys, SessionStorageKeysPrefix } from 'appConstants';
 import BasicInfo from './BasicInfo';
 
 const useStyles = makeStyles((theme) => ({
@@ -22,8 +23,14 @@ const useStyles = makeStyles((theme) => ({
 
 function UserInfoDialog() {
   const classes = useStyles();
+  const storedProfileName = window.sessionStorage.getItem(
+    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileName}`
+  );
+  const storedProfileAvatarUrl = window.sessionStorage.getItem(
+    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`
+  );
   const { name, setName, avatarUrl, setAvatarUrl, getUploadedAvatar, setUploadedAvatar } =
-    useBasicInfo();
+    useBasicInfo(storedProfileName, storedProfileAvatarUrl);
 
   const handleDialogueButtonClick = () => {
     if (!name) {
@@ -61,6 +68,14 @@ function UserInfoDialog() {
     fileUploadPromise
       .then((url) => {
         appStore.setShouldShowAlert(false);
+        window.sessionStorage.setItem(
+          `${SessionStorageKeysPrefix}${SessionStorageKeys.profileName}`,
+          name
+        );
+        window.sessionStorage.setItem(
+          `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`,
+          url
+        );
         profileStore.setName(name);
         profileStore.setAvatarUrl(url);
         if (isDevEnv()) {

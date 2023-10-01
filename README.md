@@ -18,6 +18,13 @@ Anonymous chat web app
 - Postgres >= 13.0
 - Redis >= 6.0.8
 
+## Social authentication setup
+
+1. Get social apps keys/secrets as below:
+   - **Google**
+     - Follow [tutorial](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)
+       by google to get google api client id and secret key.
+
 ## Steps for local development
 
 1. Install python dependencies and pre-commit hook
@@ -72,31 +79,6 @@ Anonymous chat web app
    ```sh
    python start_app.py
    ```
-
-## Social authentication setup
-
-1. Create a super user
-
-   ```sh
-   python manage.py createsuperuser
-   ```
-
-2. Open `http://localhost:8000/admin`(admin panel) and create a site with
-   `Domain name` as `localhost:8000` and `Display name` as `localhost`.
-   Click on the newly created site and note down the integer ID in the URL.
-
-3. Update `SITE_ID` in local settings to the above noted ID
-
-4. Add social apps in adming panel as below:
-   - **Google**
-     - Follow [tutorial](https://developers.google.com/identity/oauth2/web/guides/get-google-api-clientid)
-       by google to get google api client id and secret key.
-     - Select `Google Modified` in `Provider` and `Google` in `Name` fields.
-     - Use client id and secret key from google to fill `Client id` and
-       `Secret key` fields.
-     - Leave out `Key` field as it is.
-     - Select `localhost:8000` in `Available sites` and move it to `Chosen sites`.
-     - Click on `SAVE`.
 
 ## Contributing
 

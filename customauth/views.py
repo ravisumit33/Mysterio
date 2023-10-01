@@ -1,3 +1,4 @@
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
 from dj_rest_auth.views import LogoutView
 from django.http import HttpResponseRedirect
@@ -5,15 +6,13 @@ from django.http.response import HttpResponseBadRequest
 from django.views.generic.base import View
 from rest_framework.decorators import api_view
 
-from customauth.adapter import GoogleOAuth2AdapterIdToken
-
 
 class GoogleLogin(SocialLoginView):
     """
     Login with Google
     """
 
-    adapter_class = GoogleOAuth2AdapterIdToken
+    adapter_class = GoogleOAuth2Adapter
 
 
 @api_view(["POST"])

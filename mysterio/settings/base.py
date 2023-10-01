@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",
     "allauth",
     "allauth.account",
     "dj_rest_auth.registration",
@@ -248,13 +247,18 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_ADAPTER = "customauth.adapter.AccountAdapter"
 
 SOCIALACCOUNT_PROVIDERS = {
-    "google_modified": {
+    "google": {
         "SCOPE": [
             "profile",
             "email",
         ],
         "AUTH_PARAMS": {
             "access_type": "online",
+        },
+        "APP": {
+            "client_id": os.getenv("GOOGLE_CLIENT_ID"),
+            "secret": os.getenv("GOOGLE_CLIENT_SECRET"),
+            "key": "",
         },
     }
 }

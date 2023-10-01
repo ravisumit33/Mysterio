@@ -29,8 +29,8 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(3),
   },
   largeAvatar: {
-    width: theme.spacing(6),
-    height: theme.spacing(6),
+    width: theme.spacing(5),
+    height: theme.spacing(5),
   },
   drawerPlaceholder: {
     width: 240,
@@ -78,7 +78,15 @@ function NavBar() {
     [avatarUrl, classes.largeAvatar, classes.smallAvatar, email, hamburgerTriggerElement]
   );
 
-  const accountCircleIcon = useMemo(() => <AccountCircle fontSize="large" />, []);
+  const accountCircleIcon = useMemo(
+    () => (
+      <AccountCircle
+        fontSize="large"
+        className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
+      />
+    ),
+    [classes.largeAvatar, classes.smallAvatar, hamburgerTriggerElement]
+  );
 
   const accountCircle = {
     type: 'icon',

@@ -11,6 +11,8 @@ import {
   MenuItem,
   Toolbar,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@mui/icons-material';
@@ -41,6 +43,8 @@ const useStyles = makeStyles((theme) => ({
 function NavBar() {
   const history = useHistory();
   const location = useLocation();
+  const theme = useTheme();
+  const shouldShowHamburger = !useMediaQuery(theme.breakpoints.up('sm'));
   const atAccountPage = location.pathname === '/account';
   const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
@@ -72,20 +76,20 @@ function NavBar() {
       <Avatar
         name={email}
         avatarUrl={avatarUrl}
-        className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
+        className={shouldShowHamburger ? classes.smallAvatar : classes.largeAvatar}
       />
     ),
-    [avatarUrl, classes.largeAvatar, classes.smallAvatar, email, hamburgerTriggerElement]
+    [avatarUrl, classes.largeAvatar, classes.smallAvatar, email, shouldShowHamburger]
   );
 
   const accountCircleIcon = useMemo(
     () => (
       <AccountCircle
         fontSize="large"
-        className={hamburgerTriggerElement ? classes.smallAvatar : classes.largeAvatar}
+        className={shouldShowHamburger ? classes.smallAvatar : classes.largeAvatar}
       />
     ),
-    [classes.largeAvatar, classes.smallAvatar, hamburgerTriggerElement]
+    [classes.largeAvatar, classes.smallAvatar, shouldShowHamburger]
   );
 
   const accountCircle = {

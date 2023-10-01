@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Button, Grid, TextField, useTheme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { resizeImg } from 'utils';
+import { generateRandomColor, resizeImg } from 'utils';
 import { Face } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +38,7 @@ function BasicInfo(props) {
     if (!randomClicked) setRandomClicked(true);
     const style = styles[Math.floor(Math.random() * styles.length)];
     const randomAvatarUrl = encodeURI(
-      `https://api.dicebear.com/7.x/${style}/svg?seed=${name}${Math.random()}`
+      `https://api.dicebear.com/7.x/${style}/svg?seed=${name}${Math.random()}&backgroundColor=${generateRandomColor()}`
     );
     setAvatarUrl(randomAvatarUrl);
   };

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Icon } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { generateRandomColor } from 'utils';
+import { generateColorFromText } from 'utils';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +41,7 @@ export function TextAvatar(props) {
 
   return (
     <Avatar
-      className={clsx(useStyles({ avatarBg: generateRandomColor(name) }).avatar, className)}
+      className={clsx(useStyles({ avatarBg: generateColorFromText(name) }).avatar, className)}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
     >

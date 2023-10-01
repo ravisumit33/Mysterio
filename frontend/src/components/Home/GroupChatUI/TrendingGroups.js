@@ -86,7 +86,7 @@ function TrendingGroups(props) {
                               <CustomAvatar
                                 key={chatSession.session_id}
                                 name={chatSession.name}
-                                avatarUrl={`${chatSession.avatar_url}?background=%23bdbdbd`}
+                                avatarUrl={`${chatSession.avatar_url}`}
                               />
                             );
                           })}

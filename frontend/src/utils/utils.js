@@ -1,4 +1,4 @@
-export const generateRandomColor = (string) => {
+export const generateColorFromText = (string) => {
   let hash = 0;
   let i;
   /* eslint-disable no-bitwise */
@@ -15,6 +15,11 @@ export const generateRandomColor = (string) => {
   /* eslint-enable no-bitwise */
 
   return color;
+};
+
+export const generateRandomColor = () => {
+  const n = (Math.random() * 0xfffff * 1000000).toString(16);
+  return n.slice(0, 6);
 };
 
 export const getCookie = (name) => {

@@ -81,7 +81,7 @@ function CustomAutoComplete(props) {
         </Grid>
       )}
       renderOption={(p, option) => (
-        <Tooltip title={option[nameField]} arrow>
+        <Tooltip title={option[nameField]} arrow key={option.id}>
           {/* eslint-disable-next-line react/jsx-props-no-spreading */}
           <li {...p}>
             <ListItemAvatar>

@@ -125,7 +125,7 @@ function GroupChatUI() {
 
   const groupSearchFilterOptions = (options, state) => {
     const results = createFilterOptions()(options, state);
-    results.unshift(newGroupOption);
+    pendingNewGroupName && results.unshift(newGroupOption);
     if (selectedGroup && !results.includes(selectedGroup)) results.unshift(selectedGroup);
     return results;
   };
@@ -166,6 +166,9 @@ function GroupChatUI() {
                       return '';
                     },
                     filterOptions: groupSearchFilterOptions,
+                    noOptionsText: 'No room',
+                    isOptionEqualToValue: (option, value) =>
+                      value.id === -1 || option.id === value.id,
                   }}
                   value={selectedGroup}
                   setPendingValue={setPendingNewGroupName}

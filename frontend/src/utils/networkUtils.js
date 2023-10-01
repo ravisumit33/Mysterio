@@ -7,6 +7,11 @@ const getCompleteUrl = (url) => {
   try {
     completeUrl = new URL(url);
     completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
+    if (isDevEnv()) {
+      // make origin same as current origin
+      completeUrl.hostname = window.location.hostname;
+      completeUrl.port = window.location.port;
+    }
     completeUrl = completeUrl.href;
   } catch (_) {
     // url is relative

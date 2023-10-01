@@ -104,9 +104,9 @@ function UserInfoDialog() {
         profileStore.setName(name);
         profileStore.setAvatarUrl(url);
         if (isDevEnv()) {
-          profileStore.setSessionId(Date.now());
+          profileStore.setSessionId(`${Date.now()}`);
         } else {
-          profileStore.setSessionId(crypto.randomUUID());
+          profileStore.setSessionId(`${crypto.randomUUID()}`);
         }
       })
       .catch(() => {

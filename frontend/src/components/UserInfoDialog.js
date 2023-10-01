@@ -8,12 +8,37 @@ import {
   DialogContentText,
   DialogTitle,
 } from '@mui/material';
+import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl, isDevEnv } from 'utils';
 import { useBasicInfo } from 'hooks';
 import { SessionStorageKeys, SessionStorageKeysPrefix } from 'appConstants';
 import BasicInfo from './BasicInfo';
+
+const userAvatarStyles = [
+  'adventurer',
+  'adventurer-neutral',
+  'avataaars',
+  'avataaars-neutral',
+  'big-ears',
+  'big-ears-neutral',
+  'big-smile',
+  'croodles',
+  'croodles-neutral',
+  'fun-emoji',
+  'lorelei',
+  'lorelei-neutral',
+  'micah',
+  'miniavs',
+  'notionists',
+  'notionists-neutral',
+  'open-peeps',
+  'personas',
+  'pixel-art',
+  'pixel-art-neutral',
+  'thumbs',
+];
 
 const useStyles = makeStyles((theme) => ({
   dialogContent: {
@@ -114,6 +139,7 @@ function UserInfoDialog() {
             avatarUrl={avatarUrl}
             setAvatarUrl={setAvatarUrl}
             setUploadedAvatar={setUploadedAvatar}
+            avatarProps={{ DefaultIcon: Face, styles: userAvatarStyles }}
           />
         </DialogContent>
         <DialogActions>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { FormControlLabel, Grid, TextField, Typography, Switch, Box, Button } from '@mui/material';
+import Collapse from '@mui/material/Collapse';
 import { Group } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
@@ -9,7 +10,16 @@ import { useBasicInfo } from 'hooks';
 import CenterPaper from './CenterPaper';
 import BasicInfo from './BasicInfo';
 
-const roomAvatarSprites = ['identicon', 'initials', 'bottts', 'jdenticon'];
+const roomAvatarStyles = [
+  'identicon',
+  'initials',
+  'bottts',
+  'bottts-neutral',
+  'identicon',
+  'icons',
+  'rings',
+  'shapes',
+];
 
 function NewRoom() {
   const history = useHistory();
@@ -179,7 +189,7 @@ function NewRoom() {
               setUploadedAvatar={setUploadedAvatar}
               avatarProps={{
                 DefaultIcon: Group,
-                sprites: roomAvatarSprites[Math.floor(Math.random() * 4)],
+                styles: roomAvatarStyles,
               }}
             />
           </Grid>
@@ -205,7 +215,7 @@ function NewRoom() {
               }
               label="Protect with password"
             />
-            {shouldUsePwd && (
+            <Collapse in={shouldUsePwd}>
               <TextField
                 autoFocus
                 disabled={!shouldUsePwd}
@@ -219,7 +229,7 @@ function NewRoom() {
                 error={shouldUsePwd && pwdFieldData.error}
                 inputProps={{ type: 'password' }}
               />
-            )}
+            </Collapse>
           </Grid>
           <Grid item container direction="row-reverse">
             <Grid item>

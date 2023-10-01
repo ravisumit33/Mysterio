@@ -16,7 +16,7 @@ function BasicInfo(props) {
   const { name, onNameChange, nameProps, avatarUrl, setAvatarUrl, setUploadedAvatar, avatarProps } =
     props;
   const { error, label, helpText } = nameProps;
-  const { DefaultIcon, sprites } = avatarProps;
+  const { DefaultIcon, styles } = avatarProps;
 
   const classes = useStyles();
   const theme = useTheme();
@@ -36,8 +36,9 @@ function BasicInfo(props) {
 
   const handleRandomAvatar = () => {
     if (!randomClicked) setRandomClicked(true);
+    const style = styles[Math.floor(Math.random() * styles.length)];
     const randomAvatarUrl = encodeURI(
-      `https://avatars.dicebear.com/api/${sprites}/${name}${Math.random()}.svg`
+      `https://api.dicebear.com/7.x/${style}/svg?seed=${name}${Math.random()}`
     );
     setAvatarUrl(randomAvatarUrl);
   };
@@ -97,13 +98,13 @@ BasicInfo.propTypes = {
   setUploadedAvatar: PropTypes.func.isRequired,
   avatarProps: PropTypes.shape({
     DefaultIcon: PropTypes.elementType,
-    sprites: PropTypes.string,
+    styles: PropTypes.arrayOf(PropTypes.string),
   }),
 };
 
 BasicInfo.defaultProps = {
   nameProps: { error: false, label: 'name', helperText: '' },
-  avatarProps: { DefaultIcon: () => <Face fontSize="large" />, sprites: 'avataaars' },
+  avatarProps: { DefaultIcon: () => <Face fontSize="large" />, styles: ['avataaars'] },
 };
 
 export default BasicInfo;

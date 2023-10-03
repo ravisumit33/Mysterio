@@ -74,7 +74,13 @@ Anonymous chat web app
    python manage.py migrate
    ```
 
-7. Start the app
+7. Collect static files
+
+   ```sh
+   python manage.py collectstatic
+   ```
+
+8. Start the app
 
    ```sh
    python start_app.py

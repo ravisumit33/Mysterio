@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Box, Grid, Icon, SvgIcon, Typography } from '@mui/material';
+import { Avatar, Box, Icon, Stack, SvgIcon, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
 const useStyle = makeStyles((theme) => ({
@@ -33,22 +33,20 @@ function Card(props) {
   const { icon, title, description, isLocalIcon } = props;
   return (
     <Box className={classes.root}>
-      <Grid container direction="column" spacing={3}>
-        <Grid item>
-          <Avatar alt={title} className={classes.avatar}>
-            {isLocalIcon && (
-              <SvgIcon className={classes.avatarIcon} component={icon} viewBox="0 0 512 512" />
-            )}
-            {!isLocalIcon && <Icon className={classes.avatarIcon}>{icon}</Icon>}
-          </Avatar>
-        </Grid>
-        <Grid item style={{ textAlign: 'center' }}>
-          <Typography variant="h6">{title}</Typography>
-        </Grid>
-        <Grid item style={{ textAlign: 'center' }}>
-          <Typography variant="body2">{description}</Typography>
-        </Grid>
-      </Grid>
+      <Stack spacing={3}>
+        <Avatar alt={title} className={classes.avatar}>
+          {isLocalIcon && (
+            <SvgIcon className={classes.avatarIcon} component={icon} viewBox="0 0 512 512" />
+          )}
+          {!isLocalIcon && <Icon className={classes.avatarIcon}>{icon}</Icon>}
+        </Avatar>
+        <Typography variant="h6" align="center">
+          {title}
+        </Typography>
+        <Typography variant="body2" align="center">
+          {description}
+        </Typography>
+      </Stack>
     </Box>
   );
 }

@@ -5,9 +5,9 @@ import { observer } from 'mobx-react-lite';
 import {
   Box,
   Button,
-  Grid,
   IconButton,
   InputAdornment,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -107,8 +107,8 @@ function UserForm(props) {
         handleFormSubmit();
       }}
     >
-      <Grid container direction="column" spacing={1}>
-        <Grid item>
+      <Stack spacing={1}>
+        <Box>
           <Typography variant="h6">{shouldRegister ? 'Create account' : 'Login'}</Typography>
           <Typography variant="body1" color="textSecondary">
             {shouldRegister ? (
@@ -129,61 +129,51 @@ function UserForm(props) {
               </>
             )}
           </Typography>
-        </Grid>
-        <Grid item>
-          <TextField
-            autoFocus
-            label="Email"
-            size="small"
-            fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            helperText={emailFieldData.help_text}
-            required
-            inputProps={{
-              type: 'email',
-            }}
-            error={emailFieldData.error}
-            autoComplete="email"
-          />
-        </Grid>
-        <Grid item>
-          <TextField
-            label="Password"
-            size="small"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            helperText={passwordFieldData.help_text}
-            error={passwordFieldData.error}
-            InputProps={{
-              ...(!shouldUnmaskPassword && { type: 'password' }),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
-                    disableRipple
-                    size="large"
-                  >
-                    {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            autoComplete={shouldRegister ? 'new-password' : 'current-password'}
-          />
-        </Grid>
-        <Grid item container direction="row-reverse">
-          <Grid item>
-            <Box pt={1}>
-              <Button type="submit" color="primary">
-                {shouldRegister ? 'Continue' : 'Login'}
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Grid>
+        </Box>
+        <TextField
+          autoFocus
+          label="Email"
+          size="small"
+          fullWidth
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          helperText={emailFieldData.help_text}
+          required
+          inputProps={{
+            type: 'email',
+          }}
+          error={emailFieldData.error}
+          autoComplete="email"
+        />
+        <TextField
+          label="Password"
+          size="small"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          helperText={passwordFieldData.help_text}
+          error={passwordFieldData.error}
+          InputProps={{
+            ...(!shouldUnmaskPassword && { type: 'password' }),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskPassword)}
+                  disableRipple
+                  size="large"
+                >
+                  {shouldUnmaskPassword ? <Visibility /> : <VisibilityOff />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          autoComplete={shouldRegister ? 'new-password' : 'current-password'}
+        />
+        <Button type="submit" color="primary" sx={{ alignSelf: 'flex-end' }}>
+          {shouldRegister ? 'Continue' : 'Login'}
+        </Button>
+      </Stack>
     </form>
   );
 }

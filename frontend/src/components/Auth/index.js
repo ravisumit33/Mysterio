@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
-import { Divider, Grid, Typography } from '@mui/material';
+import { Divider, Stack, Typography } from '@mui/material';
 import { profileStore } from 'stores';
 import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';
@@ -24,29 +24,19 @@ function Auth(props) {
 
   return (
     <CenterPaper>
-      <Grid container direction="column" justifyContent="space-between" spacing={4}>
-        <Grid item>
-          <UserForm shouldRegister={shouldRegister} from={from} />
-        </Grid>
+      <Stack justifyContent="space-between" spacing={4}>
+        <UserForm shouldRegister={shouldRegister} from={from} />
         {!shouldRegister && (
           <>
-            <Grid item container alignItems="center" spacing={1}>
-              <Grid item xs>
-                <Divider />
-              </Grid>
-              <Grid item>
-                <Typography variant="caption">OR</Typography>
-              </Grid>
-              <Grid item xs>
-                <Divider />
-              </Grid>
-            </Grid>
-            <Grid item>
-              <SocialAuth />
-            </Grid>
+            <Stack alignItems="center" direction="row" spacing={1}>
+              <Divider sx={{ flex: 1 }} />
+              <Typography variant="caption">OR</Typography>
+              <Divider sx={{ flex: 1 }} />
+            </Stack>
+            <SocialAuth />
           </>
         )}
-      </Grid>
+      </Stack>
     </CenterPaper>
   );
 }

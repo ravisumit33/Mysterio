@@ -62,7 +62,7 @@ function CustomAutoComplete(props) {
       onChange={(event, newValue) => setValue(newValue)}
       value={value}
       renderInput={(params) => (
-        <Grid container spacing={1} alignItems="center">
+        <Grid container columnSpacing={1} alignItems="center">
           <Grid item>{startInputAvatar}</Grid>
           <Grid item xs>
             <TextField
@@ -76,6 +76,7 @@ function CustomAutoComplete(props) {
                   shrink: classes.inputLabelShrinked,
                 },
               }}
+              inputProps={{ ...params.inputProps, maxLength: 20 }}
             />
           </Grid>
         </Grid>

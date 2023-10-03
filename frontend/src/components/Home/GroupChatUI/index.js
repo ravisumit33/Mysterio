@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Avatar, Box, Button, Container, Grid } from '@mui/material';
+import { Avatar, Box, Button, Container, Stack, useTheme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { createFilterOptions } from '@mui/material/Autocomplete';
 import groupChatJson from 'assets/animations/group-chat.json';
 import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
@@ -29,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
   },
   groupSearch: {
     [theme.breakpoints.down('md')]: {
-      // justifyContent: 'center',
       flexDirection: 'column',
       alignItems: 'stretch',
       marginBottom: theme.spacing(2),
@@ -53,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
 function GroupChatUI() {
   const classes = useStyles();
   const history = useHistory();
+  const theme = useTheme();
   const AddCircleAvatar = useCallback(
     () => (
       <Avatar>
@@ -123,112 +122,96 @@ function GroupChatUI() {
     setNewGroupName(pendingNewGroupName);
   };
 
-  const groupSearchFilterOptions = (options, state) => {
-    const results = createFilterOptions()(options, state);
-    pendingNewGroupName && results.unshift(newGroupOption);
-    if (selectedGroup && !results.includes(selectedGroup)) results.unshift(selectedGroup);
-    return results;
-  };
-
   return (
     <Box className={classes.root}>
       <Container>
-        <Grid
-          container
-          justifyContent="space-between"
-          alignItems="stretch"
+        <Stack
           className={classes.root}
+          justifyContent="space-between"
+          alignItems="center"
+          spacing={3}
+          direction={{ xs: 'column', sm: 'row' }}
         >
-          <Grid item container justifyContent="center" xs={12} md={6}>
-            <Grid item>
-              <Animation
-                containerId="group-chat"
-                width={60}
-                height={60}
-                smallScreenWidth={30}
-                smallScreenHeight={30}
-                animationData={groupChatJson}
-              />
-            </Grid>
-          </Grid>
-          <Grid item container xs={12} md={5} direction="column" className={classes.groupChatUI}>
-            <Grid item container spacing={2} className={classes.groupSearch}>
-              <Grid item xs>
-                <CustomAutoComplete
-                  autoCompleteProps={{
-                    id: 'Groups-Search-Box',
-                    options: groupRooms,
-                    onClose: handleGroupSearchClose,
-                    inputValue: pendingNewGroupName,
-                    getOptionLabel: (option) => {
-                      if (option.id > 0) return option.name;
-                      if (option.id === -1) return pendingNewGroupName;
-                      return '';
-                    },
-                    filterOptions: groupSearchFilterOptions,
-                    noOptionsText: 'No room',
-                    isOptionEqualToValue: (option, value) =>
-                      value.id === -1 || option.id === value.id,
-                  }}
-                  value={selectedGroup}
-                  setPendingValue={setPendingNewGroupName}
-                  setValue={(newSelectedGroup) => {
-                    if (!newSelectedGroup) {
-                      setGroupAction('Create');
-                      setSelectedGroup(null);
-                    } else {
-                      if (newSelectedGroup.id === -1) {
-                        setGroupAction('Create');
-                        if (!pendingNewGroupName) {
-                          appStore.showAlert({
-                            text: 'Room name cannot be empty',
-                            severity: 'error',
-                          });
-                          setSelectedGroup(null);
-                          return;
-                        }
-                      } else {
-                        setGroupAction('Enter');
-                      }
-                      setSelectedGroup(newSelectedGroup);
-                    }
-                  }}
-                  inputLabel="Enter room name"
-                  nameField="name"
-                  getSecondaryText={(group) => {
-                    if (group.id > 0) {
-                      return `${group.message_count} messages`;
-                    }
+          <Box>
+            <Animation
+              containerId="group-chat"
+              width={60}
+              height={60}
+              smallScreenWidth={30}
+              smallScreenHeight={30}
+              animationData={groupChatJson}
+            />
+          </Box>
+          <Stack spacing={2} sx={{ py: 2, width: { sm: theme.spacing(60) } }}>
+            <Stack direction="row" spacing={1}>
+              <CustomAutoComplete
+                autoCompleteProps={{
+                  id: 'Groups-Search-Box',
+                  options: [...groupRooms, newGroupOption],
+                  onClose: handleGroupSearchClose,
+                  inputValue: pendingNewGroupName,
+                  getOptionLabel: (option) => {
+                    if (option.id > 0) return option.name;
+                    if (option.id === -1) return pendingNewGroupName;
                     return '';
-                  }}
-                />
-              </Grid>
-              <Grid item>
-                <Grid container justifyContent="center">
-                  <Button
-                    color="secondary"
-                    variant="contained"
-                    size="medium"
-                    disabled={!pendingNewGroupName || !selectedGroup}
-                    onClick={(evt) => handleStartChat()}
-                  >
-                    {groupAction} Room
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid item container xs>
+                  },
+                  noOptionsText: 'No room',
+                  sx: { flex: 1 },
+                }}
+                value={selectedGroup}
+                setPendingValue={setPendingNewGroupName}
+                setValue={(newSelectedGroup) => {
+                  if (!newSelectedGroup) {
+                    setGroupAction('Create');
+                    setSelectedGroup(null);
+                  } else {
+                    if (newSelectedGroup.id === -1) {
+                      setGroupAction('Create');
+                      if (!pendingNewGroupName) {
+                        appStore.showAlert({
+                          text: 'Room name cannot be empty',
+                          severity: 'error',
+                        });
+                        setSelectedGroup(null);
+                        return;
+                      }
+                    } else {
+                      setGroupAction('Enter');
+                    }
+                    setSelectedGroup(newSelectedGroup);
+                  }
+                }}
+                inputLabel="Enter room name"
+                nameField="name"
+                getSecondaryText={(group) => {
+                  if (group.id > 0) {
+                    return `${group.message_count} messages`;
+                  }
+                  return '';
+                }}
+              />
+              <Button
+                color="secondary"
+                variant="contained"
+                size="medium"
+                disabled={!pendingNewGroupName || !selectedGroup}
+                onClick={(evt) => handleStartChat()}
+              >
+                {groupAction} Room
+              </Button>
+            </Stack>
+            {trendingGroups.length > 0 && (
               <TrendingGroups trendingGroups={trendingGroups} onStartChat={handleStartChat} />
-            </Grid>
-          </Grid>
-        </Grid>
+            )}
+          </Stack>
+          <GroupPasswordDialog
+            shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
+            setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}
+            handleStartGroupChat={handleStartGroupChat}
+            chatWindowData={chatWindowData}
+          />
+        </Stack>
       </Container>
-      <GroupPasswordDialog
-        shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
-        setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}
-        handleStartGroupChat={handleStartGroupChat}
-        chatWindowData={chatWindowData}
-      />
     </Box>
   );
 }

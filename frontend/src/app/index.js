@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { CssBaseline, Grid } from '@mui/material';
+import { CssBaseline, Stack } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import {
   NavBar,
@@ -78,49 +78,33 @@ function App() {
 
   return (
     <CssBaseline>
-      <Grid container direction="column" className={classes.root}>
+      <Stack className={classes.root}>
         <Alert />
         <AppWait />
-        <Grid item>
-          <NavBar />
-        </Grid>
+        <NavBar />
         <Switch>
           <Route exact path="/">
             <UserInfoDialog />
-            <Grid item>
-              <Home />
-            </Grid>
-            <Grid item>
-              <Footer />
-            </Grid>
+            <Home />
+            <Footer />
           </Route>
           <Route path="/login">
-            <Grid item xs>
-              <Auth />
-            </Grid>
+            <Auth />
           </Route>
           <Route path="/register">
-            <Grid item xs>
-              <Auth shouldRegister />
-            </Grid>
+            <Auth shouldRegister />
           </Route>
           <Route path="/account">
-            <Grid item>
-              <Account />
-            </Grid>
+            <Account />
           </Route>
           <Route path="/chat">
-            <Grid item container xs>
-              <ChatContainer />
-            </Grid>
+            <ChatContainer />
           </Route>
           <Route path="/room">
-            <Grid item>
-              <NewRoom />
-            </Grid>
+            <NewRoom />
           </Route>
         </Switch>
-      </Grid>
+      </Stack>
     </CssBaseline>
   );
 }

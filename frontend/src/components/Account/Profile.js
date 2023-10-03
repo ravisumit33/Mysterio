@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Box, Button, Grid, TextField, Typography } from '@mui/material';
+import { Button, Stack, TextField, Typography } from '@mui/material';
 import { appStore, profileStore } from 'stores';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
@@ -41,50 +41,40 @@ function Profile() {
   return (
     <>
       <CenterPaper>
-        <Grid item container direction="column" spacing={1}>
-          <Grid item>
-            <TextField disabled size="small" fullWidth value={profileStore.email} label="Email" />
-          </Grid>
+        <Stack spacing={1}>
+          <TextField disabled size="small" fullWidth value={profileStore.email} label="Email" />
           {!profileStore.social && (
-            <Grid item>
-              <TextField
-                disabled
-                label="Password"
-                size="small"
-                fullWidth
-                value="Dummy Password"
-                InputProps={{
-                  type: 'password',
-                  endAdornment: (
-                    <RouterLink
-                      to={{
-                        pathname: '/account/change-password',
-                        state: { from: location },
-                      }}
-                    >
-                      <Typography variant="caption" noWrap>
-                        Change Password
-                      </Typography>
-                    </RouterLink>
-                  ),
-                }}
-              />
-            </Grid>
+            <TextField
+              disabled
+              label="Password"
+              size="small"
+              fullWidth
+              value="Dummy Password"
+              InputProps={{
+                type: 'password',
+                endAdornment: (
+                  <RouterLink
+                    to={{
+                      pathname: '/account/change-password',
+                      state: { from: location },
+                    }}
+                  >
+                    <Typography variant="caption" noWrap>
+                      Change Password
+                    </Typography>
+                  </RouterLink>
+                ),
+              }}
+            />
           )}
-          <Grid item container direction="row-reverse">
-            <Grid item>
-              <Box pt={1}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-                >
-                  Delete Account
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Grid>
+          <Button
+            color="error"
+            onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+            sx={{ alignSelf: 'flex-end' }}
+          >
+            Delete Account
+          </Button>
+        </Stack>
       </CenterPaper>
       <ConfirmationDialog
         shouldShow={shouldShowDeleteConfirmationDialog}

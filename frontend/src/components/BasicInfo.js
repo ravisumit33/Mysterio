@@ -79,6 +79,7 @@ function BasicInfo(props) {
           helperText={helpText}
           error={error}
           required
+          inputProps={{ maxLength: 20 }}
         />
       </Grid>
     </Grid>

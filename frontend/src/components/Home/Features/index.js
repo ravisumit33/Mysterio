@@ -1,6 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import { Container, Grid, Paper, Typography } from '@mui/material';
+import { Container, Grid, Paper, Stack, Typography } from '@mui/material';
 import { ReactComponent as AnonymousIcon } from 'assets/images/anonymous.svg';
 import FeatureCard from './card';
 
@@ -36,27 +36,28 @@ function Features() {
   ];
 
   const featuresUI = featuresData.map((feature) => (
-    <FeatureCard
-      key={feature.title}
-      icon={feature.icon}
-      title={feature.title}
-      description={feature.description}
-      isLocalIcon={feature.isLocalIcon}
-    />
+    <Grid item key={feature.title}>
+      <FeatureCard
+        icon={feature.icon}
+        title={feature.title}
+        description={feature.description}
+        isLocalIcon={feature.isLocalIcon}
+      />
+    </Grid>
   ));
 
   return (
     <Paper square>
       <Box id="features">
         <Container>
-          <Grid container direction="column" style={{ paddingTop: 40 }}>
-            <Grid item style={{ textAlign: 'center' }}>
-              <Typography variant="h4">Features</Typography>
-            </Grid>
-            <Grid item container xs justifyContent="center" style={{ paddingTop: 40 }}>
+          <Stack>
+            <Typography variant="h4" align="center" sx={{ py: 4 }}>
+              Features
+            </Typography>
+            <Grid container justifyContent="center">
               {featuresUI}
             </Grid>
-          </Grid>
+          </Stack>
         </Container>
       </Box>
     </Paper>

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Grid } from '@mui/material';
+import { Stack } from '@mui/material';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
 import GoogleLogin from './Google';
@@ -37,11 +37,9 @@ function SocialAuth() {
   }, []);
 
   return (
-    <Grid container justifyContent="space-between">
-      <Grid item>
-        <GoogleLogin onSuccess={handleSocialLoginSuccess} onFailure={handleSocialLoginFailure} />
-      </Grid>
-    </Grid>
+    <Stack direction="row" justifyContent="space-between">
+      <GoogleLogin onSuccess={handleSocialLoginSuccess} onFailure={handleSocialLoginFailure} />
+    </Stack>
   );
 }
 

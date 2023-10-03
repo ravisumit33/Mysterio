@@ -203,6 +203,7 @@ function NewRoom() {
               onChange={(evt) => setDescription(evt.target.value)}
               helperText={descriptionFieldData.help_text}
               error={descriptionFieldData.error}
+              inputProps={{ maxLength: 100 }}
             />
           </Grid>
           <Grid item>
@@ -227,7 +228,7 @@ function NewRoom() {
                 required
                 helperText={shouldUsePwd && pwdFieldData.help_text}
                 error={shouldUsePwd && pwdFieldData.error}
-                inputProps={{ type: 'password' }}
+                inputProps={{ type: 'password', maxLength: 20 }}
               />
             </Collapse>
           </Grid>

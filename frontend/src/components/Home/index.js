@@ -1,5 +1,5 @@
 import React from 'react';
-import { Divider, Grid } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 import Jumbotron from './Jumbotron';
 import Features from './Features';
 import Contributors from './Contributors';
@@ -7,21 +7,12 @@ import GroupChatUI from './GroupChatUI';
 
 function Home() {
   return (
-    <Grid container direction="column">
-      <Grid item>
-        <Jumbotron />
-      </Grid>
-      <Grid item>
-        <GroupChatUI />
-      </Grid>
-      <Grid item>
-        <Features />
-      </Grid>
-      <Divider />
-      <Grid item>
-        <Contributors />
-      </Grid>
-    </Grid>
+    <Stack divider={<Divider flexItem />}>
+      <Jumbotron />
+      <GroupChatUI />
+      <Features />
+      <Contributors />
+    </Stack>
   );
 }
 

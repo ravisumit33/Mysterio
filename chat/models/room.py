@@ -5,7 +5,7 @@ from django.db import models
 class Room(models.Model):
     """Chat Room Model"""
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     player = models.OneToOneField("chat.Player", on_delete=models.SET_NULL, null=True)
 
@@ -29,7 +29,7 @@ class GroupRoom(Room):
 
     avatar_url = models.URLField(blank=True)
     zscore = models.FloatField(null=True)
-    password = models.CharField(max_length=128, blank=True)
+    password = models.CharField(max_length=20, blank=True)
     description = models.CharField(max_length=256, blank=True)
     creator = models.ForeignKey(
         get_user_model(),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { alpha, Box, Button, CardMedia, Grid, useMediaQuery } from '@mui/material';
+import { alpha, Box, Button, CardMedia, Grid, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
@@ -58,28 +58,24 @@ function ChatContainer() {
   ) : (
     <Box width="100%">
       <CenterPaper>
-        <Grid container justifyContent="space-around" direction="column" spacing={2}>
-          <Grid item>
-            <Notification
-              animationProps={{
-                containerId: 'noChatSession',
-                containerClassName: classes.notFound,
-                animationData: notFoundJson,
-                width: 40,
-                height: 40,
-              }}
-              title="No active chat session!!"
-              description="Probably your chat session ended. Go to home to start a new chat."
-            />
-          </Grid>
-          <Grid item container justifyContent="center">
-            <RouterLink to="/" tabIndex={-1}>
-              <Button color="secondary" variant="contained" size="large">
-                Home
-              </Button>
-            </RouterLink>
-          </Grid>
-        </Grid>
+        <Stack justifyContent="space-around" spacing={2}>
+          <Notification
+            animationProps={{
+              containerId: 'noChatSession',
+              containerClassName: classes.notFound,
+              animationData: notFoundJson,
+              width: 40,
+              height: 40,
+            }}
+            title="No active chat session!!"
+            description="Probably your chat session ended. Go to home to start a new chat."
+          />
+          <RouterLink to="/" tabIndex={-1} style={{ alignSelf: 'center' }}>
+            <Button color="secondary" variant="contained" size="large">
+              Home
+            </Button>
+          </RouterLink>
+        </Stack>
       </CenterPaper>
     </Box>
   );

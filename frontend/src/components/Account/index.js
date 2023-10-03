@@ -10,7 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { Box, Grid, ListItemAvatar } from '@mui/material';
+import { Box, ListItemAvatar, ListItemButton, Stack } from '@mui/material';
 import { AccountCircle, ExitToApp, Favorite } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
@@ -21,18 +21,14 @@ import ConfirmEmail from './ConfirmEmail';
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles((theme) => ({
-  drawer: {
-    [theme.breakpoints.up('sm')]: {
-      width: drawerWidth,
-    },
-  },
+const useStyles = makeStyles(() => ({
   drawerPaper: {
     width: drawerWidth,
+    boxSizing: 'border-box',
   },
 }));
 
-function Account(props) {
+function Account() {
   const classes = useStyles();
   const location = useLocation();
   const history = useHistory();
@@ -61,58 +57,52 @@ function Account(props) {
         </ListItem>
       </Toolbar>
       <Divider />
-      <Grid item xs container direction="column" justifyContent="space-between">
-        <Grid item>
-          <List>
-            {drawerTabs.map((tab) => (
-              <ListItem
-                button
-                selected={selectedTab === tab.text}
-                onClick={() => {
-                  setSelectedTab(tab.text);
-                  appStore.setShouldOpenAccountsDrawer(false);
-                }}
-                key={tab.text}
-              >
-                <ListItemIcon>
-                  <tab.icon />
-                </ListItemIcon>
-                <ListItemText primary={tab.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Grid>
-        <Grid item>
-          <List>
-            <ListItem
-              button
+      <Stack justifyContent="space-between" sx={{ flex: 1 }}>
+        <List>
+          {drawerTabs.map((tab) => (
+            <ListItemButton
+              selected={selectedTab === tab.text}
               onClick={() => {
-                appStore.showWaitScreen('Logging you out');
-                fetchUrl('/api/account/logout/', {
-                  method: 'post',
-                  body: {},
-                })
-                  .then(() => {
-                    history.replace('/');
-                    profileStore.setEmail('');
-                  })
-                  .catch(() =>
-                    appStore.showAlert({
-                      text: 'Unable to log out. Make sure you are logged in.',
-                      severity: 'error',
-                    })
-                  )
-                  .finally(() => appStore.setShouldShowWaitScreen(false));
+                setSelectedTab(tab.text);
+                appStore.setShouldOpenAccountsDrawer(false);
               }}
+              key={tab.text}
             >
               <ListItemIcon>
-                <ExitToApp color="secondary" />
+                <tab.icon />
               </ListItemIcon>
-              <ListItemText primary="Logout" primaryTypographyProps={{ color: 'secondary' }} />
-            </ListItem>
-          </List>
-        </Grid>
-      </Grid>
+              <ListItemText primary={tab.text} />
+            </ListItemButton>
+          ))}
+        </List>
+        <List>
+          <ListItemButton
+            onClick={() => {
+              appStore.showWaitScreen('Logging you out');
+              fetchUrl('/api/account/logout/', {
+                method: 'post',
+                body: {},
+              })
+                .then(() => {
+                  history.replace('/');
+                  profileStore.setEmail('');
+                })
+                .catch(() =>
+                  appStore.showAlert({
+                    text: 'Unable to log out. Make sure you are logged in.',
+                    severity: 'error',
+                  })
+                )
+                .finally(() => appStore.setShouldShowWaitScreen(false));
+            }}
+          >
+            <ListItemIcon>
+              <ExitToApp color="secondary" />
+            </ListItemIcon>
+            <ListItemText primary="Logout" primaryTypographyProps={{ color: 'secondary' }} />
+          </ListItemButton>
+        </List>
+      </Stack>
     </>
   );
 
@@ -143,42 +133,46 @@ function Account(props) {
       ) : (
         <>
           <Route exact path={path}>
-            <Grid item container>
-              <Grid item>
-                <nav className={classes.drawer} aria-label="account details">
-                  <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                    <Drawer
-                      variant="temporary"
-                      anchor="left"
-                      open={appStore.shouldOpenAccountsDrawer}
-                      onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
-                      classes={{
-                        paper: classes.drawerPaper,
-                      }}
-                      ModalProps={{
-                        keepMounted: true, // Better open performance on mobile.
-                      }}
-                    >
-                      {drawer}
-                    </Drawer>
-                  </Box>
-                  <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                    <Drawer
-                      classes={{
-                        paper: classes.drawerPaper,
-                      }}
-                      variant="permanent"
-                      open
-                    >
-                      {drawer}
-                    </Drawer>
-                  </Box>
-                </nav>
-              </Grid>
-              <Grid item xs>
-                <main>{renderTab()}</main>
-              </Grid>
-            </Grid>
+            <Stack direction="row">
+              <Box
+                component="nav"
+                sx={{ width: { sm: drawerWidth, flexShrink: { sm: 0 } } }}
+                aria-label="account details"
+              >
+                <Drawer
+                  variant="temporary"
+                  anchor="left"
+                  open={appStore.shouldOpenAccountsDrawer}
+                  onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
+                  classes={{
+                    paper: classes.drawerPaper,
+                  }}
+                  ModalProps={{
+                    keepMounted: true, // Better open performance on mobile.
+                  }}
+                  sx={{
+                    display: { xs: 'block', sm: 'none' },
+                  }}
+                >
+                  {drawer}
+                </Drawer>
+                <Drawer
+                  classes={{
+                    paper: classes.drawerPaper,
+                  }}
+                  variant="permanent"
+                  open
+                  sx={{
+                    display: { xs: 'none', sm: 'block' },
+                  }}
+                >
+                  {drawer}
+                </Drawer>
+              </Box>
+              <Box component="main" sx={{ flex: 1 }}>
+                {renderTab()}
+              </Box>
+            </Stack>
           </Route>
           {!profileStore.social && (
             <Route path={`${path}/change-password`}>

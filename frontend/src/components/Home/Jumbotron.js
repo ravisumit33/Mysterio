@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { alpha, Button, CardMedia, Grid, Typography } from '@mui/material';
+import { alpha, Button, CardMedia, Stack, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
 import { appStore } from 'stores';
@@ -40,32 +40,17 @@ function Jumbotron() {
   };
 
   return (
-    <Grid
-      container
-      id="jumbotron"
-      className={classes.jumbotron}
-      direction="column"
-      justifyContent="flex-end"
-    >
+    <Stack id="jumbotron" className={classes.jumbotron} justifyContent="flex-end">
       <CardMedia className={classes.bg} image={JumbotronBG} title="Jumbotron Background" />
-      <Grid item container className={classes.quickChatTxtSection} direction="column">
-        <Grid item sx={{ my: 1 }}>
-          <Typography variant="h3" align="center" sx={{ color: 'common.white' }}>
-            Free Anonymous Chat
-          </Typography>
-        </Grid>
-        <Grid item sx={{ my: 1, textAlign: 'center' }}>
-          <Button
-            color="secondary"
-            variant="contained"
-            size="large"
-            onClick={handleStartIndividualChat}
-          >
-            Chat Now
-          </Button>
-        </Grid>
-      </Grid>
-    </Grid>
+      <Stack className={classes.quickChatTxtSection} spacing={1} alignItems="center" sx={{ py: 1 }}>
+        <Typography variant="h3" align="center" sx={{ color: 'common.white' }}>
+          Free Anonymous Chat
+        </Typography>
+        <Button color="secondary" variant="contained" onClick={handleStartIndividualChat}>
+          Chat Now
+        </Button>
+      </Stack>
+    </Stack>
   );
 }
 

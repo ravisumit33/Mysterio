@@ -1,12 +1,11 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
+import { Box, Stack } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import Grid from '@mui/material/Grid';
 import Avatar from 'components/Avatar';
 import Typography from '@mui/material/Typography';
 import { ChatWindowStoreContext } from 'contexts';
 import { observer } from 'mobx-react-lite';
-import { Box } from '@mui/material';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => {
@@ -42,6 +41,7 @@ const useStyles = makeStyles((theme) => {
       borderRadius: theme.spacing(0.5),
       display: 'inline-block',
       wordBreak: 'break-word',
+      whiteSpace: 'pre-wrap',
       fontFamily:
         // eslint-disable-next-line max-len
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
@@ -77,9 +77,9 @@ function ChatMessage({ message, sender, side, first, last }) {
   const { isGroupChat } = chatWindowStore;
   const classes = useStyles();
   return (
-    <Grid container justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}>
+    <Stack direction="row" justifyContent={side === 'right' ? 'flex-end' : 'flex-start'}>
       {isGroupChat && side === 'left' && (
-        <Grid item className={classes.avatarContainer}>
+        <Box className={classes.avatarContainer}>
           {first && (
             <Avatar
               name={(sender && sender.name) || '?'}
@@ -87,25 +87,23 @@ function ChatMessage({ message, sender, side, first, last }) {
               className={classes.avatar}
             />
           )}
-        </Grid>
-      )}
-      <Grid item xs>
-        <Box className={classes[`${side}Row`]}>
-          <Box className={clsx(classes.msgBox, classes[`${side}MsgBox`])}>
-            <Typography
-              align="left"
-              className={clsx(classes.msg, classes[side], {
-                [classes[`${side}First`]]: first,
-                [classes[`${side}Last`]]: last,
-              })}
-              component="pre"
-            >
-              {message.trim()}
-            </Typography>
-          </Box>
         </Box>
-      </Grid>
-    </Grid>
+      )}
+      <Box sx={{ flex: 1 }} className={classes[`${side}Row`]}>
+        <Box className={clsx(classes.msgBox, classes[`${side}MsgBox`])}>
+          <Typography
+            align="left"
+            className={clsx(classes.msg, classes[side], {
+              [classes[`${side}First`]]: first,
+              [classes[`${side}Last`]]: last,
+            })}
+            component="pre"
+          >
+            {message.trim()}
+          </Typography>
+        </Box>
+      </Box>
+    </Stack>
   );
 }
 

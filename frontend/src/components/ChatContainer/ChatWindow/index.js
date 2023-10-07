@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { alpha, Box, Grid, LinearProgress, Typography } from '@mui/material';
+import { alpha, Box, LinearProgress, Stack, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
     boxSizing: 'border-box',
     backgroundColor: theme.palette.common.white,
     borderRadius: theme.spacing(1, 1, 0, 0),
+    flex: 1,
   },
   infoMsg: {
     padding: theme.spacing(1, 0),
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
   },
   msgBoxContainer: {
     position: 'relative',
+    flex: 1,
   },
 }));
 
@@ -133,34 +135,18 @@ function ChatWindow(props) {
           description: 'This will terminate this chat session.',
         }}
       />
-      <Grid
-        item
-        container
-        direction="column"
-        justifyContent="space-between"
-        className={classes.root}
-        xs
-      >
-        <Grid item className={clsx(classes.header, classes.section)}>
+      <Stack justifyContent="space-between" className={classes.root}>
+        <Box className={clsx(classes.header, classes.section)}>
           <ChatHeader />
-        </Grid>
-        <Grid
-          item
-          xs
-          container
-          direction="column"
-          wrap="nowrap"
-          className={classes.msgBoxContainer}
-        >
+        </Box>
+        <Stack className={classes.msgBoxContainer}>
           {shouldDisplayLoadingMessage && (
-            <Box>
-              <WaitScreen
-                className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-                shouldOpen={shouldDisplayLoadingMessage}
-                waitScreenText="Loading previous messages"
-                progressComponent={<LinearProgress style={{ width: '100%' }} />}
-              />
-            </Box>
+            <WaitScreen
+              className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+              shouldOpen={shouldDisplayLoadingMessage}
+              waitScreenText="Loading previous messages"
+              progressComponent={<LinearProgress sx={{ width: '100%' }} />}
+            />
           )}
           <WaitScreen
             className={classes.backdrop}
@@ -175,7 +161,7 @@ function ChatWindow(props) {
               chatMessages={chatMessages}
             />
           )}
-        </Grid>
+        </Stack>
         {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
           <Typography align="center" className={classes.infoMsg}>
             Looks like no one is online &#128542;
@@ -187,10 +173,8 @@ function ChatWindow(props) {
               Click &#x21BA; above to reconnect to someone
             </Typography>
           )}
-        <Grid item>
-          <InputBar />
-        </Grid>
-      </Grid>
+        <InputBar />
+      </Stack>
     </>
   );
 }

@@ -1,6 +1,14 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Grid, IconButton, ListItem, ListItemAvatar, ListItemText, Tooltip } from '@mui/material';
+import {
+  Box,
+  IconButton,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+  Tooltip,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import ReplayIcon from '@mui/icons-material/Replay';
 import CloseIcon from '@mui/icons-material/Close';
@@ -72,19 +80,13 @@ function ChatHeader() {
   };
 
   const PlayingAnimation = useMemo(
-    () => (
-      <div>
-        <Animation containerId="videoPlaying" animationData={playingJson} />
-      </div>
-    ),
+    () => <Animation containerId="videoPlaying" animationData={playingJson} />,
     []
   );
 
   const LikeAnimation = useMemo(
     () => (
-      <div>
-        <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
-      </div>
+      <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
     ),
     []
   );
@@ -139,16 +141,16 @@ function ChatHeader() {
 
   return (
     <>
-      <Grid item container justifyContent="space-between" alignItems="center">
-        <Grid item className={classes.infoWindow}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Box className={classes.infoWindow}>
           <ListItem disableGutters>
             <ListItemAvatar>
               <CustomAvatar name={name} avatarUrl={avatarUrl} />
             </ListItemAvatar>
             <ListItemText primary={name} primaryTypographyProps={{ variant: 'h5', noWrap: true }} />
           </ListItem>
-        </Grid>
-        <Grid item>
+        </Box>
+        <Stack direction="row">
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
           <IconButton
             disabled={chatStatus !== ChatStatus.ONGOING}
@@ -170,8 +172,8 @@ function ChatHeader() {
               <CloseIcon />
             </Tooltip>
           </IconButton>
-        </Grid>
-      </Grid>
+        </Stack>
+      </Stack>
       <ConfirmationDialog
         shouldShow={shouldShowDeleteConfirmationDialog}
         onClose={() => setShouldShowDeleteConfirmationDialog(false)}

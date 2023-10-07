@@ -130,18 +130,16 @@ function GroupChatUI() {
           justifyContent="space-between"
           alignItems="center"
           spacing={3}
-          direction={{ xs: 'column', sm: 'row' }}
+          direction={{ xs: 'column', md: 'row' }}
         >
-          <Box>
-            <Animation
-              containerId="group-chat"
-              width={60}
-              height={60}
-              smallScreenWidth={30}
-              smallScreenHeight={30}
-              animationData={groupChatJson}
-            />
-          </Box>
+          <Animation
+            containerId="group-chat"
+            width={60}
+            height={60}
+            smallScreenWidth={30}
+            smallScreenHeight={30}
+            animationData={groupChatJson}
+          />
           <Stack spacing={2} sx={{ py: 2, width: { sm: theme.spacing(60) } }}>
             <Stack direction="row" spacing={1}>
               <CustomAutoComplete

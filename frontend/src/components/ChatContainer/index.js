@@ -1,5 +1,5 @@
 import React from 'react';
-import { alpha, Box, Button, CardMedia, Grid, Stack, useMediaQuery } from '@mui/material';
+import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
@@ -39,21 +39,23 @@ const useStyles = makeStyles((theme) => ({
 
 function ChatContainer() {
   const { chatWindow } = appStore;
-  const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
+  const shouldOpenPlayer = chatWindow && chatWindow.shouldOpenPlayer;
+  const classes = useStyles({ shouldOpenPlayer });
   // @ts-ignore
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   return chatWindow ? (
     <ChatWindowStoreContext.Provider value={chatWindow}>
-      <Grid item container xs direction={isSmallScreen ? 'column' : 'row'}>
-        <Grid item container md={9} xs={chatWindow.adminAccess ? 7 : 6} className={classes.player}>
+      <Stack sx={{ flex: 1 }} direction={isSmallScreen ? 'column' : 'row'}>
+        <Box
+          sx={{ flex: shouldOpenPlayer && { md: 3, xs: chatWindow.adminAccess ? 1.5 : 1 } }}
+          className={classes.player}
+        >
           <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
           {chatWindow.shouldOpenPlayer && <Player isSmallScreen={isSmallScreen} />}
-        </Grid>
-        <Grid item container xs>
-          <ChatWindow />
-        </Grid>
-      </Grid>
+        </Box>
+        <ChatWindow />
+      </Stack>
     </ChatWindowStoreContext.Provider>
   ) : (
     <Box width="100%">

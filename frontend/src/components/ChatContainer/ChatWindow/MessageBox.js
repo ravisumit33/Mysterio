@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { ChatWindowStoreContext } from 'contexts';
 import { Virtuoso } from 'react-virtuoso';
-import { alpha, Badge, Grid, IconButton, Tooltip } from '@mui/material';
+import { alpha, Badge, Box, IconButton, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType } from 'appConstants';
 import { useGoToBottom } from 'hooks';
@@ -14,6 +14,10 @@ const useStyles = makeStyles((theme) => ({
     ...((chatStatus === ChatStatus.ENDED || chatStatus === ChatStatus.NO_MATCH_FOUND) && {
       opacity: 0.5,
     }),
+    // Setting flex: 1 sets flexBasis to 0% which causes virtuoso height to become 0
+    // Setting flexBasis 0 instead of 0% fixes the issue
+    flexGrow: 1,
+    flexBasis: 0,
   }),
   bottomButton: {
     fontSize: '2rem',
@@ -40,7 +44,7 @@ function MessageBox(props) {
   const totalMessageCount = chatMessages.length;
 
   return (
-    <Grid item xs className={classes.messageBox}>
+    <Box className={classes.messageBox}>
       <Virtuoso
         totalCount={totalMessageCount}
         itemContent={(index, chatMessage) => chatMessage}
@@ -62,7 +66,7 @@ function MessageBox(props) {
               align: 'end',
             });
           }}
-          style={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
+          sx={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
           size="large"
         >
           <Tooltip title="Go to bottom" arrow>
@@ -74,7 +78,7 @@ function MessageBox(props) {
           </Tooltip>
         </IconButton>
       )}
-    </Grid>
+    </Box>
   );
 }
 

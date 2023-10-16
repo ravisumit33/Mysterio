@@ -24,7 +24,7 @@ class ChatWindowStore {
 
   playerExists = false; // player exists on server
 
-  playerData = {}; // synced player information if player is opened
+  syncedPlayerData = null; // synced player information if player is opened
 
   constructor({ appStore, data }) {
     makeAutoObservable(this);
@@ -119,7 +119,7 @@ class ChatWindowStore {
   };
 
   setPlayerData = (newPlayerData) => {
-    this.playerData = newPlayerData;
+    this.syncedPlayerData = newPlayerData;
   };
 
   setPlayerExists = (newPlayerExists) => {
@@ -134,13 +134,9 @@ class ChatWindowStore {
     return this.roomInfo.isGroupRoom ? 'group' : 'individual';
   }
 
-  get playerSynced() {
-    return !isEmptyObj(this.playerData);
-  }
-
   get isHost() {
-    if (this.playerSynced) {
-      const { host } = this.playerData;
+    if (this.syncedPlayerData) {
+      const { host } = this.syncedPlayerData;
       return profileStore.sessionId === host.session_id;
     }
     return false;
@@ -292,14 +288,14 @@ class ChatWindowStore {
         break;
       }
       case MessageType.PLAYER_SYNC: {
-        !this.isHost && this.setPlayerData({ ...this.playerData, ...messageData });
+        !this.isHost && this.setPlayerData({ ...this.syncedPlayerData, ...messageData });
         return {};
       }
       case MessageType.PLAYER_END: {
         messageData.content = `${messageData.host.name} stopped video player`;
         if (!isInitMsg) {
           this.setPlayerExists(false);
-          this.setPlayerData({});
+          this.setPlayerData(null);
         }
         break;
       }
@@ -370,7 +366,7 @@ class ChatWindowStore {
       fetchData
     )
       .then((response) => {
-        this.setPlayerData(response.data || {});
+        this.setPlayerData(response.data);
       })
       .catch(() => {
         this.appStore.showAlert({
@@ -388,7 +384,7 @@ class ChatWindowStore {
       this.setPlayerExists(false);
       this.socket.send(MessageType.PLAYER_END);
     }
-    this.setPlayerData({});
+    this.setPlayerData(null);
   };
 
   togglePlayerOpen = () => {

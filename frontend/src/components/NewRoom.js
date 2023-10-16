@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { FormControlLabel, Grid, TextField, Typography, Switch, Box, Button } from '@mui/material';
+import { FormControlLabel, TextField, Typography, Switch, Button, Stack } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import { Group } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
@@ -27,14 +27,7 @@ function NewRoom() {
   // @ts-ignore
   const { name } = location.state || { name: '' };
 
-  const {
-    name: roomName,
-    setName: setRoomName,
-    avatarUrl,
-    setAvatarUrl,
-    getUploadedAvatar,
-    setUploadedAvatar,
-  } = useBasicInfo(name);
+  const { name: roomName, setName: setRoomName, avatarUrl, setAvatarUrl } = useBasicInfo(name);
 
   const [shouldUsePwd, setShouldUsePwd] = useState(false);
   const [roomPwd, setRoomPwd] = useState('');
@@ -68,7 +61,7 @@ function NewRoom() {
     let fileUploadPromise = Promise.resolve(avatarUrl);
     if (/^blob:.*$/.test(avatarUrl)) {
       const formData = new FormData();
-      formData.append('file', getUploadedAvatar());
+      formData.append('file', avatarUrl);
       fileUploadPromise = fetchUrl('/api/upload_avatar/', {
         method: 'post',
         body: formData,
@@ -171,77 +164,63 @@ function NewRoom() {
           handleCreateRoom();
         }}
       >
-        <Grid item container direction="column" spacing={1}>
-          <Grid item>
-            <Typography variant="h6">New Room</Typography>
-          </Grid>
-          <Grid item>
-            <BasicInfo
-              name={roomName}
-              onNameChange={setRoomName}
-              nameProps={{
-                error: nameFieldData.error,
-                helpText: nameFieldData.help_text,
-                label: 'Name',
-              }}
-              avatarUrl={avatarUrl}
-              setAvatarUrl={setAvatarUrl}
-              setUploadedAvatar={setUploadedAvatar}
-              avatarProps={{
-                DefaultIcon: Group,
-                styles: roomAvatarStyles,
-              }}
-            />
-          </Grid>
-          <Grid item>
+        <Stack spacing={1}>
+          <Typography variant="h6">New Room</Typography>
+          <BasicInfo
+            name={roomName}
+            onNameChange={setRoomName}
+            nameProps={{
+              error: nameFieldData.error,
+              helpText: nameFieldData.help_text,
+              label: 'Name',
+            }}
+            avatarUrl={avatarUrl}
+            setAvatarUrl={setAvatarUrl}
+            avatarProps={{
+              DefaultIcon: Group,
+              styles: roomAvatarStyles,
+            }}
+          />
+          <TextField
+            label="description"
+            size="small"
+            fullWidth
+            multiline
+            value={description}
+            onChange={(evt) => setDescription(evt.target.value)}
+            helperText={descriptionFieldData.help_text}
+            error={descriptionFieldData.error}
+            inputProps={{ maxLength: 100 }}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={shouldUsePwd}
+                onChange={(evt) => setShouldUsePwd(evt.target.checked)}
+              />
+            }
+            label="Protect with password"
+          />
+          <Collapse in={shouldUsePwd}>
             <TextField
-              label="description"
+              autoFocus
+              disabled={!shouldUsePwd}
+              label="Password"
               size="small"
               fullWidth
-              multiline
-              value={description}
-              onChange={(evt) => setDescription(evt.target.value)}
-              helperText={descriptionFieldData.help_text}
-              error={descriptionFieldData.error}
-              inputProps={{ maxLength: 100 }}
+              value={roomPwd}
+              onChange={(evt) => setRoomPwd(evt.target.value)}
+              required
+              helperText={shouldUsePwd && pwdFieldData.help_text}
+              error={shouldUsePwd && pwdFieldData.error}
+              InputProps={{ type: 'password' }}
+              inputProps={{ maxLength: 20 }}
             />
-          </Grid>
-          <Grid item>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={shouldUsePwd}
-                  onChange={(evt) => setShouldUsePwd(evt.target.checked)}
-                />
-              }
-              label="Protect with password"
-            />
-            <Collapse in={shouldUsePwd}>
-              <TextField
-                autoFocus
-                disabled={!shouldUsePwd}
-                label="Password"
-                size="small"
-                fullWidth
-                value={roomPwd}
-                onChange={(evt) => setRoomPwd(evt.target.value)}
-                required
-                helperText={shouldUsePwd && pwdFieldData.help_text}
-                error={shouldUsePwd && pwdFieldData.error}
-                inputProps={{ type: 'password', maxLength: 20 }}
-              />
-            </Collapse>
-          </Grid>
-          <Grid item container direction="row-reverse">
-            <Grid item>
-              <Box pt={1}>
-                <Button type="submit" color="primary">
-                  Create Room
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Grid>
+          </Collapse>
+          <Button type="submit" color="primary" sx={{ alignSelf: 'flex-end' }}>
+            Create Room
+          </Button>
+        </Stack>
       </form>
     </CenterPaper>
   );

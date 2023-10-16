@@ -20,26 +20,25 @@ function Contributors() {
   ];
 
   const contributorsUI = contributorsData.map((contributor) => (
-    <ContributorCard
-      key={contributor.title}
-      icon={contributor.icon}
-      title={contributor.title}
-      description={contributor.description}
-      href={contributor.href}
-    />
+    <Grid item key={contributor.title}>
+      <ContributorCard
+        icon={contributor.icon}
+        title={contributor.title}
+        description={contributor.description}
+        href={contributor.href}
+      />
+    </Grid>
   ));
 
   return (
     <Paper square>
       <Box id="contributors">
         <Container>
-          <Grid container direction="column" spacing={0}>
-            <Grid item style={{ paddingTop: 40, textAlign: 'center' }}>
-              <Typography variant="h4">Contributors</Typography>
-            </Grid>
-            <Grid item container justifyContent="center" style={{ paddingTop: 40 }}>
-              {contributorsUI}
-            </Grid>
+          <Typography variant="h4" align="center" sx={{ py: 5 }}>
+            Contributors
+          </Typography>
+          <Grid container justifyContent="center">
+            {contributorsUI}
           </Grid>
         </Container>
       </Box>

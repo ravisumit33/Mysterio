@@ -121,7 +121,7 @@ function UserForm(props) {
                     color="primary"
                     variant="text"
                     size="small"
-                    style={{ textTransform: 'none' }}
+                    sx={{ textTransform: 'none' }}
                   >
                     Create an account
                   </Button>

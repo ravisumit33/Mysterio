@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Switch, Route, useLocation } from 'react-router-dom';
-import { CssBaseline, Stack } from '@mui/material';
+import { Box, CssBaseline, Stack } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import {
   NavBar,
@@ -98,7 +98,9 @@ function App() {
             <Account />
           </Route>
           <Route path="/chat">
-            <ChatContainer />
+            <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+              <ChatContainer />
+            </Box>
           </Route>
           <Route path="/room">
             <NewRoom />

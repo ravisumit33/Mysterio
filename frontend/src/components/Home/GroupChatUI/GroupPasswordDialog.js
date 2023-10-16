@@ -77,7 +77,8 @@ function GroupPasswordDialog(props) {
             required
             helperText={protectedGroupPasswordFieldData.help_text}
             error={protectedGroupPasswordFieldData.error}
-            inputProps={{ type: 'password' }}
+            InputProps={{ type: 'password' }}
+            inputProps={{ maxLength: 20 }}
           />
         </DialogContent>
         <DialogActions>

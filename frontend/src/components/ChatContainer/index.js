@@ -20,8 +20,6 @@ const useStyles = makeStyles((theme) => ({
       easing: theme.transitions.easing.easeInOut,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    ...(!shouldOpenPlayer && { flexBasis: 0 }),
-    maxWidth: '100%', // Fix for https://mui.com/components/grid/#direction-column-column-reverse
   }),
   bg: {
     position: 'absolute',
@@ -42,19 +40,18 @@ function ChatContainer() {
   const shouldOpenPlayer = chatWindow && chatWindow.shouldOpenPlayer;
   const classes = useStyles({ shouldOpenPlayer });
   // @ts-ignore
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   return chatWindow ? (
     <ChatWindowStoreContext.Provider value={chatWindow}>
-      <Stack sx={{ flex: 1 }} direction={isSmallScreen ? 'column' : 'row'}>
-        <Box
-          sx={{ flex: shouldOpenPlayer && { md: 3, xs: chatWindow.adminAccess ? 1.5 : 1 } }}
-          className={classes.player}
-        >
+      <Stack sx={{ width: '100%', height: '100%' }} direction={isNotLargeScreen ? 'column' : 'row'}>
+        <Box sx={{ flex: shouldOpenPlayer && { lg: 3, xs: 0 } }} className={classes.player}>
           <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
-          {chatWindow.shouldOpenPlayer && <Player isSmallScreen={isSmallScreen} />}
+          {chatWindow.shouldOpenPlayer && <Player />}
         </Box>
-        <ChatWindow />
+        <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+          <ChatWindow />
+        </Box>
       </Stack>
     </ChatWindowStoreContext.Provider>
   ) : (

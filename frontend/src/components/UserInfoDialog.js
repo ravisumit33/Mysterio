@@ -54,8 +54,10 @@ function UserInfoDialog() {
   const storedProfileAvatarUrl = window.sessionStorage.getItem(
     `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`
   );
-  const { name, setName, avatarUrl, setAvatarUrl, getUploadedAvatar, setUploadedAvatar } =
-    useBasicInfo(storedProfileName, storedProfileAvatarUrl);
+  const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
+    storedProfileName,
+    storedProfileAvatarUrl
+  );
 
   const handleDialogueButtonClick = () => {
     if (!name) {
@@ -75,7 +77,7 @@ function UserInfoDialog() {
     let fileUploadPromise = Promise.resolve(avatarUrl);
     if (/^blob:.*$/.test(avatarUrl)) {
       const formData = new FormData();
-      formData.append('file', getUploadedAvatar());
+      formData.append('file', avatarUrl);
       fileUploadPromise = fetchUrl('/api/upload_avatar/', {
         method: 'post',
         body: formData,
@@ -138,7 +140,6 @@ function UserInfoDialog() {
             nameProps={{ label: 'Give yourself a name' }}
             avatarUrl={avatarUrl}
             setAvatarUrl={setAvatarUrl}
-            setUploadedAvatar={setUploadedAvatar}
             avatarProps={{ DefaultIcon: Face, styles: userAvatarStyles }}
           />
         </DialogContent>

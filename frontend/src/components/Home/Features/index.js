@@ -1,6 +1,6 @@
 import React from 'react';
 import Box from '@mui/material/Box';
-import { Container, Grid, Paper, Stack, Typography } from '@mui/material';
+import { Container, Grid, Paper, Typography } from '@mui/material';
 import { ReactComponent as AnonymousIcon } from 'assets/images/anonymous.svg';
 import FeatureCard from './card';
 
@@ -50,14 +50,12 @@ function Features() {
     <Paper square>
       <Box id="features">
         <Container>
-          <Stack>
-            <Typography variant="h4" align="center" sx={{ py: 4 }}>
-              Features
-            </Typography>
-            <Grid container justifyContent="center">
-              {featuresUI}
-            </Grid>
-          </Stack>
+          <Typography variant="h4" align="center" sx={{ py: 4 }}>
+            Features
+          </Typography>
+          <Grid container justifyContent="center">
+            {featuresUI}
+          </Grid>
         </Container>
       </Box>
     </Paper>

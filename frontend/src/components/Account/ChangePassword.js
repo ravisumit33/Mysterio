@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Box, Button, Grid, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Button, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore } from 'stores';
@@ -83,61 +83,53 @@ function ChangePassword() {
           handleFormSubmit();
         }}
       >
-        <Grid item container direction="column" spacing={1}>
-          <Grid item>
-            <TextField
-              autoFocus
-              label="Old Password"
-              size="small"
-              fullWidth
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              helperText={oldPasswordFieldData.help_text}
-              required
-              InputProps={{
-                type: 'password',
-              }}
-              error={oldPasswordFieldData.error}
-              autoComplete="current-password"
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              label="New Password"
-              size="small"
-              fullWidth
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              helperText={newPasswordFieldData.help_text}
-              required
-              InputProps={{
-                ...(!shouldUnmaskNewPassword && { type: 'password' }),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskNewPassword)}
-                      disableRipple
-                      size="large"
-                    >
-                      {shouldUnmaskNewPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              error={newPasswordFieldData.error}
-              autoComplete="new-password"
-            />
-          </Grid>
-          <Grid item container direction="row-reverse">
-            <Grid item>
-              <Box pt={1}>
-                <Button type="submit" color="primary">
-                  Submit
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Grid>
+        <Stack spacing={1}>
+          <TextField
+            autoFocus
+            label="Old Password"
+            size="small"
+            fullWidth
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            helperText={oldPasswordFieldData.help_text}
+            required
+            InputProps={{
+              type: 'password',
+            }}
+            inputProps={{ maxLength: 20 }}
+            error={oldPasswordFieldData.error}
+            autoComplete="current-password"
+          />
+          <TextField
+            label="New Password"
+            size="small"
+            fullWidth
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            helperText={newPasswordFieldData.help_text}
+            required
+            inputProps={{ maxLength: 20 }}
+            InputProps={{
+              ...(!shouldUnmaskNewPassword && { type: 'password' }),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onMouseUp={() => setShouldUnmaskPassword(!shouldUnmaskNewPassword)}
+                    disableRipple
+                    size="large"
+                  >
+                    {shouldUnmaskNewPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            error={newPasswordFieldData.error}
+            autoComplete="new-password"
+          />
+          <Button type="submit" color="primary" sx={{ alignSelf: 'flex-end' }}>
+            Submit
+          </Button>
+        </Stack>
       </form>
     </CenterPaper>
   );

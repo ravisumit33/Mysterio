@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Box } from '@mui/material';
 import { useConstant } from 'hooks';
 import { isDevEnv } from 'utils';
 import { MysterioOrigin } from 'appConstants';
@@ -10,7 +11,7 @@ function YouTube(props) {
     globalThis.youtubeIframePromise.then(() => {
       const ytPlayer = new globalThis.YT.Player('YouTube', {
         width: 16 * size,
-        height: 9.75 * size,
+        height: 9 * size,
         playerVars: {
           autoplay: 0,
           controls: showControls ? 1 : 0,
@@ -25,7 +26,7 @@ function YouTube(props) {
     });
   });
 
-  return <div id="YouTube" />;
+  return <Box id="YouTube" sx={{ pointerEvents: showControls ? 'auto' : 'none' }} />;
 }
 
 YouTube.propTypes = {

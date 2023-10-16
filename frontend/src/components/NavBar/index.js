@@ -5,10 +5,10 @@ import {
   AppBar,
   Box,
   Container,
-  Grid,
   IconButton,
   Menu,
   MenuItem,
+  Stack,
   Toolbar,
   Typography,
   useMediaQuery,
@@ -191,10 +191,10 @@ function NavBar() {
   }));
 
   const navbarMenu = navbarBtns.map((navbarBtn) => (
-    <Grid item key={navbarBtn.key} sx={{ display: { xs: 'none', sm: 'block' } }}>
+    <Box key={navbarBtn.key} sx={{ display: { xs: 'none', sm: 'block' } }}>
       {/* eslint-disable-next-line react/jsx-props-no-spreading */}
       <NavbarButton {...navbarBtn.commonProps} />
-    </Grid>
+    </Box>
   ));
   const hamburgerMenu = (
     <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
@@ -233,33 +233,29 @@ function NavBar() {
           />
         )}
         <Container>
-          <Grid container alignItems="center" justifyContent="center">
+          <Stack direction="row" alignItems="center">
             {atAccountPage && (
               <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                <Grid item xs>
-                  <IconButton
-                    onClick={handleAccountBtnClick}
-                    color="inherit"
-                    aria-label="account"
-                    size="large"
-                  >
-                    <AccountCircle fontSize="large" />
-                  </IconButton>
-                </Grid>
+                <IconButton
+                  onClick={handleAccountBtnClick}
+                  color="inherit"
+                  aria-label="account"
+                  size="large"
+                >
+                  <AccountCircle fontSize="large" />
+                </IconButton>
               </Box>
             )}
-            <Grid item>
-              <RouterLink to="/">
-                <Typography variant="h5" className={classes.title}>
-                  Mysterio
-                </Typography>
-              </RouterLink>
-            </Grid>
-            <Grid item container justifyContent="flex-end" xs alignItems="center">
+            <RouterLink to="/">
+              <Typography variant="h5" className={classes.title}>
+                Mysterio
+              </Typography>
+            </RouterLink>
+            <Stack direction="row" sx={{ ml: 'auto' }} alignItems="center">
               {navbarMenu}
               {hamburgerMenu}
-            </Grid>
-          </Grid>
+            </Stack>
+          </Stack>
         </Container>
       </Toolbar>
     </AppBar>

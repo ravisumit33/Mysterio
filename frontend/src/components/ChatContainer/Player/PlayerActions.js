@@ -3,10 +3,10 @@ import {
   Box,
   Button,
   FormControl,
-  Grid,
   InputLabel,
   MenuItem,
   Select,
+  Stack,
   TextField,
   Typography,
 } from '@mui/material';
@@ -77,9 +77,9 @@ function PlayerActions() {
   };
 
   return (
-    <Grid container direction="column" alignItems="center" mt={2}>
-      <Grid item container justifyContent="center" alignItems="center" columnSpacing={3}>
-        <Grid item>
+    <Stack>
+      <Stack direction="row" alignItems="center" spacing={3}>
+        <Box>
           <FormControl fullWidth>
             <InputLabel id="video-player-select-label">Player</InputLabel>
             <Select
@@ -102,46 +102,40 @@ function PlayerActions() {
               </MenuItem>
             </Select>
           </FormControl>
-        </Grid>
-        <Grid item xs sm={6}>
+        </Box>
+        <Box sx={{ flex: 1 }}>
           <form
             onSubmit={(evt) => {
               evt.preventDefault();
               setVideoIdFromUrl(videoUrl);
             }}
           >
-            <Grid container columnSpacing={1} alignItems="center">
-              <Grid item xs>
-                <TextField
-                  variant="outlined"
-                  label={`Enter ${renderPlayerName(videoPlayer)} Link`}
-                  fullWidth
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  size="small"
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  disabled={!videoUrl}
-                  size="medium"
-                  variant="contained"
-                  color="secondary"
-                  type="submit"
-                >
-                  Play
-                </Button>
-              </Grid>
-            </Grid>
+            <Stack direction="row" spacing={1}>
+              <TextField
+                variant="outlined"
+                label={`Enter ${renderPlayerName(videoPlayer)} Link`}
+                fullWidth
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                size="small"
+              />
+              <Button
+                disabled={!videoUrl}
+                size="medium"
+                variant="contained"
+                color="secondary"
+                type="submit"
+              >
+                Play
+              </Button>
+            </Stack>
           </form>
-        </Grid>
-      </Grid>
-      <Grid item>
-        <Typography variant="caption" color="textSecondary">
-          ** Some videos may be unavailable due to copyright **
-        </Typography>
-      </Grid>
-    </Grid>
+        </Box>
+      </Stack>
+      <Typography variant="caption" color="textSecondary" align="center">
+        ** Some videos may be unavailable due to copyright **
+      </Typography>
+    </Stack>
   );
 }
 

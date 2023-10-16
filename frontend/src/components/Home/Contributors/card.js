@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Avatar, Box, Grid, Link, Typography } from '@mui/material';
+import { Avatar, Box, Link, Stack, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
 const useStyle = makeStyles((theme) => ({
@@ -28,23 +28,19 @@ function Card(props) {
 
   return (
     <Box className={classes.root}>
-      <Grid container direction="column" spacing={3}>
-        <Grid item>
-          <Avatar className={classes.avatar} alt={title} src={icon} />
-        </Grid>
-        <Grid item style={{ textAlign: 'center' }}>
-          <Typography variant="subtitle2">
-            <Link href={href} target="_blank" rel="noopener" underline="none">
-              {title}
-            </Link>
-          </Typography>
-        </Grid>
+      <Stack spacing={3}>
+        <Avatar className={classes.avatar} alt={title} src={icon} />
+        <Typography align="center" variant="subtitle2">
+          <Link href={href} target="_blank" rel="noopener" underline="none">
+            {title}
+          </Link>
+        </Typography>
         {description && (
-          <Grid item style={{ textAlign: 'center' }}>
-            <Typography variant="body1">{description}</Typography>
-          </Grid>
+          <Typography align="center" variant="body1">
+            {description}
+          </Typography>
         )}
-      </Grid>
+      </Stack>
     </Box>
   );
 }

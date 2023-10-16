@@ -7,7 +7,7 @@ const getCompleteUrl = (url) => {
   try {
     completeUrl = new URL(url);
     completeUrl.protocol = isCordovaEnv() ? 'https' : window.location.protocol;
-    if (isDevEnv()) {
+    if (isDevEnv() && completeUrl.hostname === 'localhost') {
       // make origin same as current origin
       completeUrl.hostname = window.location.hostname;
       completeUrl.port = window.location.port;
@@ -51,14 +51,16 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-const fetchUrl = (url, data) =>
-  axiosInstance({
-    method: (data && data.method) || 'get',
+const fetchUrl = (url, data) => {
+  const { method, body, ...rest } = data || {};
+  return axiosInstance({
+    method: method || 'get',
     url: getCompleteUrl(url),
-    headers: (data && data.headers) || {},
     data: (data && data.body) || {},
+    ...rest,
   }).catch((error) => {
     throw error.response;
   });
+};
 
 export default fetchUrl;

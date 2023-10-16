@@ -21,7 +21,8 @@ const useStyles = makeStyles((theme) => ({
     boxSizing: 'border-box',
     backgroundColor: theme.palette.common.white,
     borderRadius: theme.spacing(1, 1, 0, 0),
-    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   infoMsg: {
     padding: theme.spacing(1, 0),
@@ -154,12 +155,14 @@ function ChatWindow(props) {
             waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
           />
           {initDone && (
-            <MessageBox
-              firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
-              hasNewMessage={hasNewMessage}
-              newMessageInfo={newMessageInfo}
-              chatMessages={chatMessages}
-            />
+            <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+              <MessageBox
+                firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
+                hasNewMessage={hasNewMessage}
+                newMessageInfo={newMessageInfo}
+                chatMessages={chatMessages}
+              />
+            </Box>
           )}
         </Stack>
         {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (

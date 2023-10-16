@@ -1,12 +1,13 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import PropTypes from 'prop-types';
 import {
   Button,
   createTheme,
-  Grid,
   ThemeProvider,
   StyledEngineProvider,
   Typography,
+  Stack,
+  Container,
+  useMediaQuery,
 } from '@mui/material';
 import SyncIcon from '@mui/icons-material/Sync';
 import { ChatWindowStoreContext } from 'contexts';
@@ -15,23 +16,24 @@ import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
 import { useConstant, useGetPlayer, useHandlePlayer } from 'hooks';
 import RouterLink from 'components/RouterLink';
+import { profileStore } from 'stores';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
-function Player(props) {
-  const { isSmallScreen } = props;
-
+function Player() {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const {
-    roomInfo,
-    playerData,
-    roomType,
-    playerSynced,
-    isHost,
-    setShouldOpenPlayer,
-    handlePlayerDelete,
-  } = chatWindowStore;
+  const { roomInfo, roomType, syncedPlayerData, isHost, setShouldOpenPlayer, handlePlayerDelete } =
+    chatWindowStore;
   const { adminAccess, roomId } = roomInfo;
+  // @ts-ignore
+  const isScreenSmallerThanLg = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  // @ts-ignore
+  const isScreenSmallerThanMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  // @ts-ignore
+  const isScreenSmallerThanSm = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isXSmallScreen = isScreenSmallerThanSm;
+  const isSmallScreen = isScreenSmallerThanMd && !isXSmallScreen;
+  const isMediumScreen = isScreenSmallerThanLg && !isSmallScreen && !isXSmallScreen;
 
   const embedPlayerRef = useRef(null);
   const playerReady = useConstant(createDeferredPromiseObj);
@@ -49,17 +51,17 @@ function Player(props) {
   const { getPlayerState, getPlayerTime } = useGetPlayer(embedPlayerRef);
   const { handlePlay, handlePause, handleSeek } = useHandlePlayer(embedPlayerRef);
   useEffect(() => {
-    if (!playerSynced || isHost) return;
+    if (!syncedPlayerData || isHost) return;
     playerReady.promise.then(() => {
-      if (getPlayerState(playerData) !== playerData.state) {
-        handleSeek(playerData);
-        switch (playerData.state) {
+      if (getPlayerState(syncedPlayerData) !== syncedPlayerData.state) {
+        handleSeek(syncedPlayerData);
+        switch (syncedPlayerData.state) {
           case PlayerStatus.PLAYING: {
-            handlePlay(playerData);
+            handlePlay(syncedPlayerData);
             break;
           }
           case PlayerStatus.PAUSED: {
-            handlePause(playerData);
+            handlePause(syncedPlayerData);
             break;
           }
           case PlayerStatus.BUFFERING: {
@@ -68,14 +70,13 @@ function Player(props) {
           default:
             break;
         }
-      } else if (getPlayerTime(playerData) !== playerData.current_time) {
-        handleSeek(playerData);
+      } else if (getPlayerTime(syncedPlayerData) !== syncedPlayerData.current_time) {
+        handleSeek(syncedPlayerData);
       }
     });
   }, [
-    playerData,
+    syncedPlayerData,
     isHost,
-    playerSynced,
     playerReady.promise,
     getPlayerState,
     getPlayerTime,
@@ -90,7 +91,7 @@ function Player(props) {
         syncTimeoutRef.current = setTimeout(() => {
           fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
             method: 'patch',
-            body: { current_time: getPlayerTime(playerData) },
+            body: { current_time: getPlayerTime(syncedPlayerData) },
           }).finally(() => {
             if (syncTimeoutRef.current) {
               syncPlayerTime();
@@ -98,11 +99,11 @@ function Player(props) {
           });
         }, 1000);
       };
-      switch (playerData.name) {
+      switch (syncedPlayerData.name) {
         case PlayerName.YOUTUBE: {
           evt.target.cueVideoById({
-            videoId: playerData.video_id,
-            startSeconds: playerData.current_time,
+            videoId: syncedPlayerData.video_id,
+            startSeconds: syncedPlayerData.current_time,
           });
           isHost && syncPlayerTime();
           break;
@@ -111,13 +112,13 @@ function Player(props) {
           break;
       }
     },
-    [getPlayerTime, isHost, playerData, roomId, roomType]
+    [getPlayerTime, isHost, syncedPlayerData, roomId, roomType]
   );
   const onPlayerStateChange = useCallback(
     (state) => {
       switch (state) {
         case PlayerStatus.CUED: {
-          isHost && handlePlay(playerData);
+          isHost && handlePlay(syncedPlayerData);
           playerReady.resolve();
           break;
         }
@@ -128,25 +129,34 @@ function Player(props) {
         playerReady.promise.then(() => {
           fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
             method: 'patch',
-            body: { state, current_time: getPlayerTime(playerData) },
+            body: { state, current_time: getPlayerTime(syncedPlayerData) },
           });
         });
     },
-    [getPlayerTime, handlePlay, isHost, playerData, playerReady, roomId, roomType]
+    [getPlayerTime, handlePlay, isHost, syncedPlayerData, playerReady, roomId, roomType]
   );
 
   const getEmbedPlayer = () => {
-    switch (playerData.name) {
-      case PlayerName.YOUTUBE:
+    switch (syncedPlayerData.name) {
+      case PlayerName.YOUTUBE: {
+        let playerSize = 47;
+        if (isMediumScreen) {
+          playerSize = 38;
+        } else if (isSmallScreen) {
+          playerSize = 29;
+        } else if (isXSmallScreen) {
+          playerSize = 20;
+        }
         return (
           <YouTube
-            size={isSmallScreen ? 20 : 50}
+            size={playerSize}
             onReady={onPlayerReady}
             onStateChange={(evt) => onPlayerStateChange(evt.data)}
             showControls={isHost}
             setPlayer={setEmbedPlayer}
           />
         );
+      }
       default:
         return undefined;
     }
@@ -154,33 +164,32 @@ function Player(props) {
 
   const handleSyncFromHost = () => chatWindowStore.syncPlayer();
 
-  const shouldShowPlayerActions = playerSynced ? isHost : adminAccess;
+  const shouldShowPlayerActions = syncedPlayerData ? isHost : adminAccess;
 
   const darkModeTheme = useMemo(() => createTheme({ palette: { mode: 'dark' } }), []);
   return (
-    <Grid item container direction="column" xs alignItems="stretch" rowSpacing={1}>
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={darkModeTheme}>
-          {shouldShowPlayerActions && (
-            <Grid item container alignItems="center">
-              <PlayerActions />
-            </Grid>
-          )}
-          {!playerSynced && !adminAccess && (
-            <Grid item>
+    <Container maxWidth="md">
+      <Stack alignItems="stretch" sx={{ my: 2 }}>
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={darkModeTheme}>
+            {shouldShowPlayerActions && <PlayerActions />}
+            {!syncedPlayerData && !adminAccess && (
               <Typography variant="h5" color="textSecondary" align="center">
-                No video. Only admin can play. If you have admin rights,
-                <RouterLink to="/login"> login </RouterLink> and try again.
+                No video. Only admin can play.
+                {!profileStore.isLoggedIn && (
+                  <>
+                    If you have admin rights,
+                    <RouterLink to="/login"> login </RouterLink> and try again.
+                  </>
+                )}
               </Typography>
-            </Grid>
-          )}
-        </ThemeProvider>
-      </StyledEngineProvider>
-      <Grid item container direction="column" alignItems="center">
-        {playerSynced && <Grid item>{getEmbedPlayer()}</Grid>}
-        <Grid item container justifyContent="center" columnSpacing={2}>
-          {playerSynced && !isHost && (
-            <Grid item>
+            )}
+          </ThemeProvider>
+        </StyledEngineProvider>
+        <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
+          {syncedPlayerData && getEmbedPlayer()}
+          <Stack direction="row" justifyContent="center" spacing={2}>
+            {syncedPlayerData && !isHost && (
               <Button
                 variant="contained"
                 color="secondary"
@@ -189,9 +198,7 @@ function Player(props) {
               >
                 Sync
               </Button>
-            </Grid>
-          )}
-          <Grid item>
+            )}
             <Button
               variant="contained"
               color="secondary"
@@ -202,19 +209,11 @@ function Player(props) {
             >
               Close
             </Button>
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Container>
   );
 }
-
-Player.propTypes = {
-  isSmallScreen: PropTypes.bool,
-};
-
-Player.defaultProps = {
-  isSmallScreen: false,
-};
 
 export default observer(Player);

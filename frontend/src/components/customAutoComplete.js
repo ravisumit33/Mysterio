@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import {
   Autocomplete,
   Avatar,
-  Grid,
   ListItemAvatar,
   ListItemText,
+  Stack,
   TextField,
   Tooltip,
 } from '@mui/material';
@@ -62,24 +62,22 @@ function CustomAutoComplete(props) {
       onChange={(event, newValue) => setValue(newValue)}
       value={value}
       renderInput={(params) => (
-        <Grid container columnSpacing={1} alignItems="center">
-          <Grid item>{startInputAvatar}</Grid>
-          <Grid item xs>
-            <TextField
-              // eslint-disable-next-line react/jsx-props-no-spreading
-              {...params}
-              variant="outlined"
-              label={inputLabel}
-              InputLabelProps={{
-                classes: {
-                  root: classes.inputLabel,
-                  shrink: classes.inputLabelShrinked,
-                },
-              }}
-              inputProps={{ ...params.inputProps, maxLength: 20 }}
-            />
-          </Grid>
-        </Grid>
+        <Stack direction="row" spacing={1} alignItems="center">
+          {startInputAvatar}
+          <TextField
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            {...params}
+            variant="outlined"
+            label={inputLabel}
+            InputLabelProps={{
+              classes: {
+                root: classes.inputLabel,
+                shrink: classes.inputLabelShrinked,
+              },
+            }}
+            inputProps={{ ...params.inputProps, maxLength: 20 }}
+          />
+        </Stack>
       )}
       renderOption={(p, option) => (
         <Tooltip title={option[nameField]} arrow key={option.id}>

@@ -14,10 +14,8 @@ const useStyles = makeStyles((theme) => ({
     ...((chatStatus === ChatStatus.ENDED || chatStatus === ChatStatus.NO_MATCH_FOUND) && {
       opacity: 0.5,
     }),
-    // Setting flex: 1 sets flexBasis to 0% which causes virtuoso height to become 0
-    // Setting flexBasis 0 instead of 0% fixes the issue
-    flexGrow: 1,
-    flexBasis: 0,
+    width: '100%',
+    height: '100%',
   }),
   bottomButton: {
     fontSize: '2rem',

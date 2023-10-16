@@ -26,6 +26,7 @@ module.exports = {
       },
     ],
     'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/scripts/*.js'] }],
+    'react/jsx-no-duplicate-props': [1, { ignoreCase: false }],
   },
   settings: {
     react: {

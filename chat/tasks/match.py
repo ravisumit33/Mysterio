@@ -4,7 +4,6 @@ from django.db import transaction
 
 from chat.constants import GroupPrefix, MessageType
 from chat.models.channel import IndividualChannel
-from chat.models.chat_session import ChatSession
 from chat.models.room import IndividualRoom
 from chat.utils import channel_layer
 
@@ -13,21 +12,16 @@ logger = logging.getLogger(__name__)
 
 def get_chat_sessions_data(channels):
     """Get stored session data for each channel"""
-    chat_session_ids = [channel["chat_session"] for channel in channels]
-    chat_sessions = list(ChatSession.objects.filter(pk__in=chat_session_ids))
-    chat_sessions.sort(key=lambda chat_session: chat_session_ids.index(chat_session.id))
-    return chat_sessions
+    return [channel.chat_session for channel in channels]
 
 
 def match_channels(channels):
     """Algorithm for matching individual channels"""
     idx_pairs = []
-    matched_ids = []
     for i in range(1, len(channels), 2):
         # Currently matching serially
         idx_pairs.append((i - 1, i))
-        matched_ids.extend([channels[i - 1]["id"], channels[i]["id"]])
-    return (idx_pairs, matched_ids)
+    return idx_pairs
 
 
 def process_unmatched_channels():
@@ -35,45 +29,41 @@ def process_unmatched_channels():
     with transaction.atomic():
         unmatched_channels = (
             IndividualChannel.objects.select_for_update()
-            .filter(is_matched=False)
+            .filter(room__isnull=True)
             .order_by("created_at")
         )
-        channels = unmatched_channels.values("id", "name", "chat_session")
+        channel_idx_pairs = match_channels(unmatched_channels)
+        sessions_data = get_chat_sessions_data(unmatched_channels)
 
-        (channel_idx_pairs, matched_ids) = match_channels(channels)
-        sessions_data = get_chat_sessions_data(channels)
+        individual_room_list = [IndividualRoom(name="Anonymous")] * len(channel_idx_pairs)
+        individual_rooms = IndividualRoom.objects.bulk_create(individual_room_list)
 
-        individual_room_list = []
-        for channel_idx1, channel_idx2 in channel_idx_pairs:
-            individual_room_list.append(
-                IndividualRoom(
-                    name="Anonymous",
-                    channel1_id=channels[channel_idx1]["id"],
-                    channel2_id=channels[channel_idx2]["id"],
-                )
-            )
-
-        IndividualRoom.objects.bulk_create(individual_room_list)
-
-        IndividualChannel.objects.filter(pk__in=matched_ids).update(is_matched=True)
+        matched_channels = [
+            unmatched_channels[idx] for idx_pair in channel_idx_pairs for idx in idx_pair
+        ]
+        for i in range(0, len(matched_channels), 2):
+            matched_channels[i].room_id = matched_channels[i + 1].room_id = individual_rooms[
+                i // 2
+            ].id
+        IndividualChannel.objects.bulk_update(matched_channels, ["room_id"])
 
         for room_idx, channel_idx_pair in enumerate(channel_idx_pairs):
             room_id = individual_room_list[room_idx].id
             logger.info(
                 "Room id %d is allocated to user ids %d and %d",
                 room_id,
-                channels[channel_idx_pair[0]]["id"],
-                channels[channel_idx_pair[1]]["id"],
+                unmatched_channels[channel_idx_pair[0]].id,
+                unmatched_channels[channel_idx_pair[1]].id,
             )
             for i in range(2):
-                channel = channels[channel_idx_pair[i]]
+                channel = unmatched_channels[channel_idx_pair[i]]
                 match_channel_idx = channel_idx_pair[1 - i]
                 channel_layer.group_add(
                     GroupPrefix.INDIVIDUAL_ROOM + str(room_id),
-                    channel["name"],
+                    channel.name,
                 )
                 channel_layer.group_send(
-                    GroupPrefix.INDIVIDUAL_CHANNEL + str(channel["id"]),
+                    GroupPrefix.INDIVIDUAL_CHANNEL + str(channel.id),
                     MessageType.USER_JOINED,
                     {
                         "room_id": room_id,

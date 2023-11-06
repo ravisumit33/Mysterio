@@ -1,11 +1,11 @@
 from abc import abstractmethod
 
 from django.contrib.sessions.models import Session
-from rest_framework import status, viewsets
+from rest_framework import pagination, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from chat.constants import GroupPrefix, MessageType
+from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
 from chat.serializers import PlayerSerializer
 from chat.utils import channel_layer
 
@@ -31,6 +31,19 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self, *args, **kwargs):
         return self.serializer_classes[self.action]
+
+    @action(methods=["get"], detail=True)
+    def get_messages(self, request, pk=None):
+        """
+        Action for getting messages of room
+        """
+        room = self.get_object()
+        messages = room.messages.order_by("-sent_at")
+        paginator = pagination.PageNumberPagination()
+        paginator.page_size = MESSAGE_PAGE_SIZE
+        page = paginator.paginate_queryset(messages, request, view=self)
+        serializer = self.get_serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(methods=["get"], detail=True)
     def get_player(self, request, pk=None):

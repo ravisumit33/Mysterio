@@ -14,8 +14,11 @@ class Channel(models.Model):
     """Channel Model for individual chat"""
 
     name = models.CharField(max_length=100, unique=True)
-    chat_session = models.OneToOneField("chat.ChatSession", on_delete=models.CASCADE, null=True)
+    chat_session = models.OneToOneField(
+        "chat.ChatSession", on_delete=models.CASCADE, null=True, default=None, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     @classmethod
     def __init_subclass__(cls, **kwargs):
@@ -29,14 +32,22 @@ class Channel(models.Model):
 class IndividualChannel(Channel):
     """Channel for individual chat"""
 
-    is_matched = models.BooleanField(default=False)
+    room = models.ForeignKey(
+        "chat.IndividualRoom",
+        on_delete=models.CASCADE,
+        related_name="channels",
+        related_query_name="channel",
+        blank=True,
+        null=True,
+        default=None,
+    )
 
     class Meta:
         # TODO: Analyse performance for indexes
         indexes = [
             models.Index(
-                fields=["is_matched", "created_at"],
-                condition=models.Q(is_matched=False),
+                fields=["room", "created_at"],
+                condition=models.Q(room__isnull=True),
                 name="individual_channel_index",
             )
         ]
@@ -45,10 +56,9 @@ class IndividualChannel(Channel):
 class GroupChannel(Channel):
     """Channel for group chat"""
 
-    group_room = models.ForeignKey(
+    room = models.ForeignKey(
         "chat.GroupRoom",
         on_delete=models.CASCADE,
-        related_name="group_channels",
-        related_query_name="group_channel",
+        related_name="channels",
+        related_query_name="channel",
     )
-    is_active = models.BooleanField(default=True)

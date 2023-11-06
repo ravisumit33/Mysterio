@@ -38,29 +38,28 @@ def handle_user_info(consumer, message_data):
     }
 
     channel_layer_info = consumer.channel_layer_info
+    channel_cls = (
+        Channel.GroupChannel
+        if channel_layer_info["is_group_consumer"]
+        else Channel.IndividualChannel
+    )
+    channel_cls.objects.filter(name=consumer.channel_name).update(chat_session_id=chat_session.id)
     if not channel_layer_info["is_group_consumer"]:
-        new_channel = Channel.IndividualChannel.objects.create(
-            name=consumer.channel_name,
-            chat_session_id=chat_session.id,
-        )
-        consumer.channel_id = new_channel.id
-        channel_layer.group_add(
-            channel_layer_info["group_prefix_channel"] + str(consumer.channel_id),
-            consumer.channel_name,
-        )
-        logger.info("New individual channel created")
-        logger.info("Channel id: %d", consumer.channel_id)
-        match_channels()
-    else:
-        Channel.GroupChannel.objects.filter(name=consumer.channel_name).update(
-            chat_session_id=chat_session.id
-        )
+        if not consumer.room_id:
+            match_channels()
+        else:
+            channel_layer.group_send(
+                channel_layer_info["group_prefix"] + str(consumer.room_id),
+                MessageType.USER_JOINED,
+                {},
+            )
 
     channel_layer.group_send(
         channel_layer_info["group_prefix_channel"] + str(consumer.channel_id),
         MessageType.USER_INFO,
         {
-            "session_id": consumer.profile["session_id"],
+            "sessionId": consumer.profile["session_id"],
+            "roomId": consumer.room_id,
         },
     )
 

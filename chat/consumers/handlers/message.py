@@ -3,7 +3,12 @@ import logging
 from django.db.utils import IntegrityError
 
 from chat.constants import MessageType
-from chat.models import Message, TextData
+from chat.models.message import (
+    GroupRoomMessage,
+    GroupRoomTextData,
+    IndividualRoomMessage,
+    IndividualRoomTextData,
+)
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -11,12 +16,17 @@ logger = logging.getLogger(__name__)
 
 def add_text_message(consumer, text, msg_type, fail_action=None):
     """
-    Add entry to Text message model
+    Add entry to textdata and message models
     """
+    channel_layer_info = consumer.channel_layer_info
+    is_group_consumer = channel_layer_info["is_group_consumer"]
+    text_dala_cls = GroupRoomTextData if is_group_consumer else IndividualRoomTextData
+    message_cls = GroupRoomMessage if is_group_consumer else IndividualRoomMessage
+
     try:
-        text_data = TextData.objects.create(text=text)
-        Message.objects.create(
-            group_room_id=consumer.room_id,
+        text_data = text_dala_cls.objects.create(text=text)
+        message_cls.objects.create(
+            room_id=consumer.room_id,
             sender_channel_id=consumer.channel_id,
             message_type=msg_type,
             content_object=text_data,
@@ -36,17 +46,16 @@ def handle_text_message(consumer, message_data):
         consumer.close()
         return
     channel_layer_info = consumer.channel_layer_info
-    if channel_layer_info["is_group_consumer"]:
-        add_text_message(
-            consumer,
-            text=message_data["text"],
-            msg_type=MessageType.TEXT,
-            fail_action=lambda: channel_layer.group_send(
-                channel_layer_info["group_prefix"] + str(consumer.room_id),
-                MessageType.CHAT_DELETE,
-                {"text": "Group is deleted"},
-            ),
-        )
+    add_text_message(
+        consumer,
+        text=message_data["text"],
+        msg_type=MessageType.TEXT,
+        fail_action=lambda: channel_layer.group_send(
+            channel_layer_info["group_prefix"] + str(consumer.room_id),
+            MessageType.CHAT_DELETE,
+            {"text": "Room is deleted"},
+        ),
+    )
     channel_layer.group_send(
         channel_layer_info["group_prefix"] + str(consumer.room_id),
         MessageType.TEXT,

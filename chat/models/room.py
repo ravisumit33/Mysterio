@@ -16,12 +16,7 @@ class Room(models.Model):
 class IndividualRoom(Room):
     """Room for individual chat"""
 
-    channel1 = models.OneToOneField(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="room1"
-    )
-    channel2 = models.OneToOneField(
-        "chat.IndividualChannel", on_delete=models.CASCADE, related_name="room2"
-    )
+    pass
 
 
 class GroupRoom(Room):

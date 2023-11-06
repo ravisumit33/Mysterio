@@ -10,9 +10,7 @@ def delete_old_group_channels():
     And then delete group rooms with no channel
     """
     six_months_ago = timezone.localtime() - timezone.timedelta(days=6 * 30)
-    GroupChannel.objects.annotate(latest_activity=Max("message__sent_at")).filter(
+    GroupChannel.objects.alias(latest_activity=Max("message__sent_at")).filter(
         latest_activity__lte=six_months_ago
     ).delete()
-    GroupRoom.objects.annotate(channel_count=Count("group_channel")).filter(
-        channel_count=0
-    ).delete()
+    GroupRoom.objects.alias(channel_count=Count("channel")).filter(channel_count=0).delete()

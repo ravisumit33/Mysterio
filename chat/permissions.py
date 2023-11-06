@@ -43,9 +43,8 @@ class IndividualRoomPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        chat_session_1 = obj.channel1.chat_session
-        chat_session_2 = obj.channel2.chat_session
-        chat_session_ids = (chat_session_1.id, chat_session_2.id)
+        channels = obj.channels.all()
+        chat_session_ids = [channel.chat_session.id for channel in channels]
         session = Session.objects.get(pk=request.session.session_key)
         matched_session_query = session.chat_sessions.filter(pk__in=chat_session_ids)
         return matched_session_query.exists()

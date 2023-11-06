@@ -33,5 +33,8 @@ class CacheKey:
 
 
 MATCH_DELAY = 5  # Seconds to wait before scheduling match task
+CHAT_SESSION_DELETION_DELAY = (
+    40  # Seconds to wait after channel disconnection before individual room deletion
+)
 
 MESSAGE_PAGE_SIZE = 250

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from chat.models import Message, TextData
+from chat.models.message import GroupRoomMessage, IndividualRoomMessage
 
 from .channel import GroupChannelSerializer
 
@@ -21,7 +22,7 @@ class MessageContentField(serializers.RelatedField):
 
 class MessageSerializer(serializers.ModelSerializer):
     """
-    Serializer for messages
+    Base serializer for messages
     """
 
     sender_channel = GroupChannelSerializer(read_only=True)
@@ -31,3 +32,21 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["sender_channel", "message_type", "content"]
+
+
+class IndividualRoomMessageSerializer(MessageSerializer):
+    """
+    Serializer for messages in individual rooms
+    """
+
+    class Meta(MessageSerializer.Meta):
+        model = IndividualRoomMessage
+
+
+class GroupRoomMessageSerializer(MessageSerializer):
+    """
+    Serializer for messages in group rooms
+    """
+
+    class Meta(MessageSerializer.Meta):
+        model = GroupRoomMessage

@@ -1,17 +1,18 @@
-from rest_framework import pagination, status
+from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chat.constants import MESSAGE_PAGE_SIZE, GroupPrefix, MessageType
+from chat.constants import GroupPrefix, MessageType
 from chat.models import GroupRoom
 from chat.models.room import IndividualRoom
 from chat.permissions import GroupRoomPermission, IndividualRoomPermission
 from chat.serializers import (
     DefaultGroupRoomSerializer,
-    MessageSerializer,
     RetrieveGroupRoomSerializer,
 )
+from chat.serializers.message import GroupRoomMessageSerializer, IndividualRoomMessageSerializer
+from chat.serializers.room import DefaultIndividualRoomSerializer, RetrieveIndividualRoomSerializer
 from chat.utils import channel_layer, check_group_password
 
 from .base import RoomViewSet
@@ -24,10 +25,22 @@ class IndividualRoomViewSet(RoomViewSet):
 
     queryset = IndividualRoom.objects.all()
     permission_classes = [IndividualRoomPermission]
+    serializer_classes = dict(
+        RoomViewSet.serializer_classes,
+        **{
+            "retrieve": RetrieveIndividualRoomSerializer,
+            "get_messages": IndividualRoomMessageSerializer,
+        }
+    )
 
     @property
     def is_group_room(self):
         return False
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action in self.serializer_classes:
+            return super().get_serializer_class()
+        return DefaultIndividualRoomSerializer
 
 
 class GroupRoomViewSet(RoomViewSet):
@@ -41,7 +54,7 @@ class GroupRoomViewSet(RoomViewSet):
         RoomViewSet.serializer_classes,
         **{
             "retrieve": RetrieveGroupRoomSerializer,
-            "get_messages": MessageSerializer,
+            "get_messages": GroupRoomMessageSerializer,
         }
     )
 
@@ -79,19 +92,6 @@ class GroupRoomViewSet(RoomViewSet):
         else:
             group_room.likers.remove(request.user)
         return Response(status=status.HTTP_200_OK)
-
-    @action(methods=["get"], detail=True)
-    def get_messages(self, request, pk=None):
-        """
-        Action for getting messages of group room
-        """
-        group_room = self.get_object()
-        messages = group_room.messages.order_by("-sent_at")
-        paginator = pagination.PageNumberPagination()
-        paginator.page_size = MESSAGE_PAGE_SIZE
-        page = paginator.paginate_queryset(messages, request, view=self)
-        serializer = self.get_serializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
 
     @action(methods=["get"], detail=True, permission_classes=[AllowAny])
     def check_password(self, request, pk=None):

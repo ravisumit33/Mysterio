@@ -27,12 +27,11 @@ def handle_player_info(consumer, message_data):
     room_cls = Room.GroupRoom if channel_layer_info["is_group_consumer"] else Room.IndividualRoom
     room_cls.objects.filter(id=consumer.room_id).update(player=player)
 
-    if channel_layer_info["is_group_consumer"]:
-        add_text_message(
-            consumer,
-            text=f"{consumer.profile['name']} started video player",
-            msg_type=MessageType.PLAYER_INFO,
-        )
+    add_text_message(
+        consumer,
+        text=f"{consumer.profile['name']} started video player",
+        msg_type=MessageType.PLAYER_INFO,
+    )
     channel_layer.group_send(
         channel_layer_info["group_prefix"] + str(consumer.room_id),
         MessageType.PLAYER_INFO,
@@ -56,12 +55,11 @@ def handle_player_end(consumer):
     Player.objects.filter(pk=consumer.player_id).delete()
     consumer.player_id = None
     channel_layer_info = consumer.channel_layer_info
-    if channel_layer_info["is_group_consumer"]:
-        add_text_message(
-            consumer,
-            text=f"{consumer.profile['name']} stopped video player",
-            msg_type=MessageType.PLAYER_INFO,
-        )
+    add_text_message(
+        consumer,
+        text=f"{consumer.profile['name']} stopped video player",
+        msg_type=MessageType.PLAYER_INFO,
+    )
     channel_layer.group_send(
         channel_layer_info["group_prefix"] + str(consumer.room_id),
         MessageType.PLAYER_END,

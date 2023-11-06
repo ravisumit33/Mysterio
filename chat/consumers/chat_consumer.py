@@ -6,8 +6,9 @@ from channels.generic.websocket import WebsocketConsumer
 from django.db.utils import IntegrityError
 
 import chat.models.channel as Channel
-from chat.constants import GroupPrefix, MessageType
+from chat.constants import CHAT_SESSION_DELETION_DELAY, GroupPrefix, MessageType
 from chat.consumers.handlers.message import add_text_message
+from chat.tasks import individual_room_timeout
 from chat.utils import channel_layer
 
 from .handlers import (
@@ -37,46 +38,65 @@ class ChatConsumer(WebsocketConsumer):
         if session.session_key is None:
             logger.error("SuspiciousOperation: WebSocket connection without session")
             raise DenyConnection
-        # room_id in URL comes only in group chat
-        if "room_id" in self.scope["url_route"]["kwargs"]:
-            self.channel_layer_info = {
-                "is_group_consumer": True,
-                "group_prefix": GroupPrefix.GROUP_ROOM,
-                "group_prefix_channel": GroupPrefix.GROUP_CHANNEL,
-            }
+        if "room_id" in (url_kwargs := self.scope["url_route"]["kwargs"]):
             try:
-                self.room_id = int(self.scope["url_route"]["kwargs"]["room_id"])
+                self.room_id = int(url_kwargs["room_id"])
             except ValueError as excp:
                 logger.error("Invalid room id")
                 raise DenyConnection from excp
 
+            if "room_type" not in url_kwargs:
+                logger.error("Room id given without room type")
+                raise DenyConnection
+            if url_kwargs["room_type"] not in ["individual", "group"]:
+                logger.error("Invalid room type")
+                raise DenyConnection
+
+            is_group_consumer = True if url_kwargs["room_type"] == "group" else False
+            self.channel_layer_info = {
+                "is_group_consumer": is_group_consumer,
+                "group_prefix": (
+                    GroupPrefix.GROUP_ROOM if is_group_consumer else GroupPrefix.INDIVIDUAL_ROOM
+                ),
+                "group_prefix_channel": (
+                    GroupPrefix.GROUP_CHANNEL
+                    if is_group_consumer
+                    else GroupPrefix.INDIVIDUAL_CHANNEL
+                ),
+            }
+            channel_cls = Channel.GroupChannel if is_group_consumer else Channel.IndividualChannel
             try:
-                new_channel = Channel.GroupChannel.objects.create(
+                new_channel = channel_cls.objects.create(
                     name=self.channel_name,
-                    group_room_id=self.room_id,
+                    room_id=self.room_id,
                 )
             except IntegrityError as excp:
-                logger.error("Cannot create group channel")
-                logger.error("Channel name: %s", self.channel_name)
-                logger.error("Room id: %d", self.room_id)
+                logger.error("Unable to create channel. Room probably doesn't exist.")
+                logger.error("Room type: %s, id: %d", url_kwargs["room_type"], self.room_id)
                 raise DenyConnection from excp
-            channel_layer.group_add(GroupPrefix.GROUP_ROOM + str(self.room_id), self.channel_name)
-            logger.info("New group channel created")
             self.channel_id = new_channel.id
+            logger.info("New channel created")
+            logger.info("Room type: %s, id: %d", url_kwargs["room_type"], self.room_id)
             channel_layer.group_add(
-                GroupPrefix.GROUP_CHANNEL + str(self.channel_id), self.channel_name
+                self.channel_layer_info["group_prefix"] + str(self.room_id), self.channel_name
             )
-            logger.debug("Room id: %d", self.room_id)
-            logger.debug("Channel id: %d", self.channel_id)
-            logger.debug("Session key: %s", session.session_key)
         else:
             self.channel_layer_info = {
                 "is_group_consumer": False,
                 "group_prefix": GroupPrefix.INDIVIDUAL_ROOM,
                 "group_prefix_channel": GroupPrefix.INDIVIDUAL_CHANNEL,
             }
+            new_channel = Channel.IndividualChannel.objects.create(name=self.channel_name)
+            self.channel_id = new_channel.id
+            logger.info("New individual channel created for match")
 
+        channel_layer.group_add(
+            self.channel_layer_info["group_prefix_channel"] + str(self.channel_id),
+            self.channel_name,
+        )
         self.accept()
+        logger.debug("Channel id: %d", self.channel_id)
+        logger.debug("Session key: %s", session.session_key)
 
     def disconnect(self, code):
         if self.channel_id is None:
@@ -84,37 +104,47 @@ class ChatConsumer(WebsocketConsumer):
             return
 
         channel_layer_info = self.channel_layer_info
-        if not channel_layer_info["is_group_consumer"]:
-            Channel.IndividualChannel.objects.filter(pk=self.channel_id).delete()
-            channel_layer.group_discard(
-                channel_layer_info["group_prefix_channel"] + str(self.channel_id),
-                self.channel_name,
-            )
-            logger.info("Individual channel deleted")
-        else:
+        channel_layer.group_discard(
+            channel_layer_info["group_prefix_channel"] + str(self.channel_id),
+            self.channel_name,
+        )
+        channel_cls = (
+            Channel.GroupChannel
+            if channel_layer_info["is_group_consumer"]
+            else Channel.IndividualChannel
+        )
+        if channel_layer_info["is_group_consumer"]:
             if self.profile:
                 add_text_message(
                     self,
                     text=f"{self.profile['name']} left",
                     msg_type=MessageType.USER_LEFT,
                 )
-            Channel.GroupChannel.objects.filter(pk=self.channel_id).update(is_active=False)
-            logger.info("Group channel disconnected")
+        logger.info("Channel disconnected id: %d", self.channel_id)
 
         if self.player_id is not None:
             handle_player_end(self)
         if self.room_id is not None:
+            channel_cls.objects.filter(pk=self.channel_id).update(
+                is_active=False
+            )  # Channel will be deleted with room
             channel_layer.group_discard(
                 channel_layer_info["group_prefix"] + str(self.room_id),
                 self.channel_name,
             )
+            if not channel_layer_info["is_group_consumer"]:
+                individual_room_timeout.apply_async(
+                    (self.room_id,), countdown=CHAT_SESSION_DELETION_DELAY
+                )
             if self.profile:
                 channel_layer.group_send(
                     channel_layer_info["group_prefix"] + str(self.room_id),
                     MessageType.USER_LEFT,
                     {"resignee": self.profile},
                 )
-            logger.info("Room id: %d, Channel id: %d", self.room_id, self.channel_id)
+            logger.info("Room id: %d", self.room_id)
+        else:
+            channel_cls.objects.filter(pk=self.channel_id).delete()
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)

@@ -97,7 +97,6 @@ GroupPasswordDialog.propTypes = {
   handleStartGroupChat: PropTypes.func.isRequired,
   chatWindowData: PropTypes.shape({
     roomId: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
   }).isRequired,
 };
 

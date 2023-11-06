@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
@@ -37,15 +38,39 @@ const useStyles = makeStyles((theme) => ({
 
 function ChatContainer() {
   const { chatWindow } = appStore;
-  const shouldOpenPlayer = chatWindow && chatWindow.shouldOpenPlayer;
-  const classes = useStyles({ shouldOpenPlayer });
+  const { pathname } = useLocation();
+  const initialRenderinDoneRef = useRef(false);
+  useEffect(() => {
+    if (!initialRenderinDoneRef.current) {
+      if (!chatWindow) {
+        const randomSearchInProgressRegex = /^\/chat\/dual\/?$/;
+        const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9a-zA-Z]*)\/?$/;
+        const ongoingChatMatch = pathname.match(ongoingChatRegex);
+        if (ongoingChatMatch) {
+          const { roomId, roomType } = ongoingChatMatch.groups;
+          const isGroupRoom = roomType === 'group';
+          const chatWindowData = { roomId, isGroupRoom };
+          appStore.addChatWindow(chatWindowData);
+        } else if (pathname.match(randomSearchInProgressRegex)) {
+          appStore.addChatWindow();
+        }
+      } else {
+        // Redirect after match in dual chat
+      }
+      initialRenderinDoneRef.current = true;
+    }
+  }, [chatWindow, pathname]);
+  const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
   const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));
 
   return chatWindow ? (
     <ChatWindowStoreContext.Provider value={chatWindow}>
       <Stack sx={{ width: '100%', height: '100%' }} direction={isNotLargeScreen ? 'column' : 'row'}>
-        <Box sx={{ flex: shouldOpenPlayer && { lg: 3, xs: 0 } }} className={classes.player}>
+        <Box
+          sx={{ flex: chatWindow.shouldOpenPlayer && { lg: 3, xs: 0 } }}
+          className={classes.player}
+        >
           <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
           {chatWindow.shouldOpenPlayer && <Player />}
         </Box>

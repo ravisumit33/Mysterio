@@ -70,9 +70,9 @@ function GroupChatUI() {
   const [newGroupName, setNewGroupName] = useState('');
   const [pendingNewGroupName, setPendingNewGroupName] = useState('');
   const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
-  const [chatWindowData, setChatWindowData] = useState({ roomId: 0, name: '' });
+  const [chatWindowData, setChatWindowData] = useState({ roomId: 0 });
 
-  const { groupRooms, setGroupRoomsFetched, addChatWindow, updateGroupRooms } = appStore;
+  const { groupRooms, setGroupRoomsFetched, updateGroupRooms } = appStore;
 
   useEffect(() => {
     updateGroupRooms();
@@ -88,8 +88,7 @@ function GroupChatUI() {
     .slice(0, 5);
 
   const handleStartGroupChat = (windowData) => {
-    addChatWindow(windowData);
-    history.push('/chat');
+    history.push(`/chat/group/${windowData.roomId}`);
   };
 
   const handleStartChat = (group) => {
@@ -100,9 +99,6 @@ function GroupChatUI() {
       } else {
         const windowData = {
           roomId: chatGroup.id,
-          name: chatGroup.name,
-          avatarUrl: chatGroup.avatar_url,
-          isGroupRoom: true,
         };
         setChatWindowData(windowData);
         if (chatGroup.is_protected) {

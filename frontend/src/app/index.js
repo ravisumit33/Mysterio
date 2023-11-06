@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import log from 'loglevel';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { Box, CssBaseline, Stack } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -14,8 +15,12 @@ import {
   AppWait,
   NewRoom,
 } from 'components';
-import { fetchUrl, isCordovaEnv } from 'utils';
+import { fetchUrl, isCordovaEnv, isDevEnv } from 'utils';
 import { profileStore } from 'stores';
+
+if (isDevEnv()) {
+  log.setDefaultLevel('trace');
+}
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,7 +32,7 @@ const useStyles = makeStyles(() => ({
 
 function App() {
   const { pathname } = useLocation();
-  const classes = useStyles({ pathname });
+  const classes = useStyles();
 
   useEffect(() => {
     const rootElement = document.querySelector('#root');
@@ -84,7 +89,6 @@ function App() {
         <NavBar />
         <Switch>
           <Route exact path="/">
-            <UserInfoDialog />
             <Home />
             <Footer />
           </Route>
@@ -98,6 +102,7 @@ function App() {
             <Account />
           </Route>
           <Route path="/chat">
+            <UserInfoDialog />
             <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
               <ChatContainer />
             </Box>

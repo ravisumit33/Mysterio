@@ -7,6 +7,8 @@ const MessageType = Object.freeze({
   PLAYER_INFO: 6,
   PLAYER_SYNC: 7,
   PLAYER_END: 8,
+  RECONNECTING: 9,
+  DISCONNECTED: 10,
 });
 
 const ChatStatus = Object.freeze({
@@ -14,6 +16,7 @@ const ChatStatus = Object.freeze({
   ONGOING: 1,
   ENDED: 2,
   NO_MATCH_FOUND: 3,
+  RECONNECTING: 4,
 });
 
 const MessageSenderType = Object.freeze({
@@ -48,6 +51,8 @@ const MysterioHost = 'mysterio-chat.com';
 
 const MatchTimeout = 60 * 1000; // 1 minute
 
+const ReconnectTimeout = 60 * 1000; // 40 seconds
+
 const SessionStorageKeys = Object.freeze({
   profileName: 'profile-name',
   profileAvatarUrl: 'profile-avatar-url',
@@ -62,6 +67,7 @@ export {
   MysterioOrigin,
   MysterioHost,
   MatchTimeout,
+  ReconnectTimeout,
   PlayerName,
   PlayerStatus,
   renderPlayerName,

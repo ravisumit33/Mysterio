@@ -18,7 +18,7 @@ class ChatWindowStore {
 
   roomInfo = {};
 
-  previousMessagesInfo = {};
+  previousMessagesInfo = { fetchingPreviousMessages: false };
 
   shouldOpenPlayer = false;
 
@@ -29,12 +29,13 @@ class ChatWindowStore {
   constructor({ appStore, data }) {
     makeAutoObservable(this);
     this.appStore = appStore;
-    this.initState(data || {});
+    const initPromise = this.initState(data || {});
+    initPromise.then(() => {
+      this.socket = new Socket(this);
+    });
   }
 
-  initState = ({ roomId = '', name = '', avatarUrl = '', password = '', isGroupRoom = false }) => {
-    this.setName(name);
-    this.setAvatarUrl(avatarUrl);
+  initState = ({ roomId = '', password = '', isGroupRoom = false }) => {
     this.setRoomInfo({
       ...this.roomInfo,
       roomId,
@@ -43,21 +44,11 @@ class ChatWindowStore {
     });
     this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: false });
     const initPromise = isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
-    initPromise.then(() => {
-      this.socket = new Socket(this);
-    });
+    return initPromise;
   };
 
-  initializeForIndividual = () => {
-    this.setRoomInfo({ ...this.roomInfo, adminAccess: true });
-    return Promise.resolve();
-  };
-
-  initializeForGroup = async () => {
-    await fetchUrl('/api/account/token/refresh/', { method: 'post' }).catch(() => {});
-    return fetchUrl(`/api/chat/group_rooms/${this.roomInfo.roomId}/`, {
-      headers: { 'X-Group-Password': this.roomInfo.password },
-    })
+  syncRoomData = (requestData = {}) =>
+    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/`, { ...requestData })
       .catch((err) => {
         log.error(err);
         this.setInitDone(true);
@@ -71,27 +62,49 @@ class ChatWindowStore {
       .then(async (response) => {
         const { data } = response;
         // @ts-ignore
-        const { player } = data;
+        const { player, name } = data;
+        this.setName(name);
         if (player) {
           this.setPlayerData(player);
           this.setPlayerExists(true);
         }
         // @ts-ignore
-        const adminAccess = data.admin_access;
-        // @ts-ignore
-        const isFavorite = data.is_favorite;
-        // @ts-ignore
-        const isCreator = data.is_creator;
-        this.setRoomInfo({
-          ...this.roomInfo,
-          adminAccess,
-          isFavorite,
-          isCreator,
-        });
+        const avatarUrl = data.avatar_url;
+        this.setAvatarUrl(avatarUrl);
         // @ts-ignore
         this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
-        await this.loadPreviousMessages();
+        await this.loadPreviousMessages(requestData);
+        return data;
       });
+
+  initializeForIndividual = () => {
+    this.setRoomInfo({ ...this.roomInfo, adminAccess: true });
+    let initPromise = Promise.resolve();
+    if (this.roomInfo.roomId) {
+      // @ts-ignore
+      initPromise = this.syncRoomData();
+    }
+    return initPromise;
+  };
+
+  initializeForGroup = async () => {
+    await fetchUrl('/api/account/token/refresh/', { method: 'post' }).catch((err) => {});
+    return this.syncRoomData({
+      headers: { 'X-Group-Password': this.roomInfo.password },
+    }).then(async (data) => {
+      // @ts-ignore
+      const adminAccess = data.admin_access;
+      // @ts-ignore
+      const isFavorite = data.is_favorite;
+      // @ts-ignore
+      const isCreator = data.is_creator;
+      this.setRoomInfo({
+        ...this.roomInfo,
+        adminAccess,
+        isFavorite,
+        isCreator,
+      });
+    });
   };
 
   setName = (newName) => {
@@ -142,13 +155,11 @@ class ChatWindowStore {
     return false;
   }
 
-  loadPreviousMessages = () => {
+  loadPreviousMessages = (requestData) => {
     const { next } = this.previousMessagesInfo;
     if (!next) return Promise.resolve(0);
     this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: true });
-    return fetchUrl(`${next}`, {
-      headers: { 'X-Group-Password': this.roomInfo.password },
-    })
+    return fetchUrl(`${next}`, { ...requestData })
       .catch((err) => {
         log.error(err);
         this.appStore.showAlert({
@@ -172,7 +183,7 @@ class ChatWindowStore {
             },
           ];
           this.addInitMessageList(detailMessages);
-          this.closeChatWindow();
+          this.closeChatSession();
         } else {
           // @ts-ignore
           detailMessages = messages.map((msg) => {
@@ -236,44 +247,51 @@ class ChatWindowStore {
     switch (messageType) {
       case MessageType.USER_INFO:
         if (!this.isGroupChat) {
-          clearTimeout(this.timeout);
-          this.timeout = setTimeout(
-            (chatWindowStore) => {
-              if (chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
-                chatWindowStore.socket.close();
-                chatWindowStore.setChatStatus(ChatStatus.NO_MATCH_FOUND);
-              }
-            },
-            MatchTimeout,
-            this
-          );
+          const { roomId } = messageData;
+          if (!roomId) {
+            clearTimeout(this.matchTimeout);
+            this.matchTimeout = setTimeout(
+              (chatWindowStore) => {
+                if (chatWindowStore.chatStatus === ChatStatus.NOT_STARTED) {
+                  chatWindowStore.socket.close();
+                  chatWindowStore.setChatStatus(ChatStatus.NO_MATCH_FOUND);
+                }
+              },
+              MatchTimeout,
+              this
+            );
+            this.setChatStatus(ChatStatus.NOT_STARTED);
+          }
         }
-        this.setChatStatus(ChatStatus.NOT_STARTED);
         return {};
-      case MessageType.USER_JOINED:
-        messageData.content = this.isGroupChat
-          ? `${messageData.newJoinee.name} entered`
-          : `You are connected to ${messageData.match.name}`;
-        if (!isInitMsg) {
-          if ('match' in messageData) {
-            clearTimeout(this.timeout);
+      case MessageType.USER_JOINED: {
+        if (this.chatStatus === ChatStatus.NOT_STARTED) {
+          if (this.isGroupChat) {
+            messageData.content = `${messageData.newJoinee.name} entered`;
+          } else if ('match' in messageData) {
+            clearTimeout(this.matchTimeout);
             this.setName(messageData.match.name);
             this.setAvatarUrl(messageData.match.avatarUrl);
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
+            messageData.content = `You are connected to ${messageData.match.name}`;
+          } else {
+            // Direct entry into individual room using link
           }
+        } else if (this.chatStatus === ChatStatus.RECONNECTING) {
+          messageData.content = 'Connection restored';
+        }
+        if (!isInitMsg) {
           this.setChatStatus(ChatStatus.ONGOING);
           this.setInitDone(true);
         }
         break;
+      }
       case MessageType.USER_LEFT:
-        messageData.content = `${messageData.resignee.name} left`;
-        if (!isInitMsg) {
-          if (!this.isGroupChat) {
-            this.socket.close();
-            this.socket = null;
-            this.setChatStatus(ChatStatus.ENDED);
-            this.setShouldOpenPlayer(false);
-          }
+        if (this.isGroupChat) {
+          messageData.content = `${messageData.resignee.name} left`;
+        } else {
+          this.setChatStatus(ChatStatus.RECONNECTING);
+          messageData.content = 'Reconnecting...';
         }
         break;
       case MessageType.TEXT: {
@@ -300,8 +318,22 @@ class ChatWindowStore {
         break;
       }
       case MessageType.CHAT_DELETE:
-        this.closeChatWindow();
+        if (this.isGroupChat || this.chatStatus === ChatStatus.NOT_STARTED) {
+          messageData.content = 'Room no longer exists';
+        } else {
+          messageData.content = `${this.name} left`;
+        }
+        this.closeChatSession();
         break;
+      case MessageType.RECONNECTING:
+        messageData.content = 'Reconnecting...';
+        this.setChatStatus(ChatStatus.RECONNECTING);
+        break;
+      case MessageType.DISCONNECTED:
+        messageData.content = 'Disconnected';
+        this.closeChatSession();
+        break;
+
       default:
         log.error('Unsupported message type', messageType);
         return {};
@@ -315,8 +347,9 @@ class ChatWindowStore {
     this.messageList = messageList.concat(this.messageList);
   };
 
-  closeChatWindow = () => {
+  closeChatSession = () => {
     this.setChatStatus(ChatStatus.ENDED);
+    this.setShouldOpenPlayer(false);
     if (this.socket) {
       this.handlePlayerDelete();
       this.socket.close();

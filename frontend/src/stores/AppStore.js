@@ -66,7 +66,7 @@ class AppStore {
   removeChatWindow = () => {
     if (!this.chatWindow) return;
     this.chatWindow.isGroupChat && this.updateGroupRooms();
-    this.chatWindow.closeChatWindow();
+    this.chatWindow.closeChatSession();
     this.chatWindow = null;
     this.chatWindowData = {};
   };

@@ -15,6 +15,9 @@ class ProfileStore {
 
   constructor() {
     makeAutoObservable(this);
+    this.userInfoCompletedPromise = new Promise((resolve) => {
+      this.userInfoCompletedPromiseResolve = resolve;
+    });
   }
 
   setName = (newName) => {
@@ -27,6 +30,7 @@ class ProfileStore {
 
   setSessionId = (newSessionId) => {
     this.sessionId = newSessionId;
+    this.userInfoCompletedPromiseResolve();
   };
 
   setProfileInitialized = (newProfileInitialized) => {

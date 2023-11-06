@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom';
 import { alpha, Button, CardMedia, Stack, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
-import { appStore } from 'stores';
 
 const useStyles = makeStyles((theme) => ({
   jumbotron: {
@@ -35,8 +34,7 @@ function Jumbotron() {
   const history = useHistory();
 
   const handleStartIndividualChat = () => {
-    appStore.addChatWindow();
-    history.push('/chat');
+    history.push('/chat/dual');
   };
 
   return (

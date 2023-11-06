@@ -1,11 +1,11 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import { ChatStatus, MessageType, MysterioHost } from 'appConstants';
+import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 
 class Socket {
-  maxRetries = 20;
+  maxRetries = 10;
 
   constructor(chatWindowStore) {
     this.chatWindowStore = chatWindowStore;
@@ -13,23 +13,23 @@ class Socket {
   }
 
   init() {
-    let serverHost;
-    let websocketProtocol;
-    if (isCordovaEnv()) {
-      serverHost = MysterioHost;
-      websocketProtocol = 'wss';
-    } else {
-      const { host } = window.location;
-      serverHost = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
-      websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    }
-    const { roomInfo } = this.chatWindowStore;
-    const groupChatURL = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
-    this.socket = new ReconnectingWebSocket(
-      `${websocketProtocol}://${serverHost}/ws/chat${groupChatURL}/`,
-      undefined,
-      { maxRetries: this.maxRetries }
-    );
+    const getWsUrl = () => {
+      let serverHost;
+      let websocketProtocol;
+      if (isCordovaEnv()) {
+        serverHost = MysterioHost;
+        websocketProtocol = 'wss';
+      } else {
+        const { host } = window.location;
+        serverHost = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
+        websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      }
+      const { roomInfo, roomType } = this.chatWindowStore;
+      const urlSuffix = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
+      return `${websocketProtocol}://${serverHost}/ws/chat/${roomType}${urlSuffix}/`;
+    };
+
+    this.socket = new ReconnectingWebSocket(getWsUrl, undefined, { maxRetries: this.maxRetries });
     this.socket.addEventListener('open', this.handleOpen);
     this.socket.addEventListener('close', this.handleClose);
     this.socket.addEventListener('message', this.handleMessage);
@@ -38,27 +38,22 @@ class Socket {
 
   handleOpen = () => {
     log.info('socket connection established');
-    this.send(MessageType.USER_INFO, {
-      sessionId: profileStore.sessionId,
-      name: profileStore.name,
-      avatarUrl: profileStore.avatarUrl,
+    profileStore.userInfoCompletedPromise.then(() => {
+      this.send(MessageType.USER_INFO, {
+        sessionId: profileStore.sessionId,
+        name: profileStore.name,
+        avatarUrl: profileStore.avatarUrl,
+      });
     });
   };
 
   handleClose = () => {
     log.info('socket connection closed', this.socket);
     if (this.chatWindowStore.chatStatus === ChatStatus.ONGOING) {
-      this.chatWindowStore.setChatStatus(ChatStatus.NOT_STARTED);
-      // Show self left message by emulating server message
+      this.reconnectStart = Date.now();
       const message = {
-        type: MessageType.USER_LEFT,
-        data: {
-          resignee: {
-            session_id: profileStore.sessionId,
-            name: profileStore.name,
-            avatarUrl: profileStore.avatarUrl,
-          },
-        },
+        type: MessageType.RECONNECTING,
+        data: {},
       };
       const evt = { data: JSON.stringify(message) };
       this.handleMessage(evt);
@@ -72,15 +67,35 @@ class Socket {
   };
 
   handleError = (error) => {
-    log.error('Error connecting to server', error);
+    log.error('Error connecting to server\n', error);
+    const { chatStatus } = this.chatWindowStore;
     if (this.socket.retryCount >= this.maxRetries) {
-      const { appStore } = this.chatWindowStore;
-      appStore.removeChatWindow();
-      appStore.setShouldShowAlert(false);
-      appStore.showAlert({
-        text: `Error occured while connecting to server.`,
-        severity: 'error',
-      });
+      if (chatStatus === ChatStatus.NOT_STARTED) {
+        const { appStore } = this.chatWindowStore;
+        appStore.removeChatWindow();
+        appStore.setShouldShowAlert(false);
+        appStore.showAlert({
+          text: `Error occured while connecting to server.`,
+          severity: 'error',
+        });
+      } else if (chatStatus === ChatStatus.RECONNECTING) {
+        const message = {
+          type: MessageType.DISCONNECTED,
+          data: {},
+        };
+        const evt = { data: JSON.stringify(message) };
+        this.handleMessage(evt);
+      }
+    } else if (chatStatus === ChatStatus.RECONNECTING) {
+      const timeElapsed = Date.now() - this.reconnectStart;
+      if (timeElapsed >= ReconnectTimeout) {
+        const message = {
+          type: MessageType.DISCONNECTED,
+          data: {},
+        };
+        const evt = { data: JSON.stringify(message) };
+        this.handleMessage(evt);
+      }
     } else {
       log.info('Reconnecting...');
     }

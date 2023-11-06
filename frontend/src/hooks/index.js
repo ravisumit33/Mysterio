@@ -4,6 +4,7 @@ import { useGetPlayer, useHandlePlayer } from './player';
 import { useChatSound, useNewMessage, useGoToBottom } from './chat';
 import useOnScreen from './useOnScreen';
 import useBasicInfo from './useBasicInfo';
+import useQuery from './useQuery';
 
 export {
   useConstant,
@@ -15,4 +16,5 @@ export {
   useNewMessage,
   useGoToBottom,
   useBasicInfo,
+  useQuery,
 };

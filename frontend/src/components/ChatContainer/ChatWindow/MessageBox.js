@@ -11,7 +11,9 @@ import { useGoToBottom } from 'hooks';
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
   messageBox: ({ chatStatus }) => ({
-    ...((chatStatus === ChatStatus.ENDED || chatStatus === ChatStatus.NO_MATCH_FOUND) && {
+    ...([ChatStatus.ENDED, ChatStatus.NO_MATCH_FOUND, ChatStatus.RECONNECTING].includes(
+      chatStatus
+    ) && {
       opacity: 0.5,
     }),
     width: '100%',

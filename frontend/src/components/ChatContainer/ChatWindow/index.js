@@ -11,6 +11,7 @@ import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import { useChatSound, useNewMessage } from 'hooks';
+import { useHistory, useLocation } from 'react-router-dom';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -49,11 +50,23 @@ const useStyles = makeStyles((theme) => ({
 
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { messageList, chatStatus, isGroupChat, initDone, appStore, previousMessagesInfo } =
-    chatWindowStore;
+  const {
+    messageList,
+    chatStatus,
+    isGroupChat,
+    initDone,
+    appStore,
+    roomInfo: { roomId },
+    previousMessagesInfo,
+  } = chatWindowStore;
   const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
+  const { pathname } = useLocation();
+  const history = useHistory();
+  if (initDone && pathname.match(/^\/chat\/dual\/?$/)) {
+    history.replace(`/chat/individual/${roomId}`);
+  }
   const classes = useStyles({ chatStatus });
 
   const [initialRenderingDone, setInitialRenderingDone] = useState(false);
@@ -80,12 +93,12 @@ function ChatWindow(props) {
 
   const chatMessages = messageList.map((message, idx, list) => {
     const messageData = message.data;
-    const previousMessageData = idx ? list[idx - 1].data : null;
-    const nextMessageData = idx + 1 === list.length ? null : list[idx + 1].data;
-    const { sender } = messageData;
-    const previousSender = previousMessageData && previousMessageData.sender;
-    const nextSender = nextMessageData && nextMessageData.sender;
     if (message.type === MessageType.TEXT) {
+      const previousMessageData = idx ? list[idx - 1].data : null;
+      const nextMessageData = idx + 1 === list.length ? null : list[idx + 1].data;
+      const { sender } = messageData;
+      const previousSender = previousMessageData && previousMessageData.sender;
+      const nextSender = nextMessageData && nextMessageData.sender;
       let side;
       let isFirst;
       let isLast;
@@ -129,56 +142,55 @@ function ChatWindow(props) {
   const shouldDisplayLoadingMessage = isGroupChat && fetchingPreviousMessages;
 
   return (
-    <>
-      <RouteLeavingGuard
-        dialogProps={{
-          title: 'Do you want to close this chat?',
-          description: 'This will terminate this chat session.',
-        }}
-      />
-      <Stack justifyContent="space-between" className={classes.root}>
-        <Box className={clsx(classes.header, classes.section)}>
-          <ChatHeader />
-        </Box>
-        <Stack className={classes.msgBoxContainer}>
-          {shouldDisplayLoadingMessage && (
-            <WaitScreen
-              className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-              shouldOpen={shouldDisplayLoadingMessage}
-              waitScreenText="Loading previous messages"
-              progressComponent={<LinearProgress sx={{ width: '100%' }} />}
-            />
-          )}
+    <Stack justifyContent="space-between" className={classes.root}>
+      <Box className={clsx(classes.header, classes.section)}>
+        <ChatHeader />
+      </Box>
+      <Stack className={classes.msgBoxContainer}>
+        {shouldDisplayLoadingMessage && (
           <WaitScreen
-            className={classes.backdrop}
-            shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
-            waitScreenText={isGroupChat ? 'Entering room' : 'Finding your match'}
+            className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+            shouldOpen={shouldDisplayLoadingMessage}
+            waitScreenText="Loading previous messages"
+            progressComponent={<LinearProgress sx={{ width: '100%' }} />}
           />
-          {initDone && (
-            <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
-              <MessageBox
-                firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
-                hasNewMessage={hasNewMessage}
-                newMessageInfo={newMessageInfo}
-                chatMessages={chatMessages}
-              />
-            </Box>
-          )}
-        </Stack>
-        {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
+        )}
+        <WaitScreen
+          className={classes.backdrop}
+          shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
+          waitScreenText={roomId ? 'Entering room' : 'Finding your match'}
+        />
+        {initDone && (
+          <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+            <RouteLeavingGuard
+              dialogProps={{
+                title: 'Do you want to close this chat?',
+                description: 'This will terminate this chat session.',
+              }}
+            />
+
+            <MessageBox
+              firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
+              hasNewMessage={hasNewMessage}
+              newMessageInfo={newMessageInfo}
+              chatMessages={chatMessages}
+            />
+          </Box>
+        )}
+      </Stack>
+      {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
+        <Typography align="center" className={classes.infoMsg}>
+          Looks like no one is online &#128542;
+        </Typography>
+      )}
+      {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
+        !isGroupChat && (
           <Typography align="center" className={classes.infoMsg}>
-            Looks like no one is online &#128542;
+            Click &#x21BA; above to reconnect to someone
           </Typography>
         )}
-        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
-          !isGroupChat && (
-            <Typography align="center" className={classes.infoMsg}>
-              Click &#x21BA; above to reconnect to someone
-            </Typography>
-          )}
-        <InputBar />
-      </Stack>
-    </>
+      <InputBar />
+    </Stack>
   );
 }
 

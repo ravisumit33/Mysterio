@@ -13,48 +13,25 @@ class Message(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
 
+    room = models.ForeignKey(
+        "chat.Room",
+        on_delete=models.CASCADE,
+        related_name="messages",
+        related_query_name="message",
+    )
+    sender_channel = models.ForeignKey(
+        "chat.Channel",
+        on_delete=models.SET_NULL,
+        related_name="messages",
+        related_query_name="message",
+        null=True,
+    )
+
     class Meta:
         unique_together = (
             "content_type",
             "object_id",
         )
-        abstract = True
-
-
-class IndividualRoomMessage(Message):
-    """Model for individual room messages"""
-
-    room = models.ForeignKey(
-        "chat.IndividualRoom",
-        on_delete=models.CASCADE,
-        related_name="messages",
-        related_query_name="message",
-    )
-    sender_channel = models.ForeignKey(
-        "chat.IndividualChannel",
-        on_delete=models.SET_NULL,
-        related_name="messages",
-        related_query_name="message",
-        null=True,
-    )
-
-
-class GroupRoomMessage(Message):
-    """Model for group room messages"""
-
-    room = models.ForeignKey(
-        "chat.GroupRoom",
-        on_delete=models.CASCADE,
-        related_name="messages",
-        related_query_name="message",
-    )
-    sender_channel = models.ForeignKey(
-        "chat.GroupChannel",
-        on_delete=models.SET_NULL,
-        related_name="messages",
-        related_query_name="message",
-        null=True,
-    )
 
 
 class MessageMixin:
@@ -75,18 +52,4 @@ class TextData(MessageMixin, models.Model):
     """Model to store text messages"""
 
     text = models.CharField(max_length=65535)
-
-    class Meta:
-        abstract = True
-
-
-class IndividualRoomTextData(TextData):
-    """Model to store individual room text messages"""
-
-    message_relation = GenericRelation(IndividualRoomMessage, related_query_name="textdata")
-
-
-class GroupRoomTextData(TextData):
-    """Model to store individual room text messages"""
-
-    message_relation = GenericRelation(GroupRoomMessage, related_query_name="textdata")
+    message_relation = GenericRelation(Message, related_query_name="textdata")

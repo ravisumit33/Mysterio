@@ -48,7 +48,7 @@ function ChatHeader() {
 
   const handleDeleteRoom = () => {
     appStore.showWaitScreen('Deleting Room');
-    fetchUrl(`/api/chat/group_rooms/${roomId}/`, {
+    fetchUrl(`/api/chat/rooms/${roomId}/`, {
       method: 'delete',
     })
       .then(() => {

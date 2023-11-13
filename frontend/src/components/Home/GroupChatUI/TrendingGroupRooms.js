@@ -23,16 +23,16 @@ import CustomAvatar from 'components/Avatar';
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 const useStyles = makeStyles((theme) => ({
-  groupCard: {
+  roomCard: {
     height: theme.spacing(33),
     display: 'flex',
     flexDirection: 'column',
   },
-  groupCardAvatar: {
+  roomCardAvatar: {
     width: theme.spacing(7),
     height: theme.spacing(7),
   },
-  trendingGroupsTitle: {
+  trendingRoomsTitle: {
     [theme.breakpoints.down('md')]: {
       textAlign: 'center',
     },
@@ -40,8 +40,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function TrendingGroups(props) {
-  const { trendingGroups, onStartChat } = props;
+function TrendingGroupRooms(props) {
+  const { trendingGroupRooms, onStartChat } = props;
   const theme = useTheme();
   const classes = useStyles();
   const [activeStep, setActiveStep] = useState(0);
@@ -60,7 +60,7 @@ function TrendingGroups(props) {
 
   return (
     <Stack>
-      <Typography variant="h4" className={classes.trendingGroupsTitle}>
+      <Typography variant="h4" className={classes.trendingRoomsTitle}>
         Trending Rooms <TrendingUpIcon />
       </Typography>
       {/* @ts-ignore */}
@@ -72,33 +72,33 @@ function TrendingGroups(props) {
         // Adding padding to slides to solve no elevation on card issue
         slideStyle={{ padding: theme.spacing(1) }}
       >
-        {trendingGroups.map((group) => (
-          <Card elevation={2} className={classes.groupCard} key={group.id}>
+        {trendingGroupRooms.map((room) => (
+          <Card elevation={2} className={classes.roomCard} key={room.id}>
             <CardHeader
               avatar={
                 <CustomAvatar
-                  name={group.name}
-                  avatarUrl={group.avatar_url}
-                  className={classes.groupCardAvatar}
+                  name={room.room_data.name}
+                  avatarUrl={room.room_data.avatar_url}
+                  className={classes.roomCardAvatar}
                 />
               }
-              title={group.name}
+              title={room.room_data.name}
               titleTypographyProps={{
                 variant: 'h5',
               }}
-              subheader={`${group.message_count} messages`}
+              subheader={`${room.message_count} messages`}
             />
             <CardContent sx={{ flex: 1 }}>
               <Typography
                 paragraph
                 sx={{ hyphens: 'auto', textOverflow: 'ellipsis', overflow: 'hidden' }}
               >
-                {group.description}
+                {room.description}
               </Typography>
             </CardContent>
             <CardActions>
               <AvatarGroup max={4}>
-                {group.online_users.map((user) => {
+                {room.online_users.map((user) => {
                   const chatSession = user.chat_session;
                   return (
                     <CustomAvatar
@@ -113,7 +113,7 @@ function TrendingGroups(props) {
                 color="secondary"
                 variant="contained"
                 size="medium"
-                onClick={() => onStartChat(group)}
+                onClick={() => onStartChat(room)}
                 sx={{ ml: 'auto' }}
               >
                 Enter Room
@@ -124,14 +124,14 @@ function TrendingGroups(props) {
       </AutoPlaySwipeableViews>
       <MobileStepper
         sx={{ mx: 1 }}
-        steps={trendingGroups.length}
+        steps={trendingGroupRooms.length}
         position="static"
         activeStep={activeStep}
         nextButton={
           <Button
             size="small"
             onClick={handleNext}
-            disabled={activeStep === trendingGroups.length - 1}
+            disabled={activeStep === trendingGroupRooms.length - 1}
           >
             Next
             {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
@@ -148,13 +148,13 @@ function TrendingGroups(props) {
   );
 }
 
-TrendingGroups.propTypes = {
-  trendingGroups: PropTypes.arrayOf(PropTypes.shape({})),
+TrendingGroupRooms.propTypes = {
+  trendingGroupRooms: PropTypes.arrayOf(PropTypes.shape({})),
   onStartChat: PropTypes.func.isRequired,
 };
 
-TrendingGroups.defaultProps = {
-  trendingGroups: [],
+TrendingGroupRooms.defaultProps = {
+  trendingGroupRooms: [],
 };
 
-export default TrendingGroups;
+export default TrendingGroupRooms;

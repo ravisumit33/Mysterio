@@ -10,6 +10,8 @@ import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
 import notFoundJson from 'assets/animations/not-found.json';
+import { useQuery } from 'hooks';
+import { RoomType } from 'appConstants';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 
@@ -40,17 +42,27 @@ function ChatContainer() {
   const { chatWindow } = appStore;
   const { pathname } = useLocation();
   const initialRenderinDoneRef = useRef(false);
+  const urlSearchParams = useQuery();
   useEffect(() => {
     if (!initialRenderinDoneRef.current) {
       if (!chatWindow) {
-        const randomSearchInProgressRegex = /^\/chat\/dual\/?$/;
-        const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9a-zA-Z]*)\/?$/;
+        const randomSearchInProgressRegex = /^\/chat\/match\/?$/;
+        const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
         const ongoingChatMatch = pathname.match(ongoingChatRegex);
         if (ongoingChatMatch) {
           const { roomId, roomType } = ongoingChatMatch.groups;
-          const isGroupRoom = roomType === 'group';
-          const chatWindowData = { roomId, isGroupRoom };
-          appStore.addChatWindow(chatWindowData);
+          if (Object.values(RoomType).includes(roomType)) {
+            const isGroupRoom = roomType === RoomType.GROUP;
+            const chatWindowData = {
+              roomId,
+              isGroupRoom,
+              name: urlSearchParams.get('name') || '',
+              avatarUrl: urlSearchParams.get('avatarUrl')
+                ? decodeURIComponent(urlSearchParams.get('avatarUrl'))
+                : '',
+            };
+            appStore.addChatWindow(chatWindowData);
+          }
         } else if (pathname.match(randomSearchInProgressRegex)) {
           appStore.addChatWindow();
         }
@@ -59,7 +71,7 @@ function ChatContainer() {
       }
       initialRenderinDoneRef.current = true;
     }
-  }, [chatWindow, pathname]);
+  }, [chatWindow, pathname, urlSearchParams]);
   const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
   const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));

@@ -3,53 +3,18 @@ import logging
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from chat.models import GroupRoom
-from chat.models.room import IndividualRoom
-from chat.serializers.channel import GroupChannelSerializer
+from chat.models import GroupRoomData, Room
+from chat.serializers import ReadChannelSerializer
 
 from .player import PlayerSerializer
 
 logger = logging.getLogger(__name__)
 
 
-class DefaultRoomSerializer(serializers.ModelSerializer):
+class DefaultGroupRoomDataSerializer(serializers.ModelSerializer):
     """
-    Base default serializer for rooms API endpoint
+    Default serializer for group room data
     """
-
-    message_count = serializers.SerializerMethodField()
-
-    def get_message_count(self, room):
-        """
-        Getter function for message_count serializer field
-        """
-        return room.messages.count()
-
-    class Meta:
-        fields = ["id", "name", "message_count"]
-
-
-class DefaultIndividualRoomSerializer(DefaultRoomSerializer):
-    """Default serializer for individual rooms API endpoints"""
-
-    class Meta(DefaultRoomSerializer.Meta):
-        model = IndividualRoom
-
-
-class DefaultGroupRoomSerializer(DefaultRoomSerializer):
-    """
-    Base serializer for group rooms API endpoint
-    """
-
-    online_users = serializers.SerializerMethodField()
-
-    def get_online_users(self, group_room):
-        """
-        Getter function for online_users serializer field
-        """
-        online_users = group_room.channels.filter(is_active=True)
-        serializer = GroupChannelSerializer(online_users, many=True)
-        return serializer.data
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -71,47 +36,106 @@ class DefaultGroupRoomSerializer(DefaultRoomSerializer):
         instance.save()
         return instance
 
-    class Meta(DefaultRoomSerializer.Meta):
-        model = GroupRoom
-        fields = DefaultRoomSerializer.Meta.fields + [
+    class Meta:
+        model = GroupRoomData
+        fields = [
+            "name",
             "description",
             "avatar_url",
             "password",
             "zscore",
             "is_protected",
-            "online_users",
         ]
         read_only_fields = ["zscore"]
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {"password": {"write_only": True, "max_length": 20}}
 
 
-class RetrieveRoomSerializer(serializers.ModelSerializer):
-    """Base serializer for retrieve action of room API endpoint"""
+class DefaultRoomDataSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        if instance.room.is_group_room:
+            serializer = DefaultGroupRoomDataSerializer(instance, context=self.context)
+            return serializer.data
+        return {}
 
-    player = PlayerSerializer(read_only=True)
+    def get_value(self, dictionary):
+        field_dict = super().get_value(dictionary)
+        return {**field_dict, "room_type": dictionary.get("room_type")}
 
-    messages = serializers.SerializerMethodField()
+    def to_internal_value(self, data):
+        room_type = data.get("room_type")
+        room_data = None
+        if room_type == Room.GROUP:
+            room_data = DefaultGroupRoomDataSerializer(data=data, context=self.context)
+        if room_data is not None and room_data.is_valid():
+            return room_data.validated_data
+        else:
+            error = room_data.erros if room_data else "Invalid room data"
+            raise serializers.ValidationError(error)
 
-    def get_messages(self, group_room):
+    def create(self, validated_data):
+        room_type = validated_data.pop("room_type")
+        if room_type == Room.GROUP:
+            return DefaultGroupRoomDataSerializer(data=validated_data, context=self.context).create(
+                validated_data
+            )
+        return None
+
+    def update(self, instance, validated_data):
+        room_type = validated_data.pop("room_type")
+        if room_type == Room.GROUP:
+            return DefaultGroupRoomDataSerializer(data=validated_data, context=self.context).update(
+                instance, validated_data
+            )
+        return None
+
+
+class DefaultRoomSerializer(serializers.ModelSerializer):
+    """
+    Default serializer for rooms
+    """
+
+    message_count = serializers.SerializerMethodField()
+
+    online_users = serializers.SerializerMethodField()
+
+    room_data = DefaultRoomDataSerializer()
+
+    def get_online_users(self, room):
         """
-        Return url to get paginated messages for group room
+        Getter function for online_users serializer field
         """
-        room_pk = group_room.pk
-        view = self.context.get("view")
-        return view.reverse_action("get-messages", args=[room_pk])
+        online_users = room.channels.filter(is_active=True)
+        serializer = ReadChannelSerializer(online_users, many=True)
+        return serializer.data
+
+    def get_message_count(self, room):
+        """
+        Getter function for message_count serializer field
+        """
+        return room.messages.count()
+
+    def create(self, validated_data):
+        room_data = validated_data.pop("room_data")
+        room_type = validated_data.get("room_type")
+        room = super().create(validated_data)
+        self.fields.get("room_data").create(
+            {"room_type": room_type, "room_id": room.id, **room_data}
+        )
+        return room
+
+    def update(self, room, validated_data):
+        room_data = validated_data.pop("room_data")
+        room_type = validated_data.get("room_type")
+        super().update(room, validated_data)
+        self.fields.get("room_data").update(room.room_data, {"room_type": room_type, **room_data})
+        return room
 
     class Meta:
-        fields = ["name", "player", "messages"]
+        model = Room
+        fields = ["id", "message_count", "room_data", "online_users", "room_type"]
 
 
-class RetrieveIndividualRoomSerializer(RetrieveRoomSerializer):
-    """Serializer for retrieve action of IndividualRoom API endpoint"""
-
-    class Meta(RetrieveRoomSerializer.Meta):
-        model = IndividualRoom
-
-
-class RetrieveGroupRoomSerializer(RetrieveRoomSerializer):
+class RetrieveGroupRoomDataSerializer(serializers.ModelSerializer):
     """
     Serializer for retrieve action of group room API endpoint
     """
@@ -143,11 +167,33 @@ class RetrieveGroupRoomSerializer(RetrieveRoomSerializer):
         user = self.context.get("request").user
         return user is group_room.creator
 
-    class Meta(RetrieveRoomSerializer.Meta):
-        model = GroupRoom
-        fields = RetrieveRoomSerializer.Meta.fields + [
+    class Meta:
+        model = GroupRoomData
+        fields = [
             "admin_access",
             "is_creator",
             "is_favorite",
             "avatar_url",
+            "name",
+            "description",
         ]
+
+
+class RetrieveRoomSerializer(serializers.ModelSerializer):
+    """Base serializer for retrieve action of room API endpoint"""
+
+    player = PlayerSerializer(read_only=True)
+
+    room_data = serializers.SerializerMethodField()
+
+    def get_room_data(self, room):
+        """
+        Getter function for data serializer field
+        """
+        if room.is_group_room:
+            return RetrieveGroupRoomDataSerializer(room.room_data, context=self.context).data
+        return {}
+
+    class Meta:
+        model = Room
+        fields = ["player", "room_data", "room_type"]

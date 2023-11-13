@@ -1,11 +1,9 @@
 import logging
 
-from django.contrib.sessions.models import Session
-
-import chat.models.channel as Channel
 from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
-from chat.models import ChatSession
+from chat.consumers.utils import create_instance, update_instance
+from chat.serializers import ChatSessionSerializer, WriteChannelSerializer
 from chat.tasks import match_channels
 from chat.utils import channel_layer
 
@@ -23,12 +21,14 @@ def handle_user_info(consumer, message_data):
     tab_session_id = message_data["sessionId"]
 
     session_key = consumer.scope["session"].session_key
-    session = Session.objects.get(pk=session_key)
-    chat_session = ChatSession.objects.create(
-        name=name,
-        tab_session_id=tab_session_id,
-        avatar_url=avatar_url,
-        session=session,
+    chat_session = create_instance(
+        ChatSessionSerializer,
+        {
+            "name": name,
+            "tab_session_id": tab_session_id,
+            "avatar_url": avatar_url,
+            "session": session_key,
+        },
     )
     consumer.chat_session_id = chat_session.id
     consumer.profile = {
@@ -38,12 +38,11 @@ def handle_user_info(consumer, message_data):
     }
 
     channel_layer_info = consumer.channel_layer_info
-    channel_cls = (
-        Channel.GroupChannel
-        if channel_layer_info["is_group_consumer"]
-        else Channel.IndividualChannel
+    update_instance(
+        WriteChannelSerializer,
+        consumer.get_channel_instance(),
+        {"chat_session": chat_session.id},
     )
-    channel_cls.objects.filter(name=consumer.channel_name).update(chat_session_id=chat_session.id)
     if not channel_layer_info["is_group_consumer"]:
         if not consumer.room_id:
             match_channels()

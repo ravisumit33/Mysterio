@@ -1,9 +1,10 @@
 import logging
 
-import chat.models.room as Room
 from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
+from chat.consumers.utils import create_instance
 from chat.models import Player
+from chat.serializers import PlayerSerializer
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -18,14 +19,18 @@ def handle_player_info(consumer, message_data):
     name = message_data["name"]
     video_id = message_data["videoId"]
 
-    player = Player(name=name, video_id=video_id, host_id=consumer.chat_session_id)
-    player.save()
+    player = create_instance(
+        PlayerSerializer,
+        {
+            "name": name,
+            "video_id": video_id,
+            "host_id": consumer.chat_session_id,
+            "room_id": consumer.room_id,
+        },
+    )
     consumer.player_id = player.id
 
     channel_layer_info = consumer.channel_layer_info
-
-    room_cls = Room.GroupRoom if channel_layer_info["is_group_consumer"] else Room.IndividualRoom
-    room_cls.objects.filter(id=consumer.room_id).update(player=player)
 
     add_text_message(
         consumer,

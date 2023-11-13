@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { ChatStatus, MatchTimeout, MessageType } from 'appConstants';
+import { ChatStatus, MatchTimeout, MessageType, RoomType } from 'appConstants';
 import log from 'loglevel';
 import { fetchUrl, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
@@ -35,20 +35,22 @@ class ChatWindowStore {
     });
   }
 
-  initState = ({ roomId = '', password = '', isGroupRoom = false }) => {
+  initState = ({ roomId = '', password = '', isGroupRoom = false, name = '', avatarUrl = '' }) => {
     this.setRoomInfo({
       ...this.roomInfo,
       roomId,
       isGroupRoom,
       password,
     });
+    this.setName(name);
+    this.setAvatarUrl(avatarUrl);
     this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: false });
     const initPromise = isGroupRoom ? this.initializeForGroup() : this.initializeForIndividual();
     return initPromise;
   };
 
   syncRoomData = (requestData = {}) =>
-    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/`, { ...requestData })
+    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/`, { ...requestData })
       .catch((err) => {
         log.error(err);
         this.setInitDone(true);
@@ -62,17 +64,20 @@ class ChatWindowStore {
       .then(async (response) => {
         const { data } = response;
         // @ts-ignore
-        const { player, name } = data;
-        this.setName(name);
+        const { player, room_data: roomData, room_type: roomType } = data;
+        if (roomType === RoomType.GROUP) {
+          const { name, avatar_url: avatarUrl } = roomData;
+          this.setName(name);
+          this.setAvatarUrl(avatarUrl);
+        }
         if (player) {
           this.setPlayerData(player);
           this.setPlayerExists(true);
         }
-        // @ts-ignore
-        const avatarUrl = data.avatar_url;
-        this.setAvatarUrl(avatarUrl);
-        // @ts-ignore
-        this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, next: data.messages });
+        this.setPreviousMessagesInfo({
+          ...this.previousMessagesInfo,
+          next: `/api/chat/messages/?search=${this.roomInfo.roomId}&page_size=250&ordering=-sent_at`,
+        });
         await this.loadPreviousMessages(requestData);
         return data;
       });
@@ -90,14 +95,15 @@ class ChatWindowStore {
   initializeForGroup = async () => {
     await fetchUrl('/api/account/token/refresh/', { method: 'post' }).catch((err) => {});
     return this.syncRoomData({
-      headers: { 'X-Group-Password': this.roomInfo.password },
+      headers: { 'X-Room-Password': this.roomInfo.password },
     }).then(async (data) => {
       // @ts-ignore
-      const adminAccess = data.admin_access;
-      // @ts-ignore
-      const isFavorite = data.is_favorite;
-      // @ts-ignore
-      const isCreator = data.is_creator;
+      const { room_data: roomData } = data;
+      const {
+        admin_access: adminAccess,
+        is_favorite: isFavorite,
+        is_creator: isCreator,
+      } = roomData;
       this.setRoomInfo({
         ...this.roomInfo,
         adminAccess,
@@ -144,7 +150,7 @@ class ChatWindowStore {
   }
 
   get roomType() {
-    return this.roomInfo.isGroupRoom ? 'group' : 'individual';
+    return this.roomInfo.isGroupRoom ? RoomType.GROUP : RoomType.INDIVIDUAL;
   }
 
   get isHost() {
@@ -196,6 +202,7 @@ class ChatWindowStore {
             switch (message.type) {
               case MessageType.TEXT:
                 message.data.sender = chatSessionData;
+                message.data.content = message.data.content.text;
                 break;
               case MessageType.USER_JOINED:
                 message.data.newJoinee = chatSessionData;
@@ -366,10 +373,10 @@ class ChatWindowStore {
     if (this.isGroupChat) {
       fetchData = {
         ...fetchData,
-        headers: { 'X-Group-Password': this.roomInfo.password },
+        headers: { 'X-Room-Password': this.roomInfo.password },
       };
     }
-    fetchUrl(`/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/set_like/`, {
+    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/set_like/`, {
       ...fetchData,
       method: 'post',
     })
@@ -390,12 +397,12 @@ class ChatWindowStore {
     let fetchData;
     if (this.isGroupChat) {
       fetchData = {
-        headers: { 'X-Group-Password': this.roomInfo.password },
+        headers: { 'X-Room-Password': this.roomInfo.password },
       };
     }
     this.appStore.showWaitScreen('Syncing player');
     return fetchUrl(
-      `/api/chat/${this.roomType}_rooms/${this.roomInfo.roomId}/get_player/`,
+      `/api/chat/players/${this.syncedPlayerData.id}/?search=${this.roomInfo.roomId}`,
       fetchData
     )
       .then((response) => {

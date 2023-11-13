@@ -1,14 +1,8 @@
 import logging
 
-from django.db.utils import IntegrityError
-
 from chat.constants import MessageType
-from chat.models.message import (
-    GroupRoomMessage,
-    GroupRoomTextData,
-    IndividualRoomMessage,
-    IndividualRoomTextData,
-)
+from chat.consumers.utils import create_instance
+from chat.serializers import WriteMessageSerializer
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -18,23 +12,23 @@ def add_text_message(consumer, text, msg_type, fail_action=None):
     """
     Add entry to textdata and message models
     """
-    channel_layer_info = consumer.channel_layer_info
-    is_group_consumer = channel_layer_info["is_group_consumer"]
-    text_dala_cls = GroupRoomTextData if is_group_consumer else IndividualRoomTextData
-    message_cls = GroupRoomMessage if is_group_consumer else IndividualRoomMessage
-
     try:
-        text_data = text_dala_cls.objects.create(text=text)
-        message_cls.objects.create(
-            room_id=consumer.room_id,
-            sender_channel_id=consumer.channel_id,
-            message_type=msg_type,
-            content_object=text_data,
+        create_instance(
+            WriteMessageSerializer,
+            {
+                "content": {"text": text},
+                "room": consumer.room_id,
+                "sender_channel": consumer.channel_id,
+                "message_type": msg_type,
+            },
         )
-    except IntegrityError:
+    except Exception as excp:
+        logger.error("Failed to add text message")
+        logger.exception(excp)
         if fail_action is not None:
             fail_action()
-        return
+        else:
+            raise excp
 
 
 def handle_text_message(consumer, message_data):

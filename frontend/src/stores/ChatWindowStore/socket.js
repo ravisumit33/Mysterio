@@ -1,6 +1,6 @@
 import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
-import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout } from 'appConstants';
+import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout, RoomType } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
 import profileStore from '../ProfileStore';
 
@@ -25,8 +25,10 @@ class Socket {
         websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       }
       const { roomInfo, roomType } = this.chatWindowStore;
-      const urlSuffix = roomInfo.roomId ? `/${roomInfo.roomId}` : '';
-      return `${websocketProtocol}://${serverHost}/ws/chat/${roomType}${urlSuffix}/`;
+      if (roomType === RoomType.INDIVIDUAL && !roomInfo.roomId) {
+        return `${websocketProtocol}://${serverHost}/ws/chat/match/`;
+      }
+      return `${websocketProtocol}://${serverHost}/ws/chat/${roomType}/${roomInfo.roomId}/`;
     };
 
     this.socket = new ReconnectingWebSocket(getWsUrl, undefined, { maxRetries: this.maxRetries });

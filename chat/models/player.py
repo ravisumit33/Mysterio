@@ -4,7 +4,8 @@ from django.db import models
 class Player(models.Model):
     """Model for player metadata"""
 
-    NAME_CHOICES = (("YT", "YouTube"),)
+    YOUTUBE = "YT"
+    NAME_CHOICES = ((YOUTUBE, "YouTube"),)
     name = models.CharField(
         max_length=2,
         choices=NAME_CHOICES,
@@ -27,3 +28,4 @@ class Player(models.Model):
     )
     state = models.SmallIntegerField(choices=STATE_CHOICES, default=-1)
     current_time = models.FloatField(default=0)
+    room = models.OneToOneField("chat.Room", on_delete=models.CASCADE)

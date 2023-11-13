@@ -22,9 +22,9 @@ import PlayerActions from './PlayerActions';
 
 function Player() {
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { roomInfo, roomType, syncedPlayerData, isHost, setShouldOpenPlayer, handlePlayerDelete } =
+  const { roomInfo, syncedPlayerData, isHost, setShouldOpenPlayer, handlePlayerDelete } =
     chatWindowStore;
-  const { adminAccess, roomId } = roomInfo;
+  const { adminAccess } = roomInfo;
   // @ts-ignore
   const isScreenSmallerThanLg = useMediaQuery((theme) => theme.breakpoints.down('lg'));
   // @ts-ignore
@@ -89,7 +89,7 @@ function Player() {
     (evt) => {
       const syncPlayerTime = () => {
         syncTimeoutRef.current = setTimeout(() => {
-          fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
+          fetchUrl(`/api/chat/players/${syncedPlayerData.id}/`, {
             method: 'patch',
             body: { current_time: getPlayerTime(syncedPlayerData) },
           }).finally(() => {
@@ -112,7 +112,7 @@ function Player() {
           break;
       }
     },
-    [getPlayerTime, isHost, syncedPlayerData, roomId, roomType]
+    [getPlayerTime, isHost, syncedPlayerData]
   );
   const onPlayerStateChange = useCallback(
     (state) => {
@@ -127,13 +127,13 @@ function Player() {
       }
       isHost &&
         playerReady.promise.then(() => {
-          fetchUrl(`/api/chat/${roomType}_rooms/${roomId}/update_player/`, {
+          fetchUrl(`/api/chat/players/${syncedPlayerData.id}/`, {
             method: 'patch',
             body: { state, current_time: getPlayerTime(syncedPlayerData) },
           });
         });
     },
-    [getPlayerTime, handlePlay, isHost, syncedPlayerData, playerReady, roomId, roomType]
+    [getPlayerTime, handlePlay, isHost, syncedPlayerData, playerReady]
   );
 
   const getEmbedPlayer = () => {

@@ -43,11 +43,13 @@ class ChannelLayerOps:
 channel_layer = ChannelLayerOps()
 
 
-def check_group_password(request, group_room):
+def check_group_room_password(request, group_room_data):
     """
     Returns if request contains valid group room password
     """
-    request_password = request.META.get("HTTP_X_GROUP_PASSWORD", "")
+    request_password = request.META.get("HTTP_X_ROOM_PASSWORD", "")
     return (
-        check_password(request_password, group_room.password) if group_room.is_protected else True
+        check_password(request_password, group_room_data.password)
+        if group_room_data.is_protected
+        else True
     )

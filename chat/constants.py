@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from enum import IntEnum
 
 
-class MessageType(IntEnum):
-    """Message enum to be sent on client"""
+@dataclass
+class MessageType:
+    """Message types"""
 
     USER_JOINED = 1
     USER_LEFT = 2

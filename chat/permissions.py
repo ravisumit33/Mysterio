@@ -3,48 +3,121 @@ import logging
 from django.contrib.sessions.models import Session
 from rest_framework import permissions
 
-from chat.utils import check_group_password
+from chat.models import Room
+from chat.utils import check_group_room_password
 
 logger = logging.getLogger(__name__)
 
 
-class GroupRoomPermission(permissions.BasePermission):
+def has_basic_room_permission(request, room, only_allow_active=True):
+    has_perm = True
+    if room.is_group_room:
+        has_perm = has_perm and check_group_room_password(request, room.room_data)
+    if only_allow_active:
+        active_chat_session = Session.objects.filter(
+            pk=request.session.session_key,
+            chat_session__channel__is_active=True,
+            chat_session__channel__room_id=room.id,
+        )
+        has_perm = has_perm and active_chat_session.exists()
+    return has_perm
+
+
+class RoomPermission(permissions.BasePermission):
     """
-    Custom permissions for group room view set
+    Custom permissions for room view set
     """
 
     def has_permission(self, request, view):
-        if view.action == "create":
-            return request.user.is_authenticated
+        if request.user.is_superuser:
+            return True
+        if view.action in ("create", "list"):
+            if view.action == "create":
+                room_type = request.data.get("room_type", None)
+            else:
+                room_type = request.query_params.get("search", None)
+            if room_type not in (Room.GROUP, Room.INDIVIDUAL):
+                return False
+            restricted_actions_perms = {
+                Room.GROUP: {
+                    "create": request.user.is_authenticated,
+                },
+                Room.INDIVIDUAL: {
+                    "create": False,
+                    "list": False,
+                },
+            }
+            restricted_room_perms = restricted_actions_perms[room_type]
+            if view.action in restricted_room_perms:
+                return restricted_room_perms[view.action]
         return True
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, room):
         if request.user.is_superuser:
             return True
-        password_valid = check_group_password(request, obj)
-        get_permission_restricted = {
-            "set_like": True,
-            "update_player": request.user in obj.admins.all(),
-            "destroy": request.user == obj.creator,
+        room_type = room.room_type
+        has_basic_perm = has_basic_room_permission(request, room)
+        has_room_data = hasattr(room, "room_data")
+        restricted_actions_perms = {
+            Room.GROUP: {
+                "retrieve": has_basic_perm,
+                "destroy": has_basic_room_permission(request, room, only_allow_active=False)
+                and has_room_data
+                and request.user == room.room_data.creator,
+                "update": False,
+                "partial_update": False,
+            },
+            Room.INDIVIDUAL: {
+                "retrieve": has_basic_perm,
+                "destroy": False,
+                "update": False,
+                "partial_update": False,
+            },
         }
-        if view.action in ("retrieve", "get_player", "get_messages"):
-            return password_valid
-        if view.action in get_permission_restricted:
-            remove_restriction = request.user.is_authenticated and password_valid
-            return get_permission_restricted[view.action] if remove_restriction else False
-        return False
+        restricted_room_perms = restricted_actions_perms[room_type]
+        if view.action in restricted_room_perms:
+            return restricted_room_perms[view.action]
+        return has_basic_perm
+        #  get_permission_restricted = {
+        #  "set_like": True,
+        #  }
+        #  if view.action in ("retrieve", "get_player", "get_messages"):
+        #  return password_valid
+        #  if view.action in get_permission_restricted:
+        #  remove_restriction = request.user.is_authenticated and password_valid
+        #  return get_permission_restricted[view.action] if remove_restriction else False
+        #  return False
 
 
-class IndividualRoomPermission(permissions.BasePermission):
+class MessagePermission(permissions.BasePermission):
     """
-    Custom permissions for individual room view set
+    Custom permissions for message view set
     """
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, msg):
         if request.user.is_superuser:
             return True
-        channels = obj.channels.all()
-        chat_session_ids = [channel.chat_session.id for channel in channels]
-        session = Session.objects.get(pk=request.session.session_key)
-        matched_session_query = session.chat_sessions.filter(pk__in=chat_session_ids)
-        return matched_session_query.exists()
+        return has_basic_room_permission(request, msg.room)
+
+
+class PlayerPermission(permissions.BasePermission):
+    """
+    Custom permissions for player view set
+    """
+
+    def has_object_permission(self, request, view, player):
+        if request.user.is_superuser:
+            return True
+        room = player.room
+        has_perm = has_basic_room_permission(request, room)
+        if view.action == "retrieve":
+            return has_perm
+        if view.action in ["update", "partial_update"]:
+            if room.is_group_room:
+                has_perm = has_perm and request.user in room.room_data.admins.all()
+            host_chat_session = Session.objects.filter(
+                pk=request.session.session_key, chat_session__id=player.host.id
+            )
+            has_perm = has_perm and host_chat_session.exists()
+            return has_perm
+        return False

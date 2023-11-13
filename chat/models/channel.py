@@ -19,21 +19,8 @@ class Channel(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
-
-    @classmethod
-    def __init_subclass__(cls, **kwargs):
-        super().__init_subclass__(**kwargs)
-        models.signals.post_delete.connect(delete_session, sender=cls)
-
-    class Meta:
-        abstract = True
-
-
-class IndividualChannel(Channel):
-    """Channel for individual chat"""
-
     room = models.ForeignKey(
-        "chat.IndividualRoom",
+        "chat.Room",
         on_delete=models.CASCADE,
         related_name="channels",
         related_query_name="channel",
@@ -42,23 +29,7 @@ class IndividualChannel(Channel):
         default=None,
     )
 
-    class Meta:
-        # TODO: Analyse performance for indexes
-        indexes = [
-            models.Index(
-                fields=["room", "created_at"],
-                condition=models.Q(room__isnull=True),
-                name="individual_channel_index",
-            )
-        ]
-
-
-class GroupChannel(Channel):
-    """Channel for group chat"""
-
-    room = models.ForeignKey(
-        "chat.GroupRoom",
-        on_delete=models.CASCADE,
-        related_name="channels",
-        related_query_name="channel",
-    )
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        models.signals.post_delete.connect(delete_session, sender=cls)

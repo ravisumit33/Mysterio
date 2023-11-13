@@ -289,4 +289,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "customauth.tasks.clear_sessions",
         "schedule": timedelta(days=1),
     },
+    "clear_matched_requests": {
+        "task": "chat.tasks.clear_matched_requests",
+        "schedule": timedelta(days=1),
+    },
 }

@@ -13,11 +13,11 @@ import {
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 
-function GroupPasswordDialog(props) {
+function RoomPasswordDialog(props) {
   const {
-    shouldOpenGroupPasswordDialog,
-    setShouldOpenGroupPasswordDialog,
-    handleStartGroupChat,
+    shouldOpenRoomPasswordDialog,
+    setShouldOpenRoomPasswordDialog,
+    handleStartChat,
     chatWindowData,
   } = props;
 
@@ -26,18 +26,18 @@ function GroupPasswordDialog(props) {
     error: false,
   };
 
-  const [selectedGroupPassword, setSelectedGroupPassword] = useState('');
-  const [protectedGroupPasswordFieldData, setProtectedGroupPasswordFieldData] =
+  const [selectedRoomPassword, setSelectedRoomPassword] = useState('');
+  const [protectedRoomPasswordFieldData, setProtectedRoomPasswordFieldData] =
     useState(defaultPasswordFieldData);
 
-  const groupPasswordCheck = () => {
+  const roomPasswordCheck = () => {
     appStore.showWaitScreen('Validating password');
-    fetchUrl(`/api/chat/group_rooms/${chatWindowData.roomId}/check_password/`, {
-      headers: { 'X-Group-Password': selectedGroupPassword },
+    fetchUrl(`/api/chat/rooms/${chatWindowData.roomId}/check_password/`, {
+      headers: { 'X-Room-Password': selectedRoomPassword },
     })
       .then((response) => {
-        setShouldOpenGroupPasswordDialog(false);
-        handleStartGroupChat({ ...chatWindowData, password: selectedGroupPassword });
+        setShouldOpenRoomPasswordDialog(false);
+        handleStartChat({ ...chatWindowData, password: selectedRoomPassword });
         appStore.setShouldShowAlert(false);
       })
       .catch((response) => {
@@ -45,24 +45,24 @@ function GroupPasswordDialog(props) {
           text: 'Invalid room password.',
           severity: 'error',
         });
-        setShouldOpenGroupPasswordDialog(true);
-        const newProtectedGroupPasswordFieldData = { ...protectedGroupPasswordFieldData };
-        newProtectedGroupPasswordFieldData.error = true;
-        setProtectedGroupPasswordFieldData(newProtectedGroupPasswordFieldData);
+        setShouldOpenRoomPasswordDialog(true);
+        const newProtectedRoomPasswordFieldData = { ...protectedRoomPasswordFieldData };
+        newProtectedRoomPasswordFieldData.error = true;
+        setProtectedRoomPasswordFieldData(newProtectedRoomPasswordFieldData);
       })
       .finally(() => appStore.setShouldShowWaitScreen(false));
   };
 
   return (
     <Dialog
-      open={shouldOpenGroupPasswordDialog}
-      onClose={() => setShouldOpenGroupPasswordDialog(false)}
+      open={shouldOpenRoomPasswordDialog}
+      onClose={() => setShouldOpenRoomPasswordDialog(false)}
     >
       <DialogTitle>Enter Password</DialogTitle>
       <form
         onSubmit={(evt) => {
           evt.preventDefault();
-          groupPasswordCheck();
+          roomPasswordCheck();
         }}
       >
         <DialogContent>
@@ -72,11 +72,11 @@ function GroupPasswordDialog(props) {
             label="Password"
             size="small"
             fullWidth
-            value={selectedGroupPassword}
-            onChange={(evt) => setSelectedGroupPassword(evt.target.value)}
+            value={selectedRoomPassword}
+            onChange={(evt) => setSelectedRoomPassword(evt.target.value)}
             required
-            helperText={protectedGroupPasswordFieldData.help_text}
-            error={protectedGroupPasswordFieldData.error}
+            helperText={protectedRoomPasswordFieldData.help_text}
+            error={protectedRoomPasswordFieldData.error}
             InputProps={{ type: 'password' }}
             inputProps={{ maxLength: 20 }}
           />
@@ -91,17 +91,18 @@ function GroupPasswordDialog(props) {
   );
 }
 
-GroupPasswordDialog.propTypes = {
-  shouldOpenGroupPasswordDialog: PropTypes.bool,
-  setShouldOpenGroupPasswordDialog: PropTypes.func.isRequired,
-  handleStartGroupChat: PropTypes.func.isRequired,
+RoomPasswordDialog.propTypes = {
+  shouldOpenRoomPasswordDialog: PropTypes.bool,
+  setShouldOpenRoomPasswordDialog: PropTypes.func.isRequired,
+  handleStartChat: PropTypes.func.isRequired,
   chatWindowData: PropTypes.shape({
     roomId: PropTypes.number.isRequired,
+    isGroupRoom: PropTypes.bool.isRequired,
   }).isRequired,
 };
 
-GroupPasswordDialog.defaultProps = {
-  shouldOpenGroupPasswordDialog: false,
+RoomPasswordDialog.defaultProps = {
+  shouldOpenRoomPasswordDialog: false,
 };
 
-export default observer(GroupPasswordDialog);
+export default observer(RoomPasswordDialog);

@@ -18,4 +18,5 @@ class ChatSessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChatSession
-        fields = ["session_id", "name", "avatar_url"]
+        fields = ["session_id", "name", "avatar_url", "session", "tab_session_id"]
+        extra_kwargs = {"session": {"write_only": True}, "tab_session_id": {"write_only": True}}

@@ -8,8 +8,9 @@ import groupChatJson from 'assets/animations/group-chat.json';
 import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
 import { appStore } from 'stores';
-import TrendingGroups from './TrendingGroups';
-import GroupPasswordDialog from './GroupPasswordDialog';
+import { RoomType } from 'appConstants';
+import TrendingGroupRooms from './TrendingGroupRooms';
+import RoomPasswordDialog from './RoomPasswordDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -59,18 +60,18 @@ function GroupChatUI() {
     ),
     []
   );
-  const { current: newGroupOption } = useRef({
+  const { current: newRoomOption } = useRef({
     id: -1,
     name: 'New room',
     avatar: AddCircleAvatar,
   });
 
-  const [groupAction, setGroupAction] = useState('Create');
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [pendingNewGroupName, setPendingNewGroupName] = useState('');
-  const [shouldOpenGroupPasswordDialog, setShouldOpenGroupPasswordDialog] = useState(false);
-  const [chatWindowData, setChatWindowData] = useState({ roomId: 0 });
+  const [roomAction, setRoomAction] = useState('Create');
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [newRoomName, setNewRoomName] = useState('');
+  const [pendingNewRoomName, setPendingNewRoomName] = useState('');
+  const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
+  const [chatWindowData, setChatWindowData] = useState({ roomId: 0, isGroupRoom: true });
 
   const { groupRooms, setGroupRoomsFetched, updateGroupRooms } = appStore;
 
@@ -79,30 +80,31 @@ function GroupChatUI() {
     setGroupRoomsFetched(true);
   }, [updateGroupRooms, setGroupRoomsFetched]);
 
-  const trendingGroups = [...groupRooms]
+  const trendingGroupRooms = [...groupRooms]
     .sort((a, b) => {
-      const zscoreA = parseFloat(a.zscore);
-      const zscoreB = parseFloat(b.zscore);
+      const zscoreA = parseFloat(a.room_data.zscore);
+      const zscoreB = parseFloat(b.room_data.zscore);
       return zscoreB - zscoreA;
     })
     .slice(0, 5);
 
   const handleStartGroupChat = (windowData) => {
-    history.push(`/chat/group/${windowData.roomId}`);
+    history.push(`/chat/${RoomType.GROUP}/${windowData.roomId}`);
   };
 
-  const handleStartChat = (group) => {
-    const chatGroup = group || selectedGroup;
-    if (chatGroup) {
-      if (chatGroup.id === -1) {
-        newGroupName && history.push('/room', { name: newGroupName });
+  const handleStartChat = (room) => {
+    const chatGroupRoom = room || selectedRoom;
+    if (chatGroupRoom) {
+      if (chatGroupRoom.id === -1) {
+        newRoomName && history.push('/room', { name: newRoomName });
       } else {
         const windowData = {
-          roomId: chatGroup.id,
+          roomId: chatGroupRoom.id,
+          isGroupRoom: true,
         };
         setChatWindowData(windowData);
-        if (chatGroup.is_protected) {
-          setShouldOpenGroupPasswordDialog(true);
+        if (chatGroupRoom.room_data.is_protected) {
+          setShouldOpenRoomPasswordDialog(true);
         } else {
           handleStartGroupChat(windowData);
         }
@@ -114,7 +116,7 @@ function GroupChatUI() {
     if (reason === 'toggleInput') {
       return;
     }
-    setNewGroupName(pendingNewGroupName);
+    setNewRoomName(pendingNewRoomName);
   };
 
   return (
@@ -138,38 +140,38 @@ function GroupChatUI() {
                   <CustomAutoComplete
                     autoCompleteProps={{
                       id: 'Groups-Search-Box',
-                      options: [newGroupOption, ...groupRooms],
+                      options: [newRoomOption, ...groupRooms],
                       onClose: handleGroupSearchClose,
-                      inputValue: pendingNewGroupName,
+                      inputValue: pendingNewRoomName,
                       getOptionLabel: (option) => {
                         if (option.id > 0) return option.name;
-                        if (option.id === -1) return pendingNewGroupName;
+                        if (option.id === -1) return pendingNewRoomName;
                         return '';
                       },
                       noOptionsText: 'No room',
                       sx: { flex: 1 },
                     }}
-                    value={selectedGroup}
-                    setPendingValue={setPendingNewGroupName}
+                    value={selectedRoom}
+                    setPendingValue={setPendingNewRoomName}
                     setValue={(newSelectedGroup) => {
                       if (!newSelectedGroup) {
-                        setGroupAction('Create');
-                        setSelectedGroup(null);
+                        setRoomAction('Create');
+                        setSelectedRoom(null);
                       } else {
                         if (newSelectedGroup.id === -1) {
-                          setGroupAction('Create');
-                          if (!pendingNewGroupName) {
+                          setRoomAction('Create');
+                          if (!pendingNewRoomName) {
                             appStore.showAlert({
                               text: 'Room name cannot be empty',
                               severity: 'error',
                             });
-                            setSelectedGroup(null);
+                            setSelectedRoom(null);
                             return;
                           }
                         } else {
-                          setGroupAction('Enter');
+                          setRoomAction('Enter');
                         }
-                        setSelectedGroup(newSelectedGroup);
+                        setSelectedRoom(newSelectedGroup);
                       }
                     }}
                     inputLabel="Enter room name"
@@ -182,24 +184,27 @@ function GroupChatUI() {
                     color="secondary"
                     variant="contained"
                     size="medium"
-                    disabled={!pendingNewGroupName || !selectedGroup}
+                    disabled={!pendingNewRoomName || !selectedRoom}
                     onClick={(evt) => handleStartChat()}
                   >
-                    {groupAction} Room
+                    {roomAction} Room
                   </Button>
                 </Stack>
-                {trendingGroups.length > 0 && (
-                  <TrendingGroups trendingGroups={trendingGroups} onStartChat={handleStartChat} />
+                {trendingGroupRooms.length > 0 && (
+                  <TrendingGroupRooms
+                    trendingGroupRooms={trendingGroupRooms}
+                    onStartChat={handleStartChat}
+                  />
                 )}
               </Stack>
             </Grid>
           </Grid>
         </Container>
       </Box>
-      <GroupPasswordDialog
-        shouldOpenGroupPasswordDialog={shouldOpenGroupPasswordDialog}
-        setShouldOpenGroupPasswordDialog={setShouldOpenGroupPasswordDialog}
-        handleStartGroupChat={handleStartGroupChat}
+      <RoomPasswordDialog
+        shouldOpenRoomPasswordDialog={shouldOpenRoomPasswordDialog}
+        setShouldOpenRoomPasswordDialog={setShouldOpenRoomPasswordDialog}
+        handleStartChat={handleStartGroupChat}
         chatWindowData={chatWindowData}
       />
     </>

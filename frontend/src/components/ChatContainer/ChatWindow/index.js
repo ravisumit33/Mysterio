@@ -51,6 +51,8 @@ const useStyles = makeStyles((theme) => ({
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const {
+    name,
+    avatarUrl,
     messageList,
     chatStatus,
     isGroupChat,
@@ -58,16 +60,23 @@ function ChatWindow(props) {
     appStore,
     roomInfo: { roomId },
     previousMessagesInfo,
+    roomType,
   } = chatWindowStore;
   const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
-  const { pathname } = useLocation();
-  const history = useHistory();
-  if (initDone && pathname.match(/^\/chat\/dual\/?$/)) {
-    history.replace(`/chat/individual/${roomId}`);
-  }
   const classes = useStyles({ chatStatus });
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  const ongoingChatUrl = `/chat/${roomType}/${roomId}/?name=${name}&avatarUrl=${encodeURIComponent(
+    avatarUrl
+  )}`;
+  const shouldRedirect = initDone && pathname + search !== ongoingChatUrl;
+  useEffect(() => {
+    if (shouldRedirect) {
+      history.replace(ongoingChatUrl);
+    }
+  }, [shouldRedirect, history, ongoingChatUrl]);
 
   const [initialRenderingDone, setInitialRenderingDone] = useState(false);
   useEffect(() => {
@@ -141,7 +150,13 @@ function ChatWindow(props) {
   });
   const shouldDisplayLoadingMessage = isGroupChat && fetchingPreviousMessages;
 
-  return (
+  return shouldRedirect ? (
+    <WaitScreen
+      className={classes.backdrop}
+      shouldOpen={shouldRedirect}
+      waitScreenText="Redirecting"
+    />
+  ) : (
     <Stack justifyContent="space-between" className={classes.root}>
       <Box className={clsx(classes.header, classes.section)}>
         <ChatHeader />

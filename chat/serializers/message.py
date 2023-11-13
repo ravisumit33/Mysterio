@@ -1,52 +1,77 @@
 from rest_framework import serializers
 
 from chat.models import Message, TextData
-from chat.models.message import GroupRoomMessage, IndividualRoomMessage
 
-from .channel import GroupChannelSerializer
+from .channel import ReadChannelSerializer
 
 
-class MessageContentField(serializers.RelatedField):
+class TextDataSerializer(serializers.ModelSerializer):
+    """
+    Serializer for text data
+    """
+
+    class Meta:
+        model = TextData
+        fields = ["text"]
+
+
+class MessageContentField(serializers.Field):
     """
     A custom field to use for the content_object generic relationship on Message model
     """
 
     def to_representation(self, value):
-        """
-        Serialize message content objects to a simple textual representation.
-        """
         if isinstance(value, TextData):
-            return value.text
+            return TextDataSerializer(value, context=self.context).data
         raise Exception("Unexpected type of message content_object")
 
+    def to_internal_value(self, data):
+        if data.get("text", None):
+            return TextDataSerializer(data=data, context=self.context).to_internal_value(data)
+        raise serializers.ValidationError("Invalid message content")
 
-class MessageSerializer(serializers.ModelSerializer):
+    def get_queryset(self, data):
+        if data.get("text", None):
+            return TextData.objects.all()
+        raise serializers.ValidationError("Invalid message content")
+
+
+class WriteMessageSerializer(serializers.ModelSerializer):
     """
-    Base serializer for messages
+    Write serializer for messages
     """
 
-    sender_channel = GroupChannelSerializer(read_only=True)
+    content = MessageContentField(source="content_object")
 
-    content = MessageContentField(read_only=True, source="content_object")
+    def create(self, validated_data):
+        """
+        Create message object
+        """
+        content_data = validated_data.pop("content_object")
+        content_object_qs = self.fields["content"].get_queryset(content_data)
+        content_object = content_object_qs.create(**content_data)
+        message = Message.objects.create(**validated_data, content_object=content_object)
+        return message
 
     class Meta:
         model = Message
-        fields = ["sender_channel", "message_type", "content"]
+        fields = ["sender_channel", "room", "message_type", "content"]
+        extra_kwargs = {
+            "sender_channel": {"write_only": True},
+            "room": {"write_only": True},
+            "message_type": {"write_only": True},
+            "content": {"write_only": True},
+        }
 
 
-class IndividualRoomMessageSerializer(MessageSerializer):
+class ReadMessageSerializer(serializers.ModelSerializer):
     """
-    Serializer for messages in individual rooms
-    """
-
-    class Meta(MessageSerializer.Meta):
-        model = IndividualRoomMessage
-
-
-class GroupRoomMessageSerializer(MessageSerializer):
-    """
-    Serializer for messages in group rooms
+    Read serializer for messages
     """
 
-    class Meta(MessageSerializer.Meta):
-        model = GroupRoomMessage
+    content = MessageContentField(source="content_object", read_only=True)
+    sender_channel = ReadChannelSerializer(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ["room", "message_type", "sender_channel", "content"]

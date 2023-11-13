@@ -7,6 +7,7 @@ import { Group } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';
+import { RoomType } from 'appConstants';
 import CenterPaper from './CenterPaper';
 import BasicInfo from './BasicInfo';
 
@@ -78,14 +79,16 @@ function NewRoom() {
 
     fileUploadPromise
       .then((url) => {
-        fetchUrl('/api/chat/group_rooms/', {
+        fetchUrl('/api/chat/rooms/', {
           method: 'post',
           body: {
-            name: roomName,
-            description,
-            password: roomPwd,
-            avatar_url: url,
-            is_protected: shouldUsePwd,
+            room_data: {
+              name: roomName,
+              description,
+              password: roomPwd,
+              avatar_url: url,
+            },
+            room_type: RoomType.GROUP,
           },
         })
           .then((response) => {

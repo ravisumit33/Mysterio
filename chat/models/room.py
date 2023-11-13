@@ -5,23 +5,30 @@ from django.db import models
 class Room(models.Model):
     """Chat Room Model"""
 
-    name = models.CharField(max_length=20)
+    GROUP = "gr"
+    INDIVIDUAL = "in"
+    ROOM_TYPE_CHOICES = ((GROUP, "Group"), (INDIVIDUAL, "Individual"))
+    room_type = models.CharField(max_length=2, choices=ROOM_TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
-    player = models.OneToOneField("chat.Player", on_delete=models.SET_NULL, null=True)
 
-    class Meta:
-        abstract = True
-
-
-class IndividualRoom(Room):
-    """Room for individual chat"""
-
-    pass
+    @property
+    def is_group_room(self):
+        """
+        Returns a boolean value indicating if the room is group room
+        """
+        return self.room_type == self.GROUP
 
 
-class GroupRoom(Room):
-    """Room for group chat"""
+class GroupRoomData(models.Model):
+    """Room data for group chat"""
 
+    room = models.OneToOneField(
+        "chat.Room",
+        on_delete=models.CASCADE,
+        related_name="room_data",
+        related_query_name="room_data",
+    )
+    name = models.CharField(max_length=20)
     avatar_url = models.URLField(blank=True)
     zscore = models.FloatField(null=True)
     password = models.CharField(max_length=20, blank=True)

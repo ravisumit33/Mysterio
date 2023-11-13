@@ -1,6 +1,7 @@
 import { makeAutoObservable, observable } from 'mobx';
 import ChatWindowStore from 'stores/ChatWindowStore';
 import { fetchUrl } from 'utils';
+import { RoomType } from 'appConstants';
 
 class AppStore {
   alert = {};
@@ -89,7 +90,7 @@ class AppStore {
   };
 
   updateGroupRooms = () =>
-    fetchUrl('/api/chat/group_rooms/')
+    fetchUrl(`/api/chat/rooms/?search=${RoomType.GROUP}`)
       .then((response) => {
         this.setGroupRooms(Object.values(response.data));
       })

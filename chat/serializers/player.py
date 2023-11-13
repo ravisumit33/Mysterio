@@ -15,6 +15,7 @@ class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
         fields = [
+            "id",
             "name",
             "video_id",
             "host",

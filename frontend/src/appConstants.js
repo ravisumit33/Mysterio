@@ -11,6 +11,11 @@ const MessageType = Object.freeze({
   DISCONNECTED: 10,
 });
 
+const RoomType = Object.freeze({
+  INDIVIDUAL: 'in',
+  GROUP: 'gr',
+});
+
 const ChatStatus = Object.freeze({
   NOT_STARTED: 0,
   ONGOING: 1,
@@ -62,6 +67,7 @@ const SessionStorageKeysPrefix = 'mysterio-anon-chat-';
 
 export {
   MessageType,
+  RoomType,
   MessageSenderType,
   ChatStatus,
   MysterioOrigin,

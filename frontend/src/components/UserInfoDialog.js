@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -11,7 +11,7 @@ import {
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { fetchUrl, isDevEnv } from 'utils';
+import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';
 import { SessionStorageKeys, SessionStorageKeysPrefix } from 'appConstants';
 import BasicInfo from './BasicInfo';
@@ -54,6 +54,20 @@ function UserInfoDialog() {
   const storedProfileAvatarUrl = window.sessionStorage.getItem(
     `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`
   );
+  const storedProfileSessionId = window.sessionStorage.getItem(
+    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileSessionId}`
+  );
+  useEffect(() => {
+    const hasStoredUserInfo = storedProfileName && storedProfileAvatarUrl && storedProfileSessionId;
+    if (hasStoredUserInfo) {
+      profileStore.setName(storedProfileName);
+      profileStore.setAvatarUrl(storedProfileAvatarUrl);
+      profileStore.setSessionId(storedProfileSessionId);
+    } else {
+      appStore.setShouldOpenUserInfoDialog(true);
+    }
+  }, [storedProfileAvatarUrl, storedProfileName, storedProfileSessionId]);
+
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
     storedProfileName,
     storedProfileAvatarUrl
@@ -105,11 +119,15 @@ function UserInfoDialog() {
         );
         profileStore.setName(name);
         profileStore.setAvatarUrl(url);
-        if (isDevEnv()) {
-          profileStore.setSessionId(`${Date.now()}`);
-        } else {
-          profileStore.setSessionId(`${crypto.randomUUID()}`);
+        if (!profileStore.sessionId) {
+          const profileSessionId = `${Date.now()}`;
+          window.sessionStorage.setItem(
+            `${SessionStorageKeysPrefix}${SessionStorageKeys.profileSessionId}`,
+            profileSessionId
+          );
+          profileStore.setSessionId(profileSessionId);
         }
+        appStore.setShouldOpenUserInfoDialog(false);
       })
       .catch(() => {
         appStore.showAlert({
@@ -119,10 +137,8 @@ function UserInfoDialog() {
       });
   };
 
-  const shouldOpen = !profileStore.hasCompleteUserInfo;
-
   return (
-    <Dialog open={shouldOpen} maxWidth="xs" fullWidth>
+    <Dialog open={appStore.shouldOpenUserInfoDialog} maxWidth="xs" fullWidth>
       <DialogTitle>Let&apos;s get started!</DialogTitle>
       <form
         onSubmit={(evt) => {
@@ -132,7 +148,7 @@ function UserInfoDialog() {
       >
         <DialogContent classes={{ root: classes.dialogContent }}>
           <DialogContentText>
-            Create your anonymous avatar for this session by giving it a name and a look.
+            Create your anonymous avatar by giving it a name and a look.
           </DialogContentText>
           <BasicInfo
             name={name}

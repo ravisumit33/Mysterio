@@ -10,8 +10,8 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { Box, ListItemAvatar, ListItemButton, Stack } from '@mui/material';
-import { AccountCircle, ExitToApp, Favorite } from '@mui/icons-material';
+import { Box, IconButton, ListItemAvatar, ListItemButton, Stack } from '@mui/material';
+import { AccountCircle, ExitToApp, Favorite, Edit } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
 import Profile from './Profile';
@@ -49,11 +49,22 @@ function Account() {
   const drawer = (
     <>
       <Toolbar>
-        <ListItem disableGutters>
+        <ListItem
+          disableGutters
+          secondaryAction={
+            <IconButton
+              edge="end"
+              aria-label="modify"
+              onClick={() => appStore.setShouldOpenUserInfoDialog(true)}
+            >
+              <Edit />
+            </IconButton>
+          }
+        >
           <ListItemAvatar>
-            <Avatar name={profileStore.email} avatarUrl={profileStore.avatarUrl} />
+            <Avatar name={profileStore.name} avatarUrl={profileStore.avatarUrl} />
           </ListItemAvatar>
-          <ListItemText primary={profileStore.username} />
+          <ListItemText primary={profileStore.name} primaryTypographyProps={{ noWrap: true }} />
         </ListItem>
       </Toolbar>
       <Divider />

@@ -61,6 +61,7 @@ const ReconnectTimeout = 60 * 1000; // 40 seconds
 const SessionStorageKeys = Object.freeze({
   profileName: 'profile-name',
   profileAvatarUrl: 'profile-avatar-url',
+  profileSessionId: 'profile-session-id',
 });
 
 const SessionStorageKeysPrefix = 'mysterio-anon-chat-';

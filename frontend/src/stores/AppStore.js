@@ -8,6 +8,8 @@ class AppStore {
 
   shouldShowAlert = false;
 
+  shouldOpenUserInfoDialog = false;
+
   shouldOpenNewGroupDialog = false;
 
   shouldOpenAccountsDrawer = false;
@@ -40,6 +42,10 @@ class AppStore {
     this.setShouldShowAlert(false);
     this.setAlert(newAlert);
     this.setShouldShowAlert(true);
+  };
+
+  setShouldOpenUserInfoDialog = (shouldOpenUserInfoDialog) => {
+    this.shouldOpenUserInfoDialog = shouldOpenUserInfoDialog;
   };
 
   setShouldOpenNewGroupDialog = (shouldOpenNewGroupDialog) => {

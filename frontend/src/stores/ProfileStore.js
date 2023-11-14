@@ -49,10 +49,6 @@ class ProfileStore {
     return this.email !== '';
   }
 
-  get username() {
-    return this.email.split('@')[0];
-  }
-
   get hasCompleteUserInfo() {
     return this.name !== '' && this.avatarUrl !== '';
   }

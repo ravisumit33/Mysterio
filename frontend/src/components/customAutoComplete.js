@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import SearchIcon from '@mui/icons-material/Search';
-import CustomAvatar from './Avatar';
 
 const useStyles = makeStyles((theme) => ({
   inputLabel: {
@@ -28,7 +27,8 @@ const useStyles = makeStyles((theme) => ({
 
 function CustomAutoComplete(props) {
   const {
-    nameField,
+    getName,
+    getAvatar,
     inputLabel,
     value,
     setPendingValue,
@@ -37,24 +37,17 @@ function CustomAutoComplete(props) {
     autoCompleteProps,
   } = props;
   const classes = useStyles();
-  const searchIconAvatar = useMemo(
-    () => (
+  const startInputAvatar = useMemo(() => {
+    if (value) {
+      return getAvatar(value);
+    }
+    return (
       <Avatar>
         <SearchIcon />
       </Avatar>
-    ),
-    []
-  );
-  let startInputAvatar;
-  if (value) {
-    startInputAvatar = value.avatar ? (
-      <value.avatar />
-    ) : (
-      <CustomAvatar name={value[nameField]} avatarUrl={value.avatar_url} />
     );
-  } else {
-    startInputAvatar = searchIconAvatar;
-  }
+  }, [getAvatar, value]);
+
   return (
     <Autocomplete
       size="small"
@@ -80,18 +73,12 @@ function CustomAutoComplete(props) {
         </Stack>
       )}
       renderOption={(p, option) => (
-        <Tooltip title={option[nameField]} arrow key={option.id}>
+        <Tooltip title={getName(option)} arrow key={option.id}>
           {/* eslint-disable-next-line react/jsx-props-no-spreading */}
           <li {...p}>
-            <ListItemAvatar>
-              {option.avatar ? (
-                <option.avatar />
-              ) : (
-                <CustomAvatar name={option[nameField]} avatarUrl={option.avatar_url} />
-              )}
-            </ListItemAvatar>
+            <ListItemAvatar>{getAvatar(option)}</ListItemAvatar>
             <ListItemText
-              primary={option[nameField]}
+              primary={getName(option)}
               secondary={getSecondaryText(option)}
               primaryTypographyProps={{ noWrap: true }}
               secondaryTypographyProps={{ noWrap: true }}
@@ -106,13 +93,14 @@ function CustomAutoComplete(props) {
 }
 
 CustomAutoComplete.propTypes = {
-  nameField: PropTypes.string.isRequired,
+  getName: PropTypes.func.isRequired,
+  getAvatar: PropTypes.func.isRequired,
   inputLabel: PropTypes.string.isRequired,
   setPendingValue: PropTypes.func.isRequired,
   setValue: PropTypes.func.isRequired,
   getSecondaryText: PropTypes.func.isRequired,
   autoCompleteProps: PropTypes.shape({}),
-  value: PropTypes.shape({ avatar: PropTypes.elementType, avatar_url: PropTypes.string }),
+  value: PropTypes.shape({ id: PropTypes.number }),
 };
 
 CustomAutoComplete.defaultProps = {

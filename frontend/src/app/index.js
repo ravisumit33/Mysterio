@@ -87,6 +87,7 @@ function App() {
         <Alert />
         <AppWait />
         <NavBar />
+        <UserInfoDialog />
         <Switch>
           <Route exact path="/">
             <Home />
@@ -102,7 +103,6 @@ function App() {
             <Account />
           </Route>
           <Route path="/chat">
-            <UserInfoDialog />
             <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
               <ChatContainer />
             </Box>

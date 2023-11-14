@@ -104,11 +104,13 @@ class Socket {
   };
 
   send = (msgType, msgData = {}) => {
-    const payload = {
-      type: msgType,
-      data: msgData,
-    };
-    this.socket.send(JSON.stringify(payload));
+    if (this.socket) {
+      const payload = {
+        type: msgType,
+        data: msgData,
+      };
+      this.socket.send(JSON.stringify(payload));
+    }
   };
 
   close = () => {

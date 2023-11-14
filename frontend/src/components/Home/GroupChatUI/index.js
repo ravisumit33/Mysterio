@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Avatar, Box, Button, Container, Grid, Stack } from '@mui/material';
@@ -7,6 +7,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import groupChatJson from 'assets/animations/group-chat.json';
 import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
+import CustomAvatar from 'components/Avatar';
 import { appStore } from 'stores';
 import { RoomType } from 'appConstants';
 import TrendingGroupRooms from './TrendingGroupRooms';
@@ -52,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 function GroupChatUI() {
   const classes = useStyles();
   const history = useHistory();
-  const AddCircleAvatar = useCallback(
+  const AddCircleAvatar = useMemo(
     () => (
       <Avatar>
         <AddCircleIcon />
@@ -60,10 +61,20 @@ function GroupChatUI() {
     ),
     []
   );
+  const customAvatar = useCallback((groupRoom) => {
+    const { name, avatar, avatarUrl } = groupRoom.room_data;
+    if (avatar) {
+      return avatar;
+    }
+    return <CustomAvatar name={name} avatarUrl={avatarUrl} />;
+  }, []);
+
   const { current: newRoomOption } = useRef({
     id: -1,
-    name: 'New room',
-    avatar: AddCircleAvatar,
+    room_data: {
+      name: 'New room',
+      avatar: AddCircleAvatar,
+    },
   });
 
   const [roomAction, setRoomAction] = useState('Create');
@@ -143,9 +154,9 @@ function GroupChatUI() {
                       options: [newRoomOption, ...groupRooms],
                       onClose: handleGroupSearchClose,
                       inputValue: pendingNewRoomName,
-                      getOptionLabel: (option) => {
-                        if (option.id > 0) return option.name;
-                        if (option.id === -1) return pendingNewRoomName;
+                      getOptionLabel: (groupRoom) => {
+                        if (groupRoom.id > 0) return groupRoom.room_data.name;
+                        if (groupRoom.id === -1) return pendingNewRoomName;
                         return '';
                       },
                       noOptionsText: 'No room',
@@ -153,12 +164,12 @@ function GroupChatUI() {
                     }}
                     value={selectedRoom}
                     setPendingValue={setPendingNewRoomName}
-                    setValue={(newSelectedGroup) => {
-                      if (!newSelectedGroup) {
+                    setValue={(newSelectedGroupRoom) => {
+                      if (!newSelectedGroupRoom) {
                         setRoomAction('Create');
                         setSelectedRoom(null);
                       } else {
-                        if (newSelectedGroup.id === -1) {
+                        if (newSelectedGroupRoom.id === -1) {
                           setRoomAction('Create');
                           if (!pendingNewRoomName) {
                             appStore.showAlert({
@@ -171,13 +182,14 @@ function GroupChatUI() {
                         } else {
                           setRoomAction('Enter');
                         }
-                        setSelectedRoom(newSelectedGroup);
+                        setSelectedRoom(newSelectedGroupRoom);
                       }
                     }}
                     inputLabel="Enter room name"
-                    nameField="name"
-                    getSecondaryText={(group) =>
-                      group.id > 0 ? `${group.message_count} messages` : ''
+                    getName={(groupRoom) => groupRoom.room_data.name}
+                    getAvatar={customAvatar}
+                    getSecondaryText={(groupRoom) =>
+                      groupRoom.id > 0 ? `${groupRoom.message_count} messages` : ''
                     }
                   />
                   <Button

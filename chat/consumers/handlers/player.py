@@ -4,7 +4,7 @@ from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
 from chat.consumers.utils import create_instance
 from chat.models import Player
-from chat.serializers import PlayerSerializer
+from chat.serializers import CreatePlayerSerializer
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -20,12 +20,12 @@ def handle_player_info(consumer, message_data):
     video_id = message_data["videoId"]
 
     player = create_instance(
-        PlayerSerializer,
+        CreatePlayerSerializer,
         {
             "name": name,
             "video_id": video_id,
-            "host_id": consumer.chat_session_id,
-            "room_id": consumer.room_id,
+            "host": consumer.chat_session_id,
+            "room": consumer.room_id,
         },
     )
     consumer.player_id = player.id
@@ -44,6 +44,7 @@ def handle_player_info(consumer, message_data):
             "name": message_data["name"],
             "video_id": message_data["videoId"],
             "host": consumer.profile,
+            "id": consumer.player_id,
         },
     )
     logger.info("Player initialized")

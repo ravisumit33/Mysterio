@@ -3,10 +3,10 @@ import logging
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 
-from chat.models import GroupRoomData, Room
+from chat.models import GroupRoomData, Room, RoomType
 from chat.serializers import ReadChannelSerializer
 
-from .player import PlayerSerializer
+from .player import ReadPlayerSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,8 @@ class DefaultGroupRoomDataSerializer(serializers.ModelSerializer):
     """
     Default serializer for group room data
     """
+
+    favorite = serializers.BooleanField(write_only=True, required=False)
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -30,9 +32,16 @@ class DefaultGroupRoomDataSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.pop("password", None)
+        favorite = validated_data.pop("favorite", None)
         instance = super().update(instance, validated_data)
         if password:
             instance.password = make_password(password)
+        if favorite is not None:
+            user = self.context.get("request").user
+            if favorite:
+                instance.likers.add(user)
+            else:
+                instance.likers.remove(user)
         instance.save()
         return instance
 
@@ -45,48 +54,55 @@ class DefaultGroupRoomDataSerializer(serializers.ModelSerializer):
             "password",
             "zscore",
             "is_protected",
+            "favorite",
         ]
         read_only_fields = ["zscore"]
         extra_kwargs = {"password": {"write_only": True, "max_length": 20}}
 
 
 class DefaultRoomDataSerializer(serializers.Serializer):
+    def get_data_serializer(self, room_type, instance=None, data=None):
+        kwargs = {"context": self.context, "partial": self.root.partial}
+        if instance is not None:
+            kwargs["instance"] = instance
+        if data is not None:
+            kwargs["data"] = data
+        if room_type == RoomType.GROUP:
+            return DefaultGroupRoomDataSerializer(**kwargs)
+        return None
+
     def to_representation(self, instance):
-        if instance.room.is_group_room:
-            serializer = DefaultGroupRoomDataSerializer(instance, context=self.context)
-            return serializer.data
-        return {}
+        data_serializer = self.get_data_serializer(instance.room.room_type, instance=instance)
+        return data_serializer.data if data_serializer else {}
 
     def get_value(self, dictionary):
         field_dict = super().get_value(dictionary)
-        return {**field_dict, "room_type": dictionary.get("room_type")}
+        if room := self.root.instance:
+            room_type = room.room_type
+        else:
+            room_type = field_dict.get("room_type")
+        return {**field_dict, "room_type": room_type}
 
     def to_internal_value(self, data):
         room_type = data.get("room_type")
-        room_data = None
-        if room_type == Room.GROUP:
-            room_data = DefaultGroupRoomDataSerializer(data=data, context=self.context)
-        if room_data is not None and room_data.is_valid():
-            return room_data.validated_data
+        data_serializer = self.get_data_serializer(room_type, data=data)
+        if data_serializer is not None and data_serializer.is_valid():
+            return data_serializer.validated_data
         else:
-            error = room_data.erros if room_data else "Invalid room data"
+            error = data_serializer.errors if data_serializer else "Invalid room data"
             raise serializers.ValidationError(error)
 
     def create(self, validated_data):
         room_type = validated_data.pop("room_type")
-        if room_type == Room.GROUP:
-            return DefaultGroupRoomDataSerializer(data=validated_data, context=self.context).create(
-                validated_data
-            )
-        return None
+        data_serializer = self.get_data_serializer(room_type, data=validated_data)
+        return data_serializer.create(validated_data) if data_serializer else None
 
     def update(self, instance, validated_data):
         room_type = validated_data.pop("room_type")
-        if room_type == Room.GROUP:
-            return DefaultGroupRoomDataSerializer(data=validated_data, context=self.context).update(
-                instance, validated_data
-            )
-        return None
+        data_serializer = self.get_data_serializer(
+            room_type, instance=instance, data=validated_data
+        )
+        return data_serializer.update(instance, validated_data) if data_serializer else None
 
 
 class DefaultRoomSerializer(serializers.ModelSerializer):
@@ -125,9 +141,11 @@ class DefaultRoomSerializer(serializers.ModelSerializer):
 
     def update(self, room, validated_data):
         room_data = validated_data.pop("room_data")
-        room_type = validated_data.get("room_type")
-        super().update(room, validated_data)
-        self.fields.get("room_data").update(room.room_data, {"room_type": room_type, **room_data})
+        validated_data.pop("room_type", None)  # room_type is not updatable
+        room = super().update(room, validated_data)
+        self.fields.get("room_data").update(
+            room.room_data, {"room_type": room.room_type, **room_data}
+        )
         return room
 
     class Meta:
@@ -182,7 +200,7 @@ class RetrieveGroupRoomDataSerializer(serializers.ModelSerializer):
 class RetrieveRoomSerializer(serializers.ModelSerializer):
     """Base serializer for retrieve action of room API endpoint"""
 
-    player = PlayerSerializer(read_only=True)
+    player = ReadPlayerSerializer(read_only=True)
 
     room_data = serializers.SerializerMethodField()
 

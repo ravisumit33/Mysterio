@@ -28,4 +28,6 @@ class Player(models.Model):
     )
     state = models.SmallIntegerField(choices=STATE_CHOICES, default=-1)
     current_time = models.FloatField(default=0)
-    room = models.OneToOneField("chat.Room", on_delete=models.CASCADE)
+    room = models.ForeignKey(
+        "chat.Room", on_delete=models.CASCADE, related_name="players", related_query_name="player"
+    )

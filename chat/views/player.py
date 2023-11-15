@@ -3,19 +3,18 @@ from rest_framework import filters, mixins, viewsets
 from chat.constants import GroupPrefix, MessageType
 from chat.models import Player
 from chat.permissions import PlayerPermission
-from chat.serializers import PlayerSerializer
+from chat.serializers import ReadPlayerSerializer, UpdatePlayerSerializer
 from chat.utils import channel_layer
 
 
-class PlayerViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class PlayerViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """
     Viewset for player
     """
 
     queryset = Player.objects.all()
-    serializer_class = PlayerSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ["room_id"]
+    search_fields = ["room__id"]
     permission_classes = [PlayerPermission]
 
     def update(self, request, *args, **kwargs):
@@ -36,3 +35,8 @@ class PlayerViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets
                 },
             )
         return resp
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return ReadPlayerSerializer
+        return UpdatePlayerSerializer

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from chat.models import Channel, Room
+from chat.models import Channel, RoomType
 
 from .chat_session import ChatSessionSerializer
 
@@ -16,7 +16,7 @@ class WriteChannelSerializer(serializers.ModelSerializer):
         """
         if self.instance and (related_room := self.instance.room):
             if (
-                related_room.room_type == Room.INDIVIDUAL
+                related_room.room_type == RoomType.INDIVIDUAL
                 and related_room.channels.filter(is_active=True).count() >= 2
                 and attrs.get("is_active", False)
             ):

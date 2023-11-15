@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 
 from chat.constants import GroupPrefix, MessageType
-from chat.models import Channel, MatchRequest, Room
+from chat.models import Channel, MatchRequest, Room, RoomType
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def process_unmatched_channels():
         channel_idx_pairs = match_channels(unmatched_channels)
         sessions_data = get_chat_sessions_data(unmatched_channels)
 
-        individual_room_list = [Room(room_type=Room.INDIVIDUAL)] * len(channel_idx_pairs)
+        individual_room_list = [Room(room_type=RoomType.INDIVIDUAL)] * len(channel_idx_pairs)
         individual_rooms = Room.objects.bulk_create(individual_room_list)
 
         matched_channels = [

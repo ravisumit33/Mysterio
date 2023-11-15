@@ -2,13 +2,17 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 
+class RoomType(models.TextChoices):
+    """Room type choices"""
+
+    GROUP = "gr", "Group"
+    INDIVIDUAL = "in", "Individual"
+
+
 class Room(models.Model):
     """Chat Room Model"""
 
-    GROUP = "gr"
-    INDIVIDUAL = "in"
-    ROOM_TYPE_CHOICES = ((GROUP, "Group"), (INDIVIDUAL, "Individual"))
-    room_type = models.CharField(max_length=2, choices=ROOM_TYPE_CHOICES)
+    room_type = models.CharField(max_length=2, choices=RoomType.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -16,7 +20,15 @@ class Room(models.Model):
         """
         Returns a boolean value indicating if the room is group room
         """
-        return self.room_type == self.GROUP
+        return self.room_type == RoomType.GROUP
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(room_type__in=[choice[0] for choice in RoomType.choices]),
+                name="valid_room_type_choice",
+            )
+        ]
 
 
 class GroupRoomData(models.Model):

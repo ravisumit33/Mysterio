@@ -283,6 +283,7 @@ class ChatWindowStore {
             messageData.content = `You are connected to ${messageData.match.name}`;
           } else {
             // Direct entry into individual room using link
+            messageData.content = 'Connection restored';
           }
         } else if (this.chatStatus === ChatStatus.RECONNECTING) {
           messageData.content = 'Connection restored';
@@ -369,16 +370,16 @@ class ChatWindowStore {
   };
 
   toggleLikeRoom = () => {
-    let fetchData = { body: { like: !this.roomInfo.isFavorite } };
+    let fetchData = { body: { room_data: { favorite: !this.roomInfo.isFavorite } } };
     if (this.isGroupChat) {
       fetchData = {
         ...fetchData,
         headers: { 'X-Room-Password': this.roomInfo.password },
       };
     }
-    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/set_like/`, {
+    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/`, {
       ...fetchData,
-      method: 'post',
+      method: 'patch',
     })
       .then(() => this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }))
       .catch(() => {
@@ -401,12 +402,9 @@ class ChatWindowStore {
       };
     }
     this.appStore.showWaitScreen('Syncing player');
-    return fetchUrl(
-      `/api/chat/players/${this.syncedPlayerData.id}/?search=${this.roomInfo.roomId}`,
-      fetchData
-    )
+    return fetchUrl(`/api/chat/players/?search=${this.roomInfo.roomId}`, fetchData)
       .then((response) => {
-        this.setPlayerData(response.data);
+        this.setPlayerData(response.data[0]);
       })
       .catch(() => {
         this.appStore.showAlert({

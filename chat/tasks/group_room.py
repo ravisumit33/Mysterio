@@ -1,7 +1,7 @@
 from django.db.models.aggregates import Count, Max
 from django.utils import timezone
 
-from chat.models import Channel, Room
+from chat.models import Channel, Room, RoomType
 
 
 def delete_old_group_channels():
@@ -13,6 +13,6 @@ def delete_old_group_channels():
     Channel.objects.alias(latest_activity=Max("message__sent_at")).filter(
         latest_activity__lte=six_months_ago
     ).delete()  # No need to filter for group channels as they are the only ones with old messages
-    Room.objects.filter(room_type=Room.GROUP).alias(channel_count=Count("channel")).filter(
+    Room.objects.filter(room_type=RoomType.GROUP).alias(channel_count=Count("channel")).filter(
         channel_count=0
     ).delete()

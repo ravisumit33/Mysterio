@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.db.models.functions import TruncDay
 from django.utils import timezone
 
-from chat.models import GroupRoomData, Message, Room
+from chat.models import GroupRoomData, Message, RoomType
 
 
 def get_zscore(obs, pop):
@@ -31,7 +31,7 @@ def get_group_stats():
     }
     group_stats = {}
     annotated_model = (
-        Message.objects.filter(room__room_type=Room.GROUP, sent_at__gt=start_time)
+        Message.objects.filter(room__room_type=RoomType.GROUP, sent_at__gt=start_time)
         .annotate(date=TruncDay("sent_at"))
         .values("date", "room_id")
         .annotate(count=Count("id"))

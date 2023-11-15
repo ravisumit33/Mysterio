@@ -5,9 +5,9 @@ from chat.models import Player
 from .chat_session import ChatSessionSerializer
 
 
-class PlayerSerializer(serializers.ModelSerializer):
+class ReadPlayerSerializer(serializers.ModelSerializer):
     """
-    Serializer for player
+    serializer for listing players
     """
 
     host = ChatSessionSerializer(read_only=True)
@@ -21,5 +21,33 @@ class PlayerSerializer(serializers.ModelSerializer):
             "host",
             "state",
             "current_time",
+            "room",
         ]
-        read_only_fields = ["name", "host"]
+
+
+class CreatePlayerSerializer(serializers.ModelSerializer):
+    """
+    serializer for creating player
+    """
+
+    class Meta:
+        model = Player
+        fields = [
+            "name",
+            "video_id",
+            "host",
+            "room",
+        ]
+
+
+class UpdatePlayerSerializer(serializers.ModelSerializer):
+    """
+    serializer for creating player
+    """
+
+    class Meta:
+        model = Player
+        fields = [
+            "state",
+            "current_time",
+        ]

@@ -6,7 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 
 from chat.constants import CHAT_SESSION_DELETION_DELAY, GroupPrefix, MessageType
 from chat.consumers.handlers.message import add_text_message
-from chat.models import Channel, Room
+from chat.models import Channel, Room, RoomType
 from chat.models.match_request import MatchRequest
 from chat.serializers import WriteChannelSerializer
 from chat.tasks import individual_room_timeout
@@ -49,9 +49,9 @@ class ChatConsumer(WebsocketConsumer):
         if "room_id" in (url_kwargs := self.scope["url_route"]["kwargs"]):
             self.room_id = url_kwargs["room_id"]
             room_type = url_kwargs["room_type"]
-            if room_type == Room.GROUP:
+            if room_type == RoomType.GROUP:
                 is_group_consumer = True
-            elif room_type == Room.INDIVIDUAL:
+            elif room_type == RoomType.INDIVIDUAL:
                 is_group_consumer = False
             else:
                 logger.error("SuspiciousOperation: Invalid room type")
@@ -111,6 +111,8 @@ class ChatConsumer(WebsocketConsumer):
                     text=f"{self.profile['name']} left",
                     msg_type=MessageType.USER_LEFT,
                 )
+        if self.player_id is not None:
+            handle_player_end(self)
         if self.room_id is not None:
             update_instance(
                 WriteChannelSerializer,

@@ -2,7 +2,7 @@ import logging
 
 from chat.constants import MessageType
 from chat.consumers.utils import create_instance
-from chat.serializers import WriteMessageSerializer
+from chat.serializers import CreateMessageSerializer
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ def add_text_message(consumer, text, msg_type, fail_action=None):
     """
     try:
         create_instance(
-            WriteMessageSerializer,
+            CreateMessageSerializer,
             {
                 "content": {"text": text},
                 "room": consumer.room_id,

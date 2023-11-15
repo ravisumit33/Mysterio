@@ -36,7 +36,7 @@ class MessageContentField(serializers.Field):
         raise serializers.ValidationError("Invalid message content")
 
 
-class WriteMessageSerializer(serializers.ModelSerializer):
+class CreateMessageSerializer(serializers.ModelSerializer):
     """
     Write serializer for messages
     """
@@ -56,12 +56,6 @@ class WriteMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ["sender_channel", "room", "message_type", "content"]
-        extra_kwargs = {
-            "sender_channel": {"write_only": True},
-            "room": {"write_only": True},
-            "message_type": {"write_only": True},
-            "content": {"write_only": True},
-        }
 
 
 class ReadMessageSerializer(serializers.ModelSerializer):

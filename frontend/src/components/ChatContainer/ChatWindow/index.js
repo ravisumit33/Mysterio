@@ -223,7 +223,7 @@ function ChatWindow(props) {
                   endIcon={<Replay />}
                   onClick={() => history.replace('/chat/match/')}
                 >
-                  Find someone else
+                  Find match again
                 </Button>
               </Box>
             </Stack>

@@ -4,12 +4,12 @@ import logging
 from channels.exceptions import DenyConnection
 from channels.generic.websocket import WebsocketConsumer
 
-from chat.constants import CHAT_SESSION_DELETION_DELAY, GroupPrefix, MessageType
+from chat.constants import GroupPrefix, MessageType
 from chat.consumers.handlers.message import add_text_message
 from chat.models import Channel, Room, RoomType
 from chat.models.match_request import MatchRequest
 from chat.serializers import WriteChannelSerializer
-from chat.tasks import individual_room_timeout
+from chat.tasks import IndividualRoomDeletor
 from chat.utils import channel_layer
 
 from .handlers import (
@@ -125,9 +125,7 @@ class ChatConsumer(WebsocketConsumer):
                 self.channel_name,
             )
             if not channel_layer_info["is_group_consumer"]:
-                individual_room_timeout.apply_async(
-                    (self.room_id,), countdown=CHAT_SESSION_DELETION_DELAY
-                )
+                IndividualRoomDeletor.schedule_deletion(self.room_id)
             if self.profile:
                 channel_layer.group_send(
                     channel_layer_info["group_prefix"] + str(self.room_id),

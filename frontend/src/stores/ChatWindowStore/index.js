@@ -86,7 +86,7 @@ class ChatWindowStore {
           this.addInitMessageList([
             {
               type: MessageType.USER_JOINED,
-              data: { content: `You are connected to ${this.name}` },
+              data: { content: `You are matched to ${this.name}` },
             },
           ]);
         }
@@ -302,7 +302,7 @@ class ChatWindowStore {
               avatarUrl: messageData.match.avatarUrl,
             });
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
-            messageData.content = `You are connected to ${messageData.match.name}`;
+            messageData.content = `You are matched to ${messageData.match.name}`;
           } else if (messageData.is_room_inactive) {
             messageData.content = 'Reconnecting...';
             // @ts-ignore

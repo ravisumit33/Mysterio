@@ -5,9 +5,16 @@ import redis
 from celery import shared_task
 from celery.utils.log import get_task_logger
 
-from chat.constants import MATCH_DELAY, CacheKey, GroupPrefix, MessageType
+from chat.constants import (
+    CHAT_SESSION_DELETION_DELAY,
+    MATCH_DELAY,
+    CacheKey,
+    GroupPrefix,
+    MessageType,
+)
 from chat.models import MatchRequest
 from chat.utils import channel_layer, get_inactive_individual_room_qs
+from mysterio.celery import app
 
 from .group_room import delete_old_group_channels
 from .match import process_unmatched_channels
@@ -54,6 +61,25 @@ def individual_room_timeout(room_id):
             },
         )
         logger.info("Deleted individual room with id: %d", room_id)
+
+
+class IndividualRoomDeletor:
+    """
+    Handle individual room deletion
+    """
+
+    last_deletion_result = None
+
+    @classmethod
+    def schedule_deletion(cls, room_id):
+        """
+        Schedule room deletion after CHAT_SESSION_DELETION_DELAY seconds
+        """
+        if cls.last_deletion_result:
+            app.control.revoke(cls.last_deletion_result.id, terminate=True)
+        cls.last_deletion_result = individual_room_timeout.apply_async(
+            (room_id,), countdown=CHAT_SESSION_DELETION_DELAY
+        )
 
 
 @shared_task

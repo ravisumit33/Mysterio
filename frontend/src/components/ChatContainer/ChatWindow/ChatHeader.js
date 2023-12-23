@@ -101,7 +101,7 @@ function ChatHeader() {
     const handleReconnect = () => history.replace('/chat/match/');
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
-      <Tooltip title="Find someone else" arrow>
+      <Tooltip title="Find match again" arrow>
         <IconButton
           disabled={shouldDisable}
           onClick={handleReconnect}

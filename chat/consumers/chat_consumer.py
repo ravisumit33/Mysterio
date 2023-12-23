@@ -67,6 +67,7 @@ class ChatConsumer(WebsocketConsumer):
                 },
             )
             self.channel_id = channel.id
+            logger.info("<<New channel created>>")
         except Exception as excp:
             logger.error("Unable to create channel")
             logger.exception(excp)
@@ -92,13 +93,13 @@ class ChatConsumer(WebsocketConsumer):
         elif not is_group_consumer:
             MatchRequest.objects.create(channel_id=self.channel_id)
         self.accept()
-        logger.info("New channel created")
         logger.debug("Channel id: %d", self.channel_id)
         logger.debug("Session key: %s", session.session_key)
 
     def disconnect(self, code):
         if self.channel_id is None:
             return  # Connection close before channel object creation
+        logger.info("<<Channel disconnected>>")
         channel_layer_info = self.channel_layer_info
         channel_layer.group_discard(
             channel_layer_info["group_prefix_channel"] + str(self.channel_id),
@@ -136,7 +137,7 @@ class ChatConsumer(WebsocketConsumer):
             logger.info("Room id: %d", self.room_id)
         else:
             Channel.objects.filter(pk=self.channel_id).delete()
-        logger.info("Channel disconnected id: %d", self.channel_id)
+        logger.info("Channel id: %d", self.channel_id)
 
     def receive(self, text_data=None, bytes_data=None):
         payload_json = json.loads(text_data)

@@ -14,8 +14,6 @@ def handle_player_info(consumer, message_data):
     """
     Handles player metadata for chat consumer
     """
-    logger.debug("Player details:")
-    logger.debug(message_data)
     name = message_data["name"]
     video_id = message_data["videoId"]
 
@@ -52,7 +50,9 @@ def handle_player_info(consumer, message_data):
             "id": consumer.player_id,
         },
     )
-    logger.info("Player initialized")
+    logger.info("<<Player initialized>>")
+    logger.debug("Player details:")
+    logger.debug(message_data)
 
 
 def handle_player_end(consumer):
@@ -78,4 +78,4 @@ def handle_player_end(consumer):
             "host": consumer.profile,
         },
     )
-    logger.info("Player ended.")
+    logger.info("<<Player ended>>")

@@ -58,7 +58,7 @@ def handle_text_message(consumer, message_data):
             "sender": consumer.profile,
         },
     )
-    logger.info("Text message received")
+    logger.info("<<Text message received>>")
     logger.debug("In room id: %s", str(consumer.room_id))
     if "name" in consumer.profile:
         logger.debug("By %s", consumer.profile["name"])

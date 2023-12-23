@@ -14,8 +14,6 @@ def handle_user_info(consumer, message_data):
     """
     Handles user metadata for chat consumer
     """
-    logger.debug("User details:")
-    logger.debug(message_data)
     name = message_data["name"]
     avatar_url = message_data["avatarUrl"] if "avatarUrl" in message_data else ""
     client_session_id = message_data["sessionId"]
@@ -73,3 +71,5 @@ def handle_user_info(consumer, message_data):
         )
         add_text_message(consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED)
     logger.info("User joined.")
+    logger.debug("User details:")
+    logger.debug(message_data)

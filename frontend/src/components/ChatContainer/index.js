@@ -1,3 +1,4 @@
+import log from 'loglevel';
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
@@ -81,7 +82,7 @@ function ChatContainer() {
        * If chat window is open and user navigates to a different chat route then reinitialize the chat window.
        * History change after random search is expected so no need to reinitialize.
        */
-      const shouldReInitialize = isChatUrl && !pathname.match(/^\/chat\/match$/);
+      const shouldReInitialize = isChatUrl && !pathname.match(/^\/chat\/match\/$/);
       if (shouldReInitialize && newPathname !== pathname) {
         setInitializationStatus(InitializationStatus.INITIALIZING);
       }
@@ -101,19 +102,30 @@ function ChatContainer() {
             isGroupRoom,
           };
           if (isGroupRoom && !chatWindowData.password) {
-            fetchUrl(`/api/chat/rooms/${chatWindowData.roomId}/is_protected`).then((response) => {
-              const {
+            fetchUrl(`/api/chat/rooms/${chatWindowData.roomId}/is_protected`)
+              .then((response) => {
+                const {
+                  // @ts-ignore
+                  data: { is_protected: isProtected },
+                } = response;
+                if (isProtected) {
+                  setShouldOpenRoomPasswordDialog(true);
+                  // @ts-ignore
+                  setInitializationStatus(InitializationStatus.PASSWORD_DIALOG_OPEN);
+                } else {
+                  startChat(chatWindowData);
+                }
+              })
+              .catch((err) => {
+                log.error(err);
+                appStore.showAlert({
+                  text: 'Error occured while connecting to server.',
+                  severity: 'error',
+                });
                 // @ts-ignore
-                data: { is_protected: isProtected },
-              } = response;
-              if (isProtected) {
-                setShouldOpenRoomPasswordDialog(true);
-                // @ts-ignore
-                setInitializationStatus(InitializationStatus.PASSWORD_DIALOG_OPEN);
-              } else {
-                startChat(chatWindowData);
-              }
-            });
+                setInitializationStatus(InitializationStatus.INITIALIZED);
+                appStore.removeChatWindow(); // Remove chat window, if any.
+              });
           } else {
             startChat(chatWindowData);
           }
@@ -126,7 +138,15 @@ function ChatContainer() {
         }
       }
     }
-  }, [initializationStatus, ongoingChatMatch, pathname, roomId, roomType, storedChatWindowData]);
+  }, [
+    history,
+    initializationStatus,
+    ongoingChatMatch,
+    pathname,
+    roomId,
+    roomType,
+    storedChatWindowData,
+  ]);
   const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
   const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));

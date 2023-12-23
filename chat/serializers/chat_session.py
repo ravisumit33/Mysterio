@@ -14,9 +14,9 @@ class ChatSessionSerializer(serializers.ModelSerializer):
         """
         Get session id from chat session
         """
-        return chat_session.tab_session_id
+        return chat_session.client_session_id
 
     class Meta:
         model = ChatSession
-        fields = ["session_id", "name", "avatar_url", "session", "tab_session_id"]
-        extra_kwargs = {"session": {"write_only": True}, "tab_session_id": {"write_only": True}}
+        fields = ["session_id", "name", "avatar_url", "session", "client_session_id"]
+        extra_kwargs = {"session": {"write_only": True}, "client_session_id": {"write_only": True}}

@@ -80,61 +80,65 @@ function ChatHeader() {
   };
 
   const PlayingAnimation = useMemo(
-    () => <Animation containerId="videoPlaying" animationData={playingJson} />,
+    () => (
+      <div>
+        <Animation containerId="videoPlaying" animationData={playingJson} />
+      </div>
+    ),
     []
   );
 
   const LikeAnimation = useMemo(
     () => (
-      <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
+      <div>
+        <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
+      </div>
     ),
     []
   );
 
   const individualChatIcons = useMemo(() => {
-    const handleReconnect = () => {
-      appStore.reconnect();
-    };
+    const handleReconnect = () => history.replace('/chat/match/');
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
-      <IconButton
-        disabled={shouldDisable}
-        onClick={handleReconnect}
-        className={classes.icon}
-        size="large"
-      >
-        <Tooltip title="Find someone else" arrow>
+      <Tooltip title="Find someone else" arrow>
+        <IconButton
+          disabled={shouldDisable}
+          onClick={handleReconnect}
+          className={classes.icon}
+          size="large"
+        >
           <ReplayIcon />
-        </Tooltip>
-      </IconButton>
+        </IconButton>
+      </Tooltip>
     );
-  }, [chatStatus, classes.icon]);
+  }, [chatStatus, classes.icon, history]);
 
   const groupChatIcons = useMemo(() => {
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;
     return (
       <>
-        <IconButton
-          disabled={shouldDisable}
-          onClick={() => setShouldShowDeleteConfirmationDialog(true)}
-          className={classes.icon}
-          size="large"
-        >
-          <Tooltip title="Delete room" arrow>
+        <Tooltip title="Delete room" arrow>
+          <IconButton
+            disabled={shouldDisable}
+            onClick={() => setShouldShowDeleteConfirmationDialog(true)}
+            className={classes.icon}
+            size="large"
+          >
             <DeleteIcon />
-          </Tooltip>
-        </IconButton>
+          </IconButton>
+        </Tooltip>
 
-        <IconButton
-          disabled={shouldDisable}
-          onClick={() => toggleLikeRoom()}
-          className={classes.icon}
-          size="large"
-        >
-          <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
-            {!shouldDisable && isFavorite ? <div>{LikeAnimation}</div> : <FavoriteIcon />}
-          </Tooltip>
-        </IconButton>
+        <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
+          <IconButton
+            disabled={shouldDisable}
+            onClick={() => toggleLikeRoom()}
+            className={classes.icon}
+            size="large"
+          >
+            {!shouldDisable && isFavorite ? LikeAnimation : <FavoriteIcon />}
+          </IconButton>
+        </Tooltip>
       </>
     );
   }, [LikeAnimation, chatStatus, classes.icon, isFavorite, toggleLikeRoom]);
@@ -152,26 +156,26 @@ function ChatHeader() {
         </Box>
         <Stack direction="row">
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
-          <IconButton
-            disabled={chatStatus !== ChatStatus.ONGOING}
-            onClick={() => {
-              chatWindowStore.togglePlayerOpen();
-            }}
-            className={classes.icon}
-            size="large"
+          <Tooltip
+            title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
+            arrow
           >
-            <Tooltip
-              title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
-              arrow
+            <IconButton
+              disabled={chatStatus !== ChatStatus.ONGOING}
+              onClick={() => {
+                chatWindowStore.togglePlayerOpen();
+              }}
+              className={classes.icon}
+              size="large"
             >
-              {chatWindowStore.playerExists ? <div>{PlayingAnimation}</div> : <PlayerIcon />}
-            </Tooltip>
-          </IconButton>
-          <IconButton onClick={() => history.push('/')} className={classes.icon} size="large">
-            <Tooltip title="Close" arrow>
+              {chatWindowStore.playerExists ? PlayingAnimation : <PlayerIcon />}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Close" arrow>
+            <IconButton onClick={() => history.push('/')} className={classes.icon} size="large">
               <CloseIcon />
-            </Tooltip>
-          </IconButton>
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
       <ConfirmationDialog

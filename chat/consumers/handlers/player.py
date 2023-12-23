@@ -19,6 +19,11 @@ def handle_player_info(consumer, message_data):
     name = message_data["name"]
     video_id = message_data["videoId"]
 
+    if consumer.player_id:
+        Player.objects.filter(pk=consumer.player_id).delete()
+        logger.info("Old player deleted, id: %d", consumer.player_id)
+        consumer.player_id = None
+
     player = create_instance(
         CreatePlayerSerializer,
         {

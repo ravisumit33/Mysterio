@@ -43,13 +43,14 @@ class GroupRoomData(models.Model):
     name = models.CharField(max_length=20)
     avatar_url = models.URLField(blank=True)
     zscore = models.FloatField(null=True)
-    password = models.CharField(max_length=20, blank=True)
+    password = models.CharField(max_length=128, blank=True)
     description = models.CharField(max_length=256, blank=True)
     creator = models.ForeignKey(
         get_user_model(),
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="group_rooms",
         related_query_name="group_room",
+        null=True,
     )
     admins = models.ManyToManyField(
         get_user_model(),

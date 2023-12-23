@@ -1,5 +1,7 @@
-from rest_framework import filters, viewsets
-from rest_framework.decorators import api_view
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action, api_view
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from chat.constants import GroupPrefix, MessageType
 from chat.models import Room
@@ -8,7 +10,7 @@ from chat.serializers import (
     DefaultRoomSerializer,
     RetrieveRoomSerializer,
 )
-from chat.utils import channel_layer
+from chat.utils import channel_layer, check_group_room_password
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -40,6 +42,29 @@ class RoomViewSet(viewsets.ModelViewSet):
             },
         )
         return super().destroy(request, *args, **kwargs)
+
+    @action(methods=["get"], detail=True, permission_classes=[AllowAny])
+    def is_protected(self, request, pk=None):
+        """
+        action for checking if room is protected
+        """
+        group_room = self.get_object()
+        return Response(
+            {"is_protected": group_room.room_data.is_protected}, status=status.HTTP_200_OK
+        )
+
+    @action(methods=["get"], detail=True, permission_classes=[AllowAny])
+    def check_password(self, request, pk=None):
+        """
+        action for checking room password
+        """
+        group_room = self.get_object()
+        password_valid = check_group_room_password(request, group_room.room_data)
+        return (
+            Response(status=status.HTTP_200_OK)
+            if password_valid
+            else Response(status=status.HTTP_400_BAD_REQUEST)
+        )
 
 
 @api_view(["GET"])

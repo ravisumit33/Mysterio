@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MatchTimeout, MessageType, RoomType } from 'appConstants';
 import log from 'loglevel';
 import { fetchUrl, isEmptyObj } from 'utils';
+import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import profileStore from '../ProfileStore';
 import Socket from './socket';
 
@@ -64,11 +65,12 @@ class ChatWindowStore {
       .then(async (response) => {
         const { data } = response;
         // @ts-ignore
-        const { player, room_data: roomData, room_type: roomType } = data;
-        if (roomType === RoomType.GROUP) {
+        const { player, room_data: roomData } = data;
+        if (this.isGroupChat) {
           const { name, avatar_url: avatarUrl } = roomData;
           this.setName(name);
           this.setAvatarUrl(avatarUrl);
+          updateStoredChatWindowData(RoomType.GROUP, this.roomInfo.roomId, { name, avatarUrl });
         }
         if (player) {
           this.setPlayerData(player);
@@ -79,6 +81,15 @@ class ChatWindowStore {
           next: `/api/chat/messages/?search=${this.roomInfo.roomId}&page_size=250&ordering=-sent_at`,
         });
         await this.loadPreviousMessages(requestData);
+        if (!this.isGroupChat) {
+          // Show USER_JOINED message when user re-joins an individual chat
+          this.addInitMessageList([
+            {
+              type: MessageType.USER_JOINED,
+              data: { content: `You are connected to ${this.name}` },
+            },
+          ]);
+        }
         return data;
       });
 
@@ -272,24 +283,40 @@ class ChatWindowStore {
         }
         return {};
       case MessageType.USER_JOINED: {
+        let newChatStatus = ChatStatus.ONGOING;
         if (this.chatStatus === ChatStatus.NOT_STARTED) {
+          /*
+           * If chat is not started, then it can be because of following reasons:
+           * 1. User is joining a group chat
+           * 2. User got match in an individual chat
+           * 3. User is rejoining an individual chat
+           */
           if (this.isGroupChat) {
             messageData.content = `${messageData.newJoinee.name} entered`;
           } else if ('match' in messageData) {
             clearTimeout(this.matchTimeout);
             this.setName(messageData.match.name);
             this.setAvatarUrl(messageData.match.avatarUrl);
+            updateStoredChatWindowData(RoomType.INDIVIDUAL, messageData.room_id, {
+              name: messageData.match.name,
+              avatarUrl: messageData.match.avatarUrl,
+            });
             this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
             messageData.content = `You are connected to ${messageData.match.name}`;
+          } else if (messageData.is_room_inactive) {
+            messageData.content = 'Reconnecting...';
+            // @ts-ignore
+            newChatStatus = ChatStatus.RECONNECTING;
           } else {
-            // Direct entry into individual room using link
             messageData.content = 'Connection restored';
           }
         } else if (this.chatStatus === ChatStatus.RECONNECTING) {
           messageData.content = 'Connection restored';
+        } else if (this.chatStatus === ChatStatus.ONGOING && this.isGroupChat) {
+          messageData.content = `${messageData.newJoinee.name} entered`;
         }
         if (!isInitMsg) {
-          this.setChatStatus(ChatStatus.ONGOING);
+          this.setChatStatus(newChatStatus);
           this.setInitDone(true);
         }
         break;
@@ -415,6 +442,19 @@ class ChatWindowStore {
       .finally(() => {
         this.appStore.setShouldShowWaitScreen(false);
       });
+  };
+
+  updatePlayer = (playerData) => {
+    const fetchData = {
+      body: { ...playerData },
+    };
+    if (this.isGroupChat) {
+      fetchData.headers = { 'X-Room-Password': this.roomInfo.password };
+    }
+    fetchUrl(`/api/chat/players/${this.syncedPlayerData.id}/`, {
+      ...fetchData,
+      method: 'patch',
+    });
   };
 
   handlePlayerDelete = () => {

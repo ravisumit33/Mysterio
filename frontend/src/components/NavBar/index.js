@@ -133,8 +133,9 @@ function NavBar() {
   ];
 
   const logoutIcon = useMemo(() => <ExitToApp />, []);
-  const accountNavbarButtons = [
-    {
+  const accountNavbarButtons = [];
+  if (profileStore.isLoggedIn) {
+    accountNavbarButtons.push({
       type: 'icon',
       data: {
         key: 'logout',
@@ -160,8 +161,8 @@ function NavBar() {
             .finally(() => appStore.setShouldShowWaitScreen(false));
         },
       },
-    },
-  ];
+    });
+  }
 
   const commonNavbarButtons = [];
 

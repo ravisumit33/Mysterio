@@ -5,7 +5,7 @@ from chat.consumers.handlers.message import add_text_message
 from chat.consumers.utils import create_instance, update_instance
 from chat.serializers import ChatSessionSerializer, WriteChannelSerializer
 from chat.tasks import match_channels
-from chat.utils import channel_layer
+from chat.utils import channel_layer, get_inactive_individual_room_qs
 
 logger = logging.getLogger(__name__)
 
@@ -18,21 +18,21 @@ def handle_user_info(consumer, message_data):
     logger.debug(message_data)
     name = message_data["name"]
     avatar_url = message_data["avatarUrl"] if "avatarUrl" in message_data else ""
-    tab_session_id = message_data["sessionId"]
+    client_session_id = message_data["sessionId"]
 
     session_key = consumer.scope["session"].session_key
     chat_session = create_instance(
         ChatSessionSerializer,
         {
             "name": name,
-            "tab_session_id": tab_session_id,
+            "client_session_id": client_session_id,
             "avatar_url": avatar_url,
             "session": session_key,
         },
     )
     consumer.chat_session_id = chat_session.id
     consumer.profile = {
-        "session_id": tab_session_id,
+        "session_id": client_session_id,
         "name": chat_session.name,
         "avatar_url": chat_session.avatar_url,
     }
@@ -47,10 +47,13 @@ def handle_user_info(consumer, message_data):
         if not consumer.room_id:
             match_channels()
         else:
+            is_room_inactive = get_inactive_individual_room_qs(consumer.room_id).exists()
             channel_layer.group_send(
                 channel_layer_info["group_prefix"] + str(consumer.room_id),
                 MessageType.USER_JOINED,
-                {},
+                {
+                    "is_room_inactive": is_room_inactive,
+                },
             )
 
     channel_layer.group_send(

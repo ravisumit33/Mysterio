@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   Button,
   createTheme,
@@ -8,22 +9,30 @@ import {
   Stack,
   Container,
   useMediaQuery,
+  Box,
 } from '@mui/material';
 import SyncIcon from '@mui/icons-material/Sync';
 import { ChatWindowStoreContext } from 'contexts';
-import { createDeferredPromiseObj, fetchUrl } from 'utils';
+import { createDeferredPromiseObj } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
-import { useConstant, useGetPlayer, useHandlePlayer } from 'hooks';
+import { useGetPlayer, useHandlePlayer } from 'hooks';
 import RouterLink from 'components/RouterLink';
-import { profileStore } from 'stores';
+import { appStore, profileStore } from 'stores';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
 function Player() {
+  const location = useLocation();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const { roomInfo, syncedPlayerData, isHost, setShouldOpenPlayer, handlePlayerDelete } =
-    chatWindowStore;
+  const {
+    roomInfo,
+    syncedPlayerData,
+    isHost,
+    setShouldOpenPlayer,
+    handlePlayerDelete,
+    updatePlayer,
+  } = chatWindowStore;
   const { adminAccess } = roomInfo;
   // @ts-ignore
   const isScreenSmallerThanLg = useMediaQuery((theme) => theme.breakpoints.down('lg'));
@@ -36,86 +45,87 @@ function Player() {
   const isMediumScreen = isScreenSmallerThanLg && !isSmallScreen && !isXSmallScreen;
 
   const embedPlayerRef = useRef(null);
-  const playerReady = useConstant(createDeferredPromiseObj);
+  const playerDataRef = useRef(null);
+  if (
+    syncedPlayerData &&
+    (!playerDataRef.current || syncedPlayerData.name !== playerDataRef.current.playerName)
+  ) {
+    playerDataRef.current = {
+      playerReady: createDeferredPromiseObj(),
+      playerName: syncedPlayerData.name,
+    };
+  }
+
   const setEmbedPlayer = useCallback((player) => {
     embedPlayerRef.current = player;
   }, []);
-  const syncTimeoutRef = useRef(null);
+  const syncIntervalRef = useRef(null);
   useEffect(
     () => () => {
-      clearTimeout(syncTimeoutRef.current);
-      syncTimeoutRef.current = null;
+      clearInterval(syncIntervalRef.current);
+      syncIntervalRef.current = null;
     },
     []
   );
-  const { getPlayerState, getPlayerTime } = useGetPlayer(embedPlayerRef);
-  const { handlePlay, handlePause, handleSeek } = useHandlePlayer(embedPlayerRef);
+  const { getPlayerState, getPlayerTime, getPlayerId } = useGetPlayer(embedPlayerRef);
+  const { handleCue, handlePlay, handlePause, handleSeek } = useHandlePlayer(embedPlayerRef);
   useEffect(() => {
-    if (!syncedPlayerData || isHost) return;
+    if (!syncedPlayerData) return;
+    const { playerReady, playerName } = playerDataRef.current;
     playerReady.promise.then(() => {
-      if (getPlayerState(syncedPlayerData) !== syncedPlayerData.state) {
-        handleSeek(syncedPlayerData);
-        switch (syncedPlayerData.state) {
-          case PlayerStatus.PLAYING: {
-            handlePlay(syncedPlayerData);
-            break;
+      if (getPlayerId(playerName) !== syncedPlayerData.video_id) {
+        handleCue(syncedPlayerData);
+      } else if (!isHost) {
+        if (getPlayerState(playerName) !== syncedPlayerData.state) {
+          handleSeek(syncedPlayerData);
+          switch (syncedPlayerData.state) {
+            case PlayerStatus.PLAYING: {
+              handlePlay(syncedPlayerData);
+              break;
+            }
+            case PlayerStatus.PAUSED: {
+              handlePause(syncedPlayerData);
+              break;
+            }
+            case PlayerStatus.BUFFERING: {
+              break;
+            }
+            default:
+              break;
           }
-          case PlayerStatus.PAUSED: {
-            handlePause(syncedPlayerData);
-            break;
-          }
-          case PlayerStatus.BUFFERING: {
-            break;
-          }
-          default:
-            break;
+        } else if (getPlayerTime(playerName) !== syncedPlayerData.current_time) {
+          handleSeek(syncedPlayerData);
         }
-      } else if (getPlayerTime(syncedPlayerData) !== syncedPlayerData.current_time) {
-        handleSeek(syncedPlayerData);
       }
     });
   }, [
     syncedPlayerData,
     isHost,
-    playerReady.promise,
     getPlayerState,
     getPlayerTime,
     handleSeek,
     handlePlay,
     handlePause,
+    getPlayerId,
+    handleCue,
   ]);
 
   const onPlayerReady = useCallback(
     (evt) => {
-      const syncPlayerTime = () => {
-        syncTimeoutRef.current = setTimeout(() => {
-          fetchUrl(`/api/chat/players/${syncedPlayerData.id}/`, {
-            method: 'patch',
-            body: { current_time: getPlayerTime(syncedPlayerData) },
-          }).finally(() => {
-            if (syncTimeoutRef.current) {
-              syncPlayerTime();
-            }
-          });
+      const { playerName } = playerDataRef.current;
+      clearInterval(syncIntervalRef.current);
+      handleCue(syncedPlayerData);
+      if (isHost) {
+        syncIntervalRef.current = setInterval(() => {
+          updatePlayer({ current_time: getPlayerTime(playerName) });
         }, 1000);
-      };
-      switch (syncedPlayerData.name) {
-        case PlayerName.YOUTUBE: {
-          evt.target.cueVideoById({
-            videoId: syncedPlayerData.video_id,
-            startSeconds: syncedPlayerData.current_time,
-          });
-          isHost && syncPlayerTime();
-          break;
-        }
-        default:
-          break;
       }
     },
-    [getPlayerTime, isHost, syncedPlayerData]
+    [getPlayerTime, handleCue, isHost, syncedPlayerData, updatePlayer]
   );
   const onPlayerStateChange = useCallback(
     (state) => {
+      const { playerReady, playerName } = playerDataRef.current;
       switch (state) {
         case PlayerStatus.CUED: {
           isHost && handlePlay(syncedPlayerData);
@@ -127,13 +137,13 @@ function Player() {
       }
       isHost &&
         playerReady.promise.then(() => {
-          fetchUrl(`/api/chat/players/${syncedPlayerData.id}/`, {
-            method: 'patch',
-            body: { state, current_time: getPlayerTime(syncedPlayerData) },
+          updatePlayer({
+            state,
+            current_time: getPlayerTime(playerName),
           });
         });
     },
-    [getPlayerTime, handlePlay, isHost, syncedPlayerData, playerReady]
+    [getPlayerTime, handlePlay, isHost, syncedPlayerData, updatePlayer]
   );
 
   const getEmbedPlayer = () => {
@@ -179,7 +189,10 @@ function Player() {
                 {!profileStore.isLoggedIn && (
                   <>
                     If you have admin rights,
-                    <RouterLink to="/login"> login </RouterLink> and try again.
+                    <RouterLink to={{ pathname: '/login', state: { from: location } }}>
+                      login
+                    </RouterLink>
+                    and try again.
                   </>
                 )}
               </Typography>
@@ -187,7 +200,16 @@ function Player() {
           </ThemeProvider>
         </StyledEngineProvider>
         <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
-          {syncedPlayerData && getEmbedPlayer()}
+          {syncedPlayerData && (
+            <Box
+              onClick={() => {
+                !isHost &&
+                  appStore.showAlert({ text: 'Only host can change video', severity: 'error' });
+              }}
+            >
+              {getEmbedPlayer()}
+            </Box>
+          )}
           <Stack direction="row" justifyContent="center" spacing={2}>
             {syncedPlayerData && !isHost && (
               <Button

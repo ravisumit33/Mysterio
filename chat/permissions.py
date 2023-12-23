@@ -9,7 +9,7 @@ from chat.utils import check_group_room_password
 logger = logging.getLogger(__name__)
 
 
-def has_basic_room_permission(request, room, only_allow_active=True):
+def has_basic_room_permission(request, room, only_allow_active=False):
     has_perm = True
     if room.is_group_room:
         has_perm = has_perm and check_group_room_password(request, room.room_data)
@@ -61,7 +61,7 @@ class RoomPermission(permissions.BasePermission):
         restricted_actions_perms = {
             RoomType.GROUP: {
                 "retrieve": has_basic_perm,
-                "destroy": has_basic_room_permission(request, room, only_allow_active=False)
+                "destroy": has_basic_perm
                 and has_room_data
                 and request.user == room.room_data.creator,
                 "update": False,
@@ -99,11 +99,9 @@ class PlayerPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, player):
         if request.user.is_superuser:
             return True
-        room = player.room
-        has_perm = has_basic_room_permission(request, room)
-        if view.action == "retrieve":
-            return has_perm
         if view.action in ["update", "partial_update"]:
+            room = player.room
+            has_perm = has_basic_room_permission(request, room, only_allow_active=True)
             if room.is_group_room:
                 has_perm = has_perm and request.user in room.room_data.admins.all()
             host_session_qs = Session.objects.filter(

@@ -64,14 +64,16 @@ function CustomButton(props) {
         {data.text}
       </Button>
     ) : (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <IconButton {...commonIconBtnProps} className={classes.buttonCommon} size="small">
-        <Tooltip title={data.text} arrow>
-          {/* Need to wrap icon component in Box for tooltip to support functional components. */}
-          {/* https://stackoverflow.com/a/57528471/6842304  */}
-          <Box>{icon}</Box>
-        </Tooltip>
-      </IconButton>
+      <Tooltip title={data.text} arrow>
+        <IconButton
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...commonIconBtnProps}
+          className={classes.buttonCommon}
+          size="small"
+        >
+          {icon}
+        </IconButton>
+      </Tooltip>
     );
   }
   return (

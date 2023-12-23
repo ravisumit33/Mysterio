@@ -20,7 +20,10 @@ class WriteChannelSerializer(serializers.ModelSerializer):
                 and related_room.channels.filter(is_active=True).count() >= 2
                 and attrs.get("is_active", False)
             ):
-                raise serializers.ValidationError("Room can only have 2 active channels")
+                raise serializers.ValidationError("Individual room can only have 2 active channels")
+        elif attrs.get("room") and attrs["room"].room_type == RoomType.INDIVIDUAL:
+            if attrs["room"].channels.filter(is_active=True).count() >= 2:
+                raise serializers.ValidationError("Individual room can only have 2 active channels")
         return attrs
 
     class Meta:

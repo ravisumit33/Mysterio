@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { alpha, Box, LinearProgress, Stack, Typography } from '@mui/material';
+import { alpha, Box, Button, LinearProgress, Stack, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
+import { teal } from '@mui/material/colors';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
 import { profileStore } from 'stores';
@@ -12,6 +13,7 @@ import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import { useChatSound, useNewMessage } from 'hooks';
 import { useHistory, useLocation } from 'react-router-dom';
+import { Replay } from '@mui/icons-material';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -25,14 +27,29 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
   },
+  infoMsgBox: {
+    textAlign: 'center',
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
   infoMsg: {
-    padding: theme.spacing(1, 0),
+    padding: theme.spacing(1, 1),
+    backgroundColor: theme.palette.grey[100],
+    borderRadius: theme.spacing(1.5),
+  },
+  regretMsg: {
+    padding: theme.spacing(0, 1),
+    backgroundColor: theme.palette.grey.A100,
+    borderRadius: theme.spacing(0.5),
   },
   section: {
-    padding: theme.spacing(0, 1),
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
   header: {
-    backgroundColor: alpha(theme.palette.common.black, 0.08),
+    backgroundColor: alpha(theme.palette.common.black, 0.04),
+    boxShadow: '0px 5px 20px 0px rgba(0, 0, 0, 0.2)',
+    zIndex: 1,
   },
   backdrop: {
     position: 'absolute',
@@ -45,14 +62,13 @@ const useStyles = makeStyles((theme) => ({
   msgBoxContainer: {
     position: 'relative',
     flex: 1,
+    backgroundColor: teal[100],
   },
 }));
 
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const {
-    name,
-    avatarUrl,
     messageList,
     chatStatus,
     isGroupChat,
@@ -66,12 +82,10 @@ function ChatWindow(props) {
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
   const classes = useStyles({ chatStatus });
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const history = useHistory();
-  const ongoingChatUrl = `/chat/${roomType}/${roomId}/?name=${name}&avatarUrl=${encodeURIComponent(
-    avatarUrl
-  )}`;
-  const shouldRedirect = initDone && pathname + search !== ongoingChatUrl;
+  const ongoingChatUrl = `/chat/${roomType}/${roomId}/`;
+  const shouldRedirect = initDone && pathname !== ongoingChatUrl;
   useEffect(() => {
     if (shouldRedirect) {
       history.replace(ongoingChatUrl);
@@ -135,11 +149,10 @@ function ChatWindow(props) {
     }
     return (
       // eslint-disable-next-line react/no-array-index-key
-      <Box key={idx} className={classes.section}>
+      <Box key={idx} className={clsx(classes.section, classes.infoMsgBox)}>
         <Typography
           align="center"
           variant="caption"
-          component="p"
           color="textSecondary"
           className={classes.infoMsg}
         >
@@ -178,6 +191,7 @@ function ChatWindow(props) {
         {initDone && (
           <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
             <RouteLeavingGuard
+              when={[ChatStatus.ONGOING, ChatStatus.RECONNECTING].includes(chatStatus)}
               dialogProps={{
                 title: 'Do you want to close this chat?',
                 description: 'This will terminate this chat session.',
@@ -192,18 +206,29 @@ function ChatWindow(props) {
             />
           </Box>
         )}
+        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
+          !isGroupChat && (
+            <Stack justifyContent="center" alignItems="center" className="overlay">
+              <Box className={classes.infoMsgBox}>
+                <Typography align="center" className={classes.regretMsg} variant="subtitle2">
+                  {chatStatus === ChatStatus.NO_MATCH_FOUND
+                    ? `Looks like no one is online`
+                    : `${chatWindowStore.name} left`}
+                  <span className="emoji"> &#128542;</span>
+                </Typography>
+              </Box>
+              <Box mt={1}>
+                <Button
+                  variant="contained"
+                  endIcon={<Replay />}
+                  onClick={() => history.replace('/chat/match/')}
+                >
+                  Find someone else
+                </Button>
+              </Box>
+            </Stack>
+          )}
       </Stack>
-      {chatStatus === ChatStatus.NO_MATCH_FOUND && !isGroupChat && (
-        <Typography align="center" className={classes.infoMsg}>
-          Looks like no one is online &#128542;
-        </Typography>
-      )}
-      {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
-        !isGroupChat && (
-          <Typography align="center" className={classes.infoMsg}>
-            Click &#x21BA; above to reconnect to someone
-          </Typography>
-        )}
       <InputBar />
     </Stack>
   );

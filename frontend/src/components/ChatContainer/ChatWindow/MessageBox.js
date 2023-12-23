@@ -59,24 +59,24 @@ function MessageBox(props) {
         ref={messageListRef}
       />
       {showBottomButton && (
-        <IconButton
-          onClick={() => {
-            messageListRef.current.scrollToIndex({
-              index: chatMessages.length - 1,
-              align: 'end',
-            });
-          }}
-          sx={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
-          size="large"
-        >
-          <Tooltip title="Go to bottom" arrow>
+        <Tooltip title="Go to bottom" arrow>
+          <IconButton
+            onClick={() => {
+              messageListRef.current.scrollToIndex({
+                index: chatMessages.length - 1,
+                align: 'end',
+              });
+            }}
+            sx={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
+            size="large"
+          >
             <Badge color="secondary" badgeContent={unreadMessagesCount}>
               <span className={clsx('material-icons', classes.bottomButton)}>
                 keyboard_double_arrow_down
               </span>
             </Badge>
-          </Tooltip>
-        </IconButton>
+          </IconButton>
+        </Tooltip>
       )}
     </Box>
   );

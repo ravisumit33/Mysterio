@@ -6,7 +6,7 @@ class ChatSession(models.Model):
     Model for storing chat session
     """
 
-    tab_session_id = models.CharField(max_length=100)
+    client_session_id = models.CharField(max_length=100)
     name = models.CharField(max_length=20)
     avatar_url = models.URLField()
     session = models.ForeignKey(

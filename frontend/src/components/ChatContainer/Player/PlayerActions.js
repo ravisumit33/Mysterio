@@ -14,6 +14,7 @@ import YouTubeIcon from '@mui/icons-material/YouTube';
 import { appStore } from 'stores';
 import { ChatWindowStoreContext } from 'contexts';
 import { MessageType, PlayerName, renderPlayerName } from 'appConstants';
+import { getVideoIdFromUrl } from 'utils';
 
 function PlayerActions() {
   const chatWindowStore = useContext(ChatWindowStoreContext);
@@ -49,29 +50,11 @@ function PlayerActions() {
     });
 
   const setVideoIdFromUrl = (url) => {
-    try {
-      const urlObj = new URL(url);
-      let videoId = '';
-      switch (videoPlayer) {
-        case PlayerName.YOUTUBE: {
-          if (urlObj.hostname === 'youtu.be') {
-            const { pathname } = urlObj;
-            videoId = pathname.substr(pathname.indexOf('/') + 1);
-          } else if (urlObj.hostname === 'www.youtube.com') {
-            videoId = urlObj.searchParams.get('v');
-          }
-          break;
-        }
-        default:
-          break;
-      }
-      if (videoId) {
-        setSelectedVideoId(videoId);
-        setSelectedPlayer(videoPlayer);
-      } else {
-        handleInvalidInput();
-      }
-    } catch {
+    const videoId = getVideoIdFromUrl(url, videoPlayer);
+    if (videoId) {
+      setSelectedVideoId(videoId);
+      setSelectedPlayer(videoPlayer);
+    } else {
       handleInvalidInput();
     }
   };

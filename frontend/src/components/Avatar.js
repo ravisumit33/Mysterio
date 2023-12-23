@@ -7,17 +7,27 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
-  avatar: ({ avatarBg }) => ({
-    color: theme.palette.getContrastText(avatarBg),
-    backgroundColor: avatarBg,
+  avatar: ({ bg }) => ({
+    color: theme.palette.getContrastText(bg),
+    backgroundColor: bg,
+    border: `${theme.spacing(0.25)} solid ${theme.palette.getContrastText(bg)}`,
   }),
 }));
 
 export function ImageAvatar(props) {
   const { name, avatarUrl, className, ...rest } = props;
-
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return <Avatar className={className} alt={name} src={avatarUrl} {...rest} />;
+  const url = new URL(avatarUrl);
+  const bgQueryParam = url.searchParams.get('backgroundColor');
+  const imgBg = bgQueryParam ? `#${bgQueryParam}` : '#000';
+  return (
+    <Avatar
+      className={clsx(useStyles({ bg: imgBg }).avatar, className)}
+      alt={name}
+      src={avatarUrl}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...rest}
+    />
+  );
 }
 
 ImageAvatar.propTypes = {
@@ -41,7 +51,7 @@ export function TextAvatar(props) {
 
   return (
     <Avatar
-      className={clsx(useStyles({ avatarBg: generateColorFromText(name) }).avatar, className)}
+      className={clsx(useStyles({ bg: generateColorFromText(name) }).avatar, className)}
       // eslint-disable-next-line react/jsx-props-no-spreading
       {...rest}
     >

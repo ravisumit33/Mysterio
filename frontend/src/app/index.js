@@ -35,8 +35,12 @@ function App() {
   const classes = useStyles();
 
   useEffect(() => {
+    let cleanup = () => {};
     const rootElement = document.querySelector('#root');
+    let metaViewportContent =
+      'initial-scale=1, width=device-width, minimum-scale=1, maximum-scale=1';
     if (/\/chat.*/.test(pathname)) {
+      metaViewportContent = `${metaViewportContent}, interactive-widget=resizes-content`;
       const getRootHeight = () =>
         Math.min(
           window.innerHeight,
@@ -50,14 +54,16 @@ function App() {
         rootElement.style.height = `${getRootHeight()}px`;
       };
       window.addEventListener('resize', handleViewPortResize);
-      return () => {
+      cleanup = () => {
         window.removeEventListener('resize', handleViewPortResize);
       };
+    } else {
+      // @ts-ignore
+      rootElement.style.height = '';
     }
-    // @ts-ignore
-    rootElement.style.height = '';
-    return () => {};
-  }, [pathname, classes.root]);
+    document.querySelector('meta[name="viewport"]').setAttribute('content', metaViewportContent);
+    return cleanup;
+  }, [pathname]);
 
   useEffect(() => {
     fetchUrl('/api/account/user/')

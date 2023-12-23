@@ -29,7 +29,6 @@ class PlayerViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.Gen
                 room_prefix + str(room.id),
                 MessageType.PLAYER_SYNC,
                 {
-                    "video_id": resp_data.get("video_id"),
                     "state": resp_data.get("state"),
                     "current_time": resp_data.get("current_time"),
                 },

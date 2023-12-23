@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@mui/material';
 import { useConstant } from 'hooks';
@@ -7,6 +7,9 @@ import { MysterioOrigin } from 'appConstants';
 
 function YouTube(props) {
   const { setPlayer, size, onReady, onStateChange, showControls } = props;
+  const ytPlayerRef = useRef(null);
+
+  useEffect(() => () => ytPlayerRef.current && ytPlayerRef.current.destroy(), []);
   useConstant(() => {
     globalThis.youtubeIframePromise.then(() => {
       const ytPlayer = new globalThis.YT.Player('YouTube', {
@@ -22,11 +25,17 @@ function YouTube(props) {
           onStateChange,
         },
       });
+      ytPlayerRef.current = ytPlayer;
       setPlayer(ytPlayer);
     });
   });
 
-  return <Box id="YouTube" sx={{ pointerEvents: showControls ? 'auto' : 'none' }} />;
+  return (
+    // Wrapper box https://stackoverflow.com/q/54880669/6842304
+    <Box>
+      <Box id="YouTube" sx={{ pointerEvents: showControls ? 'auto' : 'none' }} />
+    </Box>
+  );
 }
 
 YouTube.propTypes = {

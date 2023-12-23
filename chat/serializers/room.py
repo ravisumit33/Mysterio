@@ -80,7 +80,7 @@ class DefaultRoomDataSerializer(serializers.Serializer):
         if room := self.root.instance:
             room_type = room.room_type
         else:
-            room_type = field_dict.get("room_type")
+            room_type = dictionary.get("room_type")
         return {**field_dict, "room_type": room_type}
 
     def to_internal_value(self, data):

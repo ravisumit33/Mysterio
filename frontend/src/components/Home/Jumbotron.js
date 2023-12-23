@@ -34,7 +34,7 @@ function Jumbotron() {
   const history = useHistory();
 
   const handleStartIndividualChat = () => {
-    history.push('/chat/match');
+    history.push('/chat/match/');
   };
 
   return (

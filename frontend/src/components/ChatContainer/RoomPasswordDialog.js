@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -12,14 +13,24 @@ import {
 } from '@mui/material';
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
+import { RoomType } from 'appConstants';
+import { useStoredChatWindowData } from 'hooks';
 
 function RoomPasswordDialog(props) {
-  const {
-    shouldOpenRoomPasswordDialog,
-    setShouldOpenRoomPasswordDialog,
-    handleStartChat,
-    chatWindowData,
-  } = props;
+  const { shouldOpen, setShouldOpen, handleStartChat } = props;
+  const { pathname } = useLocation();
+  const history = useHistory();
+  const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
+  const ongoingChatMatch = pathname.match(ongoingChatRegex);
+  let roomId;
+  let roomType;
+  if (ongoingChatMatch) {
+    ({ roomId, roomType } = ongoingChatMatch.groups);
+  } else {
+    roomType = '';
+    roomId = '';
+  }
+  const [chatWindowData, storeChatWindowData] = useStoredChatWindowData(roomType, roomId);
 
   const defaultPasswordFieldData = {
     help_text: '',
@@ -30,14 +41,24 @@ function RoomPasswordDialog(props) {
   const [protectedRoomPasswordFieldData, setProtectedRoomPasswordFieldData] =
     useState(defaultPasswordFieldData);
 
+  const setChatWindowData = (newChatWindowData) => {
+    const isGroupRoom = roomType === RoomType.GROUP;
+    storeChatWindowData(newChatWindowData);
+    handleStartChat({ ...newChatWindowData, roomId, isGroupRoom });
+  };
+
   const roomPasswordCheck = () => {
     appStore.showWaitScreen('Validating password');
-    fetchUrl(`/api/chat/rooms/${chatWindowData.roomId}/check_password/`, {
+    fetchUrl(`/api/chat/rooms/${roomId}/check_password/`, {
       headers: { 'X-Room-Password': selectedRoomPassword },
     })
       .then((response) => {
-        setShouldOpenRoomPasswordDialog(false);
-        handleStartChat({ ...chatWindowData, password: selectedRoomPassword });
+        setShouldOpen(false);
+        setSelectedRoomPassword('');
+        setChatWindowData({
+          ...chatWindowData,
+          password: selectedRoomPassword,
+        });
         appStore.setShouldShowAlert(false);
       })
       .catch((response) => {
@@ -45,7 +66,7 @@ function RoomPasswordDialog(props) {
           text: 'Invalid room password.',
           severity: 'error',
         });
-        setShouldOpenRoomPasswordDialog(true);
+        setShouldOpen(true);
         const newProtectedRoomPasswordFieldData = { ...protectedRoomPasswordFieldData };
         newProtectedRoomPasswordFieldData.error = true;
         setProtectedRoomPasswordFieldData(newProtectedRoomPasswordFieldData);
@@ -54,10 +75,7 @@ function RoomPasswordDialog(props) {
   };
 
   return (
-    <Dialog
-      open={shouldOpenRoomPasswordDialog}
-      onClose={() => setShouldOpenRoomPasswordDialog(false)}
-    >
+    <Dialog open={shouldOpen}>
       <DialogTitle>Enter Password</DialogTitle>
       <form
         onSubmit={(evt) => {
@@ -82,6 +100,9 @@ function RoomPasswordDialog(props) {
           />
         </DialogContent>
         <DialogActions>
+          <Button color="secondary" onClick={() => history.push('/')}>
+            Cancel
+          </Button>
           <Button type="submit" color="primary">
             Enter room
           </Button>
@@ -92,17 +113,13 @@ function RoomPasswordDialog(props) {
 }
 
 RoomPasswordDialog.propTypes = {
-  shouldOpenRoomPasswordDialog: PropTypes.bool,
-  setShouldOpenRoomPasswordDialog: PropTypes.func.isRequired,
+  shouldOpen: PropTypes.bool,
+  setShouldOpen: PropTypes.func.isRequired,
   handleStartChat: PropTypes.func.isRequired,
-  chatWindowData: PropTypes.shape({
-    roomId: PropTypes.number.isRequired,
-    isGroupRoom: PropTypes.bool.isRequired,
-  }).isRequired,
 };
 
 RoomPasswordDialog.defaultProps = {
-  shouldOpenRoomPasswordDialog: false,
+  shouldOpen: false,
 };
 
 export default observer(RoomPasswordDialog);

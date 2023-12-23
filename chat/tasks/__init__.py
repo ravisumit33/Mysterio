@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 import redis
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from django.db.models import Count, Q
 
 from chat.constants import MATCH_DELAY, CacheKey, GroupPrefix, MessageType
-from chat.models import MatchRequest, Room
-from chat.utils import channel_layer
+from chat.models import MatchRequest
+from chat.utils import channel_layer, get_inactive_individual_room_qs
 
 from .group_room import delete_old_group_channels
 from .match import process_unmatched_channels
@@ -44,11 +43,7 @@ def match_channels():
 @shared_task
 def individual_room_timeout(room_id):
     """Shared task to delete individual room after CHAT_SESSION_DELETION_DELAY"""
-    delete_room_qs = (
-        Room.objects.filter(pk=room_id)
-        .alias(active_channels_count=Count("channel", filter=Q(channel__is_active=True)))
-        .filter(active_channels_count__lt=2)
-    )
+    delete_room_qs = get_inactive_individual_room_qs(room_id)
     if delete_room_qs.exists():
         delete_room_qs.delete()
         channel_layer.group_send(

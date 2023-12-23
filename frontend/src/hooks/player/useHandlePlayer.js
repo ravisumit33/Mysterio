@@ -1,40 +1,67 @@
 import { PlayerName } from 'appConstants';
+import { useCallback } from 'react';
 
 const useHandlePlayer = (playerRef) => {
-  const handlePlay = (data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        playerRef.current.playVideo();
-        break;
+  const handleCue = useCallback(
+    (data) => {
+      switch (data.name) {
+        case PlayerName.YOUTUBE: {
+          playerRef.current.cueVideoById({
+            videoId: data.video_id,
+            startSeconds: data.current_time,
+          });
+          break;
+        }
+        default:
+          break;
       }
-      default:
-        break;
-    }
-  };
+    },
+    [playerRef]
+  );
 
-  const handlePause = (data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        playerRef.current.pauseVideo();
-        break;
+  const handlePlay = useCallback(
+    (data) => {
+      switch (data.name) {
+        case PlayerName.YOUTUBE: {
+          playerRef.current.playVideo();
+          break;
+        }
+        default:
+          break;
       }
-      default:
-        break;
-    }
-  };
+    },
+    [playerRef]
+  );
 
-  const handleSeek = (data) => {
-    switch (data.name) {
-      case PlayerName.YOUTUBE: {
-        playerRef.current.seekTo(data.current_time);
-        break;
+  const handlePause = useCallback(
+    (data) => {
+      switch (data.name) {
+        case PlayerName.YOUTUBE: {
+          playerRef.current.pauseVideo();
+          break;
+        }
+        default:
+          break;
       }
-      default:
-        break;
-    }
-  };
+    },
+    [playerRef]
+  );
 
-  return { handlePlay, handlePause, handleSeek };
+  const handleSeek = useCallback(
+    (data) => {
+      switch (data.name) {
+        case PlayerName.YOUTUBE: {
+          playerRef.current.seekTo(data.current_time);
+          break;
+        }
+        default:
+          break;
+      }
+    },
+    [playerRef]
+  );
+
+  return { handleCue, handlePlay, handlePause, handleSeek };
 };
 
 export default useHandlePlayer;

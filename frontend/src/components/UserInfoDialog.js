@@ -12,8 +12,8 @@ import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
-import { useBasicInfo } from 'hooks';
-import { SessionStorageKeys, SessionStorageKeysPrefix } from 'appConstants';
+import { useBasicInfo, useLocalStorage } from 'hooks';
+import { BrowserStorageKeys } from 'appConstants';
 import BasicInfo from './BasicInfo';
 
 const userAvatarStyles = [
@@ -48,14 +48,12 @@ const useStyles = makeStyles((theme) => ({
 
 function UserInfoDialog() {
   const classes = useStyles();
-  const storedProfileName = window.sessionStorage.getItem(
-    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileName}`
+  const [storedProfileName, setStoredProfileName] = useLocalStorage(BrowserStorageKeys.profileName);
+  const [storedProfileAvatarUrl, setStoredProfileAvatarUrl] = useLocalStorage(
+    BrowserStorageKeys.profileAvatarUrl
   );
-  const storedProfileAvatarUrl = window.sessionStorage.getItem(
-    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`
-  );
-  const storedProfileSessionId = window.sessionStorage.getItem(
-    `${SessionStorageKeysPrefix}${SessionStorageKeys.profileSessionId}`
+  const [storedProfileSessionId, setStoredProfileSessionId] = useLocalStorage(
+    BrowserStorageKeys.profileSessionId
   );
   useEffect(() => {
     const hasStoredUserInfo = storedProfileName && storedProfileAvatarUrl && storedProfileSessionId;
@@ -109,22 +107,13 @@ function UserInfoDialog() {
     fileUploadPromise
       .then((url) => {
         appStore.setShouldShowAlert(false);
-        window.sessionStorage.setItem(
-          `${SessionStorageKeysPrefix}${SessionStorageKeys.profileName}`,
-          name
-        );
-        window.sessionStorage.setItem(
-          `${SessionStorageKeysPrefix}${SessionStorageKeys.profileAvatarUrl}`,
-          url
-        );
+        setStoredProfileName(name);
+        setStoredProfileAvatarUrl(url);
         profileStore.setName(name);
         profileStore.setAvatarUrl(url);
         if (!profileStore.sessionId) {
           const profileSessionId = `${Date.now()}`;
-          window.sessionStorage.setItem(
-            `${SessionStorageKeysPrefix}${SessionStorageKeys.profileSessionId}`,
-            profileSessionId
-          );
+          setStoredProfileSessionId(profileSessionId);
           profileStore.setSessionId(profileSessionId);
         }
         appStore.setShouldOpenUserInfoDialog(false);
@@ -148,7 +137,7 @@ function UserInfoDialog() {
       >
         <DialogContent classes={{ root: classes.dialogContent }}>
           <DialogContentText>
-            Create your anonymous avatar by giving it a name and a look.
+            Create your anonymous avatar for this session by giving it a name and a look.
           </DialogContentText>
           <BasicInfo
             name={name}
@@ -160,8 +149,13 @@ function UserInfoDialog() {
           />
         </DialogContent>
         <DialogActions>
+          {storedProfileSessionId && (
+            <Button color="secondary" onClick={() => appStore.setShouldOpenUserInfoDialog(false)}>
+              Cancel
+            </Button>
+          )}
           <Button type="submit" color="primary">
-            Go
+            Submit
           </Button>
         </DialogActions>
       </form>

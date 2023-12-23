@@ -17,10 +17,11 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '1rem',
     width: '100%',
     transition: 'background-color .2s ease,box-shadow .2s ease',
+    boxShadow: '0px -5px 20px 0px rgba(0, 0, 0, 0.1)',
   },
   active: {
-    backgroundColor: 'white',
-    boxShadow: '0px -5px 20px 0px rgba(150, 165, 190, 0.2)',
+    backgroundColor: theme.palette.common.white,
+    boxShadow: '0px -5px 20px 0px rgba(0, 0, 0, 0.2)',
   },
   adornment: {
     alignSelf: 'end',

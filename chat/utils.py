@@ -1,6 +1,9 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth.hashers import check_password
+from django.db.models import Count, Q
+
+from chat.models import Room
 
 
 class ChannelLayerOps:
@@ -52,4 +55,16 @@ def check_group_room_password(request, group_room_data):
         check_password(request_password, group_room_data.password)
         if group_room_data.is_protected
         else True
+    )
+
+
+def get_inactive_individual_room_qs(room_id):
+    """
+    Returns query set to get if individual room is inactive currently
+    """
+
+    return (
+        Room.objects.filter(pk=room_id)
+        .alias(active_channels_count=Count("channel", filter=Q(channel__is_active=True)))
+        .filter(active_channels_count__lt=2)
     )

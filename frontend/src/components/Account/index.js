@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Redirect, Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { Route, Switch, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -10,10 +10,21 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
 import { appStore, profileStore } from 'stores';
-import { Box, IconButton, ListItemAvatar, ListItemButton, Stack } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  ListItemAvatar,
+  ListItemButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { AccountCircle, ExitToApp, Favorite, Edit } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
+import CenterPaper from 'components/CenterPaper';
+import RouterLink from 'components/RouterLink';
 import Profile from './Profile';
 import ChangePassword from './ChangePassword';
 import ConfirmationEmailSent from './ConfirmationEmailSent';
@@ -30,8 +41,8 @@ const useStyles = makeStyles(() => ({
 
 function Account() {
   const classes = useStyles();
-  const location = useLocation();
   const history = useHistory();
+  const location = useLocation();
   const { path } = useRouteMatch();
   const [selectedTab, setSelectedTab] = useState('Profile');
 
@@ -52,13 +63,15 @@ function Account() {
         <ListItem
           disableGutters
           secondaryAction={
-            <IconButton
-              edge="end"
-              aria-label="modify"
-              onClick={() => appStore.setShouldOpenUserInfoDialog(true)}
-            >
-              <Edit />
-            </IconButton>
+            <Tooltip title="Edit profile" arrow>
+              <IconButton
+                edge="end"
+                aria-label="edit profile"
+                onClick={() => appStore.setShouldOpenUserInfoDialog(true)}
+              >
+                <Edit />
+              </IconButton>
+            </Tooltip>
           }
         >
           <ListItemAvatar>
@@ -86,38 +99,59 @@ function Account() {
             </ListItemButton>
           ))}
         </List>
-        <List>
-          <ListItemButton
-            onClick={() => {
-              appStore.showWaitScreen('Logging you out');
-              fetchUrl('/api/account/logout/', {
-                method: 'post',
-                body: {},
-              })
-                .then(() => {
-                  history.replace('/');
-                  profileStore.setEmail('');
+        {profileStore.isLoggedIn && (
+          <List>
+            <ListItemButton
+              onClick={() => {
+                appStore.showWaitScreen('Logging you out');
+                fetchUrl('/api/account/logout/', {
+                  method: 'post',
+                  body: {},
                 })
-                .catch(() =>
-                  appStore.showAlert({
-                    text: 'Unable to log out. Make sure you are logged in.',
-                    severity: 'error',
+                  .then(() => {
+                    history.replace('/');
+                    profileStore.setEmail('');
                   })
-                )
-                .finally(() => appStore.setShouldShowWaitScreen(false));
-            }}
-          >
-            <ListItemIcon>
-              <ExitToApp color="secondary" />
-            </ListItemIcon>
-            <ListItemText primary="Logout" primaryTypographyProps={{ color: 'secondary' }} />
-          </ListItemButton>
-        </List>
+                  .catch(() =>
+                    appStore.showAlert({
+                      text: 'Unable to log out. Make sure you are logged in.',
+                      severity: 'error',
+                    })
+                  )
+                  .finally(() => appStore.setShouldShowWaitScreen(false));
+              }}
+            >
+              <ListItemIcon>
+                <ExitToApp color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Logout" primaryTypographyProps={{ color: 'secondary' }} />
+            </ListItemButton>
+          </List>
+        )}
       </Stack>
     </>
   );
 
   const renderTab = () => {
+    if (!profileStore.isLoggedIn) {
+      return (
+        <CenterPaper>
+          <Stack justifyContent="space-between" alignItems="center" spacing={1}>
+            <Typography variant="h4" align="center">
+              You are not logged in.
+            </Typography>
+            <Typography variant="body1" align="center">
+              {`${selectedTab} is only available for logged in users.`}
+            </Typography>
+            <RouterLink to={{ pathname: '/login', state: { from: location } }} tabIndex={-1}>
+              <Button variant="contained" color="secondary">
+                Login
+              </Button>
+            </RouterLink>
+          </Stack>
+        </CenterPaper>
+      );
+    }
     switch (selectedTab) {
       case 'Profile':
         return <Profile />;
@@ -134,63 +168,52 @@ function Account() {
       <Route path={`${path}/confirm-email/:key`}>
         <ConfirmEmail />
       </Route>
-      {!profileStore.isLoggedIn ? (
-        <Redirect
-          to={{
-            pathname: '/login',
-            state: { from: location },
-          }}
-        />
-      ) : (
-        <>
-          <Route exact path={path}>
-            <Stack direction="row">
-              <Box
-                component="nav"
-                sx={{ width: { sm: drawerWidth, flexShrink: { sm: 0 } } }}
-                aria-label="account details"
-              >
-                <Drawer
-                  variant="temporary"
-                  anchor="left"
-                  open={appStore.shouldOpenAccountsDrawer}
-                  onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
-                  classes={{
-                    paper: classes.drawerPaper,
-                  }}
-                  ModalProps={{
-                    keepMounted: true, // Better open performance on mobile.
-                  }}
-                  sx={{
-                    display: { xs: 'block', sm: 'none' },
-                  }}
-                >
-                  {drawer}
-                </Drawer>
-                <Drawer
-                  classes={{
-                    paper: classes.drawerPaper,
-                  }}
-                  variant="permanent"
-                  open
-                  sx={{
-                    display: { xs: 'none', sm: 'block' },
-                  }}
-                >
-                  {drawer}
-                </Drawer>
-              </Box>
-              <Box component="main" sx={{ flex: 1 }}>
-                {renderTab()}
-              </Box>
-            </Stack>
-          </Route>
-          {!profileStore.social && (
-            <Route path={`${path}/change-password`}>
-              <ChangePassword />
-            </Route>
-          )}
-        </>
+      <Route exact path={path}>
+        <Stack direction="row">
+          <Box
+            component="nav"
+            sx={{ width: { sm: drawerWidth, flexShrink: { sm: 0 } } }}
+            aria-label="account details"
+          >
+            <Drawer
+              variant="temporary"
+              anchor="left"
+              open={appStore.shouldOpenAccountsDrawer}
+              onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              ModalProps={{
+                keepMounted: true, // Better open performance on mobile.
+              }}
+              sx={{
+                display: { xs: 'block', sm: 'none' },
+              }}
+            >
+              {drawer}
+            </Drawer>
+            <Drawer
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              variant="permanent"
+              open
+              sx={{
+                display: { xs: 'none', sm: 'block' },
+              }}
+            >
+              {drawer}
+            </Drawer>
+          </Box>
+          <Box component="main" sx={{ flex: 1 }}>
+            {renderTab()}
+          </Box>
+        </Stack>
+      </Route>
+      {!profileStore.social && (
+        <Route path={`${path}/change-password`}>
+          <ChangePassword />
+        </Route>
       )}
     </Switch>
   );

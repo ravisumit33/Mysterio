@@ -93,7 +93,7 @@ function TrendingGroupRooms(props) {
                 paragraph
                 sx={{ hyphens: 'auto', textOverflow: 'ellipsis', overflow: 'hidden' }}
               >
-                {room.description}
+                {room.room_data.description}
               </Typography>
             </CardContent>
             <CardActions>

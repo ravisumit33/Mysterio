@@ -8,6 +8,7 @@ import { appStore, profileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';
 import { RoomType } from 'appConstants';
+import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import CenterPaper from './CenterPaper';
 import BasicInfo from './BasicInfo';
 
@@ -46,8 +47,7 @@ function NewRoom() {
     error: false,
   });
 
-  const { showWaitScreen, setShouldShowWaitScreen, addChatWindow, showAlert, setShouldShowAlert } =
-    appStore;
+  const { showWaitScreen, setShouldShowWaitScreen, showAlert, setShouldShowAlert } = appStore;
 
   const handleCreateRoom = () => {
     if (!avatarUrl) {
@@ -94,19 +94,10 @@ function NewRoom() {
           .then((response) => {
             setShouldShowAlert(false);
             const responseData = response.data;
-            const chatWindowData = {
-              // @ts-ignore
-              roomId: responseData.id,
-              // @ts-ignore
-              name: responseData.name,
-              // @ts-ignore
-              description: responseData.description,
-              password: roomPwd,
-              avatarUrl: url,
-              isGroupRoom: true,
-            };
-            addChatWindow(chatWindowData);
-            history.push('/chat');
+            // @ts-ignore
+            const { id: roomId } = responseData;
+            updateStoredChatWindowData(RoomType.GROUP, roomId, { password: roomPwd });
+            history.push(`/chat/${RoomType.GROUP}/${roomId}/`);
           })
           .catch((response) => {
             const responseData = response.data;

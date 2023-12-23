@@ -56,7 +56,7 @@ function AppAlert() {
         open={shouldShowAlert}
         autoHideDuration={5000}
         onClose={() => setShouldShowAlert(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert
           onClose={() => setShouldShowAlert(false)}

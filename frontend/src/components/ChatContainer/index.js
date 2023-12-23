@@ -11,10 +11,10 @@ import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
 import notFoundJson from 'assets/animations/not-found.json';
-import { useStoredChatWindowData } from 'hooks';
 import { RoomType } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
+import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 import RoomPasswordDialog from './RoomPasswordDialog';
@@ -42,36 +42,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const InitializationStatus = Object.freeze({
-  INITIALIZING: 0,
-  PASSWORD_DIALOG_OPEN: 1,
-  INITIALIZED: 2,
-});
-
 function ChatContainer() {
   const { chatWindow } = appStore;
   const { pathname } = useLocation();
   const history = useHistory();
-  const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
-  const ongoingChatMatch = pathname.match(ongoingChatRegex);
-  let roomId;
-  let roomType;
-  if (ongoingChatMatch) {
-    ({ roomId, roomType } = ongoingChatMatch.groups);
-  } else {
-    roomType = '';
-    roomId = '';
-  }
-  const [storedChatWindowData] = useStoredChatWindowData(roomType, roomId);
-  const [initializationStatus, setInitializationStatus] = useState(
-    InitializationStatus.INITIALIZING
-  );
+  const [initializating, setInitializating] = useState(true);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
 
   const startChat = (chatWindowData) => {
     appStore.addChatWindow(chatWindowData);
-    // @ts-ignore
-    setInitializationStatus(InitializationStatus.INITIALIZED);
+    setInitializating(false);
   };
 
   useEffect(() => {
@@ -84,20 +64,23 @@ function ChatContainer() {
        */
       const shouldReInitialize = isChatUrl && !pathname.match(/^\/chat\/match\/$/);
       if (shouldReInitialize && newPathname !== pathname) {
-        setInitializationStatus(InitializationStatus.INITIALIZING);
+        setInitializating(true);
       }
     });
     return () => unlisten();
   }, [history, pathname]);
 
   useEffect(() => {
-    if (initializationStatus === InitializationStatus.INITIALIZING) {
-      // ChatContainer initializes chatWindow in appStore with the data stored in localStorage (overwrites old stale chatwindow).
+    if (initializating) {
+      // ChatContainer initializes chatWindow in appStore with the stored data (overwrites old stale chatwindow).
+      const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
+      const ongoingChatMatch = pathname.match(ongoingChatRegex);
       if (ongoingChatMatch) {
+        const { roomType, roomId } = ongoingChatMatch.groups;
         if (Object.values(RoomType).includes(roomType)) {
           const isGroupRoom = roomType === RoomType.GROUP;
           const chatWindowData = {
-            ...storedChatWindowData,
+            ...getStoredChatWindowData(roomType, roomId),
             roomId,
             isGroupRoom,
           };
@@ -106,12 +89,11 @@ function ChatContainer() {
               .then((response) => {
                 const {
                   // @ts-ignore
-                  data: { is_protected: isProtected },
+                  data: { is_protected: isProtected, name, avatar_url: avatarUrl },
                 } = response;
                 if (isProtected) {
+                  updateStoredChatWindowData(roomType, roomId, { name, avatarUrl });
                   setShouldOpenRoomPasswordDialog(true);
-                  // @ts-ignore
-                  setInitializationStatus(InitializationStatus.PASSWORD_DIALOG_OPEN);
                 } else {
                   startChat(chatWindowData);
                 }
@@ -122,8 +104,7 @@ function ChatContainer() {
                   text: 'Error occured while connecting to server.',
                   severity: 'error',
                 });
-                // @ts-ignore
-                setInitializationStatus(InitializationStatus.INITIALIZED);
+                setInitializating(false);
                 appStore.removeChatWindow(); // Remove chat window, if any.
               });
           } else {
@@ -138,15 +119,7 @@ function ChatContainer() {
         }
       }
     }
-  }, [
-    history,
-    initializationStatus,
-    ongoingChatMatch,
-    pathname,
-    roomId,
-    roomType,
-    storedChatWindowData,
-  ]);
+  }, [initializating, pathname]);
   const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
   const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));
@@ -195,11 +168,9 @@ function ChatContainer() {
       </Box>
     );
 
-  // @ts-ignore
-  const shouldRender = initializationStatus === InitializationStatus.INITIALIZED;
   return (
     <>
-      {!shouldRender ? <WaitScreen shouldOpen={!shouldRender} /> : render()}
+      {initializating ? <WaitScreen shouldOpen={initializating} /> : render()}
       <RoomPasswordDialog
         handleStartChat={startChat}
         shouldOpen={shouldOpenRoomPasswordDialog}

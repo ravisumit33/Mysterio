@@ -9,12 +9,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Stack,
   TextField,
+  Typography,
 } from '@mui/material';
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { RoomType } from 'appConstants';
 import { useStoredChatWindowData } from 'hooks';
+import CustomAvatar from 'components/Avatar';
 
 function RoomPasswordDialog(props) {
   const { shouldOpen, setShouldOpen, handleStartChat } = props;
@@ -84,20 +87,34 @@ function RoomPasswordDialog(props) {
         }}
       >
         <DialogContent>
-          <DialogContentText>This room is protected with a password</DialogContentText>
-          <TextField
-            autoFocus
-            label="Password"
-            size="small"
-            fullWidth
-            value={selectedRoomPassword}
-            onChange={(evt) => setSelectedRoomPassword(evt.target.value)}
-            required
-            helperText={protectedRoomPasswordFieldData.help_text}
-            error={protectedRoomPasswordFieldData.error}
-            InputProps={{ type: 'password' }}
-            inputProps={{ maxLength: 20 }}
-          />
+          <Stack spacing={1}>
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              sx={{ mb: 2 }}
+              spacing={1}
+            >
+              <CustomAvatar avatarUrl={chatWindowData.avatarUrl} name={chatWindowData.name} />
+              <Typography variant="h5" noWrap>
+                {chatWindowData.name}
+              </Typography>
+            </Stack>
+            <DialogContentText>This room is protected with a password</DialogContentText>
+            <TextField
+              autoFocus
+              label="Password"
+              size="small"
+              fullWidth
+              value={selectedRoomPassword}
+              onChange={(evt) => setSelectedRoomPassword(evt.target.value)}
+              required
+              helperText={protectedRoomPasswordFieldData.help_text}
+              error={protectedRoomPasswordFieldData.error}
+              InputProps={{ type: 'password' }}
+              inputProps={{ maxLength: 20 }}
+            />
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button color="secondary" onClick={() => history.push('/')}>

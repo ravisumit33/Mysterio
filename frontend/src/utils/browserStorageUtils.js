@@ -23,6 +23,12 @@ const setValue = (key, value) => {
   }
 };
 
+const getStoredChatWindowData = (roomType, roomId) => {
+  const storageKey = BrowserStorageKeys.chatWindowData;
+  const chatWindowData = getValue(storageKey, {});
+  return chatWindowData[roomType]?.[roomId] || {};
+};
+
 const updateStoredChatWindowData = (roomType, roomId, updateFields) => {
   const storageKey = BrowserStorageKeys.chatWindowData;
   const chatWindowData = getValue(storageKey, {});
@@ -48,6 +54,7 @@ const deleteStoredChatWindowData = (roomType, roomId) => {
 export {
   getValue as getValueFromBrowserStorage,
   setValue as setValueInBrowserStorage,
+  getStoredChatWindowData,
   updateStoredChatWindowData,
   deleteStoredChatWindowData,
 };

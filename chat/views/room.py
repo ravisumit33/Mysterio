@@ -49,8 +49,14 @@ class RoomViewSet(viewsets.ModelViewSet):
         action for checking if room is protected
         """
         group_room = self.get_object()
+        room_data = group_room.room_data
         return Response(
-            {"is_protected": group_room.room_data.is_protected}, status=status.HTTP_200_OK
+            {
+                "is_protected": room_data.is_protected,
+                "name": room_data.name,
+                "avatar_url": room_data.avatar_url,
+            },
+            status=status.HTTP_200_OK,
         )
 
     @action(methods=["get"], detail=True, permission_classes=[AllowAny])

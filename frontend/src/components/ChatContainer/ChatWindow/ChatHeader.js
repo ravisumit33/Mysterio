@@ -50,6 +50,7 @@ function ChatHeader() {
     appStore.showWaitScreen('Deleting Room');
     fetchUrl(`/api/chat/rooms/${roomId}/`, {
       method: 'delete',
+      headers: { 'X-Room-Password': roomInfo.password },
     })
       .then(() => {
         appStore.removeChatWindow();

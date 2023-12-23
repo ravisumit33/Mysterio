@@ -1,15 +1,24 @@
-import { BrowserStorageKeys } from 'appConstants';
-import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
-import useLocalStorage from './useLocalStorage';
+import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
 
 const useStoredChatWindowData = (roomType, roomId) => {
-  const [storedChatWindowData] = useLocalStorage(BrowserStorageKeys.chatWindowData, {});
-  const { [roomType]: roomData } = storedChatWindowData;
-  const { [roomId]: chatWindowData } = roomData || {};
+  /**
+   * Format of storedChatWindowData:
+   * {
+   *  [roomType]: {
+   *     [roomId]: {
+   *       name: string,
+   *       avatarUrl: string,
+   *       password: string,
+   *     },
+   *     ...
+   *   },
+   *   ...
+   * }
+   */
   const storeChatWindowData = (newChatWindowData) => {
     updateStoredChatWindowData(roomType, roomId, newChatWindowData);
   };
-  return [chatWindowData, storeChatWindowData];
+  return [getStoredChatWindowData(roomType, roomId), storeChatWindowData];
 };
 
 export default useStoredChatWindowData;

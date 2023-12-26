@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { alpha, Box, Button, LinearProgress, Stack, Typography } from '@mui/material';
+import { alpha, Box, Button, LinearProgress, Stack, Typography, useTheme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
@@ -84,6 +84,7 @@ function ChatWindow(props) {
   const classes = useStyles({ chatStatus });
   const { pathname } = useLocation();
   const history = useHistory();
+  const theme = useTheme();
   const ongoingChatUrl = `/chat/${roomType}/${roomId}/`;
   const shouldRedirect = initDone && pathname !== ongoingChatUrl;
   useEffect(() => {
@@ -189,7 +190,8 @@ function ChatWindow(props) {
           waitScreenText={roomId ? 'Entering room' : 'Finding your match'}
         />
         {initDone && (
-          <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+          <Box sx={{ flexGrow: 1, flexBasis: theme.spacing(15) }}>
+            {/* Setting flex-basis prevents message box to get completely hidden when keyboard and video player both are opened on some mobile devices */}
             <RouteLeavingGuard
               when={[ChatStatus.ONGOING, ChatStatus.RECONNECTING].includes(chatStatus)}
               dialogProps={{

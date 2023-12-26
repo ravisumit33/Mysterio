@@ -10,7 +10,7 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => {
   const borderRadius = theme.spacing(2.5);
-  const avatarSize = theme.spacing(5);
+  const avatarSize = theme.spacing(4.5);
   return {
     avatar: {
       width: avatarSize,
@@ -98,6 +98,7 @@ function ChatMessage({ message, sender, side, first, last }) {
               [classes[`${side}Last`]]: last,
             })}
             component="pre"
+            variant="body2"
           >
             {message.trim()}
           </Typography>

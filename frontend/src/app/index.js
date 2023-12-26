@@ -92,7 +92,7 @@ function App() {
       <Stack className={classes.root}>
         <Alert />
         <AppWait />
-        <NavBar />
+        {!/\/chat.*/.test(pathname) && <NavBar />}
         <UserInfoDialog />
         <Switch>
           <Route exact path="/">

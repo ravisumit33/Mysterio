@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Avatar, Box, Button, Stack, TextField, useTheme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { generateRandomColor, resizeImg } from 'utils';
 import { Face } from '@mui/icons-material';
+import CustomAvatar from 'components/Avatar';
+import { generateRandomColor, resizeImg } from 'utils';
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -47,7 +48,7 @@ function BasicInfo(props) {
     <Stack spacing={2}>
       <Box sx={{ alignSelf: 'center' }}>
         {avatarUrl ? (
-          <Avatar className={classes.avatar} alt={name} src={avatarUrl} />
+          <CustomAvatar className={classes.avatar} name={name} avatarUrl={avatarUrl} />
         ) : (
           <Avatar className={classes.avatar}>
             <DefaultIcon />

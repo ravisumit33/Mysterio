@@ -15,7 +15,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Menu as MenuIcon, AccountCircle, ExitToApp } from '@mui/icons-material';
+import { Menu as MenuIcon, AccountCircle, Logout, Login } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
@@ -70,16 +70,16 @@ function NavBar() {
     appStore.setShouldOpenAccountsDrawer(!appStore.shouldOpenAccountsDrawer);
   };
 
-  const { email, avatarUrl } = profileStore;
+  const { name, avatarUrl } = profileStore;
   const avatarIcon = useMemo(
     () => (
       <Avatar
-        name={email}
+        name={name}
         avatarUrl={avatarUrl}
         className={shouldShowHamburger ? classes.smallAvatar : classes.largeAvatar}
       />
     ),
-    [avatarUrl, classes.largeAvatar, classes.smallAvatar, email, shouldShowHamburger]
+    [avatarUrl, classes.largeAvatar, classes.smallAvatar, name, shouldShowHamburger]
   );
 
   const accountCircleIcon = useMemo(
@@ -132,7 +132,8 @@ function NavBar() {
     },
   ];
 
-  const logoutIcon = useMemo(() => <ExitToApp />, []);
+  const logoutIcon = useMemo(() => <Logout />, []);
+  const loginIcon = useMemo(() => <Login />, []);
   const accountNavbarButtons = [];
   if (profileStore.isLoggedIn) {
     accountNavbarButtons.push({
@@ -159,6 +160,19 @@ function NavBar() {
               })
             )
             .finally(() => appStore.setShouldShowWaitScreen(false));
+        },
+      },
+    });
+  } else {
+    accountNavbarButtons.push({
+      type: 'icon',
+      data: {
+        key: 'login',
+        text: 'Login',
+        icon: loginIcon,
+        action: () => {
+          setHamburgerTriggerElement(null);
+          history.push({ pathname: '/login', state: { from: location } });
         },
       },
     });
@@ -199,13 +213,7 @@ function NavBar() {
   ));
   const hamburgerMenu = (
     <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-      <IconButton
-        edge="start"
-        color="inherit"
-        aria-label="menu"
-        onClick={handleHamburgerClick}
-        size="large"
-      >
+      <IconButton color="inherit" aria-label="menu" onClick={handleHamburgerClick} size="large">
         <MenuIcon />
       </IconButton>
       <Menu
@@ -234,7 +242,7 @@ function NavBar() {
           />
         )}
         <Container>
-          <Stack direction="row" alignItems="center">
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
             {atAccountPage && (
               <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
                 <IconButton
@@ -252,7 +260,7 @@ function NavBar() {
                 Mysterio
               </Typography>
             </RouterLink>
-            <Stack direction="row" sx={{ ml: 'auto' }} alignItems="center">
+            <Stack direction="row" alignItems="center">
               {navbarMenu}
               {hamburgerMenu}
             </Stack>

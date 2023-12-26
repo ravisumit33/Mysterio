@@ -15,7 +15,15 @@ import * as serviceWorker from './serviceWorker';
 
 configure({ isolateGlobalState: true });
 
-let theme = createTheme();
+let theme = createTheme({
+  components: {
+    MuiUseMediaQuery: {
+      defaultProps: {
+        noSsr: true,
+      },
+    },
+  },
+});
 theme = responsiveFontSizes(theme);
 
 const renderReactDom = () => {

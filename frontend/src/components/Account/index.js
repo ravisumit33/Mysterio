@@ -20,7 +20,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { AccountCircle, ExitToApp, Favorite, Edit } from '@mui/icons-material';
+import { AccountCircle, Logout, Favorite, Edit, Login } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
@@ -99,7 +99,7 @@ function Account() {
             </ListItemButton>
           ))}
         </List>
-        {profileStore.isLoggedIn && (
+        {profileStore.isLoggedIn ? (
           <List>
             <ListItemButton
               onClick={() => {
@@ -122,9 +122,20 @@ function Account() {
               }}
             >
               <ListItemIcon>
-                <ExitToApp color="secondary" />
+                <Logout color="secondary" />
               </ListItemIcon>
               <ListItemText primary="Logout" primaryTypographyProps={{ color: 'secondary' }} />
+            </ListItemButton>
+          </List>
+        ) : (
+          <List>
+            <ListItemButton
+              onClick={() => history.push({ pathname: '/login', state: { from: location } })}
+            >
+              <ListItemIcon>
+                <Login color="secondary" />
+              </ListItemIcon>
+              <ListItemText primary="Login" primaryTypographyProps={{ color: 'secondary' }} />
             </ListItemButton>
           </List>
         )}

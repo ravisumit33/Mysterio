@@ -8,7 +8,6 @@ import {
   Typography,
   Stack,
   Container,
-  useMediaQuery,
   Box,
 } from '@mui/material';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -34,16 +33,6 @@ function Player() {
     updatePlayer,
   } = chatWindowStore;
   const { adminAccess } = roomInfo;
-  // @ts-ignore
-  const isScreenSmallerThanLg = useMediaQuery((theme) => theme.breakpoints.down('lg'));
-  // @ts-ignore
-  const isScreenSmallerThanMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
-  // @ts-ignore
-  const isScreenSmallerThanSm = useMediaQuery((theme) => theme.breakpoints.down('sm'));
-  const isXSmallScreen = isScreenSmallerThanSm;
-  const isSmallScreen = isScreenSmallerThanMd && !isXSmallScreen;
-  const isMediumScreen = isScreenSmallerThanLg && !isSmallScreen && !isXSmallScreen;
-
   const embedPlayerRef = useRef(null);
   const playerDataRef = useRef(null);
   if (
@@ -149,17 +138,8 @@ function Player() {
   const getEmbedPlayer = () => {
     switch (syncedPlayerData.name) {
       case PlayerName.YOUTUBE: {
-        let playerSize = 47;
-        if (isMediumScreen) {
-          playerSize = 38;
-        } else if (isSmallScreen) {
-          playerSize = 29;
-        } else if (isXSmallScreen) {
-          playerSize = 20;
-        }
         return (
           <YouTube
-            size={playerSize}
             onReady={onPlayerReady}
             onStateChange={(evt) => onPlayerStateChange(evt.data)}
             showControls={isHost}
@@ -178,11 +158,15 @@ function Player() {
 
   const darkModeTheme = useMemo(() => createTheme({ palette: { mode: 'dark' } }), []);
   return (
-    <Container maxWidth="md">
-      <Stack alignItems="stretch" sx={{ my: 2 }}>
+    <Container maxWidth="md" disableGutters>
+      <Stack alignItems="stretch" sx={{ mb: 0.5 }}>
         <StyledEngineProvider injectFirst>
           <ThemeProvider theme={darkModeTheme}>
-            {shouldShowPlayerActions && <PlayerActions />}
+            {shouldShowPlayerActions && (
+              <Box px={1} mt={1}>
+                <PlayerActions />
+              </Box>
+            )}
             {!syncedPlayerData && !adminAccess && (
               <Typography variant="h5" color="textSecondary" align="center">
                 No video. Only admin can play.
@@ -199,13 +183,14 @@ function Player() {
             )}
           </ThemeProvider>
         </StyledEngineProvider>
-        <Stack spacing={1} alignItems="center" sx={{ mt: 2 }}>
+        <Stack spacing={0.5} alignItems="center">
           {syncedPlayerData && (
             <Box
               onClick={() => {
                 !isHost &&
                   appStore.showAlert({ text: 'Only host can change video', severity: 'error' });
               }}
+              sx={{ width: '100%' }}
             >
               {getEmbedPlayer()}
             </Box>
@@ -217,6 +202,7 @@ function Player() {
                 color="secondary"
                 endIcon={<SyncIcon />}
                 onClick={() => handleSyncFromHost()}
+                size="small"
               >
                 Sync
               </Button>
@@ -228,6 +214,7 @@ function Player() {
                 setShouldOpenPlayer(false);
                 handlePlayerDelete();
               }}
+              size="small"
             >
               Close
             </Button>

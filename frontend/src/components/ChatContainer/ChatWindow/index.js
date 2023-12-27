@@ -164,6 +164,21 @@ function ChatWindow(props) {
   });
   const shouldDisplayLoadingMessage = isGroupChat && fetchingPreviousMessages;
 
+  const overlayContent = {
+    text: 'Disconnected',
+  };
+  if (!isGroupChat) {
+    overlayContent.text =
+      chatStatus === ChatStatus.NO_MATCH_FOUND
+        ? 'Looks like no one is online'
+        : `${chatWindowStore.name} left}`;
+    overlayContent.button = {
+      text: 'Find match again',
+      icon: <Replay />,
+      action: () => history.replace('/chat/match/'),
+    };
+  }
+
   return shouldRedirect ? (
     <WaitScreen
       className={classes.backdrop}
@@ -208,28 +223,27 @@ function ChatWindow(props) {
             />
           </Box>
         )}
-        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) &&
-          !isGroupChat && (
-            <Stack justifyContent="center" alignItems="center" className="overlay">
-              <Box className={classes.infoMsgBox}>
-                <Typography align="center" className={classes.regretMsg} variant="subtitle2">
-                  {chatStatus === ChatStatus.NO_MATCH_FOUND
-                    ? `Looks like no one is online`
-                    : `${chatWindowStore.name} left`}
-                  <span className="emoji"> &#128542;</span>
-                </Typography>
-              </Box>
+        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) && (
+          <Stack justifyContent="center" alignItems="center" className="overlay">
+            <Box className={classes.infoMsgBox}>
+              <Typography align="center" className={classes.regretMsg} variant="subtitle2">
+                {overlayContent.text}
+                <span className="emoji"> &#128542;</span>
+              </Typography>
+            </Box>
+            {overlayContent.button && (
               <Box mt={1}>
                 <Button
                   variant="contained"
-                  endIcon={<Replay />}
-                  onClick={() => history.replace('/chat/match/')}
+                  endIcon={overlayContent.button.icon}
+                  onClick={overlayContent.button.action}
                 >
-                  Find match again
+                  {overlayContent.button.text}
                 </Button>
               </Box>
-            </Stack>
-          )}
+            )}
+          </Stack>
+        )}
       </Stack>
       <InputBar />
     </Stack>

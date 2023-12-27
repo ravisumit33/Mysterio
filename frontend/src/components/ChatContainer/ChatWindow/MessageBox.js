@@ -14,7 +14,7 @@ const useStyles = makeStyles((theme) => ({
     ...([ChatStatus.ENDED, ChatStatus.NO_MATCH_FOUND, ChatStatus.RECONNECTING].includes(
       chatStatus
     ) && {
-      opacity: 0.5,
+      opacity: 0.3,
     }),
     width: '100%',
     height: '100%',

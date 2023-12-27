@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
@@ -33,6 +33,24 @@ function UserForm(props) {
     help_text: passwordHelpText,
     error: false,
   });
+
+  const shouldRegisterRef = useRef(shouldRegister);
+  useEffect(() => {
+    if (shouldRegisterRef.current !== shouldRegister) {
+      setEmail('');
+      setPassword('');
+      setEmailFieldData({
+        help_text: '',
+        error: false,
+      });
+      setPasswordFieldData({
+        help_text: passwordHelpText,
+        error: false,
+      });
+      setShouldUnmaskPassword(false);
+      shouldRegisterRef.current = shouldRegister;
+    }
+  }, [passwordHelpText, shouldRegister]);
 
   const handleFormSubmit = () => {
     const endPoint = shouldRegister ? '/api/account/registration/' : '/api/account/login/';
@@ -111,23 +129,15 @@ function UserForm(props) {
         <Box>
           <Typography variant="h6">{shouldRegister ? 'Create account' : 'Login'}</Typography>
           <Typography variant="body1" color="textSecondary">
-            {shouldRegister ? (
-              'You will be given admin rights of rooms that you create.'
-            ) : (
-              <>
-                New user?
-                <RouterLink to={{ pathname: '/register', state: { from } }} tabIndex={-1}>
-                  <Button
-                    color="primary"
-                    variant="text"
-                    size="small"
-                    sx={{ textTransform: 'none' }}
-                  >
-                    Create an account
-                  </Button>
-                </RouterLink>
-              </>
-            )}
+            {shouldRegister ? 'Already have an account?' : 'New user?'}
+            <RouterLink
+              to={{ pathname: shouldRegister ? 'login' : '/register', state: { from } }}
+              tabIndex={-1}
+            >
+              <Button color="primary" variant="text" size="small" sx={{ textTransform: 'none' }}>
+                {shouldRegister ? 'Login' : 'Create an account'}
+              </Button>
+            </RouterLink>
           </Typography>
         </Box>
         <TextField

@@ -1,13 +1,13 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  Box,
+  CircularProgress,
   IconButton,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
+  Snackbar,
   Stack,
   Tooltip,
+  Typography,
+  useTheme,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -33,7 +33,12 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
   infoWindow: {
-    maxWidth: '70%',
+    maxWidth: '60%',
+    padding: theme.spacing(1, 0),
+  },
+  snackbarContentRoot: {
+    flexGrow: 'initial',
+    minWidth: 'unset',
   },
 }));
 
@@ -43,6 +48,7 @@ function ChatHeader() {
   const { name, avatarUrl, chatStatus, roomInfo, toggleLikeRoom } = chatWindowStore;
   const { roomId, isFavorite } = roomInfo;
   const history = useHistory();
+  const theme = useTheme();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
 
@@ -98,6 +104,16 @@ function ChatHeader() {
     []
   );
 
+  const ReconnectingMessage = useMemo(
+    () => (
+      <Stack direction="row" justifyContent="center" alignItems="center" spacing={3}>
+        <Typography variant="body2">Reconnecting...</Typography>
+        <CircularProgress color="inherit" size={theme.spacing(2.5)} />
+      </Stack>
+    ),
+    [theme]
+  );
+
   const individualChatIcons = useMemo(() => {
     const handleReconnect = () => history.replace('/chat/match/');
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
@@ -146,16 +162,19 @@ function ChatHeader() {
 
   return (
     <>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Box className={classes.infoWindow}>
-          <ListItem disableGutters>
-            <ListItemAvatar>
-              <CustomAvatar name={name} avatarUrl={avatarUrl} />
-            </ListItemAvatar>
-            <ListItemText primary={name} primaryTypographyProps={{ variant: 'h5', noWrap: true }} />
-          </ListItem>
-        </Box>
-        <Stack direction="row">
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        className={classes.root}
+      >
+        <Stack direction="row" alignItems="center" spacing={1} className={classes.infoWindow}>
+          <CustomAvatar name={name} avatarUrl={avatarUrl} />
+          <Typography variant="h5" noWrap sx={{ ml: 1 }}>
+            {name}
+          </Typography>
+        </Stack>
+        <Stack direction="row" alignItems="center">
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
           <Tooltip
             title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
@@ -186,6 +205,12 @@ function ChatHeader() {
         onConfirm={handleDeleteRoom}
         title="Delete this room?"
         description="This will permanently delete this room and all its messages."
+      />
+      <Snackbar
+        open={chatStatus === ChatStatus.RECONNECTING}
+        message={ReconnectingMessage}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        ContentProps={{ classes: { root: classes.snackbarContentRoot } }}
       />
     </>
   );

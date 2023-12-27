@@ -171,7 +171,7 @@ function ChatWindow(props) {
     overlayContent.text =
       chatStatus === ChatStatus.NO_MATCH_FOUND
         ? 'Looks like no one is online'
-        : `${chatWindowStore.name} left}`;
+        : `${chatWindowStore.name} left`;
     overlayContent.button = {
       text: 'Find match again',
       icon: <Replay />,

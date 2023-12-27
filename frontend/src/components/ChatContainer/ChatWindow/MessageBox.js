@@ -1,12 +1,12 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import clsx from 'clsx';
 import { ChatWindowStoreContext } from 'contexts';
 import { Virtuoso } from 'react-virtuoso';
 import { alpha, Badge, Box, IconButton, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType } from 'appConstants';
 import { useGoToBottom } from 'hooks';
+import { KeyboardDoubleArrowDown } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
@@ -20,7 +20,6 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
   }),
   bottomButton: {
-    fontSize: '2rem',
     color: theme.palette.common.black,
     backgroundColor: alpha(theme.palette.common.white, 0.8),
     borderRadius: '50%',
@@ -43,6 +42,30 @@ function MessageBox(props) {
   };
   const totalMessageCount = chatMessages.length;
 
+  const bottomButton = useMemo(
+    () => (
+      <Tooltip title="Go to bottom" arrow>
+        <IconButton
+          onClick={() => {
+            messageListRef.current.scrollToIndex({
+              index: chatMessages.length - 1,
+              align: 'end',
+            });
+          }}
+          sx={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
+          size="large"
+        >
+          <Badge color="secondary" badgeContent={unreadMessagesCount}>
+            <span className={classes.bottomButton}>
+              <KeyboardDoubleArrowDown fontSize="large" sx={{ verticalAlign: 'middle' }} />
+            </span>
+          </Badge>
+        </IconButton>
+      </Tooltip>
+    ),
+    [chatMessages.length, classes.bottomButton, unreadMessagesCount]
+  );
+
   return (
     <Box className={classes.messageBox}>
       <Virtuoso
@@ -58,26 +81,7 @@ function MessageBox(props) {
         atBottomStateChange={setAtBottom}
         ref={messageListRef}
       />
-      {showBottomButton && (
-        <Tooltip title="Go to bottom" arrow>
-          <IconButton
-            onClick={() => {
-              messageListRef.current.scrollToIndex({
-                index: chatMessages.length - 1,
-                align: 'end',
-              });
-            }}
-            sx={{ float: 'right', transform: 'translate(-0.25rem, -3.5rem)' }}
-            size="large"
-          >
-            <Badge color="secondary" badgeContent={unreadMessagesCount}>
-              <span className={clsx('material-icons', classes.bottomButton)}>
-                keyboard_double_arrow_down
-              </span>
-            </Badge>
-          </IconButton>
-        </Tooltip>
-      )}
+      {showBottomButton && bottomButton}
     </Box>
   );
 }

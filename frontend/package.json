@@ -8,6 +8,7 @@
     "@mui/lab": "^5.0.0-alpha.131",
     "@mui/material": "^5.13.2",
     "@mui/styles": "^5.13.2",
+    "@sentry/react": "^7.91.0",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",

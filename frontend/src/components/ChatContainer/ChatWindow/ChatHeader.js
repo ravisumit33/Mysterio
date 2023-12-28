@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
   infoWindow: {
-    maxWidth: '60%',
+    maxWidth: '60%', // maxWidth is required to prevent the name from overflowing and converting to ellipsis
     padding: theme.spacing(1, 0),
   },
   snackbarContentRoot: {

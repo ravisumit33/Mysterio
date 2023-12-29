@@ -33,6 +33,7 @@ Notification.propTypes = {
     animationData: PropTypes.shape({}).isRequired,
     width: PropTypes.number,
     height: PropTypes.number,
+    loop: PropTypes.bool,
   }).isRequired,
   title: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,

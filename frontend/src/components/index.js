@@ -8,6 +8,7 @@ import Alert from './Alert';
 import AppWait from './AppWait';
 import UserInfoDialog from './UserInfoDialog';
 import NewRoom from './NewRoom';
+import ErrorUI from './ErrorUI';
 
 export {
   NavBar,
@@ -20,4 +21,5 @@ export {
   AppWait,
   UserInfoDialog,
   NewRoom,
+  ErrorUI,
 };

@@ -16,6 +16,7 @@ import * as serviceWorker from './serviceWorker';
 
 Sentry.init({
   dsn: 'https://bd165b82599a66309dcff63b9139eb26@o4505268225048576.ingest.sentry.io/4506473412362240',
+  environment: process.env.NODE_ENV,
   integrations: [
     new Sentry.BrowserTracing({
       // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled

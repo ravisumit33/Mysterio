@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import log from 'loglevel';
+import * as Sentry from '@sentry/react';
 import { Switch, Route, useLocation } from 'react-router-dom';
 import { Box, CssBaseline, Stack } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -14,6 +15,7 @@ import {
   Account,
   AppWait,
   NewRoom,
+  ErrorUI,
 } from 'components';
 import { fetchUrl, isCordovaEnv, isDevEnv } from 'utils';
 import { profileStore } from 'stores';
@@ -88,37 +90,39 @@ function App() {
   }, []);
 
   return (
-    <CssBaseline>
-      <Stack className={classes.root}>
-        <Alert />
-        <AppWait />
-        {!/\/chat.*/.test(pathname) && <NavBar />}
-        <UserInfoDialog />
-        <Switch>
-          <Route exact path="/">
-            <Home />
-            <Footer />
-          </Route>
-          <Route path="/login">
-            <Auth />
-          </Route>
-          <Route path="/register">
-            <Auth shouldRegister />
-          </Route>
-          <Route path="/account">
-            <Account />
-          </Route>
-          <Route path="/chat">
-            <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
-              <ChatContainer />
-            </Box>
-          </Route>
-          <Route path="/room">
-            <NewRoom />
-          </Route>
-        </Switch>
-      </Stack>
-    </CssBaseline>
+    <Sentry.ErrorBoundary fallback={<ErrorUI />}>
+      <CssBaseline>
+        <Stack className={classes.root}>
+          <Alert />
+          <AppWait />
+          {!/\/chat.*/.test(pathname) && <NavBar />}
+          <UserInfoDialog />
+          <Switch>
+            <Route exact path="/">
+              <Home />
+              <Footer />
+            </Route>
+            <Route path="/login">
+              <Auth />
+            </Route>
+            <Route path="/register">
+              <Auth shouldRegister />
+            </Route>
+            <Route path="/account">
+              <Account />
+            </Route>
+            <Route path="/chat">
+              <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+                <ChatContainer />
+              </Box>
+            </Route>
+            <Route path="/room">
+              <NewRoom />
+            </Route>
+          </Switch>
+        </Stack>
+      </CssBaseline>
+    </Sentry.ErrorBoundary>
   );
 }
 

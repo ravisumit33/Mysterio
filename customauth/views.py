@@ -27,7 +27,7 @@ def delete_user(request):
 
 class VerifyEmailView(View):
     """
-    GET request to take user to site for verification
+    GET request to take user to site for email verification
     """
 
     def get(self, request, key=None):
@@ -35,3 +35,15 @@ class VerifyEmailView(View):
         if not key:
             HttpResponseBadRequest()
         return HttpResponseRedirect(f"/account/confirm-email/{key}")
+
+
+class ResetPasswordView(View):
+    """
+    GET request to take user to site for password reset
+    """
+
+    def get(self, request, uid=None, token=None):
+        """Redirect to frontend"""
+        if not uid or not token:
+            HttpResponseBadRequest()
+        return HttpResponseRedirect(f"/account/reset-password/{uid}/{token}")

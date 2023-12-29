@@ -29,6 +29,9 @@ import Profile from './Profile';
 import ChangePassword from './ChangePassword';
 import ConfirmationEmailSent from './ConfirmationEmailSent';
 import ConfirmEmail from './ConfirmEmail';
+import ResetPasswordEmailSent from './ResetPasswordEmailSent';
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 
 const drawerWidth = 240;
 
@@ -176,8 +179,17 @@ function Account() {
       <Route path={`${path}/confirmation-email-sent`}>
         <ConfirmationEmailSent />
       </Route>
+      <Route path={`${path}/reset-password-email-sent`}>
+        <ResetPasswordEmailSent />
+      </Route>
       <Route path={`${path}/confirm-email/:key`}>
         <ConfirmEmail />
+      </Route>
+      <Route path={`${path}/forgot-password`}>
+        <ForgotPassword />
+      </Route>
+      <Route path={`${path}/reset-password/:userId/:key`}>
+        <ResetPassword />
       </Route>
       <Route exact path={path}>
         <Stack direction="row">

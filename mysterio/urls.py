@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.generic.base import TemplateView
 
-from customauth.views import VerifyEmailView
+from customauth.views import ResetPasswordView, VerifyEmailView
 
 urlpatterns = [
     path("api/chat/", include("chat.urls", "chat")),
@@ -29,12 +29,18 @@ urlpatterns = [
         "robots.txt",
         TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
     ),
-    # allauth requires following url name in global namespace
+    ### dj_rest_auth/allauth requires following url name in global namespace ###
     # "account_confirm_email" for reverse resolving requests for email verification
     re_path(
         r"^confirm-email/(?P<key>[-:\w]+)/$",
         VerifyEmailView.as_view(),
         name="account_confirm_email",
+    ),
+    # "password_reset_confirm" for reverse resolving requests for password reset
+    path(
+        "reset-password/<uid>/<token>/",
+        ResetPasswordView.as_view(),
+        name="password_reset_confirm",
     ),
     path("", include("core.urls", "core")),
 ]

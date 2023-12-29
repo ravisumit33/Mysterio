@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
 import {
@@ -19,6 +19,7 @@ import { appStore, profileStore } from 'stores';
 function UserForm(props) {
   const { shouldRegister, from } = props;
   const history = useHistory();
+  const location = useLocation();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -180,9 +181,23 @@ function UserForm(props) {
           }}
           autoComplete={shouldRegister ? 'new-password' : 'current-password'}
         />
-        <Button type="submit" color="primary" sx={{ alignSelf: 'flex-end' }}>
-          {shouldRegister ? 'Continue' : 'Login'}
-        </Button>
+        <Stack direction="row-reverse" justifyContent="space-between" alignItems="center">
+          <Button type="submit" color="primary">
+            {shouldRegister ? 'Continue' : 'Login'}
+          </Button>
+          {!shouldRegister && (
+            <RouterLink
+              to={{
+                pathname: '/account/forgot-password',
+                state: { from: location },
+              }}
+            >
+              <Button color="primary" variant="text" size="small" sx={{ textTransform: 'none' }}>
+                Forgot Password?
+              </Button>
+            </RouterLink>
+          )}
+        </Stack>
       </Stack>
     </form>
   );

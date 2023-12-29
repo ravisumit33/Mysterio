@@ -79,6 +79,7 @@ FRONTEND_ROUTES = [
     "account/",
     "chat/",
     "account/confirm-email/(?P<key>[-:\w]+)/",
+    "account/reset-password/(?P<uid>.+)/(?P<token>.+)/",
 ]
 
 

@@ -8,6 +8,7 @@ const useStyles = makeStyles(() => ({
   waitScreen: {
     position: 'absolute',
     zIndex: 1,
+    height: '100vh',
   },
 }));
 

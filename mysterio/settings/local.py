@@ -63,5 +63,5 @@ SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"] = timedelta(minutes=60)
 # Cors headers configurations
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    "x-group-password",
+    "x-room-password",
 ]

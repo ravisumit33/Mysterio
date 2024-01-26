@@ -15,7 +15,7 @@ import { ChatWindowStoreContext } from 'contexts';
 import { createDeferredPromiseObj } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
-import { useGetPlayer, useHandlePlayer } from 'hooks';
+import { useGetPlayer, useHandlePlayer, useSearchParams } from 'hooks';
 import RouterLink from 'components/RouterLink';
 import { appStore, profileStore } from 'stores';
 import YouTube from './YouTube';
@@ -24,14 +24,9 @@ import PlayerActions from './PlayerActions';
 function Player() {
   const location = useLocation();
   const chatWindowStore = useContext(ChatWindowStoreContext);
-  const {
-    roomInfo,
-    syncedPlayerData,
-    isHost,
-    setShouldOpenPlayer,
-    handlePlayerDelete,
-    updatePlayer,
-  } = chatWindowStore;
+  const { roomInfo, syncedPlayerData, isHost, updatePlayer, syncPlayer, handlePlayerDelete } =
+    chatWindowStore;
+  const [searchParams, setSearchParams] = useSearchParams();
   const { adminAccess } = roomInfo;
   const embedPlayerRef = useRef(null);
   const playerDataRef = useRef(null);
@@ -44,6 +39,11 @@ function Player() {
       playerName: syncedPlayerData.name,
     };
   }
+
+  useEffect(() => {
+    syncPlayer();
+    return () => handlePlayerDelete();
+  }, [handlePlayerDelete, syncPlayer]);
 
   const setEmbedPlayer = useCallback((player) => {
     embedPlayerRef.current = player;
@@ -163,18 +163,18 @@ function Player() {
         <StyledEngineProvider injectFirst>
           <ThemeProvider theme={darkModeTheme}>
             {shouldShowPlayerActions && (
-              <Box px={1} mt={1}>
+              <Box px={1} mt={2}>
                 <PlayerActions />
               </Box>
             )}
             {!syncedPlayerData && !adminAccess && (
-              <Typography variant="h5" color="textSecondary" align="center">
-                No video. Only admin can play.
+              <Typography variant="h5" color="textSecondary" align="center" mt={2}>
+                {'No video. Only admin can play. '}
                 {!profileStore.isLoggedIn && (
                   <>
-                    If you have admin rights,
+                    {'If you have admin rights, '}
                     <RouterLink to={{ pathname: '/login', state: { from: location } }}>
-                      login
+                      {'login '}
                     </RouterLink>
                     and try again.
                   </>
@@ -183,7 +183,7 @@ function Player() {
             )}
           </ThemeProvider>
         </StyledEngineProvider>
-        <Stack spacing={0.5} alignItems="center">
+        <Stack spacing={0.5} mt={1} alignItems="center">
           {syncedPlayerData && (
             <Box
               onClick={() => {
@@ -211,8 +211,10 @@ function Player() {
               variant="contained"
               color="secondary"
               onClick={() => {
-                setShouldOpenPlayer(false);
-                handlePlayerDelete();
+                const newUrlSearchParams = new URLSearchParams(searchParams.toString());
+                newUrlSearchParams.delete('playerOpen');
+                // @ts-ignore
+                setSearchParams(newUrlSearchParams);
               }}
               size="small"
             >

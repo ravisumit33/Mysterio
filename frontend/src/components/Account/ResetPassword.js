@@ -67,8 +67,8 @@ function ResetPassword() {
           <Typography variant="h6" mb={1}>
             Reset Password
           </Typography>
-
           <TextField
+            autoFocus
             label="New Password"
             size="small"
             fullWidth

@@ -5,6 +5,7 @@ import { useChatSound, useNewMessage, useGoToBottom } from './chat';
 import useOnScreen from './useOnScreen';
 import useBasicInfo from './useBasicInfo';
 import useQuery from './useQuery';
+import useSearchParams from './useSearchParams';
 import useLocalStorage from './useLocalStorage';
 import useStoredChatWindowData from './useStoredChatWindowData';
 
@@ -19,6 +20,7 @@ export {
   useGoToBottom,
   useBasicInfo,
   useQuery,
+  useSearchParams,
   useLocalStorage,
   useStoredChatWindowData,
 };

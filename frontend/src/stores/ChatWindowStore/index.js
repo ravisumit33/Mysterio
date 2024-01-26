@@ -21,8 +21,6 @@ class ChatWindowStore {
 
   previousMessagesInfo = { fetchingPreviousMessages: false };
 
-  shouldOpenPlayer = false;
-
   playerExists = false; // player exists on server
 
   syncedPlayerData = null; // synced player information if player is opened
@@ -73,7 +71,7 @@ class ChatWindowStore {
           updateStoredChatWindowData(RoomType.GROUP, this.roomInfo.roomId, { name, avatarUrl });
         }
         if (player) {
-          this.setPlayerData(player);
+          this.setSyncedPlayerData(player);
           this.setPlayerExists(true);
         }
         this.setPreviousMessagesInfo({
@@ -136,10 +134,6 @@ class ChatWindowStore {
     this.initDone = initDone;
   };
 
-  setShouldOpenPlayer = (shouldOpenPlayer) => {
-    this.shouldOpenPlayer = shouldOpenPlayer;
-  };
-
   setRoomInfo = (newRoomInfo) => {
     this.roomInfo = newRoomInfo;
   };
@@ -148,7 +142,7 @@ class ChatWindowStore {
     this.previousMessagesInfo = newPreviousMessagesInfo;
   };
 
-  setPlayerData = (newPlayerData) => {
+  setSyncedPlayerData = (newPlayerData) => {
     this.syncedPlayerData = newPlayerData;
   };
 
@@ -336,19 +330,19 @@ class ChatWindowStore {
         messageData.content = `${messageData.host.name} started video player`;
         if (!isInitMsg) {
           this.setPlayerExists(true);
-          this.setPlayerData(messageData);
+          this.setSyncedPlayerData(messageData);
         }
         break;
       }
       case MessageType.PLAYER_SYNC: {
-        !this.isHost && this.setPlayerData({ ...this.syncedPlayerData, ...messageData });
+        !this.isHost && this.setSyncedPlayerData({ ...this.syncedPlayerData, ...messageData });
         return {};
       }
       case MessageType.PLAYER_END: {
         messageData.content = `${messageData.host.name} stopped video player`;
         if (!isInitMsg) {
           this.setPlayerExists(false);
-          this.setPlayerData(null);
+          this.setSyncedPlayerData(null);
         }
         break;
       }
@@ -384,7 +378,6 @@ class ChatWindowStore {
 
   closeChatSession = () => {
     this.setChatStatus(ChatStatus.ENDED);
-    this.setShouldOpenPlayer(false);
     if (this.socket) {
       this.handlePlayerDelete();
       this.socket.close();
@@ -431,7 +424,7 @@ class ChatWindowStore {
     this.appStore.showWaitScreen('Syncing player');
     return fetchUrl(`/api/chat/players/?search=${this.roomInfo.roomId}`, fetchData)
       .then((response) => {
-        this.setPlayerData(response.data[0]);
+        this.setSyncedPlayerData(response.data[0]);
       })
       .catch(() => {
         this.appStore.showAlert({
@@ -462,16 +455,7 @@ class ChatWindowStore {
       this.setPlayerExists(false);
       this.socket.send(MessageType.PLAYER_END);
     }
-    this.setPlayerData(null);
-  };
-
-  togglePlayerOpen = () => {
-    if (!this.shouldOpenPlayer) {
-      this.syncPlayer();
-    } else {
-      this.handlePlayerDelete();
-    }
-    this.setShouldOpenPlayer(!this.shouldOpenPlayer);
+    this.setSyncedPlayerData(null);
   };
 }
 

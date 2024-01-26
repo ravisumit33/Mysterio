@@ -27,6 +27,16 @@ const useStyles = makeStyles((theme) => ({
     width: '100%',
     height: '100%',
   },
+  fixedChatWindow: {
+    [theme.breakpoints.down('lg')]: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: theme.spacing(40),
+      zIndex: 1,
+    },
+  },
   infoMsgBox: {
     textAlign: 'center',
     paddingTop: theme.spacing(1),
@@ -73,7 +83,6 @@ function ChatWindow(props) {
     chatStatus,
     isGroupChat,
     initDone,
-    appStore,
     roomInfo: { roomId },
     previousMessagesInfo,
     roomType,
@@ -81,6 +90,7 @@ function ChatWindow(props) {
   const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
+  const [shouldRenderFixed, setShouldRenderFixed] = useState(false);
   const classes = useStyles({ chatStatus });
   const { pathname } = useLocation();
   const history = useHistory();
@@ -100,6 +110,26 @@ function ChatWindow(props) {
     }
   }, [initDone]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const chatWindow = document.querySelector('#chatWindow');
+      const availableChatWindowHeight = chatWindow.clientHeight;
+      /*
+       * There are cases when chat window height becomes very small and chat messages are barely/not visible.
+       * One such case is when both player and virtual keyboard are simultaneously open on mobile devices.
+       * To avoid such UX, we render fixed chat window when chat window height is less than 320px.
+       * This ensures that chatWindow's height is always >= 320px so that sufficient number of messages are visible.
+       */
+      if (availableChatWindowHeight < parseInt(theme.spacing(40), 10)) {
+        setShouldRenderFixed(true);
+      } else {
+        setShouldRenderFixed(false);
+      }
+    };
+    window.visualViewport.addEventListener('resize', handleResize);
+    return () => window.visualViewport.removeEventListener('resize', handleResize);
+  }, [theme]);
+
   const { hasNewMessage, newMessageInfo } = useNewMessage({
     initialRenderingDone,
     lastMessage,
@@ -107,13 +137,6 @@ function ChatWindow(props) {
 
   const shouldNotify = hasNewMessage && chatStatus === ChatStatus.ONGOING;
   useChatSound({ incomingMessageSound, chatStartedSound, shouldNotify, initDone });
-
-  useEffect(
-    () => () => {
-      appStore.removeChatWindow();
-    },
-    [appStore]
-  );
 
   const chatMessages = messageList.map((message, idx, list) => {
     const messageData = message.data;
@@ -186,7 +209,10 @@ function ChatWindow(props) {
       waitScreenText="Redirecting"
     />
   ) : (
-    <Stack justifyContent="space-between" className={classes.root}>
+    <Stack
+      justifyContent="space-between"
+      className={clsx(classes.root, shouldRenderFixed && classes.fixedChatWindow)}
+    >
       <Box className={clsx(classes.header, classes.section)}>
         <ChatHeader />
       </Box>
@@ -205,14 +231,14 @@ function ChatWindow(props) {
           waitScreenText={roomId ? 'Entering room' : 'Finding your match'}
         />
         {initDone && (
-          <Box sx={{ flexGrow: 1, flexBasis: theme.spacing(15) }}>
-            {/* Setting flex-basis prevents message box to get completely hidden when keyboard and video player both are opened on some mobile devices */}
+          <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
             <RouteLeavingGuard
               when={[ChatStatus.ONGOING, ChatStatus.RECONNECTING].includes(chatStatus)}
               dialogProps={{
                 title: 'Do you want to close this chat?',
                 description: 'This will terminate this chat session.',
               }}
+              shouldBlockNavigation={(nextLocation) => pathname !== nextLocation.pathname}
             />
 
             <MessageBox

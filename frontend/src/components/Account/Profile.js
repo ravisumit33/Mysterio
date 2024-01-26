@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
-import { Button, Stack, TextField, Typography } from '@mui/material';
+import { Button, Stack, TextField } from '@mui/material';
 import { appStore, profileStore } from 'stores';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
@@ -59,9 +59,14 @@ function Profile() {
                       state: { from: location },
                     }}
                   >
-                    <Typography variant="caption" noWrap>
+                    <Button
+                      color="primary"
+                      variant="text"
+                      size="small"
+                      sx={{ textTransform: 'none', textWrap: 'nowrap' }}
+                    >
                       Change Password
-                    </Typography>
+                    </Button>
                   </RouterLink>
                 ),
               }}

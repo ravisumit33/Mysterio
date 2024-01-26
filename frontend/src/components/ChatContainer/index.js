@@ -7,6 +7,7 @@ import { appStore } from 'stores';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import PlayerBG from 'assets/images/player_bg.webp';
+import ChatContainerBG from 'assets/images/chatcontainer_bg.webp';
 import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
@@ -15,19 +16,20 @@ import { RoomType } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
+import { useSearchParams } from 'hooks';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 import RoomPasswordDialog from './RoomPasswordDialog';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
-  player: ({ shouldOpenPlayer }) => ({
+  player: {
     position: 'relative',
     transition: theme.transitions.create('all', {
       easing: theme.transitions.easing.easeInOut,
       duration: theme.transitions.duration.leavingScreen,
     }),
-  }),
+  },
   bg: {
     position: 'absolute',
     left: 0,
@@ -40,19 +42,34 @@ const useStyles = makeStyles((theme) => ({
   notFound: {
     marginBottom: theme.spacing(2),
   },
+  chatWindowContainer: {
+    position: 'relative',
+    [theme.breakpoints.up('lg')]: {
+      maxWidth: `${theme.breakpoints.values.lg}${theme.breakpoints.unit}`,
+      margin: '0 auto',
+    },
+  },
 }));
 
 function ChatContainer() {
-  const { chatWindow } = appStore;
+  const { chatWindow: chatWindowStore } = appStore;
   const { pathname } = useLocation();
   const history = useHistory();
   const [initializating, setInitializating] = useState(true);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const startChat = (chatWindowData) => {
     appStore.addChatWindow(chatWindowData);
     setInitializating(false);
   };
+
+  useEffect(
+    () => () => {
+      appStore.removeChatWindow();
+    },
+    []
+  );
 
   useEffect(() => {
     const unlisten = history.listen((location) => {
@@ -120,25 +137,33 @@ function ChatContainer() {
       }
     }
   }, [initializating, pathname]);
-  const classes = useStyles({ shouldOpenPlayer: chatWindow && chatWindow.shouldOpenPlayer });
   // @ts-ignore
-  const isNotLargeScreen = useMediaQuery((theme) => theme.breakpoints.down('lg'));
+  const shouldOpenPlayer = searchParams.get('playerOpen') === 'true';
+  const classes = useStyles();
+  // @ts-ignore
+  const isNotLargeScreen = useMediaQuery((thm) => thm.breakpoints.down('lg'));
 
   const render = () =>
-    chatWindow ? (
-      <ChatWindowStoreContext.Provider value={chatWindow}>
+    chatWindowStore ? (
+      <ChatWindowStoreContext.Provider value={chatWindowStore}>
         <Stack
-          sx={{ width: '100%', height: '100%' }}
+          sx={{ width: '100%', height: '100%', position: 'relative' }}
           direction={isNotLargeScreen ? 'column' : 'row'}
         >
-          <Box
-            sx={{ flex: chatWindow.shouldOpenPlayer && { lg: 3, xs: 0 } }}
-            className={classes.player}
-          >
+          <CardMedia
+            className={classes.bg}
+            image={ChatContainerBG}
+            title="ChatContainer Background"
+          />
+          <Box sx={{ flex: shouldOpenPlayer && { lg: 3, xs: 0 } }} className={classes.player}>
             <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
-            {chatWindow.shouldOpenPlayer && <Player />}
+            {shouldOpenPlayer && <Player />}
           </Box>
-          <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+          <Box
+            sx={{ flexGrow: 1, flexBasis: 0 }}
+            className={classes.chatWindowContainer}
+            id="chatWindow"
+          >
             <ChatWindow />
           </Box>
         </Stack>

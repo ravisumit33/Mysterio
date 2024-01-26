@@ -14,6 +14,12 @@ def handle_player_info(consumer, message_data):
     """
     Handles player metadata for chat consumer
     """
+    if consumer.channel_layer_info["is_group_consumer"]:
+        room = consumer.get_room_instance()
+        user = consumer.scope["user"]
+        if user not in room.room_data.admins.all():
+            logger.error("SuspiciousOperation : Player info received without admin access")
+            consumer.close()
     name = message_data["name"]
     video_id = message_data["videoId"]
 

@@ -111,7 +111,43 @@ function ChatWindow(props) {
   }, [initDone]);
 
   useEffect(() => {
+    const rootElement = document.querySelector('#root');
+    /*
+     * Fix root element to visual viewport
+     * https://stackoverflow.com/a/68359419/6842304
+     * Explore dvh when it is supported by all browsers https://caniuse.com/?search=dvh
+     */
+    // @ts-ignore
+    rootElement.style.position = 'fixed';
+    // @ts-ignore
+    rootElement.style.inset = 0;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const originalMetaViewportContent = document
+      .querySelector('meta[name=viewport]')
+      .getAttribute('content');
+    if (!isSafari) {
+      /*
+       * Resizes all viewports to avoid cases like scroll on soft keyboard
+       * https://developer.chrome.com/blog/viewport-resize-behavior
+       */
+      document
+        .querySelector('meta[name="viewport"]')
+        .setAttribute(
+          'content',
+          `${originalMetaViewportContent}, interactive-widget=resizes-content`
+        );
+    }
     const handleResize = () => {
+      if (isSafari) {
+        /*
+         * Safari doesn't support interactive-widget
+         * So, we need to manually resize root element and scroll to top
+         */
+        // @ts-ignore
+        rootElement.style.height = `${window.visualViewport.height}px`;
+        window.scrollTo(0, 0);
+      }
+
       const chatWindow = document.querySelector('#chatWindow');
       const availableChatWindowHeight = chatWindow.clientHeight;
       /*
@@ -127,7 +163,21 @@ function ChatWindow(props) {
       }
     };
     window.visualViewport.addEventListener('resize', handleResize);
-    return () => window.visualViewport.removeEventListener('resize', handleResize);
+    return () => {
+      window.visualViewport.removeEventListener('resize', handleResize);
+      // @ts-ignore
+      rootElement.style.position = '';
+      // @ts-ignore
+      rootElement.style.inset = '';
+      if (!isSafari) {
+        document
+          .querySelector('meta[name="viewport"]')
+          .setAttribute('content', originalMetaViewportContent);
+      } else {
+        // @ts-ignore
+        rootElement.style.height = '';
+      }
+    };
   }, [theme]);
 
   const { hasNewMessage, newMessageInfo } = useNewMessage({

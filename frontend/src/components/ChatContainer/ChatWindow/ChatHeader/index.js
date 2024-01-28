@@ -85,13 +85,14 @@ function ChatHeader() {
           disabled={shouldDisable}
           onClick={handleReconnect}
           className={classes.icon}
+          sx={{ zIndex: theme.zIndex.snackbar + 1 }}
           size="large"
         >
           <ReplayIcon />
         </IconButton>
       </Tooltip>
     );
-  }, [chatStatus, classes.icon, history]);
+  }, [chatStatus, classes.icon, history, theme.zIndex.snackbar]);
 
   const groupChatIcons = useMemo(() => {
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;
@@ -153,7 +154,12 @@ function ChatHeader() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Close" arrow>
-            <IconButton onClick={() => history.push('/')} className={classes.icon} size="large">
+            <IconButton
+              onClick={() => history.push('/')}
+              className={classes.icon}
+              sx={{ zIndex: theme.zIndex.snackbar + 1 }}
+              size="large"
+            >
               <CloseIcon />
             </IconButton>
           </Tooltip>

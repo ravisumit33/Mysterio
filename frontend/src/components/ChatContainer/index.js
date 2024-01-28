@@ -12,7 +12,7 @@ import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
 import notFoundJson from 'assets/animations/not-found.json';
-import { RoomType } from 'appConstants';
+import { RoomType, OngoingChatRegex } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
@@ -64,12 +64,12 @@ function ChatContainer() {
     setInitializating(false);
   };
 
-  useEffect(
-    () => () => {
-      appStore.removeChatWindow();
-    },
-    []
-  );
+  useEffect(() => {
+    if (pathname.match(OngoingChatRegex)) {
+      return () => appStore.removeChatWindow();
+    }
+    return () => {};
+  }, [pathname]);
 
   useEffect(() => {
     const unlisten = history.listen((location) => {
@@ -90,8 +90,7 @@ function ChatContainer() {
   useEffect(() => {
     if (initializating) {
       // ChatContainer initializes chatWindow in appStore with the stored data (overwrites old stale chatwindow).
-      const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
-      const ongoingChatMatch = pathname.match(ongoingChatRegex);
+      const ongoingChatMatch = pathname.match(OngoingChatRegex);
       if (ongoingChatMatch) {
         const { roomType, roomId } = ongoingChatMatch.groups;
         if (Object.values(RoomType).includes(roomType)) {

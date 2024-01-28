@@ -35,6 +35,8 @@ function YouTube(props) {
           autoplay: 0,
           controls: showControls ? 1 : 0,
           origin: isDevEnv() ? 'http://localhost:3000' : MysterioOrigin,
+          playsinline: 1,
+          fs: 0,
         },
         events: {
           onReady,
@@ -49,7 +51,7 @@ function YouTube(props) {
   return (
     // Wrapper box https://stackoverflow.com/q/54880669/6842304
     <Box className={classes.wrapper}>
-      <Box id="YouTube" sx={{ pointerEvents: showControls ? 'auto' : 'none' }} />
+      <Box id="YouTube" />
     </Box>
   );
 }

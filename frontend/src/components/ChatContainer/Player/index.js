@@ -17,7 +17,7 @@ import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
 import { useGetPlayer, useHandlePlayer, useSearchParams } from 'hooks';
 import RouterLink from 'components/RouterLink';
-import { appStore, profileStore } from 'stores';
+import { profileStore } from 'stores';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
@@ -184,17 +184,7 @@ function Player() {
           </ThemeProvider>
         </StyledEngineProvider>
         <Stack spacing={0.5} mt={1} alignItems="center">
-          {syncedPlayerData && (
-            <Box
-              onClick={() => {
-                !isHost &&
-                  appStore.showAlert({ text: 'Only host can change video', severity: 'error' });
-              }}
-              sx={{ width: '100%' }}
-            >
-              {getEmbedPlayer()}
-            </Box>
-          )}
+          {syncedPlayerData && <Box sx={{ width: '100%' }}>{getEmbedPlayer()}</Box>}
           <Stack direction="row" justifyContent="center" spacing={2}>
             {syncedPlayerData && !isHost && (
               <Button

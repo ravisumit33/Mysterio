@@ -67,6 +67,8 @@ const BrowserStorageKeys = Object.freeze({
 
 const BrowserStorageKeysPrefix = 'mysterio-anon-chat-';
 
+const OngoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
+
 export {
   MessageType,
   RoomType,
@@ -81,4 +83,5 @@ export {
   renderPlayerName,
   BrowserStorageKeys,
   BrowserStorageKeysPrefix,
+  OngoingChatRegex,
 };

@@ -1,27 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, IconButton, Tooltip } from '@mui/material';
+import { Box, Button, IconButton, ListItemIcon, ListItemText, MenuItem, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme) => ({
-  buttonContainer: {
-    paddingLeft: theme.spacing(2),
-  },
-  buttonCommon: {
-    color: 'inherit',
-  },
-  buttonText: {
-    borderRadius: 0,
-    backgroundColor: 'transparent !important',
-  },
   buttonBoxText: {
     boxShadow: `0px 0px 0px 0px ${theme.palette.secondary.main}`,
     transition: theme.transitions.create('box-shadow', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.short,
     }),
-    '&.focused, &:hover': {
+    '&.focused': {
       boxShadow: `0px 2px 0px 0px ${theme.palette.secondary.main}`,
     },
   },
@@ -33,58 +23,43 @@ function CustomButton(props) {
   const classes = useStyles();
   const handleClick = () => {
     onClickHandler(key);
+    data.action();
   };
   const { icon } = data;
-  const disableRipple = isHamburgerMenu;
-  let buttonComponent;
-  if (type === 'text') {
+  let buttonComponent = null;
+  if (isHamburgerMenu) {
     buttonComponent = (
+      <MenuItem onClick={handleClick}>
+        <ListItemText>
+          <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
+        </ListItemText>
+        <ListItemIcon>{icon}</ListItemIcon>
+      </MenuItem>
+    );
+  } else if (type === 'text') {
+    buttonComponent =  (
       <Button
         size="small"
-        onClick={data.action}
-        className={clsx(classes.buttonCommon, classes.buttonText)}
-        disableRipple={disableRipple}
+        onClick={handleClick}
+        color="inherit"
       >
-        <Box className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
+        <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
       </Button>
     );
   } else {
-    const commonIconBtnProps = {
-      onClick: data.action,
-      disableRipple,
-    };
-    buttonComponent = isHamburgerMenu ? (
-      <Button
-        // eslint-disable-next-line react/jsx-props-no-spreading
-        {...commonIconBtnProps}
-        className={clsx(classes.buttonCommon, classes.buttonText)}
-        endIcon={icon}
-        size="small"
-      >
-        {data.text}
-      </Button>
-    ) : (
+    buttonComponent = (
       <Tooltip title={data.text} arrow>
         <IconButton
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          {...commonIconBtnProps}
-          className={classes.buttonCommon}
+          onClick={handleClick}
           size="small"
+          color="inherit"
         >
           {icon}
         </IconButton>
       </Tooltip>
     );
   }
-  return (
-    <Box
-      className={clsx({ [classes.buttonContainer]: !isHamburgerMenu })}
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...(type === 'text' && { onClick: handleClick })}
-    >
-      {buttonComponent}
-    </Box>
-  );
+  return buttonComponent;
 }
 
 CustomButton.propTypes = {

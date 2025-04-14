@@ -13,6 +13,7 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  useScrollTrigger,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, Logout, Login } from '@mui/icons-material';
@@ -27,12 +28,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.common.white,
   },
   smallAvatar: {
-    width: theme.spacing(3),
-    height: theme.spacing(3),
-  },
+      width: theme.spacing(3),
+      height: theme.spacing(3),
+    },
   largeAvatar: {
-    width: theme.spacing(5),
-    height: theme.spacing(5),
+      width: theme.spacing(5),
+      height: theme.spacing(5),
   },
   drawerPlaceholder: {
     width: 240,
@@ -49,6 +50,11 @@ function NavBar() {
   const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
+
+  const trigger = useScrollTrigger({
+    disableHysteresis: true,
+    threshold: 100,
+  });
 
   const handleNavbarBtnClick = (key) => {
     setFocusedBtnKey(key);
@@ -117,17 +123,33 @@ function NavBar() {
     {
       type: 'text',
       data: {
-        key: 'features',
-        text: 'Features',
-        action: () => handleInternalHref('#features'),
+        key: 'how-it-works',
+        text: 'How It Works',
+        action: () => handleInternalHref('#how-it-works'),
       },
     },
     {
       type: 'text',
       data: {
-        key: 'contributors',
-        text: 'Contributors',
-        action: () => handleInternalHref('#contributors'),
+        key: 'chat-experience',
+        text: 'Chat Experience',
+        action: () => handleInternalHref('#chat-experience'),
+      },
+    },
+    {
+      type: 'text',
+      data: {
+        key: 'app-download',
+        text: 'Download App',
+        action: () => handleInternalHref('#app-download'),
+      },
+    },
+    {
+      type: 'text',
+      data: {
+        key: 'faq',
+        text: 'FAQ',
+        action: () => handleInternalHref('#faq'),
       },
     },
   ];
@@ -206,10 +228,8 @@ function NavBar() {
   }));
 
   const navbarMenu = navbarBtns.map((navbarBtn) => (
-    <Box key={navbarBtn.key} sx={{ display: { xs: 'none', sm: 'block' } }}>
-      {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+      // eslint-disable-next-line react/jsx-props-no-spreading */}
       <NavbarButton {...navbarBtn.commonProps} />
-    </Box>
   ));
   const hamburgerMenu = (
     <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
@@ -223,17 +243,27 @@ function NavBar() {
         onClose={handleHamburgerClose}
       >
         {navbarBtns.map((navbarBtn) => (
-          <MenuItem key={navbarBtn.key} selected={focusedBtnKey === navbarBtn.key} dense>
-            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-            <NavbarButton {...navbarBtn.commonProps} isHamburgerMenu />
-          </MenuItem>
+            <NavbarButton key={navbarBtn.key} {...navbarBtn.commonProps} isHamburgerMenu />
         ))}
       </Menu>
     </Box>
   );
 
   return (
-    <AppBar position="sticky">
+    <AppBar
+      position="fixed"
+      sx={{
+        backgroundColor: trigger ? theme.palette.primary.main : 'transparent',
+        boxShadow: trigger ? 1 : 'none',
+        backdropFilter: trigger ? 'blur(20px)' : 'none',
+        transition: theme.transitions.create(
+          ['background-color', 'box-shadow', 'backdrop-filter'],
+          {
+            duration: theme.transitions.duration.standard,
+          }
+        ),
+      }}
+    >
       <Toolbar disableGutters>
         {atAccountPage && (
           <Box
@@ -260,10 +290,10 @@ function NavBar() {
                 Mysterio
               </Typography>
             </RouterLink>
-            <Stack direction="row" alignItems="center">
+            <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={2} sx={{ display: { xs: 'none', sm: 'block' } }}>
               {navbarMenu}
-              {hamburgerMenu}
             </Stack>
+            {hamburgerMenu}
           </Stack>
         </Container>
       </Toolbar>

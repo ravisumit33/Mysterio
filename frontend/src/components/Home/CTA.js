@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Container, Typography, Button, Stack } from '@mui/material';
+import { Box, Container, Typography, Button, Stack, useTheme } from '@mui/material';
 
 function CTA() {
+  const theme = useTheme();
   return (
     <Box
       sx={{
@@ -23,20 +24,19 @@ function CTA() {
           }}
         >
           <Typography
-            variant="h2"
+            variant="h3"
             sx={{
-              fontWeight: 700,
+              fontWeight: theme.typography.fontWeightBold,
               mb: 2,
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
             }}
           >
             Ready to Start Chatting?
           </Typography>
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
               mb: 4,
-              fontSize: { xs: '1.1rem', sm: '1.25rem' },
+              fontWeight: theme.typography.fontWeightRegular,
             }}
           >
             Join thousands of users already enjoying anonymous, secure conversations with exciting

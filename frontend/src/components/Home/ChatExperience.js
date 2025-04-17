@@ -19,6 +19,7 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import ShareIcon from '@mui/icons-material/Share';
 
 function FeatureCard({ icon, title, description, features, color, imageUrl }) {
+  const theme = useTheme();
   return (
     <Paper
       elevation={0}
@@ -105,10 +106,8 @@ function FeatureCard({ icon, title, description, features, color, imageUrl }) {
           <Typography
             variant="h4"
             sx={{
-              fontWeight: 700,
-              lineHeight: 1,
+              fontWeight: theme.typography.fontWeightBold,
               color,
-              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
             }}
           >
             {title}
@@ -119,8 +118,6 @@ function FeatureCard({ icon, title, description, features, color, imageUrl }) {
           variant="body1"
           sx={{
             color: 'text.secondary',
-            fontSize: { xs: '1rem', sm: '1.1rem' },
-            lineHeight: 1.6,
           }}
         >
           {description}
@@ -149,10 +146,10 @@ function FeatureCard({ icon, title, description, features, color, imageUrl }) {
               >
                 <FeatureIcon />
                 <Typography
+                  variant="body1"
                   sx={{
                     color: 'text.primary',
-                    fontWeight: 500,
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    fontWeight: theme.typography.fontWeightMedium,
                   }}
                 >
                   {feature.text}
@@ -198,22 +195,21 @@ function ChatExperience() {
           {/* Section Header */}
           <Box sx={{ textAlign: 'center', maxWidth: 800 }}>
             <Typography
-              variant="h2"
+              variant="h3"
               sx={{
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
                 mb: 2,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
                 color: 'text.primary',
               }}
             >
               Choose Your Chat Experience
             </Typography>
             <Typography
-              variant="h5"
+              variant="h6"
               sx={{
                 color: 'text.secondary',
                 mb: 4,
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                fontWeight: theme.typography.fontWeightRegular,
               }}
             >
               Connect with others in the way that suits you best. Whether you prefer one-on-one

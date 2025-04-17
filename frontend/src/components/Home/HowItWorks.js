@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Container, Typography, Stack } from '@mui/material';
+import { Box, Container, Typography, Stack, useTheme } from '@mui/material';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 
 function HowItWorks() {
+  const theme = useTheme();
   const steps = [
     {
       id: 'step-1',
@@ -37,29 +38,27 @@ function HowItWorks() {
       <Container maxWidth="lg">
         <Stack spacing={8} alignItems="center">
           {/* Section Header */}
-          <Box sx={{ textAlign: 'center', maxWidth: 800 }}>
+          <Container maxWidth="md" sx={{ textAlign: 'center' }}>
             <Typography
-              variant="h2"
+              variant="h3"
               sx={{
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
                 mb: 2,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                color: 'text.primary',
               }}
             >
               How It Works
             </Typography>
             <Typography
-              variant="h5"
+              variant="h6"
               sx={{
                 color: 'text.secondary',
                 mb: 4,
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                fontWeight: theme.typography.fontWeightRegular,
               }}
             >
               Getting started with Mysterio is quick and easy. No accounts, no hassle.
             </Typography>
-          </Box>
+          </Container>
 
           {/* Process Steps */}
           <Box sx={{ width: '100%' }}>
@@ -97,11 +96,10 @@ function HowItWorks() {
                     }}
                   >
                     <Typography
-                      variant="h3"
+                      variant="h4"
                       sx={{
-                        color: 'white',
-                        fontWeight: 700,
-                        fontSize: '2rem',
+                        color: 'common.white',
+                        fontWeight: theme.typography.fontWeightBold,
                       }}
                     >
                       {index + 1}
@@ -113,7 +111,7 @@ function HowItWorks() {
                     <Typography
                       variant="h5"
                       sx={{
-                        fontWeight: 700,
+                        fontWeight: theme.typography.fontWeightBold,
                         color: 'text.primary',
                         mb: 1,
                       }}
@@ -137,10 +135,10 @@ function HowItWorks() {
           </Box>
 
           {/* Testimonial Quote */}
-          <Box
+          <Container
+            maxWidth="md"
             sx={{
               mt: 8,
-              maxWidth: 800,
               textAlign: 'center',
               position: 'relative',
               p: 4,
@@ -181,8 +179,6 @@ function HowItWorks() {
                 fontStyle: 'italic',
                 color: 'text.primary',
                 mb: 2,
-                fontSize: { xs: '1.25rem', sm: '1.5rem' },
-                lineHeight: 1.6,
               }}
             >
               &quot;Mysterio provides the perfect balance of anonymity and rich features. It&apos;s
@@ -192,12 +188,12 @@ function HowItWorks() {
               variant="subtitle1"
               sx={{
                 color: 'text.secondary',
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
               }}
             >
               — Anonymous User
             </Typography>
-          </Box>
+          </Container>
         </Stack>
       </Container>
     </Box>

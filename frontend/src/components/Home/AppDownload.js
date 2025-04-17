@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Typography, Stack, Button } from '@mui/material';
+import { Box, Container, Typography, Stack, Button, useTheme } from '@mui/material';
 import AppleIcon from '@mui/icons-material/Apple';
 import AndroidIcon from '@mui/icons-material/Android';
 import { keyframes } from '@emotion/react';
@@ -26,6 +26,7 @@ const typingAnimation = keyframes`
 `;
 
 function AppDownload() {
+  const theme = useTheme();
   return (
     <Box
       id="app-download"
@@ -35,7 +36,7 @@ function AppDownload() {
         overflow: 'hidden',
         bgcolor: 'primary.main',
         color: 'primary.contrastText',
-        scrollMarginTop: (theme) => theme.mixins.toolbar.minHeight,
+        scrollMarginTop: (tm) => tm.mixins.toolbar.minHeight,
       }}
     >
       <Container maxWidth="lg">
@@ -48,21 +49,20 @@ function AppDownload() {
           {/* Content */}
           <Box sx={{ flex: 1, textAlign: { xs: 'center', md: 'left' } }}>
             <Typography
-              variant="h2"
+              variant="h3"
               sx={{
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
                 mb: 2,
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
               }}
             >
               Get Mysterio on Your Device
             </Typography>
             <Typography
-              variant="h5"
+              variant="h6"
               sx={{
                 mb: 4,
                 color: 'grey.200',
-                fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                fontWeight: theme.typography.fontWeightRegular,
               }}
             >
               Take anonymous chatting with you where ever you go. Download the app and start
@@ -102,12 +102,12 @@ function AppDownload() {
                     gap: 0.5,
                   }}
                 >
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>
+                  <Typography variant="caption" sx={{ lineHeight: 1 }}>
                     Download on the
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontSize: '1.2rem', fontWeight: 600, lineHeight: 1 }}
+                    sx={{ fontWeight: theme.typography.fontWeightBold, lineHeight: 1 }}
                   >
                     App Store
                   </Typography>
@@ -136,12 +136,12 @@ function AppDownload() {
                     gap: 0.5,
                   }}
                 >
-                  <Typography variant="caption" sx={{ fontSize: '0.7rem', lineHeight: 1 }}>
+                  <Typography variant="caption" sx={{ lineHeight: 1 }}>
                     Get it on
                   </Typography>
                   <Typography
                     variant="body1"
-                    sx={{ fontSize: '1.2rem', fontWeight: 600, lineHeight: 1 }}
+                    sx={{ fontWeight: theme.typography.fontWeightBold, lineHeight: 1 }}
                   >
                     Google Play
                   </Typography>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Link, Stack, IconButton } from '@mui/material';
+import { Box, Container, Grid, Typography, Link, Stack, IconButton, useTheme } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -7,6 +7,7 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import { Link as RouterLink } from 'react-router-dom';
 
 function Footer() {
+  const theme = useTheme();
   return (
     <Box
       component="footer"
@@ -26,7 +27,7 @@ function Footer() {
               variant="h4"
               sx={{
                 mb: 2,
-                fontWeight: 'bold',
+                fontWeight: theme.typography.fontWeightBold,
                 letterSpacing: '1px',
               }}
             >

@@ -11,46 +11,55 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 function FAQ() {
+  const theme = useTheme();
   const faqs = [
     {
       id: 'faq-1',
       question: 'What is Mysterio?',
-      answer: "Mysterio is a platform that lets you chat anonymously with people worldwide. It's a place where you can express yourself freely and connect with others without revealing your identity.",
+      answer:
+        "Mysterio is a platform that lets you chat anonymously with people worldwide. It's a place where you can express yourself freely and connect with others without revealing your identity.",
     },
     {
       id: 'faq-2',
       question: 'Is it really anonymous?',
-      answer: "Yes, it's completely anonymous. We don't collect any personal information, and you don't need to create an account to start chatting.",
+      answer:
+        "Yes, it's completely anonymous. We don't collect any personal information, and you don't need to create an account to start chatting.",
     },
     {
       id: 'faq-3',
       question: 'Is Mysterio really free?',
-      answer: "Yes, Mysterio is completely free to use. There are no hidden fees or subscriptions. Only the premium features require payment.",
+      answer:
+        'Yes, Mysterio is completely free to use. There are no hidden fees or subscriptions. Only the premium features require payment.',
     },
     {
       id: 'faq-4',
       question: 'How does the end-to-end encryption work?',
-      answer: "Our end-to-end encryption ensures that only you and the people you're chatting with can read your messages. Not even our servers can access the content of your conversations.",
+      answer:
+        "Our end-to-end encryption ensures that only you and the people you're chatting with can read your messages. Not even our servers can access the content of your conversations.",
     },
     {
       id: 'faq-5',
       question: 'Can I use Mysterio on my mobile device?',
-      answer: "Yes, you can use either our website or our mobile apps on your mobile device. Mysterio works on all devices including smartphones, tablets, laptops and desktop computers.",
+      answer:
+        'Yes, you can use either our website or our mobile apps on your mobile device. Mysterio works on all devices including smartphones, tablets, laptops and desktop computers.',
     },
     {
       id: 'faq-6',
       question: 'Do you store any user data?',
-      answer: "We do not store user identities or connection information. For group rooms, only the encrypted messages are stored until the group room is deleted. In dual chats, session data is deleted as soon as you close your chat windows.",
+      answer:
+        'We do not store user identities or connection information. For group rooms, only the encrypted messages are stored until the group room is deleted. In dual chats, session data is deleted as soon as you close your chat windows.',
     },
     {
       id: 'faq-7',
       question: 'What all video platforms are supported in watch together feature?',
-      answer: "We currently support YouTube videos, however, we have planned to include DailyMotion, Vimeo and even your own video as well. Stay tuned.",
+      answer:
+        'We currently support YouTube videos, however, we have planned to include DailyMotion, Vimeo and even your own video as well. Stay tuned.',
     },
     {
       id: 'faq-8',
       question: 'What types of games are available?',
-      answer: "Currently we support 2 player games in dual chats. We have planned to support multiplayer games in group room chats. Stay tuned.",
+      answer:
+        'Currently we support 2 player games in dual chats. We have planned to support multiplayer games in group room chats. Stay tuned.',
     },
   ];
 
@@ -63,31 +72,30 @@ function FAQ() {
         overflow: 'hidden',
         bgcolor: 'grey.100',
         color: 'grey.900',
-        scrollMarginTop: (theme) => theme.mixins.toolbar.minHeight,
+        scrollMarginTop: (tm) => tm.mixins.toolbar.minHeight,
       }}
     >
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
         <Box sx={{ textAlign: 'center', maxWidth: 800, mx: 'auto', mb: 6 }}>
           <Typography
-            variant="h2"
+            variant="h3"
             sx={{
-              fontWeight: 700,
+              fontWeight: theme.typography.fontWeightBold,
               mb: 2,
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
               color: 'text.primary',
             }}
           >
             Frequently Asked Questions
           </Typography>
           <Typography
-            variant="h5"
+            variant="h6"
             sx={{
               color: 'text.secondary',
-              fontSize: { xs: '1.1rem', sm: '1.25rem' },
+              fontWeight: theme.typography.fontWeightRegular,
             }}
           >
-            Got questions? We've got answers. If you don't see what you're looking for, feel free to
-            contact us.
+            Got questions? We&apos;ve got answers. If you don&apos;t see what you&apos;re looking
+            for, feel free to contact us.
           </Typography>
         </Box>
 
@@ -133,10 +141,9 @@ function FAQ() {
                 <Typography
                   variant="h6"
                   sx={{
-                    fontWeight: 600,
+                    fontWeight: theme.typography.fontWeightBold,
                     color: 'text.primary',
                     transition: 'text-decoration 0.2s ease',
-                    lineHeight: 1.4,
                   }}
                 >
                   {faq.question}
@@ -155,7 +162,6 @@ function FAQ() {
                   variant="body1"
                   sx={{
                     color: 'text.secondary',
-                    lineHeight: 1.6,
                   }}
                 >
                   {faq.answer}

@@ -1,14 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Stack,
-  Grid,
-  useTheme,
-} from '@mui/material';
+import { Box, Container, Typography, Paper, Stack, Grid, useTheme } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import GroupIcon from '@mui/icons-material/Group';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -26,20 +18,18 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import ShareIcon from '@mui/icons-material/Share';
 
-const FeatureCard = ({ icon, title, description, features, color, imageUrl }) => {
-  const theme = useTheme();
-
+function FeatureCard({ icon, title, description, features, color, imageUrl }) {
   return (
     <Paper
       elevation={0}
       sx={{
-        p: 4,
+        p: { xs: 2, sm: 3, md: 4 },
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-        border: '1px solid',
-        borderColor: `${color}20`,
+        bgcolor: 'background.paper',
+        border: '2px solid',
+        borderColor: `${color}40`,
         borderRadius: 3,
         transition: 'all 0.3s ease',
         position: 'relative',
@@ -47,7 +37,7 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
         '&:hover': {
           transform: 'translateY(-8px)',
           boxShadow: `0 12px 24px ${color}15`,
-          borderColor: `${color}40`,
+          borderColor: `${color}60`,
           '& .illustration': {
             transform: 'scale(1.05)',
             opacity: 0.9,
@@ -65,7 +55,7 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
           position: 'absolute',
           top: 0,
           right: 0,
-          width: '40%',
+          width: { md: '40%' },
           height: '100%',
           opacity: 0.7,
           transition: 'all 0.3s ease',
@@ -74,27 +64,30 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            padding: 2,
+            padding: { xs: 1, sm: 1.5, md: 2 },
           },
         }}
       >
         <Box component="img" src={imageUrl} alt={title} />
       </Box>
 
-      <Stack spacing={3} sx={{ position: 'relative', zIndex: 1 }}>
+      <Stack
+        spacing={{ xs: 2, sm: 3 }}
+        sx={{ position: 'relative', zIndex: 1, maxWidth: { xs: '100%', md: '60%' } }}
+      >
         <Box
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
+            gap: { xs: 1, sm: 2 },
             '& .MuiSvgIcon-root': {
-              fontSize: 32,
+              fontSize: { xs: 28, sm: 32 },
             },
           }}
         >
           <Box
             sx={{
-              p: 1.5,
+              p: { xs: 1, sm: 1.5 },
               borderRadius: 2,
               background: `linear-gradient(135deg, ${color} 0%, ${color}80 100%)`,
               display: 'flex',
@@ -102,8 +95,8 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
               justifyContent: 'center',
               boxShadow: `0 4px 12px ${color}40`,
               '& .MuiSvgIcon-root': {
-                color,
-                fontSize: 32,
+                color: 'white',
+                fontSize: { xs: 28, sm: 32 },
               },
             }}
           >
@@ -115,7 +108,7 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
               fontWeight: 700,
               lineHeight: 1,
               color,
-              fontSize: '2rem',
+              fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
             }}
           >
             {title}
@@ -126,32 +119,31 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
           variant="body1"
           sx={{
             color: 'text.secondary',
-            fontSize: '1.1rem',
-            maxWidth: '60%',
+            fontSize: { xs: '1rem', sm: '1.1rem' },
             lineHeight: 1.6,
           }}
         >
           {description}
         </Typography>
 
-        <Stack spacing={2}>
+        <Stack spacing={2} sx={{ maxWidth: '100%' }}>
           {features.map((feature, index) => {
             const FeatureIcon = feature.icon;
             return (
               <Box
-                key={index}
+                key={feature.text}
                 className="feature-box"
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 1.5,
-                  p: 1.5,
+                  gap: { xs: 1, sm: 1.5 },
+                  p: { xs: 1, sm: 1.5 },
                   borderRadius: 1,
                   bgcolor: `${color}10`,
                   transition: 'all 0.3s ease',
                   '& .MuiSvgIcon-root': {
                     color,
-                    fontSize: 24,
+                    fontSize: { xs: 20, sm: 24 },
                   },
                 }}
               >
@@ -160,7 +152,7 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
                   sx={{
                     color: 'text.primary',
                     fontWeight: 500,
-                    fontSize: '1rem',
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
                   }}
                 >
                   {feature.text}
@@ -172,7 +164,7 @@ const FeatureCard = ({ icon, title, description, features, color, imageUrl }) =>
       </Stack>
     </Paper>
   );
-};
+}
 
 FeatureCard.propTypes = {
   icon: PropTypes.node.isRequired,
@@ -198,7 +190,7 @@ function ChatExperience() {
         py: 12,
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%)',
+        bgcolor: 'background.paper',
       }}
     >
       <Container maxWidth="lg">
@@ -225,13 +217,14 @@ function ChatExperience() {
               }}
             >
               Connect with others in the way that suits you best. Whether you prefer one-on-one
-              conversations, group discussions, or interactive activities, we've got you covered.
+              conversations, group discussions, or interactive activities, we&apos;ve got you
+              covered.
             </Typography>
           </Box>
 
           {/* Experiences Grid */}
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={6}>
+          <Grid container justifyContent="center" rowSpacing={4} columnSpacing={{ xs: 0, lg: 4 }}>
+            <Grid item xs={12} lg={5.5}>
               <FeatureCard
                 icon={<ChatIcon />}
                 title="One-on-One Chat"
@@ -241,12 +234,12 @@ function ChatExperience() {
                   { icon: VisibilityOffIcon, text: 'Complete anonymity guaranteed' },
                   { icon: ChatIcon, text: 'Real-time messaging' },
                 ]}
-                color="primary.main"
+                color={theme.palette.primary.main}
                 imageUrl="https://img.icons8.com/bubbles/500/chat.png"
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} lg={5.5}>
               <FeatureCard
                 icon={<GroupIcon />}
                 title="Group Chat Rooms"
@@ -256,12 +249,12 @@ function ChatExperience() {
                   { icon: ForumIcon, text: 'Topic-based chat rooms' },
                   { icon: SecurityIcon, text: 'Secure group environment' },
                 ]}
-                color="secondary.main"
+                color={theme.palette.secondary.main}
                 imageUrl="https://img.icons8.com/bubbles/500/group.png"
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} lg={5.5}>
               <FeatureCard
                 icon={<MovieIcon />}
                 title="Watch Together"
@@ -271,12 +264,12 @@ function ChatExperience() {
                   { icon: ThumbUpIcon, text: 'Live reactions and comments' },
                   { icon: ShareIcon, text: 'Easy content sharing' },
                 ]}
-                color="error.main"
+                color={theme.palette.error.main}
                 imageUrl="https://img.icons8.com/bubbles/500/video-playlist.png"
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} lg={5.5}>
               <FeatureCard
                 icon={<SportsEsportsIcon />}
                 title="Play Together"
@@ -286,12 +279,12 @@ function ChatExperience() {
                   { icon: EmojiEventsIcon, text: 'Competitive tournaments' },
                   { icon: GroupIcon, text: 'Team-based gameplay' },
                 ]}
-                color="warning.main"
+                color={theme.palette.warning.main}
                 imageUrl="https://img.icons8.com/bubbles/500/controller.png"
               />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} lg={5.5}>
               <FeatureCard
                 icon={<BrushIcon />}
                 title="Draw Together"
@@ -301,7 +294,7 @@ function ChatExperience() {
                   { icon: BrushIcon, text: 'Multiple drawing tools' },
                   { icon: ShareIcon, text: 'Easy artwork sharing' },
                 ]}
-                color="info.main"
+                color={theme.palette.success.main}
                 imageUrl="https://img.icons8.com/bubbles/500/paint-palette.png"
               />
             </Grid>

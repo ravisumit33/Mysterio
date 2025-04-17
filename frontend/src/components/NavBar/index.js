@@ -7,16 +7,16 @@ import {
   Container,
   IconButton,
   Menu,
-  MenuItem,
   Stack,
   Toolbar,
   Typography,
   useMediaQuery,
   useTheme,
   useScrollTrigger,
+  Button,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Menu as MenuIcon, AccountCircle, Logout, Login } from '@mui/icons-material';
+import { Menu as MenuIcon, AccountCircle, Logout, Login, ArrowForward } from '@mui/icons-material';
 import { appStore, profileStore } from 'stores';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
@@ -28,12 +28,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.common.white,
   },
   smallAvatar: {
-      width: theme.spacing(3),
-      height: theme.spacing(3),
-    },
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+  },
   largeAvatar: {
-      width: theme.spacing(5),
-      height: theme.spacing(5),
+    width: theme.spacing(5),
+    height: theme.spacing(5),
   },
   drawerPlaceholder: {
     width: 240,
@@ -45,8 +45,9 @@ function NavBar() {
   const history = useHistory();
   const location = useLocation();
   const theme = useTheme();
-  const shouldShowHamburger = !useMediaQuery(theme.breakpoints.up('sm'));
+  const shouldShowHamburger = !useMediaQuery(theme.breakpoints.up('md'));
   const atAccountPage = location.pathname === '/account';
+  const atHomePage = location.pathname === '/';
   const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
@@ -60,12 +61,17 @@ function NavBar() {
     setFocusedBtnKey(key);
     setHamburgerTriggerElement(null);
   };
+
   const handleInternalHref = (id) => {
     setHamburgerTriggerElement(null);
-    setTimeout(() => {
-      window.location.href = id;
-    }, 20);
+    const sectionId = id.replace('#', '');
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+      setFocusedBtnKey(sectionId);
+    }
   };
+
   const handleHamburgerClick = (event) => {
     event.preventDefault();
     setHamburgerTriggerElement(event.currentTarget);
@@ -105,7 +111,6 @@ function NavBar() {
       text: 'Account',
       icon: profileStore.avatarUrl ? avatarIcon : accountCircleIcon,
       action: () => {
-        setHamburgerTriggerElement(null);
         history.push('/account');
       },
     },
@@ -228,11 +233,11 @@ function NavBar() {
   }));
 
   const navbarMenu = navbarBtns.map((navbarBtn) => (
-      // eslint-disable-next-line react/jsx-props-no-spreading */}
-      <NavbarButton {...navbarBtn.commonProps} />
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <NavbarButton {...navbarBtn.commonProps} />
   ));
   const hamburgerMenu = (
-    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+    <Box sx={{ display: { xs: 'block', md: 'none' } }}>
       <IconButton color="inherit" aria-label="menu" onClick={handleHamburgerClick} size="large">
         <MenuIcon />
       </IconButton>
@@ -243,7 +248,8 @@ function NavBar() {
         onClose={handleHamburgerClose}
       >
         {navbarBtns.map((navbarBtn) => (
-            <NavbarButton key={navbarBtn.key} {...navbarBtn.commonProps} isHamburgerMenu />
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          <NavbarButton key={navbarBtn.key} {...navbarBtn.commonProps} isHamburgerMenu />
         ))}
       </Menu>
     </Box>
@@ -255,26 +261,21 @@ function NavBar() {
       sx={{
         backgroundColor: trigger ? theme.palette.primary.main : 'transparent',
         boxShadow: trigger ? 1 : 'none',
-        backdropFilter: trigger ? 'blur(20px)' : 'none',
-        transition: theme.transitions.create(
-          ['background-color', 'box-shadow', 'backdrop-filter'],
-          {
-            duration: theme.transitions.duration.standard,
-          }
-        ),
+        backdropFilter: !trigger ? 'blur(10px)' : 'none',
+        transition: theme.transitions.create(['background-color', 'box-shadow', 'backdrop-filter']),
       }}
     >
       <Toolbar disableGutters>
         {atAccountPage && (
           <Box
-            sx={{ display: { xs: 'none', sm: 'block' } }}
+            sx={{ display: { xs: 'none', md: 'block' } }}
             className={classes.drawerPlaceholder}
           />
         )}
         <Container>
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             {atAccountPage && (
-              <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+              <Box sx={{ display: { xs: 'block', md: 'none' } }}>
                 <IconButton
                   onClick={handleAccountBtnClick}
                   color="inherit"
@@ -290,10 +291,29 @@ function NavBar() {
                 Mysterio
               </Typography>
             </RouterLink>
-            <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={2} sx={{ display: { xs: 'none', sm: 'block' } }}>
-              {navbarMenu}
+            <Stack direction="row" alignItems="center" justifyContent="flex-end" spacing={2}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="flex-end"
+                spacing={2}
+                sx={{ display: { xs: 'none', md: 'block' } }}
+              >
+                {navbarMenu}
+              </Stack>
+              {atHomePage && (
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="secondary"
+                  endIcon={<ArrowForward />}
+                  onClick={() => history.push('/chat/match')}
+                >
+                  Chat Now
+                </Button>
+              )}
+              {hamburgerMenu}
             </Stack>
-            {hamburgerMenu}
           </Stack>
         </Container>
       </Toolbar>

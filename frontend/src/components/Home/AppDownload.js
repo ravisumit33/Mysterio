@@ -1,8 +1,8 @@
 import React from 'react';
-import { Box, Container, Typography, Stack, Button, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Container, Typography, Stack, Button } from '@mui/material';
 import AppleIcon from '@mui/icons-material/Apple';
 import AndroidIcon from '@mui/icons-material/Android';
-import { keyframes } from '@mui/system';
+import { keyframes } from '@emotion/react';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import SendIcon from '@mui/icons-material/Send';
@@ -11,9 +11,6 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CloseIcon from '@mui/icons-material/Close';
-import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
-import LaptopMacIcon from '@mui/icons-material/LaptopMac';
-import TabletMacIcon from '@mui/icons-material/TabletMac';
 
 // Animation keyframes
 const floatAnimation = keyframes`
@@ -29,9 +26,6 @@ const typingAnimation = keyframes`
 `;
 
 function AppDownload() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   return (
     <Box
       id="app-download"
@@ -39,7 +33,9 @@ function AppDownload() {
         py: 12,
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%)',
+        bgcolor: 'primary.main',
+        color: 'primary.contrastText',
+        scrollMarginTop: (theme) => theme.mixins.toolbar.minHeight,
       }}
     >
       <Container maxWidth="lg">
@@ -57,7 +53,6 @@ function AppDownload() {
                 fontWeight: 700,
                 mb: 2,
                 fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
-                color: 'text.primary',
               }}
             >
               Get Mysterio on Your Device
@@ -65,8 +60,8 @@ function AppDownload() {
             <Typography
               variant="h5"
               sx={{
-                color: 'text.secondary',
                 mb: 4,
+                color: 'grey.200',
                 fontSize: { xs: '1.1rem', sm: '1.25rem' },
               }}
             >
@@ -80,6 +75,7 @@ function AppDownload() {
               spacing={2}
               sx={{
                 justifyContent: { xs: 'center', md: 'flex-start' },
+                alignItems: { xs: 'center', md: 'flex-start' },
                 mt: 4,
               }}
             >
@@ -246,7 +242,7 @@ function AppDownload() {
                   textAnchor="middle"
                   dominantBaseline="middle"
                 >
-                  I'm good! Just exploring Mysterio
+                  I&apos;m good! Just exploring Mysterio
                 </text>
               </g>
 

@@ -1,6 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Button, IconButton, ListItemIcon, ListItemText, MenuItem, Tooltip } from '@mui/material';
+import {
+  Box,
+  Button,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Tooltip,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import clsx from 'clsx';
 
@@ -25,25 +33,31 @@ function CustomButton(props) {
     onClickHandler(key);
     data.action();
   };
-  const { icon } = data;
+  const { icon, buttonProps } = data;
   let buttonComponent = null;
   if (isHamburgerMenu) {
     buttonComponent = (
       <MenuItem onClick={handleClick}>
         <ListItemText>
-          <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
+          <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>
+            {data.text}
+          </Box>
         </ListItemText>
         <ListItemIcon>{icon}</ListItemIcon>
       </MenuItem>
     );
   } else if (type === 'text') {
-    buttonComponent =  (
+    buttonComponent = (
       <Button
         size="small"
         onClick={handleClick}
         color="inherit"
+        // eslint-disable-next-line react/jsx-props-no-spreading
+        {...buttonProps}
       >
-        <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>{data.text}</Box>
+        <Box component="span" className={clsx(classes.buttonBoxText, { focused })}>
+          {data.text}
+        </Box>
       </Button>
     );
   } else {
@@ -53,6 +67,8 @@ function CustomButton(props) {
           onClick={handleClick}
           size="small"
           color="inherit"
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          {...buttonProps}
         >
           {icon}
         </IconButton>
@@ -69,6 +85,10 @@ CustomButton.propTypes = {
     text: PropTypes.string,
     icon: PropTypes.element,
     action: PropTypes.func,
+    buttonProps: PropTypes.shape({
+      variant: PropTypes.string,
+      color: PropTypes.string,
+    }),
   }),
   focused: PropTypes.bool,
   onClickHandler: PropTypes.func.isRequired,

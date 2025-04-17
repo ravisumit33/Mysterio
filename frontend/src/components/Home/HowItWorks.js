@@ -1,22 +1,14 @@
 import React from 'react';
-import { Box, Container, Typography, Stack, useTheme, useMediaQuery } from '@mui/material';
-import ChatIcon from '@mui/icons-material/Chat';
-import GroupIcon from '@mui/icons-material/Group';
-import BoltIcon from '@mui/icons-material/Bolt';
-import MovieIcon from '@mui/icons-material/Movie';
-import BrushIcon from '@mui/icons-material/Brush';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import SecurityIcon from '@mui/icons-material/Security';
+import { Box, Container, Typography, Stack } from '@mui/material';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 
 function HowItWorks() {
-  const theme = useTheme();
-
   const steps = [
     {
       id: 'step-1',
       title: 'Choose Your Chat Mode',
-      description: 'Select between one-on-one chat or join a group chat room based on your interests.',
+      description:
+        'Select between one-on-one chat or join a group chat room based on your interests.',
     },
     {
       id: 'step-2',
@@ -37,7 +29,9 @@ function HowItWorks() {
         py: 12,
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%)',
+        bgcolor: 'grey.100',
+        color: 'grey.900',
+        scrollMarginTop: (tm) => tm.mixins.toolbar.minHeight,
       }}
     >
       <Container maxWidth="lg">
@@ -191,8 +185,8 @@ function HowItWorks() {
                 lineHeight: 1.6,
               }}
             >
-              "Mysterio provides the perfect balance of anonymity and rich features. It's my go-to
-              platform for meeting new people."
+              &quot;Mysterio provides the perfect balance of anonymity and rich features. It&apos;s
+              my go-to platform for meeting new people.&quot;
             </Typography>
             <Typography
               variant="subtitle1"

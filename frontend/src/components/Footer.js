@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid, Typography, Link, Stack, IconButton, useTheme } from '@mui/material';
+import { Box, Container, Grid, Typography, Link, Stack, IconButton } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import TwitterIcon from '@mui/icons-material/Twitter';
@@ -7,8 +7,6 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import { Link as RouterLink } from 'react-router-dom';
 
 function Footer() {
-  const theme = useTheme();
-
   return (
     <Box
       component="footer"
@@ -16,12 +14,12 @@ function Footer() {
         py: 6,
         px: 2,
         mt: 'auto',
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.getContrastText(theme.palette.primary.main),
+        bgcolor: 'grey.900',
+        color: 'grey.50',
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={4}>
+        <Grid container spacing={4} sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
           {/* Logo and About Section */}
           <Grid item xs={12} sm={6} md={3}>
             <Typography
@@ -38,7 +36,7 @@ function Footer() {
               Connect with strangers in a safe, anonymous environment. Chat, play games, and make
               new friends.
             </Typography>
-            <Stack direction="row" spacing={1}>
+            <Stack direction="row" justifyContent={{ xs: 'center', sm: 'flex-start' }} spacing={1}>
               <IconButton
                 color="inherit"
                 href="https://github.com/yourusername/mysterio"
@@ -104,7 +102,12 @@ function Footer() {
               Contact Us
             </Typography>
             <Stack spacing={1}>
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                justifyContent={{ xs: 'center', sm: 'flex-start' }}
+              >
                 <EmailIcon fontSize="small" />
                 <Link href="mailto:support@mysterio-chat.com" color="inherit" underline="hover">
                   support@mysterio-chat.com
@@ -115,7 +118,7 @@ function Footer() {
         </Grid>
 
         {/* Copyright */}
-        <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ mt: 4, pt: 2, borderTop: 1, borderColor: 'grey.700' }}>
           <Typography variant="body2" align="center">
             © {new Date().getFullYear()} Mysterio Chat. All rights reserved.
           </Typography>

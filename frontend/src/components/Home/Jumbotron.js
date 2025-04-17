@@ -9,6 +9,7 @@ import {
   Chip,
   Container,
   IconButton,
+  Grid,
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import GroupIcon from '@mui/icons-material/Group';
@@ -16,12 +17,14 @@ import SecurityIcon from '@mui/icons-material/Security';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from '@mui/material/styles';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
+import { useConstant } from 'hooks';
 
 function Jumbotron() {
   const history = useHistory();
   const theme = useTheme();
   const [showArrow, setShowArrow] = useState(false);
   const jumbotronRef = useRef(null);
+  const initialViewPortHeight = useConstant(() => window.innerHeight);
 
   useEffect(() => {
     const checkHeight = () => {
@@ -71,7 +74,8 @@ function Jumbotron() {
       id="jumbotron"
       sx={{
         position: 'relative',
-        minHeight: '100vh',
+        minHeight: initialViewPortHeight,
+        height: initialViewPortHeight,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -114,10 +118,14 @@ function Jumbotron() {
         sx={{
           position: 'relative',
           zIndex: 1,
-          height: 'auto',
+          height: '100%', // Use 100% height
           display: 'flex',
           flexDirection: 'column',
           flex: 1,
+          py: {
+            xs: 2,
+            sm: 0,
+          },
         }}
       >
         {/* Center content wrapper */}
@@ -128,10 +136,8 @@ function Jumbotron() {
             justifyContent: 'center',
             flex: 1,
             my: {
-              xs: `${theme.mixins.toolbar.minHeight}px`,
-              [theme.breakpoints.up(
-                'sm'
-              )]: `${theme.mixins.toolbar['@media (min-width:600px)'].minHeight}px`,
+              xs: 0,
+              sm: `${theme.mixins.toolbar.minHeight}px`,
             },
           }}
         >
@@ -150,14 +156,12 @@ function Jumbotron() {
             {/* Main Text */}
             <Stack spacing={2} alignItems="center">
               <Typography
-                variant="h1"
+                variant="h2"
                 align="center"
+                fontWeight={theme.typography.fontWeightBold}
                 sx={{
                   color: 'common.white',
-                  fontWeight: 800,
-                  fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
                   textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
-                  mb: 1,
                 }}
               >
                 Connect Anonymously,
@@ -168,13 +172,13 @@ function Jumbotron() {
               </Typography>
 
               <Typography
-                variant="h5"
+                variant="h6"
                 align="center"
+                fontWeight={theme.typography.fontWeightRegular}
                 sx={{
-                  color: 'common.white',
+                  display: { xs: 'none', sm: 'block' },
+                  color: 'grey.100',
                   maxWidth: '800px',
-                  fontSize: { xs: '1.1rem', md: '1.25rem' },
-                  lineHeight: 1.6,
                   opacity: 0.9,
                 }}
               >
@@ -185,62 +189,59 @@ function Jumbotron() {
             </Stack>
 
             {/* Feature Chips */}
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              flexWrap="wrap"
-              spacing={2}
-              justifyContent="center"
-              alignItems="center"
-              sx={{ py: 2 }}
-            >
-              <Chip
-                icon={<LockIcon />}
-                label="100% Anonymous"
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'common.white',
-                  '& .MuiSvgIcon-root': { color: 'common.white' },
-                }}
-              />
-              <Chip
-                icon={<SecurityIcon />}
-                label="End-to-End Encrypted"
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'common.white',
-                  '& .MuiSvgIcon-root': { color: 'common.white' },
-                }}
-              />
-              <Chip
-                icon={<GroupIcon />}
-                label="Global Community"
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  color: 'common.white',
-                  '& .MuiSvgIcon-root': { color: 'common.white' },
-                }}
-              />
-            </Stack>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
+              <Grid item>
+                <Chip
+                  icon={<LockIcon />}
+                  label="100% Anonymous"
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: 'common.white',
+                    '& .MuiSvgIcon-root': { color: 'common.white' },
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Chip
+                  icon={<SecurityIcon />}
+                  label="End-to-End Encrypted"
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: 'common.white',
+                    '& .MuiSvgIcon-root': { color: 'common.white' },
+                  }}
+                />
+              </Grid>
+              <Grid item>
+                <Chip
+                  icon={<GroupIcon />}
+                  label="Global Community"
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: 'common.white',
+                    '& .MuiSvgIcon-root': { color: 'common.white' },
+                  }}
+                />
+              </Grid>
+            </Grid>
 
             {/* CTA Buttons */}
             <Stack spacing={3} alignItems="center">
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
+                alignItems={{ xs: 'center', sm: 'flex-start' }}
                 spacing={2}
                 sx={{ width: '100%', maxWidth: 500 }}
               >
                 <Button
-                  fullWidth
                   variant="contained"
                   size="medium"
                   onClick={handleStartIndividualChat}
                   sx={{
                     py: 1.25,
-                    fontSize: '1rem',
-                    fontWeight: 600,
                     bgcolor: 'primary.main',
                     '&:hover': {
                       bgcolor: 'primary.dark',
@@ -250,14 +251,11 @@ function Jumbotron() {
                   Start Chatting Now
                 </Button>
                 <Button
-                  fullWidth
                   variant="outlined"
                   size="medium"
                   onClick={handleExploreRooms}
                   sx={{
                     py: 1.25,
-                    fontSize: '1rem',
-                    fontWeight: 600,
                     borderColor: 'rgba(255, 255, 255, 0.3)',
                     color: 'common.white',
                     '&:hover': {
@@ -276,7 +274,6 @@ function Jumbotron() {
                 sx={{
                   color: 'common.white',
                   opacity: 0.8,
-                  fontWeight: 500,
                 }}
               >
                 No sign-up required • Start chatting instantly • 100% free

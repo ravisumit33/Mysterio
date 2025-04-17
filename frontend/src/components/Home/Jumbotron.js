@@ -23,6 +23,7 @@ function Jumbotron() {
   const history = useHistory();
   const theme = useTheme();
   const [showArrow, setShowArrow] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(theme.mixins.toolbar.minHeight);
   const jumbotronRef = useRef(null);
   const initialViewPortHeight = useConstant(() => window.innerHeight);
 
@@ -31,6 +32,10 @@ function Jumbotron() {
       if (jumbotronRef.current) {
         const jumbotronRect = jumbotronRef.current.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
+        const headerElement = document.querySelector('header');
+
+        // Use header height if found, otherwise fallback to toolbar minHeight
+        setHeaderHeight(headerElement?.offsetHeight || theme.mixins.toolbar.minHeight);
 
         // Show arrow only when jumbotron fills viewport and is at the top
         setShowArrow(
@@ -51,7 +56,7 @@ function Jumbotron() {
       window.removeEventListener('resize', checkHeight);
       window.removeEventListener('scroll', checkHeight);
     };
-  }, []);
+  }, [theme.mixins.toolbar.minHeight]);
 
   const handleStartIndividualChat = () => {
     history.push('/chat/match/');
@@ -118,14 +123,10 @@ function Jumbotron() {
         sx={{
           position: 'relative',
           zIndex: 1,
-          height: '100%', // Use 100% height
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           flex: 1,
-          py: {
-            xs: 2,
-            sm: 0,
-          },
         }}
       >
         {/* Center content wrapper */}
@@ -135,10 +136,7 @@ function Jumbotron() {
             alignItems: 'center',
             justifyContent: 'center',
             flex: 1,
-            my: {
-              xs: 0,
-              sm: `${theme.mixins.toolbar.minHeight}px`,
-            },
+            my: `${headerHeight}px`,
           }}
         >
           <Stack
@@ -158,8 +156,8 @@ function Jumbotron() {
               <Typography
                 variant="h2"
                 align="center"
-                fontWeight={theme.typography.fontWeightBold}
                 sx={{
+                  fontWeight: theme.typography.fontWeightBold,
                   color: 'common.white',
                   textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
                 }}
@@ -171,21 +169,22 @@ function Jumbotron() {
                 </Box>
               </Typography>
 
-              <Typography
-                variant="h6"
-                align="center"
-                fontWeight={theme.typography.fontWeightRegular}
-                sx={{
-                  display: { xs: 'none', sm: 'block' },
-                  color: 'grey.100',
-                  maxWidth: '800px',
-                  opacity: 0.9,
-                }}
-              >
-                Experience the freedom of authentic conversations in a secure environment. Join
-                thousands of users worldwide in meaningful discussions without revealing your
-                identity.
-              </Typography>
+              <Container maxWidth="md">
+                <Typography
+                  variant="h6"
+                  align="center"
+                  sx={{
+                    fontWeight: theme.typography.fontWeightRegular,
+                    display: { xs: 'none', sm: 'block' },
+                    color: 'grey.100',
+                    opacity: 0.9,
+                  }}
+                >
+                  Experience the freedom of authentic conversations in a secure environment. Join
+                  thousands of users worldwide in meaningful discussions without revealing your
+                  identity.
+                </Typography>
+              </Container>
             </Stack>
 
             {/* Feature Chips */}
@@ -342,7 +341,7 @@ function Jumbotron() {
                 }}
                 onClick={handleArrowClick}
               >
-                <KeyboardArrowDownIcon sx={{ fontSize: '2.5rem' }} />
+                <KeyboardArrowDownIcon sx={{ fontSize: { xs: '1.5rem', sm: '2.5rem' } }} />
               </IconButton>
             </Box>
           </Box>

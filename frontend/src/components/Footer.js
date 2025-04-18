@@ -8,6 +8,14 @@ import { Link as RouterLink } from 'react-router-dom';
 
 function Footer() {
   const theme = useTheme();
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <Box
       id="footer"
@@ -65,16 +73,40 @@ function Footer() {
               Quick Links
             </Typography>
             <Stack spacing={1}>
-              <Link component={RouterLink} to="/" color="inherit" underline="hover">
+              <Link
+                component="button"
+                onClick={() => scrollToSection('jumbotron')}
+                color="inherit"
+                underline="hover"
+                sx={{ textAlign: 'left' }}
+              >
                 Home
               </Link>
-              <Link component={RouterLink} to="/features" color="inherit" underline="hover">
-                Features
-              </Link>
-              <Link component={RouterLink} to="/how-it-works" color="inherit" underline="hover">
+              <Link
+                component="button"
+                onClick={() => scrollToSection('how-it-works')}
+                color="inherit"
+                underline="hover"
+                sx={{ textAlign: 'left' }}
+              >
                 How It Works
               </Link>
-              <Link component={RouterLink} to="/faq" color="inherit" underline="hover">
+              <Link
+                component="button"
+                onClick={() => scrollToSection('app-download')}
+                color="inherit"
+                underline="hover"
+                sx={{ textAlign: 'left' }}
+              >
+                Download app
+              </Link>
+              <Link
+                component="button"
+                onClick={() => scrollToSection('faq')}
+                color="inherit"
+                underline="hover"
+                sx={{ textAlign: 'left' }}
+              >
                 FAQ
               </Link>
             </Stack>

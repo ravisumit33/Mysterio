@@ -9,6 +9,10 @@ import AppWait from './AppWait';
 import UserInfoDialog from './UserInfoDialog';
 import NewRoom from './NewRoom';
 import ErrorUI from './ErrorUI';
+import PrivacyPolicy from './PrivacyPolicy';
+import TermsOfService from './TermsOfService';
+import CookiePolicy from './CookiePolicy';
+import ScrollToTop from './ScrollToTop';
 
 export {
   NavBar,
@@ -22,4 +26,8 @@ export {
   UserInfoDialog,
   NewRoom,
   ErrorUI,
+  PrivacyPolicy,
+  TermsOfService,
+  CookiePolicy,
+  ScrollToTop,
 };

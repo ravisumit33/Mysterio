@@ -16,6 +16,10 @@ import {
   AppWait,
   NewRoom,
   ErrorUI,
+  PrivacyPolicy,
+  TermsOfService,
+  CookiePolicy,
+  ScrollToTop,
 } from 'components';
 import { fetchUrl, isCordovaEnv, isDevEnv } from 'utils';
 import { profileStore } from 'stores';
@@ -67,6 +71,7 @@ function App() {
           <AppWait />
           {!/\/chat.*/.test(pathname) && <NavBar />}
           <UserInfoDialog />
+          <ScrollToTop />
           <Switch>
             <Route exact path="/">
               <Home />
@@ -88,6 +93,15 @@ function App() {
             </Route>
             <Route path="/room">
               <NewRoom />
+            </Route>
+            <Route path="/privacy">
+              <PrivacyPolicy />
+            </Route>
+            <Route path="/terms">
+              <TermsOfService />
+            </Route>
+            <Route path="/cookies">
+              <CookiePolicy />
             </Route>
           </Switch>
         </Stack>

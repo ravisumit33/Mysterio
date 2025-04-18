@@ -5,8 +5,8 @@ import { Box, Container, Paper } from '@mui/material';
 function CenterPaper(props) {
   const { children } = props;
   return (
-    <Box my={3}>
-      <Container maxWidth="sm">
+    <Box my={8}>
+      <Container maxWidth="sm" sx={{ py: 3 }}>
         <Paper variant="elevation" elevation={2}>
           <Box p={3}>{children}</Box>
         </Paper>

@@ -64,6 +64,11 @@ function ChatContainer() {
     setInitializating(false);
   };
 
+  // Remove chat window when going out of chat route
+  useEffect(() => () => appStore.removeChatWindow(), []);
+
+  // Remove chat window when changing pathname inside chat route
+  // e.g. doing reconnect in indiviudal chat
   useEffect(() => {
     if (pathname.match(OngoingChatRegex)) {
       return () => appStore.removeChatWindow();

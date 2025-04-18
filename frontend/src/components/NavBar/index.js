@@ -291,6 +291,11 @@ function NavBar() {
         keepMounted
         open={Boolean(hamburgerTriggerElement)}
         onClose={handleHamburgerClose}
+        PaperProps={{
+          sx: {
+            minWidth: 180,
+          },
+        }}
       >
         {navbarBtns.map((navbarBtn) => (
           // eslint-disable-next-line react/jsx-props-no-spreading
@@ -304,9 +309,9 @@ function NavBar() {
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: trigger ? theme.palette.primary.main : 'transparent',
-        boxShadow: trigger ? 1 : 'none',
-        backdropFilter: !trigger ? 'blur(10px)' : 'none',
+        backgroundColor: atHomePage && !trigger ? 'transparent' : theme.palette.primary.main,
+        boxShadow: atHomePage && !trigger ? 'none' : 1,
+        backdropFilter: atHomePage && !trigger ? 'blur(10px)' : 'none',
         transition: theme.transitions.create(['background-color', 'box-shadow', 'backdrop-filter']),
       }}
     >
@@ -352,7 +357,7 @@ function NavBar() {
                   variant="contained"
                   color="secondary"
                   endIcon={<ArrowForward />}
-                  onClick={() => history.push('/chat/match')}
+                  onClick={() => history.push('/chat/match/')}
                 >
                   Chat Now
                 </Button>

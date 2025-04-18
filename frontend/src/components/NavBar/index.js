@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import {
@@ -56,6 +56,51 @@ function NavBar() {
     disableHysteresis: true,
     threshold: 100,
   });
+
+  useEffect(() => {
+    const sections = [
+      { id: 'jumbotron', key: 'home' },
+      { id: 'how-it-works', key: 'how-it-works' },
+      { id: 'chat-experience', key: 'chat-experience' },
+      { id: 'app-download', key: 'app-download' },
+      { id: 'faq', key: 'faq' },
+      { id: 'cta', key: 'cta' },
+      { id: 'footer', key: 'footer' },
+    ];
+
+    const onChange = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const section = sections.find((s) => s.id === entry.target.id);
+          if (section) {
+            setFocusedBtnKey(section.key);
+          }
+        }
+      });
+    };
+
+    const intersectionObserver = new IntersectionObserver(onChange, {
+      root: null,
+      threshold: 0,
+      rootMargin: '-50% 0px -50% 0px',
+    });
+
+    sections.forEach((section) => {
+      const element = document.getElementById(section.id);
+      if (element) {
+        intersectionObserver.observe(element);
+      }
+    });
+
+    return () => {
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id);
+        if (element) {
+          intersectionObserver.unobserve(element);
+        }
+      });
+    };
+  }, []);
 
   const handleNavbarBtnClick = (key) => {
     setFocusedBtnKey(key);
@@ -234,7 +279,7 @@ function NavBar() {
 
   const navbarMenu = navbarBtns.map((navbarBtn) => (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <NavbarButton {...navbarBtn.commonProps} />
+    <NavbarButton key={navbarBtn.key} {...navbarBtn.commonProps} />
   ));
   const hamburgerMenu = (
     <Box sx={{ display: { xs: 'block', md: 'none' } }}>

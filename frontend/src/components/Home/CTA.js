@@ -5,6 +5,7 @@ function CTA() {
   const theme = useTheme();
   return (
     <Box
+      id="cta"
       sx={{
         py: 12,
         position: 'relative',

@@ -10,6 +10,7 @@ function Footer() {
   const theme = useTheme();
   return (
     <Box
+      id="footer"
       component="footer"
       sx={{
         py: 6,

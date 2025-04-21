@@ -72,13 +72,12 @@ function Footer() {
             <Typography variant="h6" gutterBottom>
               Quick Links
             </Typography>
-            <Stack spacing={1}>
+            <Stack spacing={1} alignItems={{ xs: 'center', sm: 'flex-start' }}>
               <Link
                 component="button"
                 onClick={() => scrollToSection('jumbotron')}
                 color="inherit"
                 underline="hover"
-                sx={{ textAlign: 'left' }}
               >
                 Home
               </Link>
@@ -87,7 +86,6 @@ function Footer() {
                 onClick={() => scrollToSection('how-it-works')}
                 color="inherit"
                 underline="hover"
-                sx={{ textAlign: 'left' }}
               >
                 How It Works
               </Link>
@@ -96,7 +94,6 @@ function Footer() {
                 onClick={() => scrollToSection('app-download')}
                 color="inherit"
                 underline="hover"
-                sx={{ textAlign: 'left' }}
               >
                 Download app
               </Link>
@@ -105,7 +102,6 @@ function Footer() {
                 onClick={() => scrollToSection('faq')}
                 color="inherit"
                 underline="hover"
-                sx={{ textAlign: 'left' }}
               >
                 FAQ
               </Link>

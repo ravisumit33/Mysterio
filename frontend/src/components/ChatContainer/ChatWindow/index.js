@@ -14,6 +14,7 @@ import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import { useChatSound, useNewMessage } from 'hooks';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Replay } from '@mui/icons-material';
+import AwesomeDebouncePromise from 'awesome-debounce-promise';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -113,9 +114,9 @@ function ChatWindow(props) {
   useEffect(() => {
     const rootElement = document.querySelector('#root');
     /*
-     * Fix root element to visual viewport
+     * Fix root element to viewport so that chatWindow is removed from the document flow and fixed. It fixes issues such as unwanted scroll.
      * https://stackoverflow.com/a/68359419/6842304
-     * Explore dvh when it is supported by all browsers https://caniuse.com/?search=dvh
+     * We cannot use viewport units like dvh. It makes the chatWindow full screen but user can still scroll down since layout viewport is not resized.
      */
     // @ts-ignore
     rootElement.style.position = 'fixed';
@@ -137,15 +138,17 @@ function ChatWindow(props) {
           `${originalMetaViewportContent}, interactive-widget=resizes-content`
         );
     }
+
+    const scrollToTop = () => window.scrollTo(0, 0);
     const handleResize = () => {
       if (isSafari) {
         /*
          * Safari doesn't support interactive-widget
-         * So, we need to manually resize root element and scroll to top
+         * So, we need to manually resize root element and scroll to top but it still let user scroll down the chat window since layout viewport is not resized
          */
         // @ts-ignore
         rootElement.style.height = `${window.visualViewport.height}px`;
-        window.scrollTo(0, 0);
+        scrollToTop();
       }
 
       const chatWindow = document.querySelector('#chatWindow');
@@ -162,9 +165,22 @@ function ChatWindow(props) {
         setShouldRenderFixed(false);
       }
     };
+    const handleTouchEnd = () => {
+      if (isSafari) {
+        /*
+         * Since safari doesn't support interactive-widget, we need to manually scroll to top when the touch end
+         */
+        if (window.scrollY > 0) {
+          scrollToTop();
+        }
+      }
+    };
+    const debouncedHandleTouchEnd = AwesomeDebouncePromise(handleTouchEnd, 50);
+    window.addEventListener('touchend', debouncedHandleTouchEnd);
     window.visualViewport.addEventListener('resize', handleResize);
     return () => {
       window.visualViewport.removeEventListener('resize', handleResize);
+      window.removeEventListener('touchend', debouncedHandleTouchEnd);
       // @ts-ignore
       rootElement.style.position = '';
       // @ts-ignore

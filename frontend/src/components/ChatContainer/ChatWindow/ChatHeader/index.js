@@ -155,7 +155,7 @@ function ChatHeader() {
           </Tooltip>
           <Tooltip title="Close" arrow>
             <IconButton
-              onClick={() => history.push('/')}
+              onClick={() => history.replace('/')}
               className={classes.icon}
               sx={{ zIndex: theme.zIndex.snackbar + 1 }}
               size="large"

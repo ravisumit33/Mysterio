@@ -125,6 +125,10 @@ class ChatConsumer(WebsocketConsumer):
                 self.channel_name,
             )
             if not channel_layer_info["is_group_consumer"]:
+                # Room is scheduled to be deleted.
+                # This is done to counter if user has disconnected due to network issues
+                # and can rejoin within CHAT_SESSION_DELETION_DELAY
+                # If the user doesn't join, room will be deleted and other user will be notified
                 IndividualRoomDeletor.schedule_deletion(self.room_id)
             if self.profile:
                 channel_layer.group_send(

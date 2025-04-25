@@ -1,6 +1,6 @@
 import log from 'loglevel';
-import React, { useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
@@ -49,48 +49,53 @@ const useStyles = makeStyles((theme) => ({
       margin: '0 auto',
     },
   },
+  fullScreen: {
+    [theme.breakpoints.down('sm')]: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 0,
+    },
+  },
 }));
 
 function ChatContainer() {
   const { chatWindow: chatWindowStore } = appStore;
   const { pathname } = useLocation();
-  const history = useHistory();
-  const [initializating, setInitializating] = useState(true);
+  const [initializating, setInitializating] = useState(false);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
   const [searchParams] = useSearchParams();
+  const prevPathnameRef = useRef(null);
 
   const startChat = (chatWindowData) => {
     appStore.addChatWindow(chatWindowData);
     setInitializating(false);
   };
 
-  // Remove chat window when going out of chat route
-  useEffect(() => () => appStore.removeChatWindow(), []);
-
-  // Remove chat window when changing pathname inside chat route
-  // e.g. doing reconnect in indiviudal chat
+  // When pathname changes inside chat route, we have to recreate chat window
+  // e.g. doing reconnect in individual chat, moving from one group chat to another
+  // Exception is one case when random search completes in which chat window is already created
+  // There is a tricky case in dual chat when match is not found and user does reconnect.
+  // In that case we replace the history with the same pathname, essentially updating the pathname (as an object)
   useEffect(() => {
-    if (pathname.match(OngoingChatRegex)) {
-      return () => appStore.removeChatWindow();
-    }
-    return () => {};
-  }, [pathname]);
-
-  useEffect(() => {
-    const unlisten = history.listen((location) => {
-      const { pathname: newPathname } = location;
-      const isChatUrl = newPathname.match(/^\/chat\/.*$/);
-      /*
-       * If chat window is open and user navigates to a different chat route then reinitialize the chat window.
-       * History change after random search is expected so no need to reinitialize.
-       */
-      const shouldReInitialize = isChatUrl && !pathname.match(/^\/chat\/match\/$/);
-      if (shouldReInitialize && newPathname !== pathname) {
-        setInitializating(true);
+    const prevPathname = prevPathnameRef.current;
+    const hasRandomSearchCompleted =
+      pathname.match(OngoingChatRegex) && prevPathname?.match(/^\/chat\/match\/?$/);
+    let cleanup = () => {};
+    if (hasRandomSearchCompleted) {
+      cleanup = () => appStore.removeChatWindow();
+    } else {
+      setInitializating(true);
+      const hasRandomSearchStarted = pathname.match(/^\/chat\/match\/?$/);
+      if (!hasRandomSearchStarted) {
+        cleanup = () => appStore.removeChatWindow();
       }
-    });
-    return () => unlisten();
-  }, [history, pathname]);
+    }
+    prevPathnameRef.current = pathname;
+    return cleanup;
+  }, [pathname]);
 
   useEffect(() => {
     if (initializating) {
@@ -150,27 +155,34 @@ function ChatContainer() {
   const render = () =>
     chatWindowStore ? (
       <ChatWindowStoreContext.Provider value={chatWindowStore}>
-        <Stack
-          sx={{ width: '100%', height: '100%', position: 'relative' }}
-          direction={isNotLargeScreen ? 'column' : 'row'}
-        >
-          <CardMedia
-            className={classes.bg}
-            image={ChatContainerBG}
-            title="ChatContainer Background"
-          />
-          <Box sx={{ flex: shouldOpenPlayer && { lg: 3, xs: 0 } }} className={classes.player}>
-            <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
-            {shouldOpenPlayer && <Player />}
-          </Box>
-          <Box
-            sx={{ flexGrow: 1, flexBasis: 0 }}
-            className={classes.chatWindowContainer}
-            id="chatWindow"
-          >
+        {isNotLargeScreen ? (
+          <>
+            <Box className={classes.fullScreen}>
+              <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
+              {shouldOpenPlayer && <Player />}
+            </Box>
             <ChatWindow />
-          </Box>
-        </Stack>
+          </>
+        ) : (
+          <Stack sx={{ width: '100%', height: '100%', position: 'relative' }} direction="row">
+            <CardMedia
+              className={classes.bg}
+              image={ChatContainerBG}
+              title="ChatContainer Background"
+            />
+            <Box sx={{ flex: shouldOpenPlayer && { lg: 3, xs: 0 } }} className={classes.player}>
+              <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
+              {shouldOpenPlayer && <Player />}
+            </Box>
+            <Box
+              sx={{ flexGrow: 1, flexBasis: 0 }}
+              className={classes.chatWindowContainer}
+              id="chatWindow"
+            >
+              <ChatWindow />
+            </Box>
+          </Stack>
+        )}
       </ChatWindowStoreContext.Provider>
     ) : (
       <Box width="100%">

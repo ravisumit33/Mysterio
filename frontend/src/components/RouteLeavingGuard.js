@@ -4,7 +4,7 @@ import { Prompt, useHistory } from 'react-router-dom';
 import ConfirmationDialog from './ConfirmationDialog';
 
 function RouteLeavingGuard(props) {
-  const { when, shouldBlockNavigation, dialogProps } = props;
+  const { when, shouldBlockNavigation, dialogProps, shouldReplaceRoute } = props;
   const history = useHistory();
   const [dialogVisible, setDialogVisible] = useState(false);
   const [toLocation, setToLocation] = useState(null);
@@ -24,9 +24,10 @@ function RouteLeavingGuard(props) {
   };
   useEffect(() => {
     if (confirmedNavigation && toLocation) {
-      history.push(toLocation.pathname, toLocation.state);
+      const navigateFunc = shouldReplaceRoute ? history.replace : history.push;
+      navigateFunc(toLocation.pathname, toLocation.state);
     }
-  }, [confirmedNavigation, history, toLocation]);
+  }, [confirmedNavigation, history, toLocation, shouldReplaceRoute]);
 
   return (
     <>
@@ -49,10 +50,12 @@ RouteLeavingGuard.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
   }).isRequired,
+  shouldReplaceRoute: PropTypes.bool,
 };
 RouteLeavingGuard.defaultProps = {
   when: true,
   shouldBlockNavigation: () => true,
+  shouldReplaceRoute: false,
 };
 
 export default RouteLeavingGuard;

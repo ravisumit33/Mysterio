@@ -1,14 +1,6 @@
 import React, { useContext, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-  CircularProgress,
-  IconButton,
-  Snackbar,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme,
-} from '@mui/material';
+import { CircularProgress, IconButton, Snackbar, Stack, Typography, useTheme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import ReplayIcon from '@mui/icons-material/Replay';
 import CloseIcon from '@mui/icons-material/Close';
@@ -19,6 +11,7 @@ import CustomAvatar from 'components/Avatar';
 import { ChatWindowStoreContext } from 'contexts';
 import { ChatStatus } from 'appConstants';
 import Animation from 'components/Animation';
+import TooltipButton from 'components/TooltipButton';
 import playingJson from 'assets/animations/playing.json';
 import likeJson from 'assets/animations/like.json';
 import { useSearchParams } from 'hooks';
@@ -80,7 +73,7 @@ function ChatHeader() {
     const handleReconnect = () => history.replace('/chat/match/');
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
-      <Tooltip title="Find match again" arrow>
+      <TooltipButton title="Find match again">
         <IconButton
           disabled={shouldDisable}
           onClick={handleReconnect}
@@ -90,14 +83,14 @@ function ChatHeader() {
         >
           <ReplayIcon />
         </IconButton>
-      </Tooltip>
+      </TooltipButton>
     );
   }, [chatStatus, classes.icon, history, theme.zIndex.snackbar]);
 
   const groupChatIcons = useMemo(() => {
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;
     return (
-      <Tooltip title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'} arrow>
+      <TooltipButton title={isFavorite ? 'Remove from favorite' : 'Mark as favorite'}>
         <IconButton
           disabled={shouldDisable}
           onClick={() => toggleLikeRoom()}
@@ -106,7 +99,7 @@ function ChatHeader() {
         >
           {!shouldDisable && isFavorite ? LikeAnimation : <FavoriteIcon />}
         </IconButton>
-      </Tooltip>
+      </TooltipButton>
     );
   }, [LikeAnimation, chatStatus, classes.icon, isFavorite, toggleLikeRoom]);
 
@@ -131,18 +124,18 @@ function ChatHeader() {
         </Stack>
         <Stack direction="row" alignItems="center">
           {!chatWindowStore.isGroupChat ? individualChatIcons : groupChatIcons}
-          <Tooltip
+          <TooltipButton
             title={`${chatWindowStore.shouldOpenPlayer ? 'Close' : 'Open'} video player`}
-            arrow
           >
             <IconButton
               disabled={chatStatus !== ChatStatus.ONGOING}
               onClick={() => {
                 const newUrlSearchParams = new URLSearchParams(searchParams.toString());
-                if (newUrlSearchParams.get('playerOpen') === 'true') {
-                  newUrlSearchParams.delete('playerOpen');
-                } else {
+                if (newUrlSearchParams.get('playerOpen') !== 'true') {
                   newUrlSearchParams.set('playerOpen', 'true');
+                }
+                if (newUrlSearchParams.get('chatMinimized') !== 'true') {
+                  newUrlSearchParams.set('chatMinimized', 'true');
                 }
                 // @ts-ignore
                 setSearchParams(newUrlSearchParams);
@@ -152,8 +145,8 @@ function ChatHeader() {
             >
               {chatWindowStore.playerExists ? PlayingAnimation : <PlayerIcon />}
             </IconButton>
-          </Tooltip>
-          <Tooltip title="Close" arrow>
+          </TooltipButton>
+          <TooltipButton title="Close">
             <IconButton
               onClick={() => history.replace('/')}
               className={classes.icon}
@@ -162,7 +155,7 @@ function ChatHeader() {
             >
               <CloseIcon />
             </IconButton>
-          </Tooltip>
+          </TooltipButton>
           {moreMenu}
         </Stack>
       </Stack>

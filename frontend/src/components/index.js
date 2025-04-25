@@ -13,6 +13,7 @@ import PrivacyPolicy from './PrivacyPolicy';
 import TermsOfService from './TermsOfService';
 import CookiePolicy from './CookiePolicy';
 import ScrollToTop from './ScrollToTop';
+import TooltipButton from './TooltipButton';
 
 export {
   NavBar,
@@ -30,4 +31,5 @@ export {
   TermsOfService,
   CookiePolicy,
   ScrollToTop,
+  TooltipButton,
 };

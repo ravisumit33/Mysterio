@@ -203,6 +203,7 @@ function Player() {
               onClick={() => {
                 const newUrlSearchParams = new URLSearchParams(searchParams.toString());
                 newUrlSearchParams.delete('playerOpen');
+                newUrlSearchParams.delete('chatMinimized');
                 // @ts-ignore
                 setSearchParams(newUrlSearchParams);
               }}

@@ -1,5 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { alpha, Box, Button, LinearProgress, Stack, Typography, useTheme } from '@mui/material';
+import {
+  alpha,
+  Box,
+  Button,
+  LinearProgress,
+  Stack,
+  Typography,
+  useTheme,
+  useMediaQuery,
+  Badge,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
@@ -11,10 +21,11 @@ import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
-import { useChatSound, useNewMessage } from 'hooks';
+import { useChatSound, useNewMessage, useGoToBottom, useChatBubble, useSearchParams } from 'hooks';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Replay } from '@mui/icons-material';
+import { Replay, ChatBubble } from '@mui/icons-material';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
+import PropTypes from 'prop-types';
 import ChatHeader from './ChatHeader';
 import ChatMessage from './ChatMessage';
 import InputBar from './InputBar';
@@ -29,13 +40,32 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
   },
   fixedChatWindow: {
-    [theme.breakpoints.down('lg')]: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: theme.spacing(40),
-      zIndex: 1,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    zIndex: 1,
+  },
+  floatingChatBubble: {
+    position: 'fixed',
+    right: theme.spacing(2),
+    bottom: theme.spacing(2),
+    zIndex: 1000,
+    '& .MuiBadge-badge': {
+      right: -3,
+      top: 13,
+      border: `2px solid ${theme.palette.background.paper}`,
+      padding: '0 4px',
+    },
+  },
+  chatBubbleButton: {
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
     },
   },
   infoMsgBox: {
@@ -77,6 +107,34 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+function FloatingChatBubble({ unreadCount, onClick, shouldShow }) {
+  const classes = useStyles();
+  return (
+    <Box className={classes.floatingChatBubble} sx={{ display: shouldShow ? 'block' : 'none' }}>
+      <Button
+        className={classes.chatBubbleButton}
+        onClick={onClick}
+        variant="contained"
+        color="primary"
+      >
+        <Badge badgeContent={unreadCount} color="error">
+          <ChatBubble />
+        </Badge>
+      </Button>
+    </Box>
+  );
+}
+
+FloatingChatBubble.propTypes = {
+  unreadCount: PropTypes.number.isRequired,
+  onClick: PropTypes.func.isRequired,
+  shouldShow: PropTypes.bool,
+};
+
+FloatingChatBubble.defaultProps = {
+  shouldShow: 'false',
+};
+
 function ChatWindow(props) {
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const {
@@ -91,11 +149,13 @@ function ChatWindow(props) {
   const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
-  const [shouldRenderFixed, setShouldRenderFixed] = useState(false);
   const classes = useStyles({ chatStatus });
   const { pathname } = useLocation();
   const history = useHistory();
   const theme = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // @ts-ignore
+  const isNotLargeScreen = useMediaQuery((thm) => thm.breakpoints.down('lg'));
   const ongoingChatUrl = `/chat/${roomType}/${roomId}/`;
   const shouldRedirect = initDone && pathname !== ongoingChatUrl;
   useEffect(() => {
@@ -150,20 +210,6 @@ function ChatWindow(props) {
         rootElement.style.height = `${window.visualViewport.height}px`;
         scrollToTop();
       }
-
-      const chatWindow = document.querySelector('#chatWindow');
-      const availableChatWindowHeight = chatWindow.clientHeight;
-      /*
-       * There are cases when chat window height becomes very small and chat messages are barely/not visible.
-       * One such case is when both player and virtual keyboard are simultaneously open on mobile devices.
-       * To avoid such UX, we render fixed chat window when chat window height is less than 320px.
-       * This ensures that chatWindow's height is always >= 320px so that sufficient number of messages are visible.
-       */
-      if (availableChatWindowHeight < parseInt(theme.spacing(40), 10)) {
-        setShouldRenderFixed(true);
-      } else {
-        setShouldRenderFixed(false);
-      }
     };
     const handleTouchEnd = () => {
       if (isSafari) {
@@ -196,10 +242,14 @@ function ChatWindow(props) {
     };
   }, [theme]);
 
+  // @ts-ignore
+  const chatMinimized = searchParams.get('chatMinimized') === 'true';
   const { hasNewMessage, newMessageInfo } = useNewMessage({
     initialRenderingDone,
     lastMessage,
   });
+  const chatBubbleNewMsgCnt = useChatBubble({ chatMinimized, hasNewMessage });
+  const { unreadMessagesCount, showBottomButton, setAtBottom } = useGoToBottom({ hasNewMessage });
 
   const shouldNotify = hasNewMessage && chatStatus === ChatStatus.ONGOING;
   useChatSound({ incomingMessageSound, chatStartedSound, shouldNotify, initDone });
@@ -268,6 +318,7 @@ function ChatWindow(props) {
     };
   }
 
+  const shouldShowChatBubble = isNotLargeScreen && chatMinimized;
   return shouldRedirect ? (
     <WaitScreen
       className={classes.backdrop}
@@ -275,70 +326,87 @@ function ChatWindow(props) {
       waitScreenText="Redirecting"
     />
   ) : (
-    <Stack
-      justifyContent="space-between"
-      className={clsx(classes.root, shouldRenderFixed && classes.fixedChatWindow)}
-    >
-      <Box className={clsx(classes.header, classes.section)}>
-        <ChatHeader />
-      </Box>
-      <Stack className={classes.msgBoxContainer}>
-        {shouldDisplayLoadingMessage && (
-          <WaitScreen
-            className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
-            shouldOpen={shouldDisplayLoadingMessage}
-            waitScreenText="Loading previous messages"
-            progressComponent={<LinearProgress sx={{ width: '100%' }} />}
-          />
-        )}
-        <WaitScreen
-          className={classes.backdrop}
-          shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
-          waitScreenText={roomId ? 'Entering room' : 'Finding your match'}
-        />
-        {initDone && (
-          <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
-            <RouteLeavingGuard
-              when={[ChatStatus.ONGOING, ChatStatus.RECONNECTING].includes(chatStatus)}
-              dialogProps={{
-                title: 'Do you want to close this chat?',
-                description: 'This will terminate this chat session.',
-              }}
-              shouldBlockNavigation={(nextLocation) => pathname !== nextLocation.pathname}
-            />
+    <>
+      <FloatingChatBubble
+        shouldShow={shouldShowChatBubble}
+        unreadCount={chatBubbleNewMsgCnt}
+        onClick={() => {
+          const newUrlSearchParams = new URLSearchParams(searchParams.toString());
+          newUrlSearchParams.set('chatMinimized', 'false');
+          // @ts-ignore
+          setSearchParams(newUrlSearchParams);
+        }}
+      />
 
-            <MessageBox
-              firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
-              hasNewMessage={hasNewMessage}
-              newMessageInfo={newMessageInfo}
-              chatMessages={chatMessages}
+      <Stack
+        justifyContent="space-between"
+        className={clsx(classes.root, isNotLargeScreen && classes.fixedChatWindow)}
+        sx={{ ...(shouldShowChatBubble && { display: 'none' }) }}
+      >
+        <Box className={clsx(classes.header, classes.section)}>
+          <ChatHeader />
+        </Box>
+        <Stack className={classes.msgBoxContainer}>
+          {shouldDisplayLoadingMessage && (
+            <WaitScreen
+              className={clsx(classes.backdrop, classes.loadingMessageBackDrop)}
+              shouldOpen={shouldDisplayLoadingMessage}
+              waitScreenText="Loading previous messages"
+              progressComponent={<LinearProgress sx={{ width: '100%' }} />}
             />
-          </Box>
-        )}
-        {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) && (
-          <Stack justifyContent="center" alignItems="center" className="overlay">
-            <Box className={classes.infoMsgBox}>
-              <Typography align="center" className={classes.regretMsg} variant="subtitle2">
-                {overlayContent.text}
-                <span className="emoji"> &#128542;</span>
-              </Typography>
+          )}
+          <WaitScreen
+            className={classes.backdrop}
+            shouldOpen={chatStatus === ChatStatus.NOT_STARTED}
+            waitScreenText={roomId ? 'Entering room' : 'Finding your match'}
+          />
+          {initDone && (
+            <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
+              <RouteLeavingGuard
+                when={[ChatStatus.ONGOING, ChatStatus.RECONNECTING].includes(chatStatus)}
+                dialogProps={{
+                  title: 'Do you want to close this chat?',
+                  description: 'This will terminate this chat session.',
+                }}
+                shouldBlockNavigation={(nextLocation) => pathname !== nextLocation.pathname}
+                shouldReplaceRoute
+              />
+
+              <MessageBox
+                firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
+                newMessageInfo={newMessageInfo}
+                chatMessages={chatMessages}
+                unreadMessagesCount={unreadMessagesCount}
+                showBottomButton={showBottomButton}
+                setAtBottom={setAtBottom}
+              />
             </Box>
-            {overlayContent.button && (
-              <Box mt={1}>
-                <Button
-                  variant="contained"
-                  endIcon={overlayContent.button.icon}
-                  onClick={overlayContent.button.action}
-                >
-                  {overlayContent.button.text}
-                </Button>
+          )}
+          {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) && (
+            <Stack justifyContent="center" alignItems="center" className="overlay">
+              <Box className={classes.infoMsgBox}>
+                <Typography align="center" className={classes.regretMsg} variant="subtitle2">
+                  {overlayContent.text}
+                  <span className="emoji"> &#128542;</span>
+                </Typography>
               </Box>
-            )}
-          </Stack>
-        )}
+              {overlayContent.button && (
+                <Box mt={1}>
+                  <Button
+                    variant="contained"
+                    endIcon={overlayContent.button.icon}
+                    onClick={overlayContent.button.action}
+                  >
+                    {overlayContent.button.text}
+                  </Button>
+                </Box>
+              )}
+            </Stack>
+          )}
+        </Stack>
+        <InputBar />
       </Stack>
-      <InputBar />
-    </Stack>
+    </>
   );
 }
 

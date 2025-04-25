@@ -4,17 +4,14 @@ const useChatSound = ({ incomingMessageSound, chatStartedSound, shouldNotify, in
   useEffect(() => {
     if (shouldNotify) {
       const incomingMessageAudio = new Audio(incomingMessageSound);
-      try {
-        incomingMessageAudio.play();
-      } catch (e) {
-        // This throws when the message is played before user has done any interaction
-      }
+      incomingMessageAudio.play().catch(() => {});
     }
   });
   useEffect(() => {
     if (initDone) {
       const chatStartedAudio = new Audio(chatStartedSound);
-      chatStartedAudio.play();
+      // This rejects when the message is played before user has done any interaction
+      chatStartedAudio.play().catch(() => {});
     }
   }, [chatStartedSound, initDone]);
 };

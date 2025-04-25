@@ -5,7 +5,6 @@ import { Virtuoso } from 'react-virtuoso';
 import { alpha, Badge, Box, IconButton, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType } from 'appConstants';
-import { useGoToBottom } from 'hooks';
 import { KeyboardDoubleArrowDown } from '@mui/icons-material';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,14 +25,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function MessageBox(props) {
-  const { firstItemIndex, hasNewMessage, newMessageInfo, chatMessages } = props;
+  const {
+    firstItemIndex,
+    newMessageInfo,
+    chatMessages,
+    unreadMessagesCount,
+    showBottomButton,
+    setAtBottom,
+  } = props;
 
   const [firstItemIdx, setFirstItemIdx] = useState(firstItemIndex);
   const messageListRef = useRef(null);
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { loadPreviousMessages, chatStatus } = chatWindowStore;
   const classes = useStyles({ chatStatus });
-  const { unreadMessagesCount, showBottomButton, setAtBottom } = useGoToBottom({ hasNewMessage });
 
   const handleChatWindowTopReached = () => {
     loadPreviousMessages().then((msgCnt) =>
@@ -88,17 +93,20 @@ function MessageBox(props) {
 
 MessageBox.propTypes = {
   firstItemIndex: PropTypes.number.isRequired,
-  hasNewMessage: PropTypes.bool,
   newMessageInfo: PropTypes.shape({
     senderType: PropTypes.oneOf(Object.values(MessageSenderType)),
   }),
   chatMessages: PropTypes.arrayOf(PropTypes.element),
+  unreadMessagesCount: PropTypes.number,
+  showBottomButton: PropTypes.bool,
+  setAtBottom: PropTypes.func.isRequired,
 };
 
 MessageBox.defaultProps = {
-  hasNewMessage: false,
   newMessageInfo: undefined,
   chatMessages: [],
+  unreadMessagesCount: 0,
+  showBottomButton: false,
 };
 
 export default MessageBox;

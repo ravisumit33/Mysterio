@@ -22,7 +22,7 @@ import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import { useChatSound, useNewMessage, useGoToBottom, useChatBubble, useSearchParams } from 'hooks';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { Replay, ChatBubble } from '@mui/icons-material';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';
 import PropTypes from 'prop-types';
@@ -136,6 +136,9 @@ FloatingChatBubble.defaultProps = {
 };
 
 function ChatWindow(props) {
+  const {
+    location: { pathname },
+  } = props;
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const {
     messageList,
@@ -150,7 +153,6 @@ function ChatWindow(props) {
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
   const classes = useStyles({ chatStatus });
-  const { pathname } = useLocation();
   const history = useHistory();
   const theme = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -368,7 +370,7 @@ function ChatWindow(props) {
                   title: 'Do you want to close this chat?',
                   description: 'This will terminate this chat session.',
                 }}
-                shouldBlockNavigation={(nextLocation) => pathname !== nextLocation.pathname}
+                shouldBlockNavigation={(nextLocation) => nextLocation.pathname !== ongoingChatUrl}
                 shouldReplaceRoute
               />
 
@@ -409,5 +411,11 @@ function ChatWindow(props) {
     </>
   );
 }
+
+ChatWindow.propTypes = {
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 export default observer(ChatWindow);

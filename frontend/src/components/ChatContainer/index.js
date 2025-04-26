@@ -1,6 +1,6 @@
 import log from 'loglevel';
-import React, { useEffect, useState, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
@@ -12,7 +12,7 @@ import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
 import notFoundJson from 'assets/animations/not-found.json';
-import { RoomType, OngoingChatRegex } from 'appConstants';
+import { RoomType, OngoingChatRegex, ChatStatus } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
@@ -61,47 +61,45 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function ChatContainer() {
+function ChatContainer(props) {
+  const { type: chatWindowType, location } = props;
+  const { pathname } = location;
   const { chatWindow: chatWindowStore } = appStore;
-  const { pathname } = useLocation();
   const [initializating, setInitializating] = useState(false);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
   const [searchParams] = useSearchParams();
-  const prevPathnameRef = useRef(null);
 
   const startChat = (chatWindowData) => {
     appStore.addChatWindow(chatWindowData);
     setInitializating(false);
   };
 
-  // When pathname changes inside chat route, we have to recreate chat window
-  // e.g. doing reconnect in individual chat, moving from one group chat to another
-  // Exception is one case when random search completes in which chat window is already created
-  // There is a tricky case in dual chat when match is not found and user does reconnect.
-  // In that case we replace the history with the same pathname, essentially updating the pathname (as an object)
   useEffect(() => {
-    const prevPathname = prevPathnameRef.current;
-    const hasRandomSearchCompleted =
-      pathname.match(OngoingChatRegex) && prevPathname?.match(/^\/chat\/match\/?$/);
-    let cleanup = () => {};
-    if (hasRandomSearchCompleted) {
-      cleanup = () => appStore.removeChatWindow();
-    } else {
+    if (!chatWindowStore) {
       setInitializating(true);
-      const hasRandomSearchStarted = pathname.match(/^\/chat\/match\/?$/);
-      if (!hasRandomSearchStarted) {
-        cleanup = () => appStore.removeChatWindow();
-      }
     }
-    prevPathnameRef.current = pathname;
+    let cleanup = () => {};
+    if (chatWindowType === 'match') {
+      cleanup = () => {
+        if (chatWindowStore?.chatStatus === ChatStatus.NO_MATCH_FOUND) {
+          /*
+           * If match is not found we need to remove chat window,
+           * otherwise it will be removed when room route unmounts
+           */
+          appStore.removeChatWindow();
+        }
+      };
+    } else if (chatWindowType === 'room') {
+      cleanup = () => appStore.removeChatWindow();
+    }
     return cleanup;
-  }, [pathname]);
+  }, [chatWindowType, chatWindowStore]);
 
   useEffect(() => {
     if (initializating) {
       // ChatContainer initializes chatWindow in appStore with the stored data (overwrites old stale chatwindow).
-      const ongoingChatMatch = pathname.match(OngoingChatRegex);
-      if (ongoingChatMatch) {
+      if (chatWindowType === 'room') {
+        const ongoingChatMatch = pathname.match(OngoingChatRegex);
         const { roomType, roomId } = ongoingChatMatch.groups;
         if (Object.values(RoomType).includes(roomType)) {
           const isGroupRoom = roomType === RoomType.GROUP;
@@ -137,15 +135,11 @@ function ChatContainer() {
             startChat(chatWindowData);
           }
         }
-      } else {
-        const randomSearchInProgressRegex = /^\/chat\/match\/?$/;
-        const randomSearchInProgress = pathname.match(randomSearchInProgressRegex);
-        if (randomSearchInProgress) {
-          startChat();
-        }
+      } else if (chatWindowType === 'match') {
+        startChat();
       }
     }
-  }, [initializating, pathname]);
+  }, [initializating, chatWindowType, pathname]);
   // @ts-ignore
   const shouldOpenPlayer = searchParams.get('playerOpen') === 'true';
   const classes = useStyles();
@@ -161,7 +155,7 @@ function ChatContainer() {
               <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
               {shouldOpenPlayer && <Player />}
             </Box>
-            <ChatWindow />
+            <ChatWindow location={location} />
           </>
         ) : (
           <Stack sx={{ width: '100%', height: '100%', position: 'relative' }} direction="row">
@@ -179,7 +173,7 @@ function ChatContainer() {
               className={classes.chatWindowContainer}
               id="chatWindow"
             >
-              <ChatWindow />
+              <ChatWindow location={location} />
             </Box>
           </Stack>
         )}
@@ -220,5 +214,12 @@ function ChatContainer() {
     </>
   );
 }
+
+ChatContainer.propTypes = {
+  type: PropTypes.string.isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
+  }).isRequired,
+};
 
 export default observer(ChatContainer);

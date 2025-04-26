@@ -17,7 +17,9 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, Logout, Login, ArrowForward } from '@mui/icons-material';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
+import { ProfileActions } from 'stores/actions';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
@@ -50,6 +52,8 @@ function NavBar() {
   const atHomePage = location.pathname === '/';
   const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
+  // @ts-ignore
+  const { profileStore, profileDispatch } = useProfileStore();
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
   const trigger = useScrollTrigger({
@@ -207,7 +211,7 @@ function NavBar() {
   const logoutIcon = useMemo(() => <Logout />, []);
   const loginIcon = useMemo(() => <Login />, []);
   const accountNavbarButtons = [];
-  if (profileStore.isLoggedIn) {
+  if (isLoggedIn(profileStore)) {
     accountNavbarButtons.push({
       type: 'icon',
       data: {
@@ -223,7 +227,7 @@ function NavBar() {
           })
             .then(() => {
               history.replace('/');
-              profileStore.setEmail('');
+              profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email: '' } });
             })
             .catch(() =>
               appStore.showAlert({

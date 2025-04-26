@@ -12,6 +12,7 @@ import {
   ThemeProvider,
   StyledEngineProvider,
 } from '@mui/material';
+import { RootProvider } from 'stores/providers';
 import * as serviceWorker from './serviceWorker';
 
 if (process.env.NODE_ENV === 'production') {
@@ -54,7 +55,9 @@ const renderReactDom = () => {
     <Router>
       <StyledEngineProvider injectFirst>
         <ThemeProvider theme={theme}>
-          <App />
+          <RootProvider>
+            <App />
+          </RootProvider>
         </ThemeProvider>
       </StyledEngineProvider>
     </Router>,

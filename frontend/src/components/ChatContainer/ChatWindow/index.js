@@ -16,7 +16,7 @@ import clsx from 'clsx';
 import { teal } from '@mui/material/colors';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
-import { profileStore } from 'stores';
+import { useProfileStore } from 'stores';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
@@ -139,6 +139,8 @@ function ChatWindow(props) {
   const {
     location: { pathname },
   } = props;
+  // @ts-ignore
+  const { profileStore } = useProfileStore();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const {
     messageList,

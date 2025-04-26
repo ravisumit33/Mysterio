@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Button, Stack, TextField } from '@mui/material';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import ConfirmationDialog from 'components/ConfirmationDialog';
+import { ProfileActions } from 'stores/actions';
 
 function Profile() {
   const history = useHistory();
   const location = useLocation();
+  // @ts-ignore
+  const { profileStore, profileDispatch } = useProfileStore();
 
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
@@ -27,7 +30,7 @@ function Profile() {
           severity: 'success',
         });
         history.replace('/');
-        profileStore.setEmail('');
+        profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email: '' } });
       })
       .catch(() => {
         appStore.showAlert({

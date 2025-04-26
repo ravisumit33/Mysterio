@@ -17,11 +17,14 @@ import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
 import { useGetPlayer, useHandlePlayer, useSearchParams } from 'hooks';
 import RouterLink from 'components/RouterLink';
-import { profileStore } from 'stores';
+import { useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
 function Player() {
+  // @ts-ignore
+  const { profileStore } = useProfileStore();
   const location = useLocation();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { roomInfo, syncedPlayerData, isHost, updatePlayer, syncPlayer, handlePlayerDelete } =
@@ -170,7 +173,7 @@ function Player() {
             {!syncedPlayerData && !adminAccess && (
               <Typography variant="h5" color="textSecondary" align="center" mt={2}>
                 {'No video. Only admin can play. '}
-                {!profileStore.isLoggedIn && (
+                {!isLoggedIn(profileStore) && (
                   <>
                     {'If you have admin rights, '}
                     <RouterLink to={{ pathname: '/login', state: { from: location } }}>

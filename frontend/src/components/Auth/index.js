@@ -3,7 +3,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react-lite';
 import { Divider, Stack, Typography } from '@mui/material';
-import { profileStore } from 'stores';
+import { useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
 import CenterPaper from 'components/CenterPaper';
 import UserForm from './UserForm';
 import SocialAuth from './SocialAuth';
@@ -14,12 +15,14 @@ function Auth(props) {
   const location = useLocation();
   // @ts-ignore
   const { from } = location.state || { from: { pathname: '/' } };
+  // @ts-ignore
+  const { profileStore } = useProfileStore();
 
   useEffect(() => {
-    if (profileStore.isLoggedIn) history.replace(from);
+    if (isLoggedIn(profileStore)) history.replace(from);
   });
 
-  const shouldRenderAuth = profileStore.profileInitialized && !profileStore.isLoggedIn;
+  const shouldRenderAuth = profileStore.profileInitialized && !isLoggedIn(profileStore);
   if (!shouldRenderAuth) return null;
 
   return (

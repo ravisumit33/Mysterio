@@ -2,13 +2,14 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout, RoomType } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
-import profileStore from '../ProfileStore';
+import profileManager from './profile';
 
-class Socket {
+class SocketManager {
   maxRetries = 10;
 
-  constructor(chatWindowStore) {
+  constructor(chatWindowStore, profileStore) {
     this.chatWindowStore = chatWindowStore;
+    this.profileStore = profileStore;
     this.init();
   }
 
@@ -40,11 +41,11 @@ class Socket {
 
   handleOpen = () => {
     log.info('socket connection established');
-    profileStore.userInfoCompletedPromise.then(() => {
+    profileManager.waitUntilReady().then(() => {
       this.send(MessageType.USER_INFO, {
-        sessionId: profileStore.sessionId,
-        name: profileStore.name,
-        avatarUrl: profileStore.avatarUrl,
+        sessionId: this.profileStore.sessionId,
+        name: this.profileStore.name,
+        avatarUrl: this.profileStore.avatarUrl,
       });
     });
   };
@@ -121,4 +122,4 @@ class Socket {
   };
 }
 
-export default Socket;
+export default SocketManager;

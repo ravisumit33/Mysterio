@@ -10,11 +10,12 @@ import {
 } from '@mui/material';
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { useBasicInfo, useLocalStorage } from 'hooks';
 import { BrowserStorageKeys } from 'appConstants';
 import BasicInfo from './BasicInfo';
+import { ProfileActions } from 'stores/actions';
 
 const userAvatarStyles = [
   'adventurer',
@@ -48,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 function UserInfoDialog() {
   const classes = useStyles();
+  const { profileStore, profileDispatch } = useProfileStore();
   const [storedProfileName, setStoredProfileName] = useLocalStorage(BrowserStorageKeys.profileName);
   const [storedProfileAvatarUrl, setStoredProfileAvatarUrl] = useLocalStorage(
     BrowserStorageKeys.profileAvatarUrl
@@ -58,13 +60,18 @@ function UserInfoDialog() {
   useEffect(() => {
     const hasStoredUserInfo = storedProfileName && storedProfileAvatarUrl && storedProfileSessionId;
     if (hasStoredUserInfo) {
-      profileStore.setName(storedProfileName);
-      profileStore.setAvatarUrl(storedProfileAvatarUrl);
-      profileStore.setSessionId(storedProfileSessionId);
+      profileDispatch({
+        type: ProfileActions.SET_BASIC_INFO,
+        payload: {
+          name: storedProfileName,
+          avatarUrl: storedProfileAvatarUrl,
+          sessionId: storedProfileSessionId,
+        },
+      });
     } else {
       appStore.setShouldOpenUserInfoDialog(true);
     }
-  }, [storedProfileAvatarUrl, storedProfileName, storedProfileSessionId]);
+  }, [storedProfileAvatarUrl, storedProfileName, storedProfileSessionId, profileDispatch]);
 
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
     storedProfileName,
@@ -109,12 +116,15 @@ function UserInfoDialog() {
         appStore.setShouldShowAlert(false);
         setStoredProfileName(name);
         setStoredProfileAvatarUrl(url);
-        profileStore.setName(name);
-        profileStore.setAvatarUrl(url);
+        profileDispatch({ type: ProfileActions.SET_NAME, payload: { name } });
+        profileDispatch({ type: ProfileActions.SET_AVATAR_URL, payload: { avatarUrl: url } });
         if (!profileStore.sessionId) {
           const profileSessionId = `${Date.now()}`;
           setStoredProfileSessionId(profileSessionId);
-          profileStore.setSessionId(profileSessionId);
+          profileDispatch({
+            type: ProfileActions.SET_SESSION_ID,
+            payload: { sessionId: profileSessionId },
+          });
         }
         appStore.setShouldOpenUserInfoDialog(false);
       })

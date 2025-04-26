@@ -5,7 +5,8 @@ import { makeStyles } from '@mui/styles';
 import Alert from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,13 +20,15 @@ const useStyles = makeStyles((theme) => ({
 function LoginAction() {
   const location = useLocation();
   const history = useHistory();
+  // @ts-ignore
+  const { profileStore } = useProfileStore();
   const handleLogin = () => {
     handleAlertClose();
     history.push('/login', { from: location });
   };
 
   const handleAlertClose = () => appStore.setShouldShowAlert(false);
-  return profileStore.isLoggedIn ? null : (
+  return isLoggedIn(profileStore) ? null : (
     <>
       <Button color="secondary" size="small" onClick={handleLogin} variant="text">
         login

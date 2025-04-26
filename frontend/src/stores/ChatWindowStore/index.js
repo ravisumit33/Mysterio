@@ -1,10 +1,9 @@
-import { makeAutoObservable } from 'mobx';
 import { ChatStatus, MatchTimeout, MessageType, RoomType } from 'appConstants';
 import log from 'loglevel';
 import { fetchUrl, isEmptyObj } from 'utils';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
-import profileStore from '../ProfileStore';
-import Socket from './socket';
+import { SocketManager } from 'managers';
+import { isLoggedIn } from 'stores/selectors';
 
 class ChatWindowStore {
   avatarUrl = '';
@@ -25,12 +24,12 @@ class ChatWindowStore {
 
   syncedPlayerData = null; // synced player information if player is opened
 
-  constructor({ appStore, data }) {
-    makeAutoObservable(this);
+  constructor({ appStore, profileStore, data }) {
     this.appStore = appStore;
+    this.profileStore = profileStore;
     const initPromise = this.initState(data || {});
     initPromise.then(() => {
-      this.socket = new Socket(this);
+      this.socket = new SocketManager(this, profileStore);
     });
   }
 
@@ -161,7 +160,7 @@ class ChatWindowStore {
   get isHost() {
     if (this.syncedPlayerData) {
       const { host } = this.syncedPlayerData;
-      return profileStore.sessionId === host.session_id;
+      return this.profileStore.sessionId === host.session_id;
     }
     return false;
   }
@@ -403,7 +402,7 @@ class ChatWindowStore {
     })
       .then(() => this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }))
       .catch(() => {
-        const alertText = profileStore.isLoggedIn
+        const alertText = isLoggedIn(this.profileStore)
           ? 'Unable to change favorite status.'
           : 'Login required to change favorite status';
         this.appStore.showAlert({

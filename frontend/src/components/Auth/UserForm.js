@@ -14,10 +14,13 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl, getErrorString } from 'utils';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
+import { ProfileActions } from 'stores/actions';
 
 function UserForm(props) {
   const { shouldRegister, from } = props;
+  // @ts-ignore
+  const { profileDispatch } = useProfileStore();
   const history = useHistory();
   const location = useLocation();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
@@ -69,8 +72,8 @@ function UserForm(props) {
     })
       .then(() => {
         if (!shouldRegister) {
-          profileStore.setEmail(email);
-          profileStore.setSocial(false);
+          profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email } });
+          profileDispatch({ type: ProfileActions.SET_SOCIAL, payload: { social: false } });
           history.replace(from);
           appStore.setShouldShowAlert(false);
           appStore.showAlert({

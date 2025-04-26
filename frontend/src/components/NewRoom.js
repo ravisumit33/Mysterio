@@ -4,7 +4,8 @@ import { observer } from 'mobx-react-lite';
 import { FormControlLabel, TextField, Typography, Switch, Button, Stack } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import { Group } from '@mui/icons-material';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
 import { fetchUrl } from 'utils';
 import { useBasicInfo } from 'hooks';
 import { RoomType } from 'appConstants';
@@ -24,6 +25,8 @@ const roomAvatarStyles = [
 ];
 
 function NewRoom() {
+  // @ts-ignore
+  const { profileStore } = useProfileStore();
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -143,7 +146,7 @@ function NewRoom() {
       });
   };
 
-  return !profileStore.isLoggedIn ? (
+  return !isLoggedIn(profileStore) ? (
     <Redirect
       to={{
         pathname: '/login',

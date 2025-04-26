@@ -9,7 +9,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
-import { appStore, profileStore } from 'stores';
+import { appStore, useProfileStore } from 'stores';
+import { isLoggedIn } from 'stores/selectors';
+import { ProfileActions } from 'stores/actions';
 import {
   Box,
   Button,
@@ -48,6 +50,8 @@ function Account() {
   const location = useLocation();
   const { path } = useRouteMatch();
   const [selectedTab, setSelectedTab] = useState('Profile');
+  // @ts-ignore
+  const { profileStore, profileDispatch } = useProfileStore();
 
   const drawerTabs = [
     {
@@ -102,7 +106,7 @@ function Account() {
             </ListItemButton>
           ))}
         </List>
-        {profileStore.isLoggedIn ? (
+        {isLoggedIn(profileStore) ? (
           <List>
             <ListItemButton
               onClick={() => {
@@ -113,7 +117,7 @@ function Account() {
                 })
                   .then(() => {
                     history.replace('/');
-                    profileStore.setEmail('');
+                    profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email: '' } });
                   })
                   .catch(() =>
                     appStore.showAlert({
@@ -147,7 +151,7 @@ function Account() {
   );
 
   const renderTab = () => {
-    if (!profileStore.isLoggedIn) {
+    if (!isLoggedIn(profileStore)) {
       return (
         <CenterPaper>
           <Stack justifyContent="space-between" alignItems="center" spacing={1}>

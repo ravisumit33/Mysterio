@@ -72,8 +72,7 @@ function UserForm(props) {
     })
       .then(() => {
         if (!shouldRegister) {
-          profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email } });
-          profileDispatch({ type: ProfileActions.SET_SOCIAL, payload: { social: false } });
+          profileDispatch({ type: ProfileActions.LOGIN, payload: { email, social: false } });
           history.replace(from);
           appStore.setShouldShowAlert(false);
           appStore.showAlert({

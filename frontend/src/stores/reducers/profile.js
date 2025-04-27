@@ -23,6 +23,10 @@ export const profileReducer = (state, action) => {
       return { ...state, profileInitialized: true };
     case ProfileActions.SET_SOCIAL:
       return { ...state, social: action.payload.social };
+    case ProfileActions.LOGIN:
+      return { ...state, email: action.payload.email, social: action.payload.social };
+    case ProfileActions.LOGOUT:
+      return { ...state, email: '', social: false };
     default:
       return state;
   }

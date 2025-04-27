@@ -11,11 +11,11 @@ import {
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
 import { appStore, useProfileStore } from 'stores';
+import { ProfileActions } from 'stores/actions';
 import { fetchUrl } from 'utils';
 import { useBasicInfo, useLocalStorage } from 'hooks';
 import { BrowserStorageKeys } from 'appConstants';
 import BasicInfo from './BasicInfo';
-import { ProfileActions } from 'stores/actions';
 
 const userAvatarStyles = [
   'adventurer',
@@ -116,16 +116,15 @@ function UserInfoDialog() {
         appStore.setShouldShowAlert(false);
         setStoredProfileName(name);
         setStoredProfileAvatarUrl(url);
-        profileDispatch({ type: ProfileActions.SET_NAME, payload: { name } });
-        profileDispatch({ type: ProfileActions.SET_AVATAR_URL, payload: { avatarUrl: url } });
-        if (!profileStore.sessionId) {
-          const profileSessionId = `${Date.now()}`;
+        let profileSessionId = profileStore.sessionId;
+        if (!profileSessionId) {
+          profileSessionId = `${Date.now()}`;
           setStoredProfileSessionId(profileSessionId);
-          profileDispatch({
-            type: ProfileActions.SET_SESSION_ID,
-            payload: { sessionId: profileSessionId },
-          });
         }
+        profileDispatch({
+          type: ProfileActions.SET_BASIC_INFO,
+          payload: { name, avatarUrl: url, sessionId: profileSessionId },
+        });
         appStore.setShouldOpenUserInfoDialog(false);
       })
       .catch(() => {

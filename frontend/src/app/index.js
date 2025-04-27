@@ -53,12 +53,13 @@ function App() {
           const { email } = responseData;
           // @ts-ignore
           const isSociallyRegistered = responseData.is_socially_registered;
-          email && profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email } });
-          isSociallyRegistered &&
-            profileDispatch({
-              type: ProfileActions.SET_SOCIAL,
-              payload: { social: isSociallyRegistered },
-            });
+          profileDispatch({
+            type: ProfileActions.LOGIN,
+            payload: {
+              email: email || '',
+              social: isSociallyRegistered || false,
+            },
+          });
         }
       })
       .catch(() => {})

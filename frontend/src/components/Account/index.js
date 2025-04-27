@@ -117,7 +117,7 @@ function Account() {
                 })
                   .then(() => {
                     history.replace('/');
-                    profileDispatch({ type: ProfileActions.SET_EMAIL, payload: { email: '' } });
+                    profileDispatch({ type: ProfileActions.LOGOUT });
                   })
                   .catch(() =>
                     appStore.showAlert({

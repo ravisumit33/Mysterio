@@ -16,11 +16,10 @@ function SocialAuth() {
         body: { access_token: responseData.access_token },
       })
         .then((resp) => {
-          profileDispatch({ type: ProfileActions.SET_SOCIAL, payload: { social: true } });
           profileDispatch({
-            type: ProfileActions.SET_EMAIL,
+            type: ProfileActions.LOGIN,
             // @ts-ignore
-            payload: { email: resp.data.user.email },
+            payload: { email: resp.data.user.email, social: true },
           });
           appStore.showAlert({ text: 'Login Successful', severity: 'success' });
         })

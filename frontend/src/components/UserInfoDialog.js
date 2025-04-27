@@ -49,6 +49,7 @@ const useStyles = makeStyles((theme) => ({
 
 function UserInfoDialog() {
   const classes = useStyles();
+  // @ts-ignore
   const { profileStore, profileDispatch } = useProfileStore();
   const [storedProfileName, setStoredProfileName] = useLocalStorage(BrowserStorageKeys.profileName);
   const [storedProfileAvatarUrl, setStoredProfileAvatarUrl] = useLocalStorage(

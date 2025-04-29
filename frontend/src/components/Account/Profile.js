@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Button, Stack, TextField } from '@mui/material';
-import { appStore, useProfileStore } from 'stores';
+import { appStore } from 'stores';
+import { useAlertStore, useUserStore } from 'hooks';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import ConfirmationDialog from 'components/ConfirmationDialog';
-import { ProfileActions } from 'stores/actions';
 
 function Profile() {
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
-  const { profileStore, profileDispatch } = useProfileStore();
+  const { userStore, logout } = useUserStore();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
 
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
@@ -25,15 +27,15 @@ function Profile() {
       body: {},
     })
       .then(() => {
-        appStore.showAlert({
+        showAlert({
           text: `Account deleted successfully.`,
           severity: 'success',
         });
         history.replace('/');
-        profileDispatch({ type: ProfileActions.LOGOUT });
+        logout();
       })
       .catch(() => {
-        appStore.showAlert({
+        showAlert({
           text: `Error occurred while deleting account. Make sure you are logged in.`,
           severity: 'error',
         });
@@ -45,8 +47,8 @@ function Profile() {
     <>
       <CenterPaper>
         <Stack spacing={1}>
-          <TextField disabled size="small" fullWidth value={profileStore.email} label="Email" />
-          {!profileStore.social && (
+          <TextField disabled size="small" fullWidth value={userStore.email} label="Email" />
+          {!userStore.social && (
             <TextField
               disabled
               label="Password"

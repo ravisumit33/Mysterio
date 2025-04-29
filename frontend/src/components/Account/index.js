@@ -9,9 +9,9 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
-import { appStore, useProfileStore } from 'stores';
-import { isLoggedIn } from 'stores/selectors';
-import { ProfileActions } from 'stores/actions';
+import { appStore } from 'stores';
+import { useProfileStore, useUserStore, useAlertStore } from 'hooks';
+import { isLoggedIn } from 'selectors';
 import {
   Box,
   Button,
@@ -51,7 +51,11 @@ function Account() {
   const { path } = useRouteMatch();
   const [selectedTab, setSelectedTab] = useState('Profile');
   // @ts-ignore
-  const { profileStore, profileDispatch } = useProfileStore();
+  const { profileStore } = useProfileStore();
+  // @ts-ignore
+  const { userStore, logout } = useUserStore();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
 
   const drawerTabs = [
     {
@@ -106,7 +110,7 @@ function Account() {
             </ListItemButton>
           ))}
         </List>
-        {isLoggedIn(profileStore) ? (
+        {isLoggedIn(userStore) ? (
           <List>
             <ListItemButton
               onClick={() => {
@@ -117,10 +121,10 @@ function Account() {
                 })
                   .then(() => {
                     history.replace('/');
-                    profileDispatch({ type: ProfileActions.LOGOUT });
+                    logout();
                   })
                   .catch(() =>
-                    appStore.showAlert({
+                    showAlert({
                       text: 'Unable to log out. Make sure you are logged in.',
                       severity: 'error',
                     })
@@ -151,7 +155,7 @@ function Account() {
   );
 
   const renderTab = () => {
-    if (!isLoggedIn(profileStore)) {
+    if (!isLoggedIn(userStore)) {
       return (
         <CenterPaper>
           <Stack justifyContent="space-between" alignItems="center" spacing={1}>
@@ -237,7 +241,7 @@ function Account() {
           </Box>
         </Stack>
       </Route>
-      {!profileStore.social && (
+      {!userStore.social && (
         <Route path={`${path}/change-password`}>
           <ChangePassword />
         </Route>

@@ -15,8 +15,11 @@ import { appStore } from 'stores';
 import { ChatWindowStoreContext } from 'contexts';
 import { MessageType, PlayerName, renderPlayerName } from 'appConstants';
 import { getVideoIdFromUrl } from 'utils';
+import { useAlertStore } from 'hooks';
 
 function PlayerActions() {
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [selectedVideoId, setSelectedVideoId] = useState('');
@@ -44,7 +47,7 @@ function PlayerActions() {
   };
 
   const handleInvalidInput = () =>
-    appStore.showAlert({
+    showAlert({
       text: 'Invalid video link',
       severity: 'error',
     });

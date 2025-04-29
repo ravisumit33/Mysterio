@@ -22,8 +22,8 @@ import {
   ScrollToTop,
 } from 'components';
 import { fetchUrl, isCordovaEnv, isDevEnv } from 'utils';
-import { useProfileStore } from 'stores';
-import { ProfileActions } from 'stores/actions';
+import { useUserStore } from 'hooks';
+import { UserActions } from 'stores';
 
 if (isDevEnv()) {
   log.setDefaultLevel('trace');
@@ -41,35 +41,6 @@ const useStyles = makeStyles(() => ({
 function App() {
   const { pathname } = useLocation();
   const classes = useStyles();
-  // @ts-ignore
-  const { profileDispatch } = useProfileStore();
-
-  useEffect(() => {
-    fetchUrl('/api/account/user/')
-      .then((response) => {
-        const responseData = response.data;
-        if (responseData) {
-          // @ts-ignore
-          const { email } = responseData;
-          // @ts-ignore
-          const isSociallyRegistered = responseData.is_socially_registered;
-          profileDispatch({
-            type: ProfileActions.LOGIN,
-            payload: {
-              email: email || '',
-              social: isSociallyRegistered || false,
-            },
-          });
-        }
-      })
-      .catch(() => {})
-      .finally(() => profileDispatch({ type: ProfileActions.SET_PROFILE_INITIALIZED }));
-    return () => {
-      if (isCordovaEnv()) {
-        window.localStorage.removeItem('token');
-      }
-    };
-  }, [profileDispatch]);
 
   return (
     <Sentry.ErrorBoundary fallback={<ErrorUI />}>

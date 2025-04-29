@@ -9,6 +9,7 @@ import CustomAutoComplete from 'components/customAutoComplete';
 import Animation from 'components/Animation';
 import CustomAvatar from 'components/Avatar';
 import { appStore } from 'stores';
+import { useAlertStore } from 'hooks';
 import { RoomType } from 'appConstants';
 import TrendingGroupRooms from './TrendingGroupRooms';
 
@@ -52,6 +53,8 @@ const useStyles = makeStyles((theme) => ({
 function GroupChatUI() {
   const classes = useStyles();
   const history = useHistory();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const AddCircleAvatar = useMemo(
     () => (
       <Avatar>
@@ -159,7 +162,7 @@ function GroupChatUI() {
                       if (newSelectedGroupRoom.id === -1) {
                         setRoomAction('Create');
                         if (!pendingNewRoomName) {
-                          appStore.showAlert({
+                          showAlert({
                             text: 'Room name cannot be empty',
                             severity: 'error',
                           });

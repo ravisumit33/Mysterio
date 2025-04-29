@@ -12,7 +12,7 @@ import {
   ThemeProvider,
   StyledEngineProvider,
 } from '@mui/material';
-import { RootProvider } from 'stores/providers';
+import { RootProvider } from 'providers';
 import * as serviceWorker from './serviceWorker';
 
 if (process.env.NODE_ENV === 'production') {

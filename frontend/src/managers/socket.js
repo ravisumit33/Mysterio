@@ -7,9 +7,10 @@ import profileManager from './profile';
 class SocketManager {
   maxRetries = 10;
 
-  constructor(chatWindowStore, profileStore) {
+  constructor(chatWindowStore, profileStore, showAlert) {
     this.chatWindowStore = chatWindowStore;
     this.profileStore = profileStore;
+    this.showAlert = showAlert;
     this.init();
   }
 
@@ -76,8 +77,7 @@ class SocketManager {
       if (chatStatus === ChatStatus.NOT_STARTED) {
         const { appStore } = this.chatWindowStore;
         appStore.removeChatWindow();
-        appStore.setShouldShowAlert(false);
-        appStore.showAlert({
+        this.showAlert({
           text: `Error occured while connecting to server.`,
           severity: 'error',
         });

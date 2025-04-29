@@ -1,22 +1,32 @@
-import { ProfileActions } from 'stores/actions';
+import { ProfileActions } from '../actions';
 
 export const initialProfileState = {
   name: '',
   avatarUrl: '',
   sessionId: '',
-  email: '',
-  profileInitialized: false,
-  social: false,
+  isReady: false,
 };
 
 export const profileReducer = (state, action) => {
   switch (action.type) {
-    case ProfileActions.SET_PROFILE_INITIALIZED:
-      return { ...state, profileInitialized: true };
-    case ProfileActions.LOGIN:
-      return { ...state, email: action.payload.email, social: action.payload.social };
-    case ProfileActions.LOGOUT:
-      return { ...state, email: '', social: false };
+    case ProfileActions.SET_BASIC_INFO:
+      return {
+        ...state,
+        name: action.payload.name,
+        avatarUrl: action.payload.avatarUrl,
+        sessionId: action.payload.sessionId,
+        isReady: true,
+      };
+    case ProfileActions.HYDRATE: {
+      const { name, avatarUrl, sessionId } = action.payload;
+      return {
+        ...state,
+        name,
+        avatarUrl,
+        sessionId,
+        isReady: name && avatarUrl && sessionId,
+      };
+    }
     default:
       return state;
   }

@@ -16,12 +16,18 @@ import clsx from 'clsx';
 import { teal } from '@mui/material/colors';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
-import { useProfileStore } from 'stores';
 import incomingMessageSound from 'assets/sounds/message_pop.mp3';
 import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
-import { useChatSound, useNewMessage, useGoToBottom, useChatBubble, useSearchParams } from 'hooks';
+import {
+  useChatSound,
+  useNewMessage,
+  useGoToBottom,
+  useChatBubble,
+  useSearchParams,
+  useProfileStore,
+} from 'hooks';
 import { useHistory } from 'react-router-dom';
 import { Replay, ChatBubble } from '@mui/icons-material';
 import AwesomeDebouncePromise from 'awesome-debounce-promise';

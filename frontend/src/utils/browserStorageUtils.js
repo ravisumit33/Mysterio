@@ -8,8 +8,9 @@ const getValue = (key, defaultValue = null) => {
       val = JSON.parse(storedData);
     }
   } catch {
-    // If user is in private mode or has storage restriction
-    // localStorage can throw.
+    // If user is in private mode or has storage restriction localStorage can throw.
+    // Or data that is saved has been corrupted
+    window.localStorage.removeItem(`${BrowserStorageKeysPrefix}${key}`);
   }
   return val;
 };
@@ -21,6 +22,18 @@ const setValue = (key, value) => {
     // If user is in private mode or has storage restriction
     // localStorage can throw.
   }
+};
+
+const getStoredProfileData = () => {
+  const storageKey = BrowserStorageKeys.profileData;
+  return getValue(storageKey, {});
+};
+
+const updateStoredProfileData = (updateFields) => {
+  const storageKey = BrowserStorageKeys.profileData;
+  const profileData = getValue(storageKey, {});
+  Object.assign(profileData, updateFields);
+  setValue(storageKey, profileData);
 };
 
 const getStoredChatWindowData = (roomType, roomId) => {
@@ -57,4 +70,6 @@ export {
   getStoredChatWindowData,
   updateStoredChatWindowData,
   deleteStoredChatWindowData,
+  getStoredProfileData,
+  updateStoredProfileData,
 };

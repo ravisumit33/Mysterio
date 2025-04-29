@@ -4,10 +4,10 @@ import { observer } from 'mobx-react-lite';
 import { FormControlLabel, TextField, Typography, Switch, Button, Stack } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import { Group } from '@mui/icons-material';
-import { appStore, useProfileStore } from 'stores';
-import { isLoggedIn } from 'stores/selectors';
+import { appStore } from 'stores';
+import { isLoggedIn } from 'selectors';
 import { fetchUrl } from 'utils';
-import { useBasicInfo } from 'hooks';
+import { useBasicInfo, useUserStore, useAlertStore } from 'hooks';
 import { RoomType } from 'appConstants';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import CenterPaper from './CenterPaper';
@@ -26,7 +26,9 @@ const roomAvatarStyles = [
 
 function NewRoom() {
   // @ts-ignore
-  const { profileStore } = useProfileStore();
+  const { userStore } = useUserStore();
+  // @ts-ignore
+  const { showAlert, hideAlert } = useAlertStore();
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -50,11 +52,11 @@ function NewRoom() {
     error: false,
   });
 
-  const { showWaitScreen, setShouldShowWaitScreen, showAlert, setShouldShowAlert } = appStore;
+  const { showWaitScreen, setShouldShowWaitScreen } = appStore;
 
   const handleCreateRoom = () => {
     if (!avatarUrl) {
-      appStore.showAlert({
+      showAlert({
         text: 'No image chosen. Upload your own or click on choose random.',
         severity: 'error',
       });
@@ -95,7 +97,7 @@ function NewRoom() {
           },
         })
           .then((response) => {
-            setShouldShowAlert(false);
+            hideAlert();
             const responseData = response.data;
             // @ts-ignore
             const { id: roomId } = responseData;
@@ -139,14 +141,14 @@ function NewRoom() {
           .finally(() => setShouldShowWaitScreen(false));
       })
       .catch(() => {
-        appStore.showAlert({
+        showAlert({
           text: 'Error occured while creating avatar. Try choosing random one.',
           severity: 'error',
         });
       });
   };
 
-  return !isLoggedIn(profileStore) ? (
+  return !isLoggedIn(userStore) ? (
     <Redirect
       to={{
         pathname: '/login',

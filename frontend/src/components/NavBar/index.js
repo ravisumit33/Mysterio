@@ -17,9 +17,9 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, Logout, Login, ArrowForward } from '@mui/icons-material';
-import { appStore, useProfileStore } from 'stores';
-import { isLoggedIn } from 'stores/selectors';
-import { ProfileActions } from 'stores/actions';
+import { appStore } from 'stores';
+import { useAlertStore, useProfileStore, useUserStore } from 'hooks';
+import { isLoggedIn } from 'selectors';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl } from 'utils';
@@ -53,7 +53,11 @@ function NavBar() {
   const classes = useStyles();
   const [focusedBtnKey, setFocusedBtnKey] = useState('home');
   // @ts-ignore
-  const { profileStore, profileDispatch } = useProfileStore();
+  const { profileStore } = useProfileStore();
+  // @ts-ignore
+  const { userStore, logout } = useUserStore();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
   const trigger = useScrollTrigger({
@@ -211,7 +215,7 @@ function NavBar() {
   const logoutIcon = useMemo(() => <Logout />, []);
   const loginIcon = useMemo(() => <Login />, []);
   const accountNavbarButtons = [];
-  if (isLoggedIn(profileStore)) {
+  if (isLoggedIn(userStore)) {
     accountNavbarButtons.push({
       type: 'icon',
       data: {
@@ -227,10 +231,10 @@ function NavBar() {
           })
             .then(() => {
               history.replace('/');
-              profileDispatch({ type: ProfileActions.LOGOUT });
+              logout();
             })
             .catch(() =>
-              appStore.showAlert({
+              showAlert({
                 text: 'Unable to log out. Make sure you are logged in.',
                 severity: 'error',
               })

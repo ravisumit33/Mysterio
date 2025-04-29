@@ -10,11 +10,10 @@ import {
 } from '@mui/material';
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
-import { appStore, useProfileStore } from 'stores';
-import { ProfileActions } from 'stores/actions';
+import { appStore, ProfileActions } from 'stores';
 import { fetchUrl } from 'utils';
-import { useBasicInfo, useLocalStorage } from 'hooks';
-import { BrowserStorageKeys } from 'appConstants';
+import { useBasicInfo, useProfileStore, useAlertStore } from 'hooks';
+import { profileManager } from 'managers';
 import BasicInfo from './BasicInfo';
 
 const userAvatarStyles = [
@@ -50,45 +49,38 @@ const useStyles = makeStyles((theme) => ({
 function UserInfoDialog() {
   const classes = useStyles();
   // @ts-ignore
-  const { profileStore, profileDispatch } = useProfileStore();
-  const [storedProfileName, setStoredProfileName] = useLocalStorage(BrowserStorageKeys.profileName);
-  const [storedProfileAvatarUrl, setStoredProfileAvatarUrl] = useLocalStorage(
-    BrowserStorageKeys.profileAvatarUrl
-  );
-  const [storedProfileSessionId, setStoredProfileSessionId] = useLocalStorage(
-    BrowserStorageKeys.profileSessionId
-  );
+  const { profileStore, setBasicInfo } = useProfileStore();
+  // @ts-ignore
+  const { showAlert, hideAlert } = useAlertStore();
   useEffect(() => {
-    const hasStoredUserInfo = storedProfileName && storedProfileAvatarUrl && storedProfileSessionId;
-    if (hasStoredUserInfo) {
-      profileDispatch({
-        type: ProfileActions.SET_BASIC_INFO,
-        payload: {
-          name: storedProfileName,
-          avatarUrl: storedProfileAvatarUrl,
-          sessionId: storedProfileSessionId,
-        },
-      });
-    } else {
+    const { name, avatarUrl, sessionId } = profileStore;
+    const hasCompleteBasicInfo = name && avatarUrl && sessionId;
+    if (!hasCompleteBasicInfo) {
       appStore.setShouldOpenUserInfoDialog(true);
     }
-  }, [storedProfileAvatarUrl, storedProfileName, storedProfileSessionId, profileDispatch]);
+  }, [profileStore]);
+
+  useEffect(() => {
+    if (profileStore.isReady) {
+      profileManager.markReady();
+    }
+  }, [profileStore.isReady]);
 
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
-    storedProfileName,
-    storedProfileAvatarUrl
+    profileStore.name,
+    profileStore.avatarUrl
   );
 
   const handleDialogueButtonClick = () => {
     if (!name) {
-      appStore.showAlert({
+      showAlert({
         text: 'Name cannot be empty.',
         severity: 'error',
       });
       return;
     }
     if (!avatarUrl) {
-      appStore.showAlert({
+      showAlert({
         text: 'No image chosen. Upload your own or click on choose random.',
         severity: 'error',
       });
@@ -114,22 +106,20 @@ function UserInfoDialog() {
 
     fileUploadPromise
       .then((url) => {
-        appStore.setShouldShowAlert(false);
-        setStoredProfileName(name);
-        setStoredProfileAvatarUrl(url);
+        hideAlert();
         let profileSessionId = profileStore.sessionId;
         if (!profileSessionId) {
           profileSessionId = `${Date.now()}`;
-          setStoredProfileSessionId(profileSessionId);
         }
-        profileDispatch({
-          type: ProfileActions.SET_BASIC_INFO,
-          payload: { name, avatarUrl: url, sessionId: profileSessionId },
+        setBasicInfo({
+          name,
+          avatarUrl: url,
+          sessionId: profileSessionId,
         });
         appStore.setShouldOpenUserInfoDialog(false);
       })
       .catch(() => {
-        appStore.showAlert({
+        showAlert({
           text: 'Error occured while creating avatar. Try choosing random one.',
           severity: 'error',
         });
@@ -159,7 +149,7 @@ function UserInfoDialog() {
           />
         </DialogContent>
         <DialogActions>
-          {storedProfileSessionId && (
+          {profileStore.sessionId && (
             <Button color="secondary" onClick={() => appStore.setShouldOpenUserInfoDialog(false)}>
               Cancel
             </Button>

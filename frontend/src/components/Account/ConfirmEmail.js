@@ -7,10 +7,13 @@ import RouterLink from 'components/RouterLink';
 import Notification from 'components/Notification';
 import welcomeJson from 'assets/animations/welcome.json';
 import { appStore } from 'stores';
+import { useAlertStore } from 'hooks';
 
 const ConfirmEmail = () => {
   // @ts-ignore
   const { key } = useParams();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   useEffect(() => {
@@ -20,13 +23,13 @@ const ConfirmEmail = () => {
         setEmailConfirmed(true);
       })
       .catch(() =>
-        appStore.showAlert({
+        showAlert({
           text: 'Error occured while verifying email',
           severity: 'error',
         })
       )
       .finally(() => appStore.setShouldShowWaitScreen(false));
-  }, [key]);
+  }, [key, showAlert]);
 
   const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>

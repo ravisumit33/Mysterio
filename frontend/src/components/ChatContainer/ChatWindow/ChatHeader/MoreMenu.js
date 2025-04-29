@@ -8,9 +8,12 @@ import { appStore } from 'stores';
 import ConfirmationDialog from 'components/ConfirmationDialog';
 import { ChatWindowStoreContext } from 'contexts';
 import { fetchUrl } from 'utils';
+import { useAlertStore } from 'hooks';
 
 function MoreMenu(props) {
   const { isGroupChat, className } = props;
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState(null);
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
@@ -35,20 +38,20 @@ function MoreMenu(props) {
       .then(() => {
         appStore.removeChatWindow();
         history.push('/');
-        appStore.showAlert({
+        showAlert({
           text: 'Room deleted successfully.',
           severity: 'success',
         });
       })
       .catch((error) => {
         if (error.status === 401 || error.status === 403) {
-          appStore.showAlert({
+          showAlert({
             text: 'Only creator can delete the room.',
             action: 'login',
             severity: 'error',
           });
         } else {
-          appStore.showAlert({
+          showAlert({
             text: 'Error occurred while deleting. Try again later.',
             severity: 'error',
           });

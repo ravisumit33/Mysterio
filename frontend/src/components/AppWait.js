@@ -2,6 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
+import { useHydration } from 'hooks';
 import WaitScreen from './WaitScreen';
 
 const useStyles = makeStyles(() => ({
@@ -14,9 +15,11 @@ const useStyles = makeStyles(() => ({
 
 function AppWait() {
   const classes = useStyles();
+  // @ts-ignore
+  const { isAppReady } = useHydration();
   return (
     <WaitScreen
-      shouldOpen={appStore.shouldShowWaitScreen}
+      shouldOpen={!isAppReady || appStore.shouldShowWaitScreen}
       waitScreenText={appStore.waitScreenText}
       className={classes.waitScreen}
     />

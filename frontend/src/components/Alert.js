@@ -5,8 +5,8 @@ import { makeStyles } from '@mui/styles';
 import Alert from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
-import { appStore, useProfileStore } from 'stores';
-import { isLoggedIn } from 'stores/selectors';
+import { useAlertStore, useUserStore } from 'hooks';
+import { isLoggedIn } from 'selectors';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -21,19 +21,20 @@ function LoginAction() {
   const location = useLocation();
   const history = useHistory();
   // @ts-ignore
-  const { profileStore } = useProfileStore();
+  const { userStore } = useUserStore();
+  // @ts-ignore
+  const { hideAlert } = useAlertStore();
   const handleLogin = () => {
-    handleAlertClose();
+    hideAlert();
     history.push('/login', { from: location });
   };
 
-  const handleAlertClose = () => appStore.setShouldShowAlert(false);
-  return isLoggedIn(profileStore) ? null : (
+  return isLoggedIn(userStore) ? null : (
     <>
       <Button color="secondary" size="small" onClick={handleLogin} variant="text">
         login
       </Button>
-      <IconButton size="small" aria-label="close" color="inherit" onClick={handleAlertClose}>
+      <IconButton size="small" aria-label="close" color="inherit" onClick={hideAlert}>
         <CloseIcon fontSize="small" />
       </IconButton>
     </>
@@ -42,10 +43,11 @@ function LoginAction() {
 
 function AppAlert() {
   const classes = useStyles();
-  const { alert, shouldShowAlert, setShouldShowAlert } = appStore;
+  // @ts-ignore
+  const { alertStore, hideAlert } = useAlertStore();
 
   const getAlertAction = () => {
-    switch (alert.action) {
+    switch (alertStore.action) {
       case 'login':
         return <LoginAction />;
       default:
@@ -56,17 +58,13 @@ function AppAlert() {
   return (
     <Box className={classes.root}>
       <Snackbar
-        open={shouldShowAlert}
+        open={alertStore.visible}
         autoHideDuration={5000}
-        onClose={() => setShouldShowAlert(false)}
+        onClose={hideAlert}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert
-          onClose={() => setShouldShowAlert(false)}
-          severity={alert.severity}
-          action={getAlertAction()}
-        >
-          <Typography variant="body2">{alert.text}</Typography>
+        <Alert onClose={hideAlert} severity={alertStore.severity} action={getAlertAction()}>
+          <Typography variant="body2">{alertStore.text}</Typography>
         </Alert>
       </Snackbar>
     </Box>

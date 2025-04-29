@@ -3,7 +3,7 @@ import log from 'loglevel';
 import { fetchUrl, isEmptyObj } from 'utils';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import { SocketManager } from 'managers';
-import { isLoggedIn } from 'stores/selectors';
+import { isLoggedIn } from 'selectors';
 
 class ChatWindowStore {
   avatarUrl = '';
@@ -24,9 +24,11 @@ class ChatWindowStore {
 
   syncedPlayerData = null; // synced player information if player is opened
 
-  constructor({ appStore, profileStore, data }) {
+  constructor({ appStore, profileStore, userStore, showAlert, data }) {
     this.appStore = appStore;
     this.profileStore = profileStore;
+    this.userStore = userStore;
+    this.showAlert = showAlert;
     const initPromise = this.initState(data || {});
     initPromise.then(() => {
       this.socket = new SocketManager(this, profileStore);
@@ -53,7 +55,7 @@ class ChatWindowStore {
         log.error(err);
         this.setInitDone(true);
         this.appStore.removeChatWindow();
-        this.appStore.showAlert({
+        this.showAlert({
           text: 'Error occured while connecting to server.',
           severity: 'error',
         });
@@ -172,7 +174,7 @@ class ChatWindowStore {
     return fetchUrl(`${next}`, { ...requestData })
       .catch((err) => {
         log.error(err);
-        this.appStore.showAlert({
+        this.showAlert({
           text: 'Error occured while fetching previous messages.',
           severity: 'error',
         });
@@ -402,10 +404,10 @@ class ChatWindowStore {
     })
       .then(() => this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }))
       .catch(() => {
-        const alertText = isLoggedIn(this.profileStore)
+        const alertText = isLoggedIn(this.userStore)
           ? 'Unable to change favorite status.'
           : 'Login required to change favorite status';
-        this.appStore.showAlert({
+        this.showAlert({
           severity: 'error',
           action: 'login',
           text: alertText,
@@ -426,7 +428,7 @@ class ChatWindowStore {
         this.setSyncedPlayerData(response.data[0]);
       })
       .catch(() => {
-        this.appStore.showAlert({
+        this.showAlert({
           severity: 'error',
           text: 'Error occurred while fetching player data',
         });

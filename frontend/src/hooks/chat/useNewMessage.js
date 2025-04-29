@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MessageType, MessageSenderType } from 'appConstants';
-import { useProfileStore } from 'stores';
+import { useProfileStore } from '../useStore';
 
 const useNewMessage = ({ initialRenderingDone, lastMessage }) => {
   // @ts-ignore

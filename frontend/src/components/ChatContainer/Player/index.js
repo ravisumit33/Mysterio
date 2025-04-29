@@ -15,16 +15,15 @@ import { ChatWindowStoreContext } from 'contexts';
 import { createDeferredPromiseObj } from 'utils';
 import { observer } from 'mobx-react-lite';
 import { PlayerName, PlayerStatus } from 'appConstants';
-import { useGetPlayer, useHandlePlayer, useSearchParams } from 'hooks';
+import { useGetPlayer, useHandlePlayer, useSearchParams, useUserStore } from 'hooks';
 import RouterLink from 'components/RouterLink';
-import { useProfileStore } from 'stores';
-import { isLoggedIn } from 'stores/selectors';
+import { isLoggedIn } from 'selectors';
 import YouTube from './YouTube';
 import PlayerActions from './PlayerActions';
 
 function Player() {
   // @ts-ignore
-  const { profileStore } = useProfileStore();
+  const { userStore } = useUserStore();
   const location = useLocation();
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { roomInfo, syncedPlayerData, isHost, updatePlayer, syncPlayer, handlePlayerDelete } =
@@ -173,7 +172,7 @@ function Player() {
             {!syncedPlayerData && !adminAccess && (
               <Typography variant="h5" color="textSecondary" align="center" mt={2}>
                 {'No video. Only admin can play. '}
-                {!isLoggedIn(profileStore) && (
+                {!isLoggedIn(userStore) && (
                   <>
                     {'If you have admin rights, '}
                     <RouterLink to={{ pathname: '/login', state: { from: location } }}>

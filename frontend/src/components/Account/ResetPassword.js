@@ -8,9 +8,12 @@ import Notification from 'components/Notification';
 import passwordResetDoneJson from 'assets/animations/password-reset-done.json';
 import { appStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
+import { useAlertStore } from 'hooks';
 
 function ResetPassword() {
   const { userId, key } = useParams();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const [resetDone, setResetDone] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordFieldData, setNewPasswordFieldData] = useState({
@@ -44,7 +47,7 @@ function ResetPassword() {
         }
         setNewPasswordFieldData(newNewPasswordFieldData);
         if (!Object.keys(responseData).some((field) => responseFields.includes(field))) {
-          appStore.showAlert({
+          showAlert({
             text: responseData.non_field_errors
               ? getErrorString(responseData.non_field_errors)
               : 'Unable to reset password',

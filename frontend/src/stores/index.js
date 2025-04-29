@@ -1,14 +1,21 @@
-import { useContext } from 'react';
 import {
-  AccountDrawerContext,
-  AlertContext,
-  ProfileContext,
-  UserInfoDialogContext,
-  WaitScreenContext,
-} from './contexts';
+  profileReducer,
+  initialProfileState,
+  alertReducer,
+  initialAlertState,
+  userReducer,
+  initialUserState,
+} from './reducers';
+import { ProfileActions, UserActions, AlertActions } from './actions';
 
-export const useAlertStore = () => useContext(AlertContext);
-export const useProfileStore = () => useContext(ProfileContext);
-export const useUserInfoDialogStore = () => useContext(UserInfoDialogContext);
-export const useAccountDrawerStore = () => useContext(AccountDrawerContext);
-export const useWaitScreenStore = () => useContext(WaitScreenContext);
+export {
+  profileReducer,
+  initialProfileState,
+  alertReducer,
+  initialAlertState,
+  userReducer,
+  initialUserState,
+  ProfileActions,
+  UserActions,
+  AlertActions,
+};

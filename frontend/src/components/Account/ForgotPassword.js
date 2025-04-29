@@ -4,9 +4,12 @@ import { Button, Stack, TextField, Typography } from '@mui/material';
 import CenterPaper from 'components/CenterPaper';
 import { appStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
+import { useAlertStore } from 'hooks';
 
 function ForgotPassword() {
   const history = useHistory();
+  //@ts-ignore
+  const { showAlert } = useAlertStore();
   const [email, setEmail] = useState('');
   const [emailFieldData, setEmailFieldData] = useState({
     help_text: '',
@@ -22,7 +25,7 @@ function ForgotPassword() {
     })
       .then(() => {
         history.replace('/account/reset-password-email-sent');
-        appStore.showAlert({
+        showAlert({
           text: `Reset password e-mail sent`,
           severity: 'success',
         });
@@ -40,7 +43,7 @@ function ForgotPassword() {
         }
         setEmailFieldData(newEmailFieldData);
         if (!Object.keys(responseData).some((field) => responseFields.includes(field))) {
-          appStore.showAlert({
+          showAlert({
             text: responseData.non_field_errors
               ? getErrorString(responseData.non_field_errors)
               : 'Unable to reset password',

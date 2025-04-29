@@ -16,13 +16,15 @@ import {
 import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
 import { RoomType } from 'appConstants';
-import { useStoredChatWindowData } from 'hooks';
+import { useAlertStore, useStoredChatWindowData } from 'hooks';
 import CustomAvatar from 'components/Avatar';
 
 function RoomPasswordDialog(props) {
   const { shouldOpen, setShouldOpen, handleStartChat } = props;
   const { pathname } = useLocation();
   const history = useHistory();
+  // @ts-ignore
+  const { showAlert, hideAlert } = useAlertStore();
   const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
   const ongoingChatMatch = pathname.match(ongoingChatRegex);
   let roomId;
@@ -62,10 +64,10 @@ function RoomPasswordDialog(props) {
           ...chatWindowData,
           password: selectedRoomPassword,
         });
-        appStore.setShouldShowAlert(false);
+        hideAlert();
       })
       .catch((response) => {
-        appStore.showAlert({
+        showAlert({
           text: 'Invalid room password.',
           severity: 'error',
         });

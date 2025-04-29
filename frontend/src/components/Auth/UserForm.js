@@ -14,13 +14,15 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import RouterLink from 'components/RouterLink';
 import { fetchUrl, getErrorString } from 'utils';
-import { appStore, useProfileStore } from 'stores';
-import { ProfileActions } from 'stores/actions';
+import { appStore } from 'stores';
+import { useAlertStore, useUserStore } from 'hooks';
 
 function UserForm(props) {
   const { shouldRegister, from } = props;
   // @ts-ignore
-  const { profileDispatch } = useProfileStore();
+  const { login } = useUserStore();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const history = useHistory();
   const location = useLocation();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
@@ -72,16 +74,15 @@ function UserForm(props) {
     })
       .then(() => {
         if (!shouldRegister) {
-          profileDispatch({ type: ProfileActions.LOGIN, payload: { email, social: false } });
+          login({ email, social: false });
           history.replace(from);
-          appStore.setShouldShowAlert(false);
-          appStore.showAlert({
+          showAlert({
             text: `Login successful.`,
             severity: 'success',
           });
         } else {
           history.replace('/account/confirmation-email-sent/');
-          appStore.showAlert({
+          showAlert({
             text: 'Confirmation e-mail sent',
             severity: 'success',
           });
@@ -110,7 +111,7 @@ function UserForm(props) {
         setPasswordFieldData(newPasswordFieldData);
         if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
           const action = shouldRegister ? 'create an account' : 'login';
-          appStore.showAlert({
+          showAlert({
             text: responseData.non_field_errors
               ? getErrorString(responseData.non_field_errors)
               : `Unable to ${action}.`,

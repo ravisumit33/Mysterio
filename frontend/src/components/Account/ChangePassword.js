@@ -4,6 +4,7 @@ import { Button, IconButton, InputAdornment, Stack, TextField, Typography } from
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { fetchUrl, getErrorString } from 'utils';
 import { appStore } from 'stores';
+import { useAlertStore } from 'hooks';
 import CenterPaper from 'components/CenterPaper';
 
 function ChangePassword() {
@@ -11,6 +12,8 @@ function ChangePassword() {
   const location = useLocation();
   // @ts-ignore
   const { from } = location.state || { from: { pathname: '/' } };
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [shouldUnmaskNewPassword, setShouldUnmaskPassword] = useState(false);
@@ -36,7 +39,7 @@ function ChangePassword() {
       },
     })
       .then(() => {
-        appStore.showAlert({
+        showAlert({
           text: `Password changed successfully.`,
           severity: 'success',
         });
@@ -64,7 +67,7 @@ function ChangePassword() {
         setOldPasswordFieldData(newOldPasswordFieldData);
         setNewPasswordFieldData(newNewPasswordFieldData);
         if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
-          appStore.showAlert({
+          showAlert({
             text: responseData.detail
               ? getErrorString(responseData.detail)
               : 'Error occurred while changing password',

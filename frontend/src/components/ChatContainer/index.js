@@ -16,7 +16,7 @@ import { RoomType, OngoingChatRegex, ChatStatus } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
-import { useSearchParams } from 'hooks';
+import { useAlertStore, useSearchParams } from 'hooks';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 import RoomPasswordDialog from './RoomPasswordDialog';
@@ -64,6 +64,8 @@ const useStyles = makeStyles((theme) => ({
 function ChatContainer(props) {
   const { type: chatWindowType, location } = props;
   const { pathname } = location;
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const { chatWindow: chatWindowStore } = appStore;
   const [initializating, setInitializating] = useState(false);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
@@ -124,7 +126,7 @@ function ChatContainer(props) {
               })
               .catch((err) => {
                 log.error(err);
-                appStore.showAlert({
+                showAlert({
                   text: 'Error occured while connecting to server.',
                   severity: 'error',
                 });

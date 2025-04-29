@@ -1,31 +1,25 @@
 import React, { useCallback } from 'react';
 import { Stack } from '@mui/material';
-import { appStore, useProfileStore } from 'stores';
-import { ProfileActions } from 'stores/actions';
-import { fetchUrl, getErrorString } from 'utils';
+import { appStore } from 'stores';
+import { useAlertStore, useUserStore } from 'hooks';
+import { getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
 function SocialAuth() {
   // @ts-ignore
-  const { profileDispatch } = useProfileStore();
+  const { socialLogin } = useUserStore();
+  // @ts-ignore
+  const { showAlert } = useAlertStore();
   const handleSocialLoginSuccess = useCallback(
     (provider, responseData) => {
       appStore.showWaitScreen('Logging you in');
-      fetchUrl(`/api/account/${provider}/login/`, {
-        method: 'post',
-        body: { access_token: responseData.access_token },
-      })
-        .then((resp) => {
-          profileDispatch({
-            type: ProfileActions.LOGIN,
-            // @ts-ignore
-            payload: { email: resp.data.user.email, social: true },
-          });
-          appStore.showAlert({ text: 'Login Successful', severity: 'success' });
+      socialLogin(provider, { access_token: responseData.access_token })
+        .then(() => {
+          showAlert({ text: 'Login Successful', severity: 'success' });
         })
         .catch((resp) => {
           const respData = resp.data;
-          appStore.showAlert({
+          showAlert({
             text: respData.non_field_errors
               ? getErrorString(respData.non_field_errors)
               : `Unable to login using ${provider}`,
@@ -34,15 +28,18 @@ function SocialAuth() {
         })
         .finally(() => appStore.setShouldShowWaitScreen(false));
     },
-    [profileDispatch]
+    [socialLogin, showAlert]
   );
 
-  const handleSocialLoginFailure = useCallback((provider) => {
-    appStore.showAlert({
-      text: `Unable to login using ${provider}`,
-      severity: 'error',
-    });
-  }, []);
+  const handleSocialLoginFailure = useCallback(
+    (provider) => {
+      showAlert({
+        text: `Unable to login using ${provider}`,
+        severity: 'error',
+      });
+    },
+    [showAlert]
+  );
 
   return (
     <Stack direction="row" justifyContent="space-between">

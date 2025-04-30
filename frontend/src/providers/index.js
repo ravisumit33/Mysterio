@@ -2,5 +2,7 @@ import RootProvider from './root';
 import ProfileProvider from './profile';
 import AlertProvider from './alert';
 import UserProvider from './user';
+import WaitScreenProvider from './waitScreen';
 
-export { RootProvider, ProfileProvider, AlertProvider, UserProvider };
+// TODO: Create provider for chat window which may include room, player, etc. providers
+export { RootProvider, ProfileProvider, AlertProvider, UserProvider, WaitScreenProvider };

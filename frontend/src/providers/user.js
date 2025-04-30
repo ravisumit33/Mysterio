@@ -3,11 +3,14 @@ import PropTypes from 'prop-types';
 import { UserContext } from 'contexts';
 import { userReducer, initialUserState, UserActions } from 'stores';
 import {
-  getUser,
-  login as loginService,
-  socialLogin as socialLoginService,
-  logout as logoutService,
-  register as registerService,
+  getUserService,
+  loginService,
+  socialLoginService,
+  logoutService,
+  registerService,
+  passwordChangeService,
+  deleteAccountService,
+  verifyEmailService,
 } from 'services';
 import { useHydration } from 'hooks';
 import { HydrationKeys } from 'appConstants';
@@ -21,7 +24,7 @@ export default function UserProvider({ children }) {
 
   useEffect(() => {
     if (!isHydrated(HydrationKeys.USER)) {
-      getUser()
+      getUserService()
         .then((response) => {
           const responseData = response.data;
           // @ts-ignore
@@ -77,6 +80,12 @@ export default function UserProvider({ children }) {
     []
   );
 
+  const changePassword = useCallback((oldPwd, newPwd) => passwordChangeService(oldPwd, newPwd), []);
+
+  const deleteAccount = useCallback(() => deleteAccountService(), []);
+
+  const verifyEmail = useCallback((key) => verifyEmailService(key), []);
+
   const value = useMemo(
     () => ({
       userStore,
@@ -84,9 +93,13 @@ export default function UserProvider({ children }) {
       socialLogin,
       logout,
       register,
+      changePassword,
+      deleteAccount,
+      verifyEmail,
     }),
-    [userStore, login, logout, register, socialLogin]
+    [userStore, login, logout, register, socialLogin, changePassword, deleteAccount, verifyEmail]
   );
+
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }
 

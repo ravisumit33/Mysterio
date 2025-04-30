@@ -5,8 +5,10 @@ import {
   initialAlertState,
   userReducer,
   initialUserState,
+  waitScreenReducer,
+  initialWaitScreenState,
 } from './reducers';
-import { ProfileActions, UserActions, AlertActions } from './actions';
+import { ProfileActions, UserActions, AlertActions, WaitScreenActions } from './actions';
 
 export {
   profileReducer,
@@ -15,7 +17,10 @@ export {
   initialAlertState,
   userReducer,
   initialUserState,
+  waitScreenReducer,
+  initialWaitScreenState,
   ProfileActions,
   UserActions,
   AlertActions,
+  WaitScreenActions,
 };

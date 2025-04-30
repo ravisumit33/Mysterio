@@ -4,6 +4,7 @@ import { fetchUrl, isEmptyObj } from 'utils';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import { SocketManager } from 'managers';
 import { isLoggedIn } from 'selectors';
+import { syncPlayerService } from 'services';
 
 class ChatWindowStore {
   avatarUrl = '';
@@ -24,11 +25,12 @@ class ChatWindowStore {
 
   syncedPlayerData = null; // synced player information if player is opened
 
-  constructor({ appStore, profileStore, userStore, showAlert, data }) {
+  constructor({ appStore, profileStore, userStore, showAlert, runTaskWithLoader, data }) {
     this.appStore = appStore;
     this.profileStore = profileStore;
     this.userStore = userStore;
     this.showAlert = showAlert;
+    this.runTaskWithLoader = runTaskWithLoader;
     const initPromise = this.initState(data || {});
     initPromise.then(() => {
       this.socket = new SocketManager(this, profileStore);
@@ -416,26 +418,20 @@ class ChatWindowStore {
   };
 
   syncPlayer = () => {
-    let fetchData;
-    if (this.isGroupChat) {
-      fetchData = {
-        headers: { 'X-Room-Password': this.roomInfo.password },
-      };
-    }
-    this.appStore.showWaitScreen('Syncing player');
-    return fetchUrl(`/api/chat/players/?search=${this.roomInfo.roomId}`, fetchData)
-      .then((response) => {
-        this.setSyncedPlayerData(response.data[0]);
-      })
-      .catch(() => {
-        this.showAlert({
-          severity: 'error',
-          text: 'Error occurred while fetching player data',
-        });
-      })
-      .finally(() => {
-        this.appStore.setShouldShowWaitScreen(false);
-      });
+    this.runTaskWithLoader({
+      loaderText: 'Syncing player',
+      task: () =>
+        syncPlayerService(this.roomInfo.roomId, this.roomInfo.password)
+          .then((response) => {
+            this.setSyncedPlayerData(response.data[0]);
+          })
+          .catch(() => {
+            this.showAlert({
+              severity: 'error',
+              text: 'Error occurred while fetching player data',
+            });
+          }),
+    });
   };
 
   updatePlayer = (playerData) => {

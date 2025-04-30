@@ -1,7 +1,6 @@
 import React, { useCallback } from 'react';
 import { Stack } from '@mui/material';
-import { appStore } from 'stores';
-import { useAlertStore, useUserStore } from 'hooks';
+import { useAlertStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
 import { getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
@@ -10,25 +9,28 @@ function SocialAuth() {
   const { socialLogin } = useUserStore();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
   const handleSocialLoginSuccess = useCallback(
     (provider, responseData) => {
-      appStore.showWaitScreen('Logging you in');
-      socialLogin(provider, { access_token: responseData.access_token })
-        .then(() => {
-          showAlert({ text: 'Login Successful', severity: 'success' });
-        })
-        .catch((resp) => {
-          const respData = resp.data;
-          showAlert({
-            text: respData.non_field_errors
-              ? getErrorString(respData.non_field_errors)
-              : `Unable to login using ${provider}`,
-            severity: 'error',
-          });
-        })
-        .finally(() => appStore.setShouldShowWaitScreen(false));
+      runTaskWithLoader({
+        loaderText: 'Logging you in',
+        task: () =>
+          socialLogin(provider, { access_token: responseData.access_token })
+            .then(() => {
+              showAlert({ text: 'Login Successful', severity: 'success' });
+            })
+            .catch((resp) => {
+              const respData = resp.data;
+              showAlert({
+                text: respData.non_field_errors
+                  ? getErrorString(respData.non_field_errors)
+                  : `Unable to login using ${provider}`,
+                severity: 'error',
+              });
+            }),
+      });
     },
-    [socialLogin, showAlert]
+    [socialLogin, showAlert, runTaskWithLoader]
   );
 
   const handleSocialLoginFailure = useCallback(

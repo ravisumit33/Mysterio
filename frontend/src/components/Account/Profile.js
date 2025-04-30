@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Button, Stack, TextField } from '@mui/material';
-import { appStore } from 'stores';
-import { useAlertStore, useUserStore } from 'hooks';
+import { useAlertStore, useUserStore, useTaskRunnerWithLoader } from 'hooks';
 import RouterLink from 'components/RouterLink';
-import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import ConfirmationDialog from 'components/ConfirmationDialog';
 
@@ -13,34 +11,34 @@ function Profile() {
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
-  const { userStore, logout } = useUserStore();
+  const { userStore, logout, deleteAccount } = useUserStore();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
 
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
 
   const handleDeleteAccount = () => {
-    appStore.showWaitScreen('Deleting');
-    fetchUrl('/api/account/delete/', {
-      method: 'post',
-      body: {},
-    })
-      .then(() => {
-        showAlert({
-          text: `Account deleted successfully.`,
-          severity: 'success',
-        });
-        history.replace('/');
-        logout();
-      })
-      .catch(() => {
-        showAlert({
-          text: `Error occurred while deleting account. Make sure you are logged in.`,
-          severity: 'error',
-        });
-      })
-      .finally(() => appStore.setShouldShowWaitScreen(false));
+    runTaskWithLoader({
+      loaderText: 'Deleting',
+      task: () =>
+        deleteAccount()
+          .then(() => {
+            showAlert({
+              text: `Account deleted successfully.`,
+              severity: 'success',
+            });
+            history.replace('/');
+            logout();
+          })
+          .catch(() => {
+            showAlert({
+              text: `Error occurred while deleting account. Make sure you are logged in.`,
+              severity: 'error',
+            });
+          }),
+    });
   };
 
   return (

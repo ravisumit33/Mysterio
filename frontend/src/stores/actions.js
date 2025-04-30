@@ -14,6 +14,11 @@ export const AlertActions = Object.freeze({
   HIDE: 'ALERT/HIDE',
 });
 
+export const WaitScreenActions = Object.freeze({
+  SHOW: 'ALERT/SHOW',
+  HIDE: 'ALERT/HIDE',
+});
+
 export const ChatWindowActions = Object.freeze({
   INIT: 'CHATWINDOW/INIT',
 });

@@ -1,13 +1,17 @@
-import React, { useMemo, useReducer } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { AlertContext } from 'contexts';
 import { AlertActions, alertReducer, initialAlertState } from 'stores';
 
 export default function AlertProvider({ children }) {
   const [alertStore, alertDispatch] = useReducer(alertReducer, initialAlertState);
-  const value = useMemo(() => {
-    const hideAlert = () => alertDispatch({ type: AlertActions.HIDE });
-    const showAlert = (alert) => {
+
+  // @ts-ignore
+  const hideAlert = useCallback(() => alertDispatch({ type: AlertActions.HIDE }), []);
+
+  const showAlert = useCallback(
+    (alert) => {
+      // @ts-ignore
       const dispatchAlert = (payload) => alertDispatch({ type: AlertActions.SHOW, payload });
       if (alertStore.visible) {
         hideAlert();
@@ -15,9 +19,14 @@ export default function AlertProvider({ children }) {
       } else {
         dispatchAlert(alert);
       }
-    };
-    return { alertState: alertStore, showAlert, hideAlert };
-  }, [alertStore, alertDispatch]);
+    },
+    [alertStore.visible, hideAlert]
+  );
+  const value = useMemo(
+    () => ({ alertStore, showAlert, hideAlert }),
+    [alertStore, showAlert, hideAlert]
+  );
+
   return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;
 }
 

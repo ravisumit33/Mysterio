@@ -10,7 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
-import { useProfileStore, useUserStore, useAlertStore } from 'hooks';
+import { useProfileStore, useUserStore, useAlertStore, useTaskRunnerWithLoader } from 'hooks';
 import { isLoggedIn } from 'selectors';
 import {
   Box,
@@ -56,6 +56,7 @@ function Account() {
   const { userStore, logout } = useUserStore();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
 
   const drawerTabs = [
     {
@@ -114,22 +115,20 @@ function Account() {
           <List>
             <ListItemButton
               onClick={() => {
-                appStore.showWaitScreen('Logging you out');
-                fetchUrl('/api/account/logout/', {
-                  method: 'post',
-                  body: {},
-                })
-                  .then(() => {
-                    history.replace('/');
-                    logout();
-                  })
-                  .catch(() =>
-                    showAlert({
-                      text: 'Unable to log out. Make sure you are logged in.',
-                      severity: 'error',
-                    })
-                  )
-                  .finally(() => appStore.setShouldShowWaitScreen(false));
+                runTaskWithLoader({
+                  loaderText: 'Logging you out',
+                  task: () =>
+                    logout()
+                      .then(() => {
+                        history.replace('/');
+                      })
+                      .catch(() =>
+                        showAlert({
+                          text: 'Unable to log out. Make sure you are logged in.',
+                          severity: 'error',
+                        })
+                      ),
+                });
               }}
             >
               <ListItemIcon>

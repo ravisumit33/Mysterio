@@ -1,35 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Stack } from '@mui/material';
-import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
 import Notification from 'components/Notification';
 import welcomeJson from 'assets/animations/welcome.json';
-import { appStore } from 'stores';
-import { useAlertStore } from 'hooks';
+import { useAlertStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
+import { verifyEmailService } from 'services';
 
 const ConfirmEmail = () => {
   // @ts-ignore
   const { key } = useParams();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  // @ts-ignore
+  const { verifyEmail } = useUserStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   useEffect(() => {
-    appStore.showWaitScreen('Verifying');
-    fetchUrl('/api/account/registration/verify-email/', { method: 'post', body: { key } })
-      .then(() => {
-        setEmailConfirmed(true);
-      })
-      .catch(() =>
-        showAlert({
-          text: 'Error occured while verifying email',
-          severity: 'error',
-        })
-      )
-      .finally(() => appStore.setShouldShowWaitScreen(false));
-  }, [key, showAlert]);
+    runTaskWithLoader({
+      loaderText: 'Verifying',
+      task: () =>
+        verifyEmail(key)
+          .then(() => {
+            setEmailConfirmed(true);
+          })
+          .catch(() =>
+            showAlert({
+              text: 'Error occured while verifying email',
+              severity: 'error',
+            })
+          ),
+    });
+  }, [key, showAlert, runTaskWithLoader, verifyEmail]);
 
   const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>

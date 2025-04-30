@@ -1,6 +1,7 @@
 import { profileReducer, initialProfileState } from './profile';
 import { alertReducer, initialAlertState } from './alert';
 import { userReducer, initialUserState } from './user';
+import { waitScreenReducer, initialWaitScreenState } from './waitScreen';
 
 export {
   profileReducer,
@@ -9,4 +10,6 @@ export {
   initialAlertState,
   userReducer,
   initialUserState,
+  waitScreenReducer,
+  initialWaitScreenState,
 };

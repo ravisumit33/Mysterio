@@ -8,12 +8,14 @@ import { appStore } from 'stores';
 import ConfirmationDialog from 'components/ConfirmationDialog';
 import { ChatWindowStoreContext } from 'contexts';
 import { fetchUrl } from 'utils';
-import { useAlertStore } from 'hooks';
+import { useAlertStore, useTaskRunnerWithLoader } from 'hooks';
+import { deleteRoomService } from 'services';
 
 function MoreMenu(props) {
   const { isGroupChat, className } = props;
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState(null);
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
@@ -30,37 +32,36 @@ function MoreMenu(props) {
   };
 
   const handleDeleteRoom = () => {
-    appStore.showWaitScreen('Deleting Room');
-    fetchUrl(`/api/chat/rooms/${roomId}/`, {
-      method: 'delete',
-      headers: { 'X-Room-Password': roomInfo.password },
-    })
-      .then(() => {
-        appStore.removeChatWindow();
-        history.push('/');
-        showAlert({
-          text: 'Room deleted successfully.',
-          severity: 'success',
-        });
-      })
-      .catch((error) => {
-        if (error.status === 401 || error.status === 403) {
-          showAlert({
-            text: 'Only creator can delete the room.',
-            action: 'login',
-            severity: 'error',
-          });
-        } else {
-          showAlert({
-            text: 'Error occurred while deleting. Try again later.',
-            severity: 'error',
-          });
-        }
-      })
-      .finally(() => {
-        appStore.setShouldShowWaitScreen(false);
-        setShouldShowDeleteConfirmationDialog(false);
-      });
+    runTaskWithLoader({
+      loaderText: 'Deleting Room',
+      task: () =>
+        deleteRoomService(roomId, roomInfo.password)
+          .then(() => {
+            appStore.removeChatWindow();
+            history.push('/');
+            showAlert({
+              text: 'Room deleted successfully.',
+              severity: 'success',
+            });
+          })
+          .catch((error) => {
+            if (error.status === 401 || error.status === 403) {
+              showAlert({
+                text: 'Only creator can delete the room.',
+                action: 'login',
+                severity: 'error',
+              });
+            } else {
+              showAlert({
+                text: 'Error occurred while deleting. Try again later.',
+                severity: 'error',
+              });
+            }
+          })
+          .finally(() => {
+            setShouldShowDeleteConfirmationDialog(false);
+          }),
+    });
   };
 
   const individualChatMenuItems = [];

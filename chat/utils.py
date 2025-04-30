@@ -50,6 +50,8 @@ def check_group_room_password(request, group_room_data):
     """
     Returns if request contains valid group room password
     """
+    # TODO: Create a custom post action in case of protected rooms, which takes password in the body
+    # to get rid of this custom header approach.
     request_password = request.META.get("HTTP_X_ROOM_PASSWORD", "")
     return (
         check_password(request_password, group_room_data.password)

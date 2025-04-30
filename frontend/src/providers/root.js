@@ -1,4 +1,3 @@
-import { HydrationKeys } from 'appConstants';
 import PropTypes from 'prop-types';
 import React from 'react';
 import AlertProvider from './alert';
@@ -8,7 +7,7 @@ import UserProvider from './user';
 
 export default function RootProvider({ children }) {
   return (
-    <HydrationProvider keysToHydrate={Object.values(HydrationKeys)}>
+    <HydrationProvider>
       <AlertProvider>
         <UserProvider>
           <ProfileProvider>{children}</ProfileProvider>

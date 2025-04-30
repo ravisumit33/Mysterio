@@ -1,26 +1,41 @@
 import { HydrationContext } from 'contexts';
 import PropTypes from 'prop-types';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-export default function HydrationProvider({ children, keysToHydrate }) {
-  const [hydratedKeys, setHydratedKeys] = useState(new Set());
+export default function HydrationProvider({ children }) {
+  const [keysToHydrate, setKeysToHydrate] = useState(new Set());
 
-  const markHydrated = (key) => setHydratedKeys((prev) => new Set([...prev, key]));
+  const trackHydration = useCallback(
+    (key) =>
+      setKeysToHydrate((prev) => {
+        if (prev.has(key)) return prev;
+        const updated = new Set(prev);
+        updated.add(key);
+        return updated;
+      }),
+    []
+  );
+
+  const markHydrated = useCallback(
+    (key) =>
+      setKeysToHydrate((prev) => {
+        if (!prev.has(key)) return prev;
+        const updated = new Set(prev);
+        updated.delete(key);
+        return updated;
+      }),
+    []
+  );
 
   const value = useMemo(() => {
-    const isAppReady = keysToHydrate.every((key) => hydratedKeys.has(key));
-    const isHydrated = (key) => hydratedKeys.has(key);
-    return { markHydrated, isHydrated, isAppReady };
-  }, [keysToHydrate, hydratedKeys]);
+    const isAppReady = keysToHydrate.size === 0;
+    const isHydrated = (key) => !keysToHydrate.has(key);
+    return { trackHydration, markHydrated, isHydrated, isAppReady };
+  }, [keysToHydrate, markHydrated, trackHydration]);
 
   return <HydrationContext.Provider value={value}>{children}</HydrationContext.Provider>;
 }
 
 HydrationProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  keysToHydrate: PropTypes.arrayOf(PropTypes.string),
-};
-
-HydrationProvider.defaultProps = {
-  keysToHydrate: [],
 };

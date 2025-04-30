@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useReducer } from 'react';
+import React, { useMemo, useEffect, useReducer, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { UserContext } from 'contexts';
 import { userReducer, initialUserState, UserActions } from 'stores';
@@ -15,55 +15,67 @@ import { HydrationKeys } from 'appConstants';
 export default function UserProvider({ children }) {
   const [userStore, userDispatch] = useReducer(userReducer, initialUserState);
   // @ts-ignore
-  const { markHydrated, isHydrated } = useHydration();
+  const { trackHydration, markHydrated, isHydrated } = useHydration();
+
+  useEffect(() => trackHydration(HydrationKeys.USER), [trackHydration]);
 
   useEffect(() => {
     if (!isHydrated(HydrationKeys.USER)) {
-      let userData = { email: '', social: false };
       getUser()
         .then((response) => {
           const responseData = response.data;
           // @ts-ignore
           const { email, is_socially_registered: social } = responseData;
-          userData = { email, social };
-        })
-        .catch(() => {})
-        .finally(() => {
           // @ts-ignore
-          userDispatch({ type: UserActions.HYDRATE, payload: userData });
+          userDispatch({ type: UserActions.HYDRATE, payload: { email, social } });
+        })
+        .catch(() =>
+          // @ts-ignore
+          userDispatch({ type: UserActions.HYDRATE, payload: { email: '', social: false } })
+        )
+        .finally(() => {
           markHydrated(HydrationKeys.USER);
         });
     }
   }, [isHydrated, markHydrated]);
 
-  const login = (credentials) =>
-    loginService(credentials).then((response) => {
-      // @ts-ignore
-      userDispatch({
-        type: UserActions.LOGIN,
+  const login = useCallback(
+    (credentials) =>
+      loginService(credentials).then((response) => {
         // @ts-ignore
-        payload: { email: response.data.user.email, social: false },
-      });
-      return response;
-    });
+        userDispatch({
+          type: UserActions.LOGIN,
+          // @ts-ignore
+          payload: { email: response.data.user.email, social: false },
+        });
+        return response;
+      }),
+    []
+  );
 
-  const logout = () =>
-    logoutService().then((response) => {
-      // @ts-ignore
-      userDispatch({ type: UserActions.LOGOUT });
-      return response;
-    });
+  const logout = useCallback(
+    () =>
+      logoutService().then((response) => {
+        // @ts-ignore
+        userDispatch({ type: UserActions.LOGOUT });
+        return response;
+      }),
+    []
+  );
 
-  const register = (credentials) => registerService(credentials);
+  const register = useCallback((credentials) => registerService(credentials), []);
 
-  const socialLogin = (provider, credentials) =>
-    socialLoginService(provider, credentials).then((response) => {
-      // @ts-ignore
-      const { email } = response.data.user;
-      // @ts-ignore
-      userDispatch({ type: UserActions.LOGIN, payload: { email, social: true } });
-      return response;
-    });
+  const socialLogin = useCallback(
+    (provider, credentials) =>
+      socialLoginService(provider, credentials).then((response) => {
+        // @ts-ignore
+        const { email } = response.data.user;
+        // @ts-ignore
+        userDispatch({ type: UserActions.LOGIN, payload: { email, social: true } });
+        return response;
+      }),
+    []
+  );
 
   const value = useMemo(
     () => ({
@@ -73,7 +85,7 @@ export default function UserProvider({ children }) {
       logout,
       register,
     }),
-    [userStore]
+    [userStore, login, logout, register, socialLogin]
   );
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }

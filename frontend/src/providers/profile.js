@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useReducer } from 'react';
+import React, { useMemo, useEffect, useReducer, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ProfileContext } from 'contexts';
 import { profileReducer, initialProfileState, ProfileActions } from 'stores';
@@ -15,7 +15,9 @@ export default function ProfileProvider({ children }) {
     initialProfileState
   );
   // @ts-ignore
-  const { markHydrated, isHydrated } = useHydration();
+  const { trackHydration, markHydrated, isHydrated } = useHydration();
+
+  useEffect(() => trackHydration(HydrationKeys.PROFILE), [trackHydration]);
 
   useEffect(() => {
     if (!isHydrated(HydrationKeys.PROFILE)) {
@@ -27,12 +29,13 @@ export default function ProfileProvider({ children }) {
     }
   }, [isHydrated, markHydrated]);
 
-  const value = useMemo(() => {
-    const setBasicInfo = (basicInfo) =>
-      // @ts-ignore
-      profileDispatch({ type: ProfileActions.SET_BASIC_INFO, payload: basicInfo });
-    return { profileStore, setBasicInfo };
-  }, [profileStore, profileDispatch]);
+  const setBasicInfo = useCallback(
+    // @ts-ignore
+    (basicInfo) => profileDispatch({ type: ProfileActions.SET_BASIC_INFO, payload: basicInfo }),
+    []
+  );
+
+  const value = useMemo(() => ({ profileStore, setBasicInfo }), [profileStore, setBasicInfo]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

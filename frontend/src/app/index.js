@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import log from 'loglevel';
 import * as Sentry from '@sentry/react';
 import { Switch, Route, useLocation } from 'react-router-dom';
@@ -21,9 +21,7 @@ import {
   CookiePolicy,
   ScrollToTop,
 } from 'components';
-import { fetchUrl, isCordovaEnv, isDevEnv } from 'utils';
-import { useUserStore } from 'hooks';
-import { UserActions } from 'stores';
+import { isDevEnv } from 'utils';
 
 if (isDevEnv()) {
   log.setDefaultLevel('trace');
@@ -47,7 +45,6 @@ function App() {
       <CssBaseline>
         <Stack className={classes.root}>
           <Alert />
-          <AppWait />
           {!/\/chat.*/.test(pathname) && <NavBar />}
           <UserInfoDialog />
           <ScrollToTop />
@@ -104,6 +101,7 @@ function App() {
             <Route path="/cookies">
               <CookiePolicy />
             </Route>
+            <AppWait />
           </Switch>
         </Stack>
       </CssBaseline>

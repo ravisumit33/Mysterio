@@ -1,6 +1,11 @@
 import React, { useCallback } from 'react';
 import { Stack } from '@mui/material';
-import { useAlertStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
+import {
+  useAlertStore,
+  useTaskRunnerWithAlert,
+  useTaskRunnerWithLoader,
+  useUserStore,
+} from 'hooks';
 import { getErrorString } from 'utils';
 import GoogleLogin from './Google';
 
@@ -10,27 +15,30 @@ function SocialAuth() {
   // @ts-ignore
   const { showAlert } = useAlertStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const handleSocialLoginSuccess = useCallback(
     (provider, responseData) => {
       runTaskWithLoader({
         loaderText: 'Logging you in',
         task: () =>
-          socialLogin(provider, { access_token: responseData.access_token })
-            .then(() => {
-              showAlert({ text: 'Login Successful', severity: 'success' });
-            })
-            .catch((resp) => {
+          runTaskWithAlert({
+            task: () => socialLogin(provider, { access_token: responseData.access_token }),
+            onSuccessCb: (resp, showAlertCb) => {
+              showAlertCb({ text: 'Login Successful', severity: 'success' });
+            },
+            onErrorCb: (resp, showAlertCb) => {
               const respData = resp.data;
-              showAlert({
+              showAlertCb({
                 text: respData.non_field_errors
                   ? getErrorString(respData.non_field_errors)
                   : `Unable to login using ${provider}`,
                 severity: 'error',
               });
-            }),
+            },
+          }),
       });
     },
-    [socialLogin, showAlert, runTaskWithLoader]
+    [socialLogin, runTaskWithLoader, runTaskWithAlert]
   );
 
   const handleSocialLoginFailure = useCallback(

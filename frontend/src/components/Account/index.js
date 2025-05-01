@@ -10,7 +10,12 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
-import { useProfileStore, useUserStore, useAlertStore, useTaskRunnerWithLoader } from 'hooks';
+import {
+  useProfileStore,
+  useUserStore,
+  useTaskRunnerWithLoader,
+  useTaskRunnerWithAlert,
+} from 'hooks';
 import { isLoggedIn } from 'selectors';
 import {
   Box,
@@ -24,7 +29,6 @@ import {
 } from '@mui/material';
 import { AccountCircle, Logout, Favorite, Edit, Login } from '@mui/icons-material';
 import Avatar from 'components/Avatar';
-import { fetchUrl } from 'utils';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
 import Profile from './Profile';
@@ -55,8 +59,8 @@ function Account() {
   // @ts-ignore
   const { userStore, logout } = useUserStore();
   // @ts-ignore
-  const { showAlert } = useAlertStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
 
   const drawerTabs = [
     {
@@ -118,16 +122,18 @@ function Account() {
                 runTaskWithLoader({
                   loaderText: 'Logging you out',
                   task: () =>
-                    logout()
-                      .then(() => {
+                    runTaskWithAlert({
+                      task: () => logout(),
+                      onSuccessCb: () => {
                         history.replace('/');
-                      })
-                      .catch(() =>
-                        showAlert({
+                      },
+                      onErrorCb: (err, showAlertCb) => {
+                        showAlertCb({
                           text: 'Unable to log out. Make sure you are logged in.',
                           severity: 'error',
-                        })
-                      ),
+                        });
+                      },
+                    }),
                 });
               }}
             >

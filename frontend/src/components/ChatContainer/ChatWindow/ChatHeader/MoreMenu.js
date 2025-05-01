@@ -7,15 +7,14 @@ import { useHistory } from 'react-router-dom';
 import { appStore } from 'stores';
 import ConfirmationDialog from 'components/ConfirmationDialog';
 import { ChatWindowStoreContext } from 'contexts';
-import { fetchUrl } from 'utils';
-import { useAlertStore, useTaskRunnerWithLoader } from 'hooks';
+import { useTaskRunnerWithLoader, useTaskRunnerWithAlert } from 'hooks';
 import { deleteRoomService } from 'services';
 
 function MoreMenu(props) {
   const { isGroupChat, className } = props;
   // @ts-ignore
-  const { showAlert } = useAlertStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState(null);
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
@@ -35,32 +34,34 @@ function MoreMenu(props) {
     runTaskWithLoader({
       loaderText: 'Deleting Room',
       task: () =>
-        deleteRoomService(roomId, roomInfo.password)
-          .then(() => {
+        runTaskWithAlert({
+          task: () => deleteRoomService(roomId, roomInfo.password),
+          onSuccessCb: (response, showAlertCb) => {
             appStore.removeChatWindow();
             history.push('/');
-            showAlert({
+            showAlertCb({
               text: 'Room deleted successfully.',
               severity: 'success',
             });
-          })
-          .catch((error) => {
+          },
+          onErrorCb: (error, showAlertCb) => {
             if (error.status === 401 || error.status === 403) {
-              showAlert({
+              showAlertCb({
                 text: 'Only creator can delete the room.',
                 action: 'login',
                 severity: 'error',
               });
             } else {
-              showAlert({
+              showAlertCb({
                 text: 'Error occurred while deleting. Try again later.',
                 severity: 'error',
               });
             }
-          })
-          .finally(() => {
+          },
+          onCompletionCb: () => {
             setShouldShowDeleteConfirmationDialog(false);
-          }),
+          },
+        }),
     });
   };
 

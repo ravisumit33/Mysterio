@@ -13,16 +13,15 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import RouterLink from 'components/RouterLink';
-import { fetchUrl, getErrorString } from 'utils';
-import { appStore } from 'stores';
-import { useAlertStore, useUserStore } from 'hooks';
+import { getErrorString } from 'utils';
+import { useTaskRunnerWithLoader, useTaskRunnerWithAlert, useUserStore } from 'hooks';
 
 function UserForm(props) {
   const { shouldRegister, from } = props;
   // @ts-ignore
-  const { login } = useUserStore();
-  // @ts-ignore
-  const { showAlert } = useAlertStore();
+  const { login, register } = useUserStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const history = useHistory();
   const location = useLocation();
   const [shouldUnmaskPassword, setShouldUnmaskPassword] = useState(false);
@@ -59,7 +58,7 @@ function UserForm(props) {
   }, [passwordHelpText, shouldRegister]);
 
   const handleFormSubmit = () => {
-    const endPoint = shouldRegister ? '/api/account/registration/' : '/api/account/login/';
+    const service = shouldRegister ? register : login;
     const requestBody = { email };
     if (shouldRegister) {
       requestBody.password1 = password;
@@ -67,59 +66,59 @@ function UserForm(props) {
     } else {
       requestBody.password = password;
     }
-    appStore.showWaitScreen(shouldRegister ? 'Creating your account' : 'Logging you in');
-    fetchUrl(endPoint, {
-      method: 'post',
-      body: requestBody,
-    })
-      .then(() => {
-        if (!shouldRegister) {
-          login({ email, social: false });
-          history.replace(from);
-          showAlert({
-            text: `Login successful.`,
-            severity: 'success',
-          });
-        } else {
-          history.replace('/account/confirmation-email-sent/');
-          showAlert({
-            text: 'Confirmation e-mail sent',
-            severity: 'success',
-          });
-        }
-      })
-      .catch((response) => {
-        const responseData = response.data;
-        const responseFields = ['email', 'password1'];
-        const newEmailFieldData = { ...emailFieldData };
-        const newPasswordFieldData = { ...passwordFieldData };
-        if (responseData.email) {
-          newEmailFieldData.help_text = getErrorString(responseData.email);
-          newEmailFieldData.error = true;
-        } else {
-          newEmailFieldData.help_text = '';
-          newEmailFieldData.error = false;
-        }
-        if (responseData.password1) {
-          newPasswordFieldData.help_text = getErrorString(responseData.password1);
-          newPasswordFieldData.error = true;
-        } else {
-          newPasswordFieldData.help_text = passwordHelpText;
-          newPasswordFieldData.error = false;
-        }
-        setEmailFieldData(newEmailFieldData);
-        setPasswordFieldData(newPasswordFieldData);
-        if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
-          const action = shouldRegister ? 'create an account' : 'login';
-          showAlert({
-            text: responseData.non_field_errors
-              ? getErrorString(responseData.non_field_errors)
-              : `Unable to ${action}.`,
-            severity: 'error',
-          });
-        }
-      })
-      .finally(() => appStore.setShouldShowWaitScreen(false));
+    runTaskWithLoader({
+      loaderText: shouldRegister ? 'Creating your account' : 'Logging you in',
+      task: () =>
+        runTaskWithAlert({
+          task: () => service(requestBody),
+          onSuccessCb: (resp, showAlertCb) => {
+            if (!shouldRegister) {
+              history.replace(from);
+              showAlertCb({
+                text: `Login successful.`,
+                severity: 'success',
+              });
+            } else {
+              history.replace('/account/confirmation-email-sent/');
+              showAlertCb({
+                text: 'Confirmation e-mail sent',
+                severity: 'success',
+              });
+            }
+          },
+          onErrorCb: (response, showAlertCb) => {
+            const responseData = response.data;
+            const responseFields = ['email', 'password1'];
+            const newEmailFieldData = { ...emailFieldData };
+            const newPasswordFieldData = { ...passwordFieldData };
+            if (responseData.email) {
+              newEmailFieldData.help_text = getErrorString(responseData.email);
+              newEmailFieldData.error = true;
+            } else {
+              newEmailFieldData.help_text = '';
+              newEmailFieldData.error = false;
+            }
+            if (responseData.password1) {
+              newPasswordFieldData.help_text = getErrorString(responseData.password1);
+              newPasswordFieldData.error = true;
+            } else {
+              newPasswordFieldData.help_text = passwordHelpText;
+              newPasswordFieldData.error = false;
+            }
+            setEmailFieldData(newEmailFieldData);
+            setPasswordFieldData(newPasswordFieldData);
+            if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
+              const action = shouldRegister ? 'create an account' : 'login';
+              showAlertCb({
+                text: responseData.non_field_errors
+                  ? getErrorString(responseData.non_field_errors)
+                  : `Unable to ${action}.`,
+                severity: 'error',
+              });
+            }
+          },
+        }),
+    });
   };
 
   return (

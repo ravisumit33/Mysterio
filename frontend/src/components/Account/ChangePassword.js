@@ -3,7 +3,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Button, IconButton, InputAdornment, Stack, TextField, Typography } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { getErrorString } from 'utils';
-import { useAlertStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
+import { useTaskRunnerWithAlert, useTaskRunnerWithLoader, useUserStore } from 'hooks';
 import CenterPaper from 'components/CenterPaper';
 
 function ChangePassword() {
@@ -12,9 +12,9 @@ function ChangePassword() {
   // @ts-ignore
   const { from } = location.state || { from: { pathname: '/' } };
   // @ts-ignore
-  const { showAlert } = useAlertStore();
   const { changePassword } = useUserStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [shouldUnmaskNewPassword, setShouldUnmaskPassword] = useState(false);
@@ -33,15 +33,16 @@ function ChangePassword() {
     runTaskWithLoader({
       loaderText: 'Please wait',
       task: () =>
-        changePassword()
-          .then(() => {
-            showAlert({
+        runTaskWithAlert({
+          task: () => changePassword(oldPassword, newPassword),
+          onSuccessCb: (response, showAlertCb) => {
+            showAlertCb({
               text: `Password changed successfully.`,
               severity: 'success',
             });
             history.push(from);
-          })
-          .catch((response) => {
+          },
+          onErrorCb: (response, showAlertCb) => {
             const responseData = response.data;
             const responseFields = ['old_password', 'new_password2'];
             const newOldPasswordFieldData = { ...oldPasswordFieldData };
@@ -63,14 +64,15 @@ function ChangePassword() {
             setOldPasswordFieldData(newOldPasswordFieldData);
             setNewPasswordFieldData(newNewPasswordFieldData);
             if (!Object.keys(responseData).some((key) => responseFields.includes(key))) {
-              showAlert({
+              showAlertCb({
                 text: responseData.detail
                   ? getErrorString(responseData.detail)
                   : 'Error occurred while changing password',
                 severity: 'error',
               });
             }
-          }),
+          },
+        }),
     });
   };
 

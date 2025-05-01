@@ -18,7 +18,12 @@ import {
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, Logout, Login, ArrowForward } from '@mui/icons-material';
 import { appStore } from 'stores';
-import { useAlertStore, useProfileStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
+import {
+  useProfileStore,
+  useTaskRunnerWithAlert,
+  useTaskRunnerWithLoader,
+  useUserStore,
+} from 'hooks';
 import { isLoggedIn } from 'selectors';
 import Avatar from 'components/Avatar';
 import RouterLink from 'components/RouterLink';
@@ -55,9 +60,8 @@ function NavBar() {
   const { profileStore } = useProfileStore();
   // @ts-ignore
   const { userStore, logout } = useUserStore();
-  // @ts-ignore
-  const { showAlert } = useAlertStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
   const trigger = useScrollTrigger({
@@ -227,16 +231,18 @@ function NavBar() {
           runTaskWithLoader({
             loaderText: 'Logging you out',
             task: () =>
-              logout()
-                .then(() => {
+              runTaskWithAlert({
+                task: () => logout(),
+                onSuccessCb: () => {
                   history.replace('/');
-                })
-                .catch(() =>
-                  showAlert({
+                },
+                onErrorCb: (err, showAlertCb) => {
+                  showAlertCb({
                     text: 'Unable to log out. Make sure you are logged in.',
                     severity: 'error',
-                  })
-                ),
+                  });
+                },
+              }),
           });
         },
       },

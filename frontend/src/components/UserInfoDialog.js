@@ -10,9 +10,9 @@ import {
 } from '@mui/material';
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
-import { appStore, ProfileActions } from 'stores';
+import { appStore } from 'stores';
 import { fetchUrl } from 'utils';
-import { useBasicInfo, useProfileStore, useAlertStore } from 'hooks';
+import { useBasicInfo, useProfileStore, useAlertStore, useTaskRunnerWithAlert } from 'hooks';
 import { profileManager } from 'managers';
 import BasicInfo from './BasicInfo';
 
@@ -51,7 +51,9 @@ function UserInfoDialog() {
   // @ts-ignore
   const { profileStore, setBasicInfo } = useProfileStore();
   // @ts-ignore
-  const { showAlert, hideAlert } = useAlertStore();
+  const { showAlert } = useAlertStore();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
+
   useEffect(() => {
     const { name, avatarUrl, sessionId } = profileStore;
     const hasCompleteBasicInfo = name && avatarUrl && sessionId;
@@ -104,9 +106,9 @@ function UserInfoDialog() {
       });
     }
 
-    fileUploadPromise
-      .then((url) => {
-        hideAlert();
+    runTaskWithAlert({
+      task: () => fileUploadPromise,
+      onSuccessCb: (url) => {
         let profileSessionId = profileStore.sessionId;
         if (!profileSessionId) {
           profileSessionId = `${Date.now()}`;
@@ -117,13 +119,14 @@ function UserInfoDialog() {
           sessionId: profileSessionId,
         });
         appStore.setShouldOpenUserInfoDialog(false);
-      })
-      .catch(() => {
-        showAlert({
+      },
+      onErrorCb: (resp, showAlertCb) => {
+        showAlertCb({
           text: 'Error occured while creating avatar. Try choosing random one.',
           severity: 'error',
         });
-      });
+      },
+    });
   };
 
   return (

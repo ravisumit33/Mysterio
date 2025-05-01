@@ -5,35 +5,35 @@ import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
 import Notification from 'components/Notification';
 import welcomeJson from 'assets/animations/welcome.json';
-import { useAlertStore, useTaskRunnerWithLoader, useUserStore } from 'hooks';
-import { verifyEmailService } from 'services';
+import { useTaskRunnerWithAlert, useTaskRunnerWithLoader, useUserStore } from 'hooks';
 
 const ConfirmEmail = () => {
   // @ts-ignore
   const { key } = useParams();
   // @ts-ignore
-  const { showAlert } = useAlertStore();
-  // @ts-ignore
   const { verifyEmail } = useUserStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [emailConfirmed, setEmailConfirmed] = useState(false);
 
   useEffect(() => {
     runTaskWithLoader({
       loaderText: 'Verifying',
       task: () =>
-        verifyEmail(key)
-          .then(() => {
+        runTaskWithAlert({
+          task: () => verifyEmail(key),
+          onSuccessCb: () => {
             setEmailConfirmed(true);
-          })
-          .catch(() =>
-            showAlert({
+          },
+          onErrorCb: (error, showAlertCb) => {
+            showAlertCb({
               text: 'Error occured while verifying email',
               severity: 'error',
-            })
-          ),
+            });
+          },
+        }),
     });
-  }, [key, showAlert, runTaskWithLoader, verifyEmail]);
+  }, [key, runTaskWithLoader, runTaskWithAlert, verifyEmail]);
 
   const welcomeComponent = !emailConfirmed ? null : (
     <CenterPaper>

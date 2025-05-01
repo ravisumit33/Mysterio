@@ -4,12 +4,17 @@ import { observer } from 'mobx-react-lite';
 import { FormControlLabel, TextField, Typography, Switch, Button, Stack } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import { Group } from '@mui/icons-material';
-import { appStore } from 'stores';
 import { isLoggedIn } from 'selectors';
-import { fetchUrl } from 'utils';
-import { useBasicInfo, useUserStore, useAlertStore } from 'hooks';
+import {
+  useBasicInfo,
+  useUserStore,
+  useAlertStore,
+  useTaskRunnerWithLoader,
+  useTaskRunnerWithAlert,
+} from 'hooks';
 import { RoomType } from 'appConstants';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
+import { createRoomService, uploadAvatarService } from 'services';
 import CenterPaper from './CenterPaper';
 import BasicInfo from './BasicInfo';
 
@@ -28,7 +33,10 @@ function NewRoom() {
   // @ts-ignore
   const { userStore } = useUserStore();
   // @ts-ignore
-  const { showAlert, hideAlert } = useAlertStore();
+  const { showAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runAvatarUploadWithAlert = useTaskRunnerWithAlert();
+  const runCreateRoomWithAlert = useTaskRunnerWithAlert();
   const history = useHistory();
   const location = useLocation();
   // @ts-ignore
@@ -52,8 +60,6 @@ function NewRoom() {
     error: false,
   });
 
-  const { showWaitScreen, setShouldShowWaitScreen } = appStore;
-
   const handleCreateRoom = () => {
     if (!avatarUrl) {
       showAlert({
@@ -62,90 +68,82 @@ function NewRoom() {
       });
       return;
     }
-    showWaitScreen('Creating new room');
+    runTaskWithLoader({
+      loaderText: 'Creating new room',
+      task: () =>
+        runAvatarUploadWithAlert({
+          task: () => {
+            let fileUploadPromise = Promise.resolve(avatarUrl);
+            if (/^blob:.*$/.test(avatarUrl)) {
+              fileUploadPromise = uploadAvatarService(avatarUrl).then((resp) => {
+                const responseData = resp.data;
+                // @ts-ignore
+                const { url } = responseData;
+                return url;
+              });
+            }
 
-    let fileUploadPromise = Promise.resolve(avatarUrl);
-    if (/^blob:.*$/.test(avatarUrl)) {
-      const formData = new FormData();
-      formData.append('file', avatarUrl);
-      fileUploadPromise = fetchUrl('/api/upload_avatar/', {
-        method: 'post',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }).then((resp) => {
-        const responseData = resp.data;
-        // @ts-ignore
-        const { url } = responseData;
-        return url;
-      });
-    }
-
-    fileUploadPromise
-      .then((url) => {
-        fetchUrl('/api/chat/rooms/', {
-          method: 'post',
-          body: {
-            room_data: {
-              name: roomName,
-              description,
-              password: roomPwd,
-              avatar_url: url,
-            },
-            room_type: RoomType.GROUP,
+            return fileUploadPromise;
           },
-        })
-          .then((response) => {
-            hideAlert();
-            const responseData = response.data;
-            // @ts-ignore
-            const { id: roomId } = responseData;
-            updateStoredChatWindowData(RoomType.GROUP, roomId, { password: roomPwd });
-            history.push(`/chat/${RoomType.GROUP}/${roomId}/`);
-          })
-          .catch((response) => {
-            const responseData = response.data;
-            const groupNameFieldData = { ...nameFieldData };
-            const groupPasswordFieldData = { ...pwdFieldData };
-            const groupDescriptionFieldData = { ...descriptionFieldData };
-            if (responseData.name) {
-              [groupNameFieldData.help_text] = responseData.name;
-              groupNameFieldData.error = true;
-            } else {
-              groupNameFieldData.help_text = '';
-              groupNameFieldData.error = false;
-            }
-            if (responseData.password) {
-              [groupPasswordFieldData.help_text] = responseData.password;
-              groupPasswordFieldData.error = true;
-            } else {
-              groupPasswordFieldData.help_text = '';
-              groupPasswordFieldData.error = false;
-            }
-            if (responseData.description) {
-              [groupDescriptionFieldData.help_text] = responseData.description;
-              groupDescriptionFieldData.error = true;
-            } else {
-              groupDescriptionFieldData.help_text = '';
-              groupDescriptionFieldData.error = false;
-            }
-            showAlert({
-              text: 'Error occurred while creating room.',
+          onSuccessCb: (url) =>
+            runCreateRoomWithAlert({
+              task: () =>
+                createRoomService(RoomType.GROUP, {
+                  name: roomName,
+                  description,
+                  password: roomPwd,
+                  avatarUrl: url,
+                }),
+              onSuccessCb: (response) => {
+                const responseData = response.data;
+                // @ts-ignore
+                const { id: roomId } = responseData;
+                updateStoredChatWindowData(RoomType.GROUP, roomId, { password: roomPwd });
+                history.push(`/chat/${RoomType.GROUP}/${roomId}/`);
+              },
+              onErrorCb: (response, showAlertCb) => {
+                const responseData = response.data;
+                const groupNameFieldData = { ...nameFieldData };
+                const groupPasswordFieldData = { ...pwdFieldData };
+                const groupDescriptionFieldData = { ...descriptionFieldData };
+                if (responseData.name) {
+                  [groupNameFieldData.help_text] = responseData.name;
+                  groupNameFieldData.error = true;
+                } else {
+                  groupNameFieldData.help_text = '';
+                  groupNameFieldData.error = false;
+                }
+                if (responseData.password) {
+                  [groupPasswordFieldData.help_text] = responseData.password;
+                  groupPasswordFieldData.error = true;
+                } else {
+                  groupPasswordFieldData.help_text = '';
+                  groupPasswordFieldData.error = false;
+                }
+                if (responseData.description) {
+                  [groupDescriptionFieldData.help_text] = responseData.description;
+                  groupDescriptionFieldData.error = true;
+                } else {
+                  groupDescriptionFieldData.help_text = '';
+                  groupDescriptionFieldData.error = false;
+                }
+                showAlertCb({
+                  text: 'Error occurred while creating room.',
+                  severity: 'error',
+                });
+                setNameFieldData(groupNameFieldData);
+                setPwdFieldData(groupPasswordFieldData);
+                setDescriptionFieldData(groupDescriptionFieldData);
+              },
+            }),
+          onErrorCb: (err, showAlertCb) => {
+            showAlertCb({
+              text: 'Error occured while creating avatar. Try choosing random one.',
               severity: 'error',
             });
-            setNameFieldData(groupNameFieldData);
-            setPwdFieldData(groupPasswordFieldData);
-            setDescriptionFieldData(groupDescriptionFieldData);
-          })
-          .finally(() => setShouldShowWaitScreen(false));
-      })
-      .catch(() => {
-        showAlert({
-          text: 'Error occured while creating avatar. Try choosing random one.',
-          severity: 'error',
-        });
-      });
+          },
+        }),
+    });
   };
 
   return !isLoggedIn(userStore) ? (

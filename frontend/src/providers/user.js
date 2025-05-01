@@ -11,6 +11,8 @@ import {
   passwordChangeService,
   deleteAccountService,
   verifyEmailService,
+  forgotPasswordService,
+  resetPasswordService,
 } from 'services';
 import { useHydration } from 'hooks';
 import { HydrationKeys } from 'appConstants';
@@ -82,6 +84,13 @@ export default function UserProvider({ children }) {
 
   const changePassword = useCallback((oldPwd, newPwd) => passwordChangeService(oldPwd, newPwd), []);
 
+  const forgotPassword = useCallback((email) => forgotPasswordService(email), []);
+
+  const resetPassword = useCallback(
+    (userId, key, newPassword) => resetPasswordService(userId, key, newPassword),
+    []
+  );
+
   const deleteAccount = useCallback(() => deleteAccountService(), []);
 
   const verifyEmail = useCallback((key) => verifyEmailService(key), []);
@@ -94,10 +103,23 @@ export default function UserProvider({ children }) {
       logout,
       register,
       changePassword,
+      forgotPassword,
+      resetPassword,
       deleteAccount,
       verifyEmail,
     }),
-    [userStore, login, logout, register, socialLogin, changePassword, deleteAccount, verifyEmail]
+    [
+      userStore,
+      login,
+      logout,
+      register,
+      socialLogin,
+      changePassword,
+      forgotPassword,
+      resetPassword,
+      deleteAccount,
+      verifyEmail,
+    ]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

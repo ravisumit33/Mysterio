@@ -10,13 +10,13 @@ export const UserActions = Object.freeze({
 });
 
 export const AlertActions = Object.freeze({
-  SHOW: 'ALERT/SHOW',
-  HIDE: 'ALERT/HIDE',
+  ADD: 'ALERT/ADD',
+  REMOVE: 'ALERT/REMOVE',
 });
 
 export const WaitScreenActions = Object.freeze({
-  SHOW: 'ALERT/SHOW',
-  HIDE: 'ALERT/HIDE',
+  SHOW: 'WAITSCREEN/SHOW',
+  HIDE: 'WAITSCREEN/HIDE',
 });
 
 export const ChatWindowActions = Object.freeze({

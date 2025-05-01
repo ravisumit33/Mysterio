@@ -4,7 +4,12 @@ import { fetchUrl, isEmptyObj } from 'utils';
 import { updateStoredChatWindowData } from 'utils/browserStorageUtils';
 import { SocketManager } from 'managers';
 import { isLoggedIn } from 'selectors';
-import { syncPlayerService } from 'services';
+import {
+  syncPlayerService,
+  getRoomService,
+  getPreviousMessagePageService,
+  updateRoomService,
+} from 'services';
 
 class ChatWindowStore {
   avatarUrl = '';
@@ -25,12 +30,12 @@ class ChatWindowStore {
 
   syncedPlayerData = null; // synced player information if player is opened
 
-  constructor({ appStore, profileStore, userStore, showAlert, runTaskWithLoader, data }) {
+  constructor({ appStore, profileStore, userStore, runTaskWithLoader, runTaskWithAlert, data }) {
     this.appStore = appStore;
     this.profileStore = profileStore;
     this.userStore = userStore;
-    this.showAlert = showAlert;
     this.runTaskWithLoader = runTaskWithLoader;
+    this.runTaskWithAlert = runTaskWithAlert;
     const initPromise = this.initState(data || {});
     initPromise.then(() => {
       this.socket = new SocketManager(this, profileStore);
@@ -51,19 +56,20 @@ class ChatWindowStore {
     return initPromise;
   };
 
-  syncRoomData = (requestData = {}) =>
-    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/`, { ...requestData })
-      .catch((err) => {
+  syncRoomData = () =>
+    this.runTaskWithAlert({
+      task: () => getRoomService(this.roomInfo.roomId),
+      onErrorCb: (err, showAlertCb) => {
         log.error(err);
         this.setInitDone(true);
         this.appStore.removeChatWindow();
-        this.showAlert({
+        showAlertCb({
           text: 'Error occured while connecting to server.',
           severity: 'error',
         });
         throw err;
-      })
-      .then(async (response) => {
+      },
+      onSuccessCb: async (response) => {
         const { data } = response;
         // @ts-ignore
         const { player, room_data: roomData } = data;
@@ -81,7 +87,7 @@ class ChatWindowStore {
           ...this.previousMessagesInfo,
           next: `/api/chat/messages/?search=${this.roomInfo.roomId}&page_size=250&ordering=-sent_at`,
         });
-        await this.loadPreviousMessages(requestData);
+        await this.loadPreviousMessages();
         if (!this.isGroupChat) {
           // Show USER_JOINED message when user re-joins an individual chat
           this.addInitMessageList([
@@ -92,7 +98,8 @@ class ChatWindowStore {
           ]);
         }
         return data;
-      });
+      },
+    });
 
   initializeForIndividual = () => {
     this.setRoomInfo({ ...this.roomInfo, adminAccess: true });
@@ -106,9 +113,7 @@ class ChatWindowStore {
 
   initializeForGroup = async () => {
     await fetchUrl('/api/account/token/refresh/', { method: 'post' }).catch((err) => {});
-    return this.syncRoomData({
-      headers: { 'X-Room-Password': this.roomInfo.password },
-    }).then(async (data) => {
+    return this.syncRoomData().then(async (data) => {
       // @ts-ignore
       const { room_data: roomData } = data;
       const {
@@ -169,20 +174,21 @@ class ChatWindowStore {
     return false;
   }
 
-  loadPreviousMessages = (requestData) => {
+  loadPreviousMessages = () => {
     const { next } = this.previousMessagesInfo;
     if (!next) return Promise.resolve(0);
     this.setPreviousMessagesInfo({ ...this.previousMessagesInfo, fetchingPreviousMessages: true });
-    return fetchUrl(`${next}`, { ...requestData })
-      .catch((err) => {
+    return this.runTaskWithAlert({
+      task: () => getPreviousMessagePageService(`${next}`),
+      onErrorCb: (err, showAlertCb) => {
         log.error(err);
-        this.showAlert({
+        showAlertCb({
           text: 'Error occured while fetching previous messages.',
           severity: 'error',
         });
         throw err;
-      })
-      .then((response) => {
+      },
+      onSuccessCb: (response) => {
         const responseData = response.data;
         // @ts-ignore
         const { results: messages } = responseData;
@@ -247,13 +253,14 @@ class ChatWindowStore {
             this.previousMessagesInfo.previousMessagesCount || responseData.count,
         });
         return prevMessageList.length;
-      })
-      .finally(() => {
+      },
+      onCompletionCb: () => {
         this.setPreviousMessagesInfo({
           ...this.previousMessagesInfo,
           fetchingPreviousMessages: false,
         });
-      });
+      },
+    });
   };
 
   processMessage = (payload, isInitMsg) => {
@@ -393,44 +400,40 @@ class ChatWindowStore {
   };
 
   toggleLikeRoom = () => {
-    let fetchData = { body: { room_data: { favorite: !this.roomInfo.isFavorite } } };
-    if (this.isGroupChat) {
-      fetchData = {
-        ...fetchData,
-        headers: { 'X-Room-Password': this.roomInfo.password },
-      };
-    }
-    fetchUrl(`/api/chat/rooms/${this.roomInfo.roomId}/`, {
-      ...fetchData,
-      method: 'patch',
-    })
-      .then(() => this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }))
-      .catch(() => {
+    const roomUpdateData = { room_data: { favorite: !this.roomInfo.isFavorite } };
+    this.runTaskWithAlert({
+      task: () => updateRoomService(this.roomInfo.roomId, this.roomInfo.password, roomUpdateData),
+      onSuccessCb: () =>
+        this.setRoomInfo({ ...this.roomInfo, isFavorite: !this.roomInfo.isFavorite }),
+      onErrorCb: (err, showAlertCb) => {
         const alertText = isLoggedIn(this.userStore)
           ? 'Unable to change favorite status.'
           : 'Login required to change favorite status';
-        this.showAlert({
+        showAlertCb({
           severity: 'error',
           action: 'login',
           text: alertText,
         });
-      });
+      },
+    });
   };
 
   syncPlayer = () => {
     this.runTaskWithLoader({
       loaderText: 'Syncing player',
       task: () =>
-        syncPlayerService(this.roomInfo.roomId, this.roomInfo.password)
-          .then((response) => {
+        this.runTaskWithAlert({
+          task: () => syncPlayerService(this.roomInfo.roomId, this.roomInfo.password),
+          onSuccessCb: (response) => {
             this.setSyncedPlayerData(response.data[0]);
-          })
-          .catch(() => {
-            this.showAlert({
+          },
+          onErrorCb: (err, showAlertCb) => {
+            showAlertCb({
               severity: 'error',
               text: 'Error occurred while fetching player data',
             });
-          }),
+          },
+        }),
     });
   };
 

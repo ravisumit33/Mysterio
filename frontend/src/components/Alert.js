@@ -55,6 +55,7 @@ function AppAlert() {
     }
   };
 
+  // Reason we do not show stacked notifications: https://ux.stackexchange.com/a/74930
   return (
     <Box className={classes.root}>
       <Snackbar

@@ -6,22 +6,19 @@ import { AlertActions, alertReducer, initialAlertState } from 'stores';
 export default function AlertProvider({ children }) {
   const [alertStore, alertDispatch] = useReducer(alertReducer, initialAlertState);
 
-  // @ts-ignore
-  const hideAlert = useCallback(() => alertDispatch({ type: AlertActions.HIDE }), []);
-
-  const showAlert = useCallback(
-    (alert) => {
-      // @ts-ignore
-      const dispatchAlert = (payload) => alertDispatch({ type: AlertActions.SHOW, payload });
-      if (alertStore.visible) {
-        hideAlert();
-        setTimeout(() => dispatchAlert(alert), 300);
-      } else {
-        dispatchAlert(alert);
-      }
-    },
-    [alertStore.visible, hideAlert]
+  const hideAlert = useCallback(
+    // @ts-ignore
+    (id) => alertDispatch({ type: AlertActions.REMOVE, payload: { id } }),
+    []
   );
+
+  const showAlert = useCallback((alert) => {
+    const id = crypto.randomUUID();
+    // @ts-ignore
+    alertDispatch({ type: AlertActions.ADD, payload: { ...alert, id } });
+    return id;
+  }, []);
+
   const value = useMemo(
     () => ({ alertStore, showAlert, hideAlert }),
     [alertStore, showAlert, hideAlert]

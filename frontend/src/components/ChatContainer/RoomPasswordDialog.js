@@ -13,18 +13,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { appStore } from 'stores';
-import { fetchUrl } from 'utils';
+
 import { RoomType } from 'appConstants';
-import { useAlertStore, useStoredChatWindowData } from 'hooks';
+import { useStoredChatWindowData, useTaskRunnerWithAlert, useTaskRunnerWithLoader } from 'hooks';
 import CustomAvatar from 'components/Avatar';
+import { verifyRoomPasswordService } from 'services';
 
 function RoomPasswordDialog(props) {
   const { shouldOpen, setShouldOpen, handleStartChat } = props;
   const { pathname } = useLocation();
   const history = useHistory();
-  // @ts-ignore
-  const { showAlert, hideAlert } = useAlertStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const ongoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
   const ongoingChatMatch = pathname.match(ongoingChatRegex);
   let roomId;
@@ -53,30 +53,31 @@ function RoomPasswordDialog(props) {
   };
 
   const roomPasswordCheck = () => {
-    appStore.showWaitScreen('Validating password');
-    fetchUrl(`/api/chat/rooms/${roomId}/check_password/`, {
-      headers: { 'X-Room-Password': selectedRoomPassword },
-    })
-      .then((response) => {
-        setShouldOpen(false);
-        setSelectedRoomPassword('');
-        setChatWindowData({
-          ...chatWindowData,
-          password: selectedRoomPassword,
-        });
-        hideAlert();
-      })
-      .catch((response) => {
-        showAlert({
-          text: 'Invalid room password.',
-          severity: 'error',
-        });
-        setShouldOpen(true);
-        const newProtectedRoomPasswordFieldData = { ...protectedRoomPasswordFieldData };
-        newProtectedRoomPasswordFieldData.error = true;
-        setProtectedRoomPasswordFieldData(newProtectedRoomPasswordFieldData);
-      })
-      .finally(() => appStore.setShouldShowWaitScreen(false));
+    runTaskWithLoader({
+      loaderText: 'Validating password',
+      task: () =>
+        runTaskWithAlert({
+          task: () => verifyRoomPasswordService(roomId, selectedRoomPassword),
+          onSuccessCb: () => {
+            setShouldOpen(false);
+            setSelectedRoomPassword('');
+            setChatWindowData({
+              ...chatWindowData,
+              password: selectedRoomPassword,
+            });
+          },
+          onErrorCb: (response, showAlertCb) => {
+            showAlertCb({
+              text: 'Invalid room password.',
+              severity: 'error',
+            });
+            setShouldOpen(true);
+            const newProtectedRoomPasswordFieldData = { ...protectedRoomPasswordFieldData };
+            newProtectedRoomPasswordFieldData.error = true;
+            setProtectedRoomPasswordFieldData(newProtectedRoomPasswordFieldData);
+          },
+        }),
+    });
   };
 
   return (

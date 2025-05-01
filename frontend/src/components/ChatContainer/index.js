@@ -16,10 +16,11 @@ import { RoomType, OngoingChatRegex, ChatStatus } from 'appConstants';
 import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
-import { useAlertStore, useSearchParams } from 'hooks';
+import { useAlertStore, useSearchParams, useTaskRunnerWithAlert } from 'hooks';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 import RoomPasswordDialog from './RoomPasswordDialog';
+import { getRoomProtectionService } from 'services';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
@@ -66,6 +67,7 @@ function ChatContainer(props) {
   const { pathname } = location;
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const { chatWindow: chatWindowStore } = appStore;
   const [initializating, setInitializating] = useState(false);
   const [shouldOpenRoomPasswordDialog, setShouldOpenRoomPasswordDialog] = useState(false);
@@ -111,8 +113,9 @@ function ChatContainer(props) {
             isGroupRoom,
           };
           if (isGroupRoom && !chatWindowData.password) {
-            fetchUrl(`/api/chat/rooms/${chatWindowData.roomId}/is_protected`)
-              .then((response) => {
+            runTaskWithAlert({
+              task: () => getRoomProtectionService(),
+              onSuccessCb: (response) => {
                 const {
                   // @ts-ignore
                   data: { is_protected: isProtected, name, avatar_url: avatarUrl },
@@ -123,16 +126,17 @@ function ChatContainer(props) {
                 } else {
                   startChat(chatWindowData);
                 }
-              })
-              .catch((err) => {
+              },
+              onErrorCb: (err, showAlertCb) => {
                 log.error(err);
-                showAlert({
+                showAlertCb({
                   text: 'Error occured while connecting to server.',
                   severity: 'error',
                 });
                 setInitializating(false);
                 appStore.removeChatWindow(); // Remove chat window, if any.
-              });
+              },
+            });
           } else {
             startChat(chatWindowData);
           }

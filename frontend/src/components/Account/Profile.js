@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Button, Stack, TextField } from '@mui/material';
-import { useAlertStore, useUserStore, useTaskRunnerWithLoader } from 'hooks';
+import { useUserStore, useTaskRunnerWithLoader, useTaskRunnerWithAlert } from 'hooks';
 import RouterLink from 'components/RouterLink';
 import CenterPaper from 'components/CenterPaper';
 import ConfirmationDialog from 'components/ConfirmationDialog';
@@ -12,10 +12,8 @@ function Profile() {
   const location = useLocation();
   // @ts-ignore
   const { userStore, logout, deleteAccount } = useUserStore();
-  // @ts-ignore
-  const { showAlert } = useAlertStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
-
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [shouldShowDeleteConfirmationDialog, setShouldShowDeleteConfirmationDialog] =
     useState(false);
 
@@ -23,21 +21,23 @@ function Profile() {
     runTaskWithLoader({
       loaderText: 'Deleting',
       task: () =>
-        deleteAccount()
-          .then(() => {
-            showAlert({
+        runTaskWithAlert({
+          task: () => deleteAccount(),
+          onSuccessCb: (resposne, showAlertCb) => {
+            showAlertCb({
               text: `Account deleted successfully.`,
               severity: 'success',
             });
             history.replace('/');
             logout();
-          })
-          .catch(() => {
-            showAlert({
+          },
+          onErrorCb: (err, showAlertCb) => {
+            showAlertCb({
               text: `Error occurred while deleting account. Make sure you are logged in.`,
               severity: 'error',
             });
-          }),
+          },
+        }),
     });
   };
 

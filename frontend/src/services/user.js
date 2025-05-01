@@ -38,6 +38,25 @@ export const passwordChange = (oldPwd, newPwd) =>
     },
   });
 
+export const forgotPassword = (email) =>
+  fetchUrl(`/api/account/password/reset/`, {
+    method: 'post',
+    body: {
+      email,
+    },
+  });
+
+export const resetPassword = (userId, key, newPassword) =>
+  fetchUrl(`/api/account/password/reset/confirm/`, {
+    method: 'post',
+    body: {
+      uid: userId,
+      token: key,
+      new_password1: newPassword,
+      new_password2: newPassword,
+    },
+  });
+
 export const deleteAccount = () =>
   fetchUrl('/api/account/delete/', {
     method: 'post',

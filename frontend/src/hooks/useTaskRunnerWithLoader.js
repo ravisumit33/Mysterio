@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useWaitScreenStore } from './useStore';
 
-const useAsyncRunnerWithLoader = () => {
+const useTaskRunnerWithLoader = () => {
   // @ts-ignore
   const { showWaitScreen, hideWaitScreen } = useWaitScreenStore();
   const run = useCallback(
@@ -18,4 +18,4 @@ const useAsyncRunnerWithLoader = () => {
   return run;
 };
 
-export default useAsyncRunnerWithLoader;
+export default useTaskRunnerWithLoader;

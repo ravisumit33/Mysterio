@@ -1,24 +1,18 @@
 import { AlertActions } from '../actions';
 
 export const initialAlertState = {
-  visible: false,
-  text: '',
-  severity: '',
-  action: '',
+  alertQueue: [],
 };
 
 export const alertReducer = (state, action) => {
   switch (action.type) {
-    case AlertActions.SHOW:
+    case AlertActions.ADD:
       return {
         ...state,
-        visible: true,
-        text: action.payload.text,
-        severity: action.payload.severity,
-        action: action.payload.action,
+        alertQueue: [...state.alertQueue, action.payload],
       };
-    case AlertActions.HIDE:
-      return { ...state, visible: false, text: '', severity: '', action: '' };
+    case AlertActions.REMOVE:
+      return state.filter((alert) => alert.id !== action.payload.id);
     default:
       return state;
   }

@@ -18,6 +18,7 @@ import {
 } from './useStore';
 import useHydration from './useHydration';
 import useTaskRunnerWithLoader from './useTaskRunnerWithLoader';
+import useTaskRunnerWithAlert from './useTaskRunnerWithAlert';
 
 export {
   useConstant,
@@ -42,4 +43,5 @@ export {
   useWaitScreenStore,
   useHydration,
   useTaskRunnerWithLoader,
+  useTaskRunnerWithAlert,
 };

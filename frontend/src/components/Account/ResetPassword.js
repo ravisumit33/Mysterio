@@ -8,12 +8,21 @@ import Notification from 'components/Notification';
 import passwordResetDoneJson from 'assets/animations/password-reset-done.json';
 import { appStore } from 'stores';
 import { fetchUrl, getErrorString } from 'utils';
-import { useAlertStore } from 'hooks';
+import {
+  useAlertStore,
+  useTaskRunnerWithAlert,
+  useTaskRunnerWithLoader,
+  useUserStore,
+} from 'hooks';
 
 function ResetPassword() {
   const { userId, key } = useParams();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  // @ts-ignore
+  const { resetPassword } = useUserStore();
+  const runTaskWithLoader = useTaskRunnerWithLoader();
+  const runTaskWithAlert = useTaskRunnerWithAlert();
   const [resetDone, setResetDone] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [newPasswordFieldData, setNewPasswordFieldData] = useState({
@@ -22,40 +31,37 @@ function ResetPassword() {
   });
   const [shouldUnmaskNewPassword, setShouldUnmaskPassword] = useState(false);
   const handleFormSubmit = () => {
-    fetchUrl('/api/account/password/reset/confirm/', {
-      method: 'post',
-      body: {
-        uid: userId,
-        token: key,
-        new_password1: newPassword,
-        new_password2: newPassword,
-      },
-    })
-      .then(() => {
-        setResetDone(true);
-      })
-      .catch((response) => {
-        const responseData = response.data;
-        const responseFields = ['new_password2'];
-        const newNewPasswordFieldData = { ...newPasswordFieldData };
-        if (responseData.new_password2) {
-          newNewPasswordFieldData.help_text = getErrorString(responseData.new_password2);
-          newNewPasswordFieldData.error = true;
-        } else {
-          newNewPasswordFieldData.help_text = '';
-          newNewPasswordFieldData.error = false;
-        }
-        setNewPasswordFieldData(newNewPasswordFieldData);
-        if (!Object.keys(responseData).some((field) => responseFields.includes(field))) {
-          showAlert({
-            text: responseData.non_field_errors
-              ? getErrorString(responseData.non_field_errors)
-              : 'Unable to reset password',
-            severity: 'error',
-          });
-        }
-      })
-      .finally(() => appStore.setShouldShowWaitScreen(false));
+    runTaskWithLoader({
+      loaderText: 'Please wait',
+      task: () =>
+        runTaskWithAlert({
+          task: () => resetPassword(userId, key, newPassword),
+          onSuccessCb: () => {
+            setResetDone(true);
+          },
+          onErrorCb: (response, showAlertCb) => {
+            const responseData = response.data;
+            const responseFields = ['new_password2'];
+            const newNewPasswordFieldData = { ...newPasswordFieldData };
+            if (responseData.new_password2) {
+              newNewPasswordFieldData.help_text = getErrorString(responseData.new_password2);
+              newNewPasswordFieldData.error = true;
+            } else {
+              newNewPasswordFieldData.help_text = '';
+              newNewPasswordFieldData.error = false;
+            }
+            setNewPasswordFieldData(newNewPasswordFieldData);
+            if (!Object.keys(responseData).some((field) => responseFields.includes(field))) {
+              showAlertCb({
+                text: responseData.non_field_errors
+                  ? getErrorString(responseData.non_field_errors)
+                  : 'Unable to reset password',
+                severity: 'error',
+              });
+            }
+          },
+        }),
+    });
   };
 
   const newPasswordComponent = (

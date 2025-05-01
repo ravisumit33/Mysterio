@@ -1,7 +1,7 @@
 import { WaitScreenActions } from '../actions';
 
 export const initialWaitScreenState = {
-  visible: false,
+  shoulShow: false,
   text: '',
 };
 
@@ -10,13 +10,13 @@ export const waitScreenReducer = (state, action) => {
     case WaitScreenActions.SHOW:
       return {
         ...state,
-        visible: true,
+        shouldShow: true,
         text: action.payload.text,
       };
     case WaitScreenActions.HIDE:
       return {
         ...state,
-        visible: false,
+        shouldShow: false,
         text: '',
       };
     default:

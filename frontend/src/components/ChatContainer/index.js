@@ -13,14 +13,13 @@ import CenterPaper from 'components/CenterPaper';
 import Notification from 'components/Notification';
 import notFoundJson from 'assets/animations/not-found.json';
 import { RoomType, OngoingChatRegex, ChatStatus } from 'appConstants';
-import { fetchUrl } from 'utils';
 import WaitScreen from 'components/WaitScreen';
 import { getStoredChatWindowData, updateStoredChatWindowData } from 'utils/browserStorageUtils';
-import { useAlertStore, useSearchParams, useTaskRunnerWithAlert } from 'hooks';
+import { useSearchParams, useTaskRunnerWithAlert } from 'hooks';
+import { getRoomProtectionService } from 'services';
 import ChatWindow from './ChatWindow';
 import Player from './Player';
 import RoomPasswordDialog from './RoomPasswordDialog';
-import { getRoomProtectionService } from 'services';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
@@ -65,8 +64,6 @@ const useStyles = makeStyles((theme) => ({
 function ChatContainer(props) {
   const { type: chatWindowType, location } = props;
   const { pathname } = location;
-  // @ts-ignore
-  const { showAlert } = useAlertStore();
   const runTaskWithAlert = useTaskRunnerWithAlert();
   const { chatWindow: chatWindowStore } = appStore;
   const [initializating, setInitializating] = useState(false);
@@ -145,7 +142,7 @@ function ChatContainer(props) {
         startChat();
       }
     }
-  }, [initializating, chatWindowType, pathname]);
+  }, [initializating, chatWindowType, pathname, runTaskWithAlert]);
   // @ts-ignore
   const shouldOpenPlayer = searchParams.get('playerOpen') === 'true';
   const classes = useStyles();

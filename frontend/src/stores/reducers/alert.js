@@ -12,7 +12,10 @@ export const alertReducer = (state, action) => {
         alertQueue: [...state.alertQueue, action.payload],
       };
     case AlertActions.REMOVE:
-      return state.filter((alert) => alert.id !== action.payload.id);
+      return {
+        ...state,
+        alertQueue: state.alertQueue.filter((alert) => alert.id !== action.payload.id),
+      };
     default:
       return state;
   }

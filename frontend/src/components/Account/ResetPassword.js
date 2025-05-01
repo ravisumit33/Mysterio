@@ -6,19 +6,12 @@ import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
 import Notification from 'components/Notification';
 import passwordResetDoneJson from 'assets/animations/password-reset-done.json';
-import { appStore } from 'stores';
-import { fetchUrl, getErrorString } from 'utils';
-import {
-  useAlertStore,
-  useTaskRunnerWithAlert,
-  useTaskRunnerWithLoader,
-  useUserStore,
-} from 'hooks';
+import { getErrorString } from 'utils';
+import { useTaskRunnerWithAlert, useTaskRunnerWithLoader, useUserStore } from 'hooks';
 
 function ResetPassword() {
   const { userId, key } = useParams();
-  // @ts-ignore
-  const { showAlert } = useAlertStore();
+
   // @ts-ignore
   const { resetPassword } = useUserStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import { Box, Button, IconButton, Snackbar, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { observer } from 'mobx-react-lite';
 import { useAlertStore, useUserStore } from 'hooks';
 import { isLoggedIn } from 'selectors';
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,13 +18,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function LoginAction() {
+function LoginAction({ hideAlert }) {
   const location = useLocation();
   const history = useHistory();
   // @ts-ignore
   const { userStore } = useUserStore();
-  // @ts-ignore
-  const { hideAlert } = useAlertStore();
+
   const handleLogin = () => {
     hideAlert();
     history.push('/login', { from: location });
@@ -41,31 +41,60 @@ function LoginAction() {
   );
 }
 
+LoginAction.propTypes = {
+  hideAlert: PropTypes.func.isRequired,
+};
+
 function AppAlert() {
   const classes = useStyles();
   // @ts-ignore
-  const { alertStore, hideAlert } = useAlertStore();
+  const { popAlert } = useAlertStore();
+  const [open, setOpen] = useState(false);
+  const [currentAlert, setCurrentAlert] = useState(null);
+
+  useEffect(() => {
+    const newAlert = popAlert();
+    if (newAlert && !currentAlert) {
+      setCurrentAlert({ ...newAlert });
+      setOpen(true);
+    } else if (newAlert && currentAlert && open) {
+      setOpen(false);
+    }
+  }, [currentAlert, open, popAlert]);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
 
   const getAlertAction = () => {
-    switch (alertStore.action) {
+    switch (currentAlert.action) {
       case 'login':
-        return <LoginAction />;
+        return <LoginAction hideAlert={handleClose} />;
       default:
         return null;
     }
+  };
+
+  const handleExited = () => {
+    setCurrentAlert(null);
   };
 
   // Reason we do not show stacked notifications: https://ux.stackexchange.com/a/74930
   return (
     <Box className={classes.root}>
       <Snackbar
-        open={alertStore.visible}
+        key={currentAlert ? currentAlert.id : undefined}
+        open={open}
         autoHideDuration={5000}
-        onClose={hideAlert}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        onClose={handleClose}
+        TransitionProps={{ onExited: handleExited }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Alert onClose={hideAlert} severity={alertStore.severity} action={getAlertAction()}>
-          <Typography variant="body2">{alertStore.text}</Typography>
+        <Alert onClose={handleClose} severity={currentAlert.severity} action={getAlertAction()}>
+          <Typography variant="body2">{currentAlert.text}</Typography>
         </Alert>
       </Snackbar>
     </Box>

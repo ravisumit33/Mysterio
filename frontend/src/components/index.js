@@ -6,7 +6,7 @@ import Account from './Account';
 import Auth from './Auth';
 import Alert from './Alert';
 import AppWait from './AppWait';
-import UserInfoDialog from './UserInfoDialog';
+import GlobalDialog from './GlobalDialog';
 import NewRoom from './NewRoom';
 import ErrorUI from './ErrorUI';
 import PrivacyPolicy from './PrivacyPolicy';
@@ -24,7 +24,7 @@ export {
   Auth,
   Alert,
   AppWait,
-  UserInfoDialog,
+  GlobalDialog,
   NewRoom,
   ErrorUI,
   PrivacyPolicy,

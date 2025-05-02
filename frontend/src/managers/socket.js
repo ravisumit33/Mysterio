@@ -2,15 +2,15 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout, RoomType } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
-import profileManager from './profile';
 
 class SocketManager {
   maxRetries = 10;
 
-  constructor(chatWindowStore, profileStore, showAlert) {
+  constructor(chatWindowStore, profileStore, waitUntilProfileReady, showAlert) {
     this.chatWindowStore = chatWindowStore;
     this.profileStore = profileStore;
     this.showAlert = showAlert;
+    this.waitUntilProfileReady = waitUntilProfileReady;
     this.init();
   }
 
@@ -42,7 +42,7 @@ class SocketManager {
 
   handleOpen = () => {
     log.info('socket connection established');
-    profileManager.waitUntilReady().then(() => {
+    this.waitUntilProfileReady().then(() => {
       this.send(MessageType.USER_INFO, {
         sessionId: this.profileStore.sessionId,
         name: this.profileStore.name,

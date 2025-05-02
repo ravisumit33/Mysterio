@@ -25,25 +25,25 @@ const setValue = (key, value) => {
 };
 
 const getStoredProfileData = () => {
-  const storageKey = BrowserStorageKeys.profileData;
+  const storageKey = BrowserStorageKeys.PROFILE_DATA;
   return getValue(storageKey, {});
 };
 
 const updateStoredProfileData = (updateFields) => {
-  const storageKey = BrowserStorageKeys.profileData;
+  const storageKey = BrowserStorageKeys.PROFILE_DATA;
   const profileData = getValue(storageKey, {});
   Object.assign(profileData, updateFields);
   setValue(storageKey, profileData);
 };
 
 const getStoredChatWindowData = (roomType, roomId) => {
-  const storageKey = BrowserStorageKeys.chatWindowData;
+  const storageKey = BrowserStorageKeys.CHAT_WINDOW_DATA;
   const chatWindowData = getValue(storageKey, {});
   return chatWindowData[roomType]?.[roomId] || {};
 };
 
 const updateStoredChatWindowData = (roomType, roomId, updateFields) => {
-  const storageKey = BrowserStorageKeys.chatWindowData;
+  const storageKey = BrowserStorageKeys.CHAT_WINDOW_DATA;
   const chatWindowData = getValue(storageKey, {});
   if (!chatWindowData[roomType]) {
     chatWindowData[roomType] = {};
@@ -56,7 +56,7 @@ const updateStoredChatWindowData = (roomType, roomId, updateFields) => {
 };
 
 const deleteStoredChatWindowData = (roomType, roomId) => {
-  const storageKey = BrowserStorageKeys.chatWindowData;
+  const storageKey = BrowserStorageKeys.CHAT_WINDOW_DATA;
   const chatWindowData = getValue(storageKey, {});
   if (chatWindowData[roomType] && chatWindowData[roomType][roomId]) {
     delete chatWindowData[roomType][roomId];

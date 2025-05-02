@@ -7,8 +7,16 @@ import {
   initialUserState,
   waitScreenReducer,
   initialWaitScreenState,
+  globalDialogReducer,
+  initialGlobalDialogState,
 } from './reducers';
-import { ProfileActions, UserActions, AlertActions, WaitScreenActions } from './actions';
+import {
+  ProfileActions,
+  UserActions,
+  AlertActions,
+  WaitScreenActions,
+  GlobalDialogActions,
+} from './actions';
 
 export {
   profileReducer,
@@ -19,8 +27,11 @@ export {
   initialUserState,
   waitScreenReducer,
   initialWaitScreenState,
+  globalDialogReducer,
+  initialGlobalDialogState,
   ProfileActions,
   UserActions,
   AlertActions,
   WaitScreenActions,
+  GlobalDialogActions,
 };

@@ -9,7 +9,7 @@ import {
   Home,
   Footer,
   ChatContainer,
-  UserInfoDialog,
+  GlobalDialog,
   Alert,
   Auth,
   Account,
@@ -46,7 +46,7 @@ function App() {
         <Stack className={classes.root}>
           <Alert />
           {!/\/chat.*/.test(pathname) && <NavBar />}
-          <UserInfoDialog />
+          <GlobalDialog />
           <ScrollToTop />
           <Switch>
             <Route exact path="/">

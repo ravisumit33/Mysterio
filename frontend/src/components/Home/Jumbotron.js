@@ -17,7 +17,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTheme } from '@mui/material/styles';
 import JumbotronBG from 'assets/images/jumbotron_bg.webp';
-import { useConstant } from 'hooks';
+import { useChatLauncher, useConstant } from 'hooks';
 
 function Jumbotron() {
   const history = useHistory();
@@ -26,6 +26,7 @@ function Jumbotron() {
   const [headerHeight, setHeaderHeight] = useState(theme.mixins.toolbar.minHeight);
   const jumbotronRef = useRef(null);
   const initialViewPortHeight = useConstant(() => window.innerHeight);
+  const launchChat = useChatLauncher();
 
   useEffect(() => {
     const checkHeight = () => {
@@ -34,24 +35,18 @@ function Jumbotron() {
         const viewportHeight = window.innerHeight;
         const headerElement = document.querySelector('header');
 
-        // Use header height if found, otherwise fallback to toolbar minHeight
         setHeaderHeight(headerElement?.offsetHeight || theme.mixins.toolbar.minHeight);
 
         // Show arrow only when jumbotron fills viewport and is at the top
-        setShowArrow(
-          jumbotronRect.height >= viewportHeight && Math.abs(jumbotronRect.top) < 50 // Allow small scroll tolerance
-        );
+        setShowArrow(jumbotronRect.height >= viewportHeight && Math.abs(jumbotronRect.top) < 50);
       }
     };
 
-    // Check initially
     checkHeight();
 
-    // Check on resize and scroll
     window.addEventListener('resize', checkHeight);
     window.addEventListener('scroll', checkHeight);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', checkHeight);
       window.removeEventListener('scroll', checkHeight);
@@ -59,7 +54,7 @@ function Jumbotron() {
   }, [theme.mixins.toolbar.minHeight]);
 
   const handleStartIndividualChat = () => {
-    history.push('/chat/match/');
+    launchChat();
   };
 
   const handleExploreRooms = () => {
@@ -284,18 +279,18 @@ function Jumbotron() {
         {/* Arrow space placeholder */}
         <Box
           sx={{
-            position: 'fixed', // Change to fixed positioning
-            bottom: { xs: '20px', sm: '40px' }, // Position from bottom of viewport
+            position: 'fixed',
+            bottom: { xs: '20px', sm: '40px' },
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
-            height: 'auto', // Remove fixed height
+            height: 'auto',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            pointerEvents: showArrow ? 'auto' : 'none', // Disable interactions when hidden
-            opacity: showArrow ? 1 : 0, // Fade in/out
-            transition: 'opacity 0.3s ease', // Smooth transition
+            pointerEvents: showArrow ? 'auto' : 'none',
+            opacity: showArrow ? 1 : 0,
+            transition: 'opacity 0.3s ease',
           }}
         >
           {/* Animated Arrow */}

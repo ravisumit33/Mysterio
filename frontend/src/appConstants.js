@@ -59,8 +59,8 @@ const MatchTimeout = 60 * 1000; // 1 minute
 const ReconnectTimeout = 60 * 1000; // 1 minute
 
 const BrowserStorageKeys = Object.freeze({
-  profileData: 'profile-data',
-  chatWindowData: 'chat-window-data',
+  PROFILE_DATA: 'profile-data',
+  CHAT_WINDOW_DATA: 'chat-window-data',
 });
 
 const BrowserStorageKeysPrefix = 'mysterio-anon-chat-';
@@ -70,6 +70,10 @@ const OngoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
 const HydrationKeys = Object.freeze({
   USER: 'user',
   PROFILE: 'profile',
+});
+
+const GlobalDialogTypes = Object.freeze({
+  USER_INFO: 'userInfo',
 });
 
 export {
@@ -88,4 +92,5 @@ export {
   BrowserStorageKeysPrefix,
   OngoingChatRegex,
   HydrationKeys,
+  GlobalDialogTypes,
 };

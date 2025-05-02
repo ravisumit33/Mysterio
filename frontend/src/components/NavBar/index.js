@@ -17,12 +17,13 @@ import {
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Menu as MenuIcon, AccountCircle, Logout, Login, ArrowForward } from '@mui/icons-material';
-import { appStore } from 'stores';
 import {
+  useChatLauncher,
   useProfileStore,
   useTaskRunnerWithAlert,
   useTaskRunnerWithLoader,
   useUserStore,
+  useSearchParams,
 } from 'hooks';
 import { isLoggedIn } from 'selectors';
 import Avatar from 'components/Avatar';
@@ -60,8 +61,10 @@ function NavBar() {
   const { profileStore } = useProfileStore();
   // @ts-ignore
   const { userStore, logout } = useUserStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const runTaskWithLoader = useTaskRunnerWithLoader();
   const runTaskWithAlert = useTaskRunnerWithAlert();
+  const launchChat = useChatLauncher();
   const [hamburgerTriggerElement, setHamburgerTriggerElement] = useState(null);
 
   const trigger = useScrollTrigger({
@@ -136,7 +139,12 @@ function NavBar() {
   const handleHamburgerClose = () => setHamburgerTriggerElement(null);
 
   const handleAccountBtnClick = () => {
-    appStore.setShouldOpenAccountsDrawer(!appStore.shouldOpenAccountsDrawer);
+    const newUrlSearchParams = new URLSearchParams(searchParams.toString());
+    if (newUrlSearchParams.get('drawer') !== 'account') {
+      newUrlSearchParams.set('drawer', 'account');
+    }
+    // @ts-ignore
+    setSearchParams(newUrlSearchParams);
   };
 
   const { name, avatarUrl } = profileStore;
@@ -369,7 +377,7 @@ function NavBar() {
                   variant="contained"
                   color="secondary"
                   endIcon={<ArrowForward />}
-                  onClick={() => history.push('/chat/match/')}
+                  onClick={() => launchChat()}
                 >
                   Chat Now
                 </Button>

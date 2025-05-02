@@ -1,4 +1,4 @@
-import profileManager from './profile';
+import ProfileManager from './profile';
 import SocketManager from './socket';
 
-export { profileManager, SocketManager };
+export { ProfileManager, SocketManager };

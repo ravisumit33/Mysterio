@@ -10,11 +10,16 @@ import {
 } from '@mui/material';
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
-import { appStore } from 'stores';
-import { fetchUrl } from 'utils';
-import { useBasicInfo, useProfileStore, useAlertStore, useTaskRunnerWithAlert } from 'hooks';
-import { profileManager } from 'managers';
-import BasicInfo from './BasicInfo';
+import {
+  useBasicInfo,
+  useProfileStore,
+  useGlobalDialogStore,
+  useAlertStore,
+  useTaskRunnerWithAlert,
+} from 'hooks';
+import { uploadAvatarService } from 'services';
+import PropTypes from 'prop-types';
+import BasicInfo from '../BasicInfo';
 
 const userAvatarStyles = [
   'adventurer',
@@ -46,32 +51,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function UserInfoDialog() {
+function UserInfoDialog({ payload }) {
+  const { checkComplete, onComplete } = payload;
   const classes = useStyles();
   // @ts-ignore
   const { profileStore, setBasicInfo } = useProfileStore();
   // @ts-ignore
   const { showAlert } = useAlertStore();
+  // @ts-ignore
+  const { globalDialogStore, closeGlobalDialog } = useGlobalDialogStore();
   const runTaskWithAlert = useTaskRunnerWithAlert();
-
-  useEffect(() => {
-    const { name, avatarUrl, sessionId } = profileStore;
-    const hasCompleteBasicInfo = name && avatarUrl && sessionId;
-    if (!hasCompleteBasicInfo) {
-      appStore.setShouldOpenUserInfoDialog(true);
-    }
-  }, [profileStore]);
-
-  useEffect(() => {
-    if (profileStore.isReady) {
-      profileManager.markReady();
-    }
-  }, [profileStore.isReady]);
 
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
     profileStore.name,
     profileStore.avatarUrl
   );
+
+  useEffect(() => {
+    if (checkComplete()) {
+      onComplete();
+    }
+  }, [checkComplete, onComplete]);
 
   const handleDialogueButtonClick = () => {
     if (!name) {
@@ -90,15 +90,7 @@ function UserInfoDialog() {
     }
     let fileUploadPromise = Promise.resolve(avatarUrl);
     if (/^blob:.*$/.test(avatarUrl)) {
-      const formData = new FormData();
-      formData.append('file', avatarUrl);
-      fileUploadPromise = fetchUrl('/api/upload_avatar/', {
-        method: 'post',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }).then((resp) => {
+      fileUploadPromise = uploadAvatarService(avatarUrl).then((resp) => {
         const responseData = resp.data;
         // @ts-ignore
         const { url } = responseData;
@@ -118,7 +110,7 @@ function UserInfoDialog() {
           avatarUrl: url,
           sessionId: profileSessionId,
         });
-        appStore.setShouldOpenUserInfoDialog(false);
+        closeGlobalDialog();
       },
       onErrorCb: (resp, showAlertCb) => {
         showAlertCb({
@@ -130,7 +122,7 @@ function UserInfoDialog() {
   };
 
   return (
-    <Dialog open={appStore.shouldOpenUserInfoDialog} maxWidth="xs" fullWidth>
+    <Dialog open={globalDialogStore.isOpen} maxWidth="xs" fullWidth>
       <DialogTitle>Let&apos;s get started!</DialogTitle>
       <form
         onSubmit={(evt) => {
@@ -153,7 +145,7 @@ function UserInfoDialog() {
         </DialogContent>
         <DialogActions>
           {profileStore.sessionId && (
-            <Button color="secondary" onClick={() => appStore.setShouldOpenUserInfoDialog(false)}>
+            <Button color="secondary" onClick={() => closeGlobalDialog()}>
               Cancel
             </Button>
           )}
@@ -165,5 +157,19 @@ function UserInfoDialog() {
     </Dialog>
   );
 }
+
+UserInfoDialog.propTypes = {
+  payload: PropTypes.shape({
+    onComplete: PropTypes.func,
+    checkComplete: PropTypes.func,
+  }),
+};
+
+UserInfoDialog.defaultProps = {
+  payload: {
+    onComplete: () => {},
+    checkComplete: () => true,
+  },
+};
 
 export default observer(UserInfoDialog);

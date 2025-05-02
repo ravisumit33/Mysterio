@@ -3,11 +3,6 @@ import { createDeferredPromiseObj } from 'utils';
 class ProfileManager {
   constructor() {
     this.profileReadyPromise = createDeferredPromiseObj();
-    this.ready = false;
-  }
-
-  get isReady() {
-    return this.ready;
   }
 
   markReady() {
@@ -19,5 +14,4 @@ class ProfileManager {
   }
 }
 
-const profileManager = new ProfileManager();
-export default profileManager;
+export default ProfileManager;

@@ -10,8 +10,6 @@ class AppStore {
 
   shouldOpenUserInfoDialog = false;
 
-  shouldOpenNewGroupDialog = false;
-
   shouldOpenAccountsDrawer = false;
 
   shouldShowWaitScreen = false;
@@ -46,10 +44,6 @@ class AppStore {
 
   setShouldOpenUserInfoDialog = (shouldOpenUserInfoDialog) => {
     this.shouldOpenUserInfoDialog = shouldOpenUserInfoDialog;
-  };
-
-  setShouldOpenNewGroupDialog = (shouldOpenNewGroupDialog) => {
-    this.shouldOpenNewGroupDialog = shouldOpenNewGroupDialog;
   };
 
   setShouldShowWaitScreen = (shouldShowWaitScreen) => {

@@ -19,6 +19,11 @@ export const WaitScreenActions = Object.freeze({
   HIDE: 'WAITSCREEN/HIDE',
 });
 
+export const GlobalDialogActions = Object.freeze({
+  OPEN: 'GLOBALDIALOG/OPEN',
+  CLOSE: 'GLOBALDIALOG/CLOSE',
+});
+
 export const ChatWindowActions = Object.freeze({
   INIT: 'CHATWINDOW/INIT',
 });

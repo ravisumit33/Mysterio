@@ -1,8 +1,10 @@
 import React from 'react';
 import { Box, Container, Typography, Button, Stack, useTheme } from '@mui/material';
+import { useChatLauncher } from 'hooks';
 
 function CTA() {
   const theme = useTheme();
+  const launchChat = useChatLauncher();
   return (
     <Box
       id="cta"
@@ -48,6 +50,7 @@ function CTA() {
             <Button
               variant="contained"
               size="large"
+              onClick={() => launchChat()}
               sx={{
                 bgcolor: 'background.paper',
                 color: 'secondary.main',

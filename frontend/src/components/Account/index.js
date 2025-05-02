@@ -13,8 +13,10 @@ import { appStore } from 'stores';
 import {
   useProfileStore,
   useUserStore,
+  useGlobalDialogStore,
   useTaskRunnerWithLoader,
   useTaskRunnerWithAlert,
+  useSearchParams,
 } from 'hooks';
 import { isLoggedIn } from 'selectors';
 import {
@@ -31,6 +33,7 @@ import { AccountCircle, Logout, Favorite, Edit, Login } from '@mui/icons-materia
 import Avatar from 'components/Avatar';
 import CenterPaper from 'components/CenterPaper';
 import RouterLink from 'components/RouterLink';
+import { GlobalDialogTypes } from 'appConstants';
 import Profile from './Profile';
 import ChangePassword from './ChangePassword';
 import ConfirmationEmailSent from './ConfirmationEmailSent';
@@ -59,6 +62,8 @@ function Account() {
   // @ts-ignore
   const { userStore, logout } = useUserStore();
   // @ts-ignore
+  const { openGlobalDialog } = useGlobalDialogStore();
+  const [searchParams, setSearchParams] = useSearchParams();
   const runTaskWithLoader = useTaskRunnerWithLoader();
   const runTaskWithAlert = useTaskRunnerWithAlert();
 
@@ -73,6 +78,15 @@ function Account() {
     },
   ];
 
+  const handleDrawerClose = () => {
+    const newUrlSearchParams = new URLSearchParams(searchParams.toString());
+    if (newUrlSearchParams.get('drawer') === 'account') {
+      newUrlSearchParams.delete('drawer');
+    }
+    // @ts-ignore
+    setSearchParams(newUrlSearchParams);
+  };
+
   const drawer = (
     <>
       <Toolbar>
@@ -83,7 +97,7 @@ function Account() {
               <IconButton
                 edge="end"
                 aria-label="edit profile"
-                onClick={() => appStore.setShouldOpenUserInfoDialog(true)}
+                onClick={() => openGlobalDialog(GlobalDialogTypes.USER_INFO)}
               >
                 <Edit />
               </IconButton>
@@ -214,8 +228,9 @@ function Account() {
             <Drawer
               variant="temporary"
               anchor="left"
-              open={appStore.shouldOpenAccountsDrawer}
-              onClose={() => appStore.setShouldOpenAccountsDrawer(false)}
+              // @ts-ignore
+              open={searchParams.get('drawer') === 'account'}
+              onClose={handleDrawerClose}
               classes={{
                 paper: classes.drawerPaper,
               }}

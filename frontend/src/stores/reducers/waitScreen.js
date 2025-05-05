@@ -7,13 +7,13 @@ export const initialWaitScreenState = {
 
 export const waitScreenReducer = (state, action) => {
   switch (action.type) {
-    case WaitScreenActions.SHOW:
+    case WaitScreenActions.STARTED:
       return {
         ...state,
         shouldShow: true,
         text: action.payload.text,
       };
-    case WaitScreenActions.HIDE:
+    case WaitScreenActions.ENDED:
       return {
         ...state,
         shouldShow: false,

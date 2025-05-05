@@ -11,12 +11,12 @@ export default function GlobalDialogProvider({ children }) {
 
   const openGlobalDialog = useCallback((type, payload) => {
     // @ts-ignore
-    globalDialogDispatch({ type: GlobalDialogActions.OPEN, payload: { type, payload } });
+    globalDialogDispatch({ type: GlobalDialogActions.OPENED, payload: { type, payload } });
   }, []);
 
   const closeGlobalDialog = useCallback(() => {
     // @ts-ignore
-    globalDialogDispatch({ type: GlobalDialogActions.CLOSE });
+    globalDialogDispatch({ type: GlobalDialogActions.CLOSED });
   }, []);
 
   const value = useMemo(

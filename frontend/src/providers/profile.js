@@ -26,7 +26,7 @@ export default function ProfileProvider({ children }) {
       const cachedProfile = getStoredProfileData();
       const { name, avatarUrl, sessionId } = cachedProfile;
       // @ts-ignore
-      profileDispatch({ type: ProfileActions.HYDRATE, payload: { name, avatarUrl, sessionId } });
+      profileDispatch({ type: ProfileActions.HYDRATED, payload: { name, avatarUrl, sessionId } });
       markHydrated(HydrationKeys.PROFILE);
     }
   }, [isHydrated, markHydrated]);
@@ -39,7 +39,7 @@ export default function ProfileProvider({ children }) {
 
   const setBasicInfo = useCallback(
     // @ts-ignore
-    (basicInfo) => profileDispatch({ type: ProfileActions.SET_BASIC_INFO, payload: basicInfo }),
+    (basicInfo) => profileDispatch({ type: ProfileActions.BASIC_INFO_UPDATED, payload: basicInfo }),
     []
   );
 

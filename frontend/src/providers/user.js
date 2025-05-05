@@ -32,11 +32,11 @@ export default function UserProvider({ children }) {
           // @ts-ignore
           const { email, is_socially_registered: social } = responseData;
           // @ts-ignore
-          userDispatch({ type: UserActions.HYDRATE, payload: { email, social } });
+          userDispatch({ type: UserActions.HYDRATED, payload: { email, social } });
         })
         .catch(() =>
           // @ts-ignore
-          userDispatch({ type: UserActions.HYDRATE, payload: { email: '', social: false } })
+          userDispatch({ type: UserActions.HYDRATED, payload: { email: '', social: false } })
         )
         .finally(() => {
           markHydrated(HydrationKeys.USER);
@@ -49,7 +49,7 @@ export default function UserProvider({ children }) {
       loginService(credentials).then((response) => {
         // @ts-ignore
         userDispatch({
-          type: UserActions.LOGIN,
+          type: UserActions.LOGIN_SUCCEEDED,
           // @ts-ignore
           payload: { email: response.data.user.email, social: false },
         });
@@ -62,7 +62,7 @@ export default function UserProvider({ children }) {
     () =>
       logoutService().then((response) => {
         // @ts-ignore
-        userDispatch({ type: UserActions.LOGOUT });
+        userDispatch({ type: UserActions.LOGGED_OUT });
         return response;
       }),
     []
@@ -76,7 +76,7 @@ export default function UserProvider({ children }) {
         // @ts-ignore
         const { email } = response.data.user;
         // @ts-ignore
-        userDispatch({ type: UserActions.LOGIN, payload: { email, social: true } });
+        userDispatch({ type: UserActions.LOGIN_SUCCEEDED, payload: { email, social: true } });
         return response;
       }),
     []

@@ -9,7 +9,7 @@ export const initialProfileState = {
 
 export const profileReducer = (state, action) => {
   switch (action.type) {
-    case ProfileActions.SET_BASIC_INFO:
+    case ProfileActions.BASIC_INFO_UPDATED:
       return {
         ...state,
         name: action.payload.name,
@@ -17,7 +17,7 @@ export const profileReducer = (state, action) => {
         sessionId: action.payload.sessionId,
         isReady: true,
       };
-    case ProfileActions.HYDRATE: {
+    case ProfileActions.HYDRATED: {
       const { name, avatarUrl, sessionId } = action.payload;
       return {
         ...state,

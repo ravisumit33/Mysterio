@@ -14,14 +14,14 @@ export default function AlertProvider({ children }) {
    */
   const hideAlert = useCallback(
     // @ts-ignore
-    (id) => alertDispatch({ type: AlertActions.REMOVE, payload: { id } }),
+    (id) => alertDispatch({ type: AlertActions.REMOVED, payload: { id } }),
     []
   );
 
   const showAlert = useCallback((alert) => {
     const id = crypto.randomUUID();
     // @ts-ignore
-    alertDispatch({ type: AlertActions.ADD, payload: { ...alert, id } });
+    alertDispatch({ type: AlertActions.ADDED, payload: { ...alert, id } });
     return id;
   }, []);
 
@@ -32,7 +32,7 @@ export default function AlertProvider({ children }) {
     }
     const currentAlert = { ...alertQueue[0] };
     // @ts-ignore
-    alertDispatch({ type: AlertActions.REMOVE, payload: { id: currentAlert.id } });
+    alertDispatch({ type: AlertActions.REMOVED, payload: { id: currentAlert.id } });
     return currentAlert;
   }, [alertStore]);
 

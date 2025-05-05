@@ -11,13 +11,13 @@ export default function WaitScreenProvider({ children }) {
 
   const hideWaitScreen = useCallback(
     // @ts-ignore
-    () => waitScreenDispatch({ type: WaitScreenActions.HIDE }),
+    () => waitScreenDispatch({ type: WaitScreenActions.ENDED }),
     []
   );
 
   const showWaitScreen = useCallback(
     // @ts-ignore
-    (text) => waitScreenDispatch({ type: WaitScreenActions.SHOW, text }),
+    (text) => waitScreenDispatch({ type: WaitScreenActions.STARTED, text }),
     []
   );
 

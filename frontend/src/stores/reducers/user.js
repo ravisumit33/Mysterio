@@ -7,11 +7,11 @@ export const initialUserState = {
 
 export const userReducer = (state, action) => {
   switch (action.type) {
-    case UserActions.LOGIN:
+    case UserActions.LOGIN_SUCCEEDED:
       return { ...state, email: action.payload.email, social: action.payload.social };
-    case UserActions.LOGOUT:
+    case UserActions.LOGGED_OUT:
       return { ...state, email: '', social: false };
-    case UserActions.HYDRATE:
+    case UserActions.HYDRATED:
       return {
         ...state,
         email: action.payload.email,

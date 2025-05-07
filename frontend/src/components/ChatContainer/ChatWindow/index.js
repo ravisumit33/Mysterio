@@ -16,14 +16,11 @@ import clsx from 'clsx';
 import { teal } from '@mui/material/colors';
 import { ChatStatus, MessageType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
-import incomingMessageSound from 'assets/sounds/message_pop.mp3';
-import chatStartedSound from 'assets/sounds/chat_started.mp3';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import {
   useChatSound,
   useNewMessage,
-  useGoToBottom,
   useChatBubble,
   useSearchParams,
   useProfileStore,
@@ -259,10 +256,9 @@ function ChatWindow(props) {
     lastMessage,
   });
   const chatBubbleNewMsgCnt = useChatBubble({ chatMinimized, hasNewMessage });
-  const { unreadMessagesCount, showBottomButton, setAtBottom } = useGoToBottom({ hasNewMessage });
 
   const shouldNotify = hasNewMessage && chatStatus === ChatStatus.ONGOING;
-  useChatSound({ incomingMessageSound, chatStartedSound, shouldNotify, initDone });
+  useChatSound({ shouldNotify, initDone });
 
   const chatMessages = messageList.map((message, idx, list) => {
     const messageData = message.data;
@@ -386,9 +382,6 @@ function ChatWindow(props) {
                 firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
                 newMessageInfo={newMessageInfo}
                 chatMessages={chatMessages}
-                unreadMessagesCount={unreadMessagesCount}
-                showBottomButton={showBottomButton}
-                setAtBottom={setAtBottom}
               />
             </Box>
           )}

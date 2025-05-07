@@ -6,6 +6,7 @@ import { alpha, Badge, Box, IconButton, Tooltip } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType } from 'appConstants';
 import { KeyboardDoubleArrowDown } from '@mui/icons-material';
+import { useGoToBottom } from 'hooks';
 
 const useStyles = makeStyles((theme) => ({
   // @ts-ignore
@@ -25,20 +26,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function MessageBox(props) {
-  const {
-    firstItemIndex,
-    newMessageInfo,
-    chatMessages,
-    unreadMessagesCount,
-    showBottomButton,
-    setAtBottom,
-  } = props;
+  const { firstItemIndex, newMessageInfo, chatMessages, hasNewMessage } = props;
 
   const [firstItemIdx, setFirstItemIdx] = useState(firstItemIndex);
   const messageListRef = useRef(null);
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { loadPreviousMessages, chatStatus } = chatWindowStore;
   const classes = useStyles({ chatStatus });
+  const { unreadMessagesCount, showBottomButton, setAtBottom } = useGoToBottom({ hasNewMessage });
 
   const handleChatWindowTopReached = () => {
     loadPreviousMessages().then((msgCnt) =>
@@ -97,16 +92,13 @@ MessageBox.propTypes = {
     senderType: PropTypes.oneOf(Object.values(MessageSenderType)),
   }),
   chatMessages: PropTypes.arrayOf(PropTypes.element),
-  unreadMessagesCount: PropTypes.number,
-  showBottomButton: PropTypes.bool,
-  setAtBottom: PropTypes.func.isRequired,
+  hasNewMessage: PropTypes.bool,
 };
 
 MessageBox.defaultProps = {
   newMessageInfo: undefined,
   chatMessages: [],
-  unreadMessagesCount: 0,
-  showBottomButton: false,
+  hasNewMessage: false,
 };
 
 export default MessageBox;

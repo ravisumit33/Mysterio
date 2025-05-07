@@ -4,7 +4,6 @@ import { useGetPlayer, useHandlePlayer } from './player';
 import { useChatSound, useNewMessage, useGoToBottom, useChatBubble } from './chat';
 import useOnScreen from './useOnScreen';
 import useBasicInfo from './useBasicInfo';
-import useQuery from './useQuery';
 import useSearchParams from './useSearchParams';
 import useLocalStorage from './useLocalStorage';
 import useStoredChatWindowData from './useStoredChatWindowData';
@@ -14,6 +13,7 @@ import {
   useGlobalDialogStore,
   useWaitScreenStore,
   useUserStore,
+  useChatRoomInfoStore,
 } from './useStore';
 import useHydration from './useHydration';
 import useTaskRunnerWithLoader from './useTaskRunnerWithLoader';
@@ -31,7 +31,6 @@ export {
   useGoToBottom,
   useChatBubble,
   useBasicInfo,
-  useQuery,
   useSearchParams,
   useLocalStorage,
   useStoredChatWindowData,
@@ -40,6 +39,7 @@ export {
   useUserStore,
   useGlobalDialogStore,
   useWaitScreenStore,
+  useChatRoomInfoStore,
   useHydration,
   useTaskRunnerWithLoader,
   useTaskRunnerWithAlert,

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { alpha, Box, Button, CardMedia, Stack, useMediaQuery } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { appStore } from 'stores';
+import { useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { ChatWindowStoreContext } from 'contexts';
 import PlayerBG from 'assets/images/player_bg.webp';
@@ -62,8 +63,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ChatContainer(props) {
-  const { type: chatWindowType, location } = props;
-  const { pathname } = location;
+  const { type: chatWindowType } = props;
+  const { pathname } = useLocation();
   const runTaskWithAlert = useTaskRunnerWithAlert();
   const { chatWindow: chatWindowStore } = appStore;
   const [initializating, setInitializating] = useState(false);
@@ -158,7 +159,7 @@ function ChatContainer(props) {
               <CardMedia className={classes.bg} image={PlayerBG} title="Player Background" />
               {shouldOpenPlayer && <Player />}
             </Box>
-            <ChatWindow location={location} />
+            <ChatWindow />
           </>
         ) : (
           <Stack sx={{ width: '100%', height: '100%', position: 'relative' }} direction="row">
@@ -176,7 +177,7 @@ function ChatContainer(props) {
               className={classes.chatWindowContainer}
               id="chatWindow"
             >
-              <ChatWindow location={location} />
+              <ChatWindow />
             </Box>
           </Stack>
         )}
@@ -220,9 +221,6 @@ function ChatContainer(props) {
 
 ChatContainer.propTypes = {
   type: PropTypes.string.isRequired,
-  location: PropTypes.shape({
-    pathname: PropTypes.string.isRequired,
-  }).isRequired,
 };
 
 export default observer(ChatContainer);

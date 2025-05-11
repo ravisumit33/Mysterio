@@ -1,6 +1,6 @@
 import useChatSound from './useChatSound';
 import useNewMessage from './useNewMessage';
 import useGoToBottom from './useGoToBottom';
-import useChatBubble from './useChatBubble';
+import useFullScreenChatWindow from './useFullScreenChatWindow';
 
-export { useChatSound, useNewMessage, useGoToBottom, useChatBubble };
+export { useChatSound, useNewMessage, useGoToBottom, useFullScreenChatWindow };

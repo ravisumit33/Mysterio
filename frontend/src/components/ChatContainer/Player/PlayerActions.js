@@ -11,7 +11,6 @@ import {
   Typography,
 } from '@mui/material';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import { appStore } from 'stores';
 import { ChatWindowStoreContext } from 'contexts';
 import { MessageType, PlayerName, renderPlayerName } from 'appConstants';
 import { getVideoIdFromUrl } from 'utils';

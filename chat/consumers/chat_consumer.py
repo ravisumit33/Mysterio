@@ -119,13 +119,13 @@ class ChatConsumer(WebsocketConsumer):
                 WriteChannelSerializer,
                 self.get_channel_instance(),
                 {"is_active": False},
-            )  # Channel will be deleted with room
+            )  # Channel model will be deleted with room
             channel_layer.group_discard(
                 channel_layer_info["group_prefix"] + str(self.room_id),
                 self.channel_name,
             )
             if not channel_layer_info["is_group_consumer"]:
-                # Room is scheduled to be deleted.
+                # Indiviual Room is scheduled to be deleted.
                 # This is done to counter if user has disconnected due to network issues
                 # and can rejoin within CHAT_SESSION_DELETION_DELAY
                 # If the user doesn't join, room will be deleted and other user will be notified

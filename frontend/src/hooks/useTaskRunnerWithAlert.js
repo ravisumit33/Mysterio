@@ -18,11 +18,11 @@ const useTaskRunnerWithAlert = () => {
         }
         return await onSuccessCb(result, showAlert);
       } catch (err) {
-        // https://stackoverflow.com/a/44806230/6842304
-        // eslint-disable-next-line no-return-await
         const showErrorAlertCb = (alert) => {
           errorAlertIdRef.current = showAlert(alert);
         };
+        // https://stackoverflow.com/a/44806230/6842304
+        // eslint-disable-next-line no-return-await
         return await onErrorCb(err, showErrorAlertCb);
       } finally {
         onCompletionCb();

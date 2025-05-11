@@ -1,7 +1,7 @@
 import useConstant from './useConstant';
 import useDebouncedSearch from './useDebouncedSearch';
 import { useGetPlayer, useHandlePlayer } from './player';
-import { useChatSound, useNewMessage, useGoToBottom, useChatBubble } from './chat';
+import { useChatSound, useNewMessage, useGoToBottom, useFullScreenChatWindow } from './chat';
 import useOnScreen from './useOnScreen';
 import useBasicInfo from './useBasicInfo';
 import useSearchParams from './useSearchParams';
@@ -29,7 +29,7 @@ export {
   useChatSound,
   useNewMessage,
   useGoToBottom,
-  useChatBubble,
+  useFullScreenChatWindow,
   useBasicInfo,
   useSearchParams,
   useLocalStorage,

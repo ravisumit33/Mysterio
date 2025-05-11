@@ -70,21 +70,20 @@ function App() {
                 console.log('chat match key: ', location.key);
                 return (
                   <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
-                    <ChatContainer key={location.key} type="match" location={location} />
+                    <ChatContainer key={location.key} type="match" />
                   </Box>
                 );
               }}
             />
             <Route
               path="/chat/:roomType/:roomId"
-              render={({ match, location }) => {
+              render={({ match }) => {
                 console.log('chat room key: ', `${match.params.roomType}-${match.params.roomId}`);
                 return (
                   <Box sx={{ flexGrow: 1, flexBasis: 0 }}>
                     <ChatContainer
                       key={`${match.params.roomType}-${match.params.roomId}`}
                       type="room"
-                      location={location}
                     />
                   </Box>
                 );

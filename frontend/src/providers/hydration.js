@@ -13,7 +13,7 @@ export default function HydrationProvider({ children }) {
         updated.add(key);
         return updated;
       }),
-    []
+    [],
   );
 
   const markHydrated = useCallback(
@@ -24,7 +24,7 @@ export default function HydrationProvider({ children }) {
         updated.delete(key);
         return updated;
       }),
-    []
+    [],
   );
 
   const value = useMemo(() => {

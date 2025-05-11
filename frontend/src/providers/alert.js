@@ -15,7 +15,7 @@ export default function AlertProvider({ children }) {
   const hideAlert = useCallback(
     // @ts-ignore
     (id) => alertDispatch({ type: AlertActions.REMOVED, payload: { id } }),
-    []
+    [],
   );
 
   const showAlert = useCallback((alert) => {
@@ -38,7 +38,7 @@ export default function AlertProvider({ children }) {
 
   const value = useMemo(
     () => ({ alertStore, showAlert, hideAlert, popAlert }),
-    [alertStore, showAlert, hideAlert, popAlert]
+    [alertStore, showAlert, hideAlert, popAlert],
   );
 
   return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;

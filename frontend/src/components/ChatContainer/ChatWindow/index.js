@@ -202,7 +202,7 @@ function ChatWindow(props) {
         .querySelector('meta[name="viewport"]')
         .setAttribute(
           'content',
-          `${originalMetaViewportContent}, interactive-widget=resizes-content`
+          `${originalMetaViewportContent}, interactive-widget=resizes-content`,
         );
     }
 

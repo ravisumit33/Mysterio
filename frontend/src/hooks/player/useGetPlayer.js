@@ -12,7 +12,7 @@ const useGetPlayer = (playerRef) => {
           return -1;
       }
     },
-    [playerRef]
+    [playerRef],
   );
   const getPlayerTime = useCallback(
     (playerName) => {
@@ -23,7 +23,7 @@ const useGetPlayer = (playerRef) => {
           return -1;
       }
     },
-    [playerRef]
+    [playerRef],
   );
 
   const getPlayerId = useCallback(
@@ -35,7 +35,7 @@ const useGetPlayer = (playerRef) => {
           return -1;
       }
     },
-    [playerRef]
+    [playerRef],
   );
   return { getPlayerState, getPlayerTime, getPlayerId };
 };

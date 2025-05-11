@@ -39,7 +39,7 @@ function BasicInfo(props) {
     if (!randomClicked) setRandomClicked(true);
     const style = styles[Math.floor(Math.random() * styles.length)];
     const randomAvatarUrl = encodeURI(
-      `https://api.dicebear.com/7.x/${style}/svg?seed=${name}${Math.random()}&backgroundColor=${generateRandomColor()}`
+      `https://api.dicebear.com/7.x/${style}/svg?seed=${name}${Math.random()}&backgroundColor=${generateRandomColor()}`,
     );
     setAvatarUrl(randomAvatarUrl);
   };

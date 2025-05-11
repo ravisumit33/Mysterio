@@ -21,7 +21,7 @@ function GoogleLogin(props) {
       });
       globalThis.google.accounts.id.renderButton(
         document.getElementById('GoogleLogin'),
-        { theme: 'outline', size: 'large' } // customization attributes
+        { theme: 'outline', size: 'large' }, // customization attributes
       );
       // globalThis.google.accounts.id.prompt(); // also display the One Tap dialog
     });

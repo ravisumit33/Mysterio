@@ -171,7 +171,7 @@ FeatureCard.propTypes = {
     PropTypes.shape({
       icon: PropTypes.elementType.isRequired,
       text: PropTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
   color: PropTypes.string.isRequired,
   imageUrl: PropTypes.string.isRequired,

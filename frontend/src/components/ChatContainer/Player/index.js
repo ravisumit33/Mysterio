@@ -56,7 +56,7 @@ function Player() {
       clearInterval(syncIntervalRef.current);
       syncIntervalRef.current = null;
     },
-    []
+    [],
   );
   const { getPlayerState, getPlayerTime, getPlayerId } = useGetPlayer(embedPlayerRef);
   const { handleCue, handlePlay, handlePause, handleSeek } = useHandlePlayer(embedPlayerRef);
@@ -112,7 +112,7 @@ function Player() {
         }, 1000);
       }
     },
-    [getPlayerTime, handleCue, isHost, syncedPlayerData, updatePlayer]
+    [getPlayerTime, handleCue, isHost, syncedPlayerData, updatePlayer],
   );
   const onPlayerStateChange = useCallback(
     (state) => {
@@ -134,7 +134,7 @@ function Player() {
           });
         });
     },
-    [getPlayerTime, handlePlay, isHost, syncedPlayerData, updatePlayer]
+    [getPlayerTime, handlePlay, isHost, syncedPlayerData, updatePlayer],
   );
 
   const getEmbedPlayer = () => {

@@ -16,7 +16,7 @@ const useHandlePlayer = (playerRef) => {
           break;
       }
     },
-    [playerRef]
+    [playerRef],
   );
 
   const handlePlay = useCallback(
@@ -30,7 +30,7 @@ const useHandlePlayer = (playerRef) => {
           break;
       }
     },
-    [playerRef]
+    [playerRef],
   );
 
   const handlePause = useCallback(
@@ -44,7 +44,7 @@ const useHandlePlayer = (playerRef) => {
           break;
       }
     },
-    [playerRef]
+    [playerRef],
   );
 
   const handleSeek = useCallback(
@@ -58,7 +58,7 @@ const useHandlePlayer = (playerRef) => {
           break;
       }
     },
-    [playerRef]
+    [playerRef],
   );
 
   return { handleCue, handlePlay, handlePause, handleSeek };

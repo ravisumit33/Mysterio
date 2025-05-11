@@ -64,7 +64,7 @@ function UserInfoDialog({ payload }) {
 
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
     profileStore.name,
-    profileStore.avatarUrl
+    profileStore.avatarUrl,
   );
 
   useEffect(() => {

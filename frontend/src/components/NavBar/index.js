@@ -156,7 +156,7 @@ function NavBar() {
         className={shouldShowHamburger ? classes.smallAvatar : classes.largeAvatar}
       />
     ),
-    [avatarUrl, classes.largeAvatar, classes.smallAvatar, name, shouldShowHamburger]
+    [avatarUrl, classes.largeAvatar, classes.smallAvatar, name, shouldShowHamburger],
   );
 
   const accountCircleIcon = useMemo(
@@ -166,7 +166,7 @@ function NavBar() {
         className={shouldShowHamburger ? classes.smallAvatar : classes.largeAvatar}
       />
     ),
-    [classes.largeAvatar, classes.smallAvatar, shouldShowHamburger]
+    [classes.largeAvatar, classes.smallAvatar, shouldShowHamburger],
   );
 
   const accountCircle = {

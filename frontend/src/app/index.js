@@ -40,6 +40,7 @@ function App() {
   const { pathname } = useLocation();
   const classes = useStyles();
 
+  // TODO: Add an alert for internet connection down
   return (
     <Sentry.ErrorBoundary fallback={<ErrorUI />}>
       <CssBaseline>
@@ -54,10 +55,10 @@ function App() {
               <Footer />
             </Route>
             <Route path="/login">
-              <Auth />
+              <Auth key="login" />
             </Route>
             <Route path="/register">
-              <Auth shouldRegister />
+              <Auth key="register" shouldRegister />
             </Route>
             <Route path="/account">
               <Account />

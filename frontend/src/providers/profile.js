@@ -13,7 +13,7 @@ const profileReducerWithStorage = withStorage(profileReducer, updateStoredProfil
 export default function ProfileProvider({ children }) {
   const [profileStore, profileDispatch] = useReducer(
     profileReducerWithStorage,
-    initialProfileState
+    initialProfileState,
   );
   // @ts-ignore
   const { trackHydration, markHydrated, isHydrated } = useHydration();
@@ -40,14 +40,14 @@ export default function ProfileProvider({ children }) {
   const setBasicInfo = useCallback(
     // @ts-ignore
     (basicInfo) => profileDispatch({ type: ProfileActions.BASIC_INFO_UPDATED, payload: basicInfo }),
-    []
+    [],
   );
 
   const waitUntilReady = useCallback(() => profileManagerRef.current.waitUntilReady(), []);
 
   const value = useMemo(
     () => ({ profileStore, setBasicInfo, waitUntilReady }),
-    [profileStore, setBasicInfo, waitUntilReady]
+    [profileStore, setBasicInfo, waitUntilReady],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;

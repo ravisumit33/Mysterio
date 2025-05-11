@@ -38,7 +38,7 @@ function SocialAuth() {
           }),
       });
     },
-    [socialLogin, runTaskWithLoader, runTaskWithAlert]
+    [socialLogin, runTaskWithLoader, runTaskWithAlert],
   );
 
   const handleSocialLoginFailure = useCallback(
@@ -48,7 +48,7 @@ function SocialAuth() {
         severity: 'error',
       });
     },
-    [showAlert]
+    [showAlert],
   );
 
   return (

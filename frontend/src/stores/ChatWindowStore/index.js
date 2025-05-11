@@ -280,7 +280,7 @@ class ChatWindowStore {
                 }
               },
               MatchTimeout,
-              this
+              this,
             );
             this.setChatStatus(ChatStatus.NOT_STARTED);
           }

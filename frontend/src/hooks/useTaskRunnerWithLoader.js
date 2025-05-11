@@ -13,7 +13,7 @@ const useTaskRunnerWithLoader = () => {
         hideWaitScreen();
       }
     },
-    [showWaitScreen, hideWaitScreen]
+    [showWaitScreen, hideWaitScreen],
   );
   return run;
 };

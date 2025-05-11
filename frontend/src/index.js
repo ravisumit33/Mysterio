@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { configure } from 'mobx';
 import * as Sentry from '@sentry/react';
@@ -51,7 +51,9 @@ let theme = createTheme({
 theme = responsiveFontSizes(theme);
 
 const renderReactDom = () => {
-  ReactDOM.render(
+  const container = document.getElementById('root');
+  const root = createRoot(container);
+  root.render(
     <Router>
       <StyledEngineProvider injectFirst>
         <ThemeProvider theme={theme}>
@@ -61,7 +63,6 @@ const renderReactDom = () => {
         </ThemeProvider>
       </StyledEngineProvider>
     </Router>,
-    document.getElementById('root')
   );
 };
 
@@ -73,7 +74,7 @@ window.loadReactPromise.then(() => {
       () => {
         renderReactDom();
       },
-      false
+      false,
     );
   } else {
     renderReactDom();

@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
       }).then(() => axios(originalRequest));
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 const fetchUrl = (url, data) => {

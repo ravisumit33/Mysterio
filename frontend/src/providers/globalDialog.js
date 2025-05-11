@@ -6,7 +6,7 @@ import { GlobalDialogActions, globalDialogReducer, initialGlobalDialogState } fr
 export default function GlobalDialogProvider({ children }) {
   const [globalDialogStore, globalDialogDispatch] = useReducer(
     globalDialogReducer,
-    initialGlobalDialogState
+    initialGlobalDialogState,
   );
 
   const openGlobalDialog = useCallback((type, payload) => {
@@ -21,7 +21,7 @@ export default function GlobalDialogProvider({ children }) {
 
   const value = useMemo(
     () => ({ globalDialogStore, openGlobalDialog, closeGlobalDialog }),
-    [globalDialogStore, openGlobalDialog, closeGlobalDialog]
+    [globalDialogStore, openGlobalDialog, closeGlobalDialog],
   );
 
   return <GlobalDialogContext.Provider value={value}>{children}</GlobalDialogContext.Provider>;

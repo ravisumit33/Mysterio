@@ -12,7 +12,7 @@ const useStyles = makeStyles((theme) => ({
   // @ts-ignore
   messageBox: ({ chatStatus }) => ({
     ...([ChatStatus.ENDED, ChatStatus.NO_MATCH_FOUND, ChatStatus.RECONNECTING].includes(
-      chatStatus
+      chatStatus,
     ) && {
       opacity: 0.3,
     }),
@@ -37,7 +37,7 @@ function MessageBox(props) {
 
   const handleChatWindowTopReached = () => {
     loadPreviousMessages().then((msgCnt) =>
-      setFirstItemIdx((oldFirstItemIndex) => oldFirstItemIndex - msgCnt)
+      setFirstItemIdx((oldFirstItemIndex) => oldFirstItemIndex - msgCnt),
     );
   };
   const totalMessageCount = chatMessages.length;
@@ -63,7 +63,7 @@ function MessageBox(props) {
         </IconButton>
       </Tooltip>
     ),
-    [chatMessages.length, classes.bottomButton, unreadMessagesCount]
+    [chatMessages.length, classes.bottomButton, unreadMessagesCount],
   );
 
   return (

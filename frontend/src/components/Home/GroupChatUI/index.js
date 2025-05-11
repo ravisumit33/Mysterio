@@ -61,7 +61,7 @@ function GroupChatUI() {
         <AddCircleIcon />
       </Avatar>
     ),
-    []
+    [],
   );
   const customAvatar = useCallback((groupRoom) => {
     const { name, avatar, avatarUrl } = groupRoom.room_data;

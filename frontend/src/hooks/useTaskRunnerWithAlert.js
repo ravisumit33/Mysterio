@@ -28,7 +28,7 @@ const useTaskRunnerWithAlert = () => {
         onCompletionCb();
       }
     },
-    [showAlert, hideAlert]
+    [showAlert, hideAlert],
   );
   return run;
 };

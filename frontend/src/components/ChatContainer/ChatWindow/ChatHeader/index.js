@@ -47,7 +47,7 @@ function ChatHeader() {
         <Animation containerId="videoPlaying" animationData={playingJson} />
       </div>
     ),
-    []
+    [],
   );
 
   const LikeAnimation = useMemo(
@@ -56,7 +56,7 @@ function ChatHeader() {
         <Animation containerId="like" animationData={likeJson} loop={false} width={6} height={6} />
       </div>
     ),
-    []
+    [],
   );
 
   const ReconnectingMessage = useMemo(
@@ -66,7 +66,7 @@ function ChatHeader() {
         <CircularProgress color="inherit" size={theme.spacing(2.5)} />
       </Stack>
     ),
-    [theme]
+    [theme],
   );
 
   const individualChatIcons = useMemo(() => {
@@ -105,12 +105,12 @@ function ChatHeader() {
 
   const moreMenu = useMemo(
     () => <MoreMenu isGroupChat={chatWindowStore.isGroupChat} className={classes.icon} />,
-    [chatWindowStore.isGroupChat, classes.icon]
+    [chatWindowStore.isGroupChat, classes.icon],
   );
 
   const avatarIcon = useMemo(
     () => <CustomAvatar name={name} avatarUrl={avatarUrl} />,
-    [avatarUrl, name]
+    [avatarUrl, name],
   );
 
   return (

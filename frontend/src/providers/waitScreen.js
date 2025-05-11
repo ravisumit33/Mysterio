@@ -6,24 +6,24 @@ import { initialWaitScreenState, waitScreenReducer, WaitScreenActions } from 'st
 export default function WaitScreenProvider({ children }) {
   const [waitScreenStore, waitScreenDispatch] = useReducer(
     waitScreenReducer,
-    initialWaitScreenState
+    initialWaitScreenState,
   );
 
   const hideWaitScreen = useCallback(
     // @ts-ignore
     () => waitScreenDispatch({ type: WaitScreenActions.ENDED }),
-    []
+    [],
   );
 
   const showWaitScreen = useCallback(
     // @ts-ignore
     (text) => waitScreenDispatch({ type: WaitScreenActions.STARTED, text }),
-    []
+    [],
   );
 
   const value = useMemo(
     () => ({ waitScreenStore, hideWaitScreen, showWaitScreen }),
-    [waitScreenStore, hideWaitScreen, showWaitScreen]
+    [waitScreenStore, hideWaitScreen, showWaitScreen],
   );
 
   return <WaitScreenContext.Provider value={value}>{children}</WaitScreenContext.Provider>;

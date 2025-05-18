@@ -1,4 +1,4 @@
-import ProfileManager from './profile';
-import SocketManager from './socket';
+import ChatManager from './chat';
 
-export { ProfileManager, SocketManager };
+// eslint-disable-next-line import/prefer-default-export
+export { ChatManager };

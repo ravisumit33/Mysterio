@@ -14,6 +14,9 @@ import TermsOfService from './TermsOfService';
 import CookiePolicy from './CookiePolicy';
 import ScrollToTop from './ScrollToTop';
 import TooltipButton from './TooltipButton';
+import CenterPaper from './CenterPaper';
+import Notification from './Notification';
+import RouterLink from './RouterLink';
 
 export {
   NavBar,
@@ -32,4 +35,7 @@ export {
   CookiePolicy,
   ScrollToTop,
   TooltipButton,
+  CenterPaper,
+  Notification,
+  RouterLink,
 };

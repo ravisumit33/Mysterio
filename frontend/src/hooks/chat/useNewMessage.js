@@ -2,10 +2,19 @@ import { useEffect, useState } from 'react';
 import { MessageType, MessageSenderType } from 'appConstants';
 import { useProfileStore } from '../useStore';
 
-const useNewMessage = ({ initialRenderingDone, lastMessage }) => {
+const useNewMessage = ({ initDone, lastMessage }) => {
   // @ts-ignore
   const { profileStore } = useProfileStore();
+
+  const [initialRenderingDone, setInitialRenderingDone] = useState(false);
   const [lastRenderedNewMessage, setLastRenderedNewMessage] = useState(null);
+
+  useEffect(() => {
+    if (initDone) {
+      setInitialRenderingDone(true);
+    }
+  }, [initDone]);
+
   const hasNewMessage =
     initialRenderingDone &&
     lastMessage &&

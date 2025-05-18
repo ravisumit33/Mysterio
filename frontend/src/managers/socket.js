@@ -2,15 +2,14 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 import log from 'loglevel';
 import { ChatStatus, MessageType, MysterioHost, ReconnectTimeout, RoomType } from 'appConstants';
 import { isCordovaEnv, isDevEnv, isEmptyObj } from 'utils';
+import BaseManager from './base';
 
-class SocketManager {
+class SocketManager extends BaseManager {
   maxRetries = 10;
 
-  constructor(chatWindowStore, profileStore, waitUntilProfileReady, showAlert) {
-    this.chatWindowStore = chatWindowStore;
-    this.profileStore = profileStore;
-    this.showAlert = showAlert;
-    this.waitUntilProfileReady = waitUntilProfileReady;
+  constructor(chatManager, getCtx) {
+    super(getCtx);
+    this.chatManager = chatManager;
     this.init();
   }
 
@@ -26,7 +25,8 @@ class SocketManager {
         serverHost = isDevEnv() ? `${host.split(':')[0]}:8000` : host;
         websocketProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       }
-      const { roomInfo, roomType } = this.chatWindowStore;
+      const { chatRoomStore } = this.stores;
+      const { roomInfo, roomType } = chatRoomStore;
       if (roomType === RoomType.INDIVIDUAL && !roomInfo.roomId) {
         return `${websocketProtocol}://${serverHost}/ws/chat/match/`;
       }
@@ -42,18 +42,17 @@ class SocketManager {
 
   handleOpen = () => {
     log.info('socket connection established');
-    this.waitUntilProfileReady().then(() => {
-      this.send(MessageType.USER_INFO, {
-        sessionId: this.profileStore.sessionId,
-        name: this.profileStore.name,
-        avatarUrl: this.profileStore.avatarUrl,
-      });
+    const { sessionId, name, avatarUrl } = this.stores.profileStore;
+    const { waitUntilProfileReady } = this.actions;
+    waitUntilProfileReady().then(() => {
+      this.send(MessageType.USER_INFO, { sessionId, name, avatarUrl });
     });
   };
 
   handleClose = () => {
     log.info('socket connection closed', this.socket);
-    if (this.chatWindowStore.chatStatus === ChatStatus.ONGOING) {
+    const { chatStatus } = this.stores.chatRoomStore;
+    if (chatStatus === ChatStatus.ONGOING) {
       this.reconnectStart = Date.now();
       const message = {
         type: MessageType.RECONNECTING,
@@ -66,18 +65,18 @@ class SocketManager {
 
   handleMessage = (event) => {
     const payload = JSON.parse(event.data);
-    const processedMessage = this.chatWindowStore.processMessage(payload);
-    !isEmptyObj(processedMessage) && this.chatWindowStore.addMessage(payload);
+    this.chatManager.addMessage(payload);
   };
 
   handleError = (error) => {
     log.error('Error connecting to server\n', error);
-    const { chatStatus } = this.chatWindowStore;
+    const { chatStatus } = this.stores.chatRoomStore;
     if (this.socket.retryCount >= this.maxRetries) {
       if (chatStatus === ChatStatus.NOT_STARTED) {
-        const { appStore } = this.chatWindowStore;
+        const { appStore } = this.chatManager;
         appStore.removeChatWindow();
-        this.showAlert({
+        const { showAlert } = this.actions;
+        showAlert({
           text: `Error occured while connecting to server.`,
           severity: 'error',
         });

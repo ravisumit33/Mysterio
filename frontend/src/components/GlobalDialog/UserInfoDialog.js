@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -52,7 +52,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function UserInfoDialog({ payload }) {
-  const { checkComplete, onComplete } = payload;
+  const { onSuccess, onCancel } = payload;
   const classes = useStyles();
   // @ts-ignore
   const { profileStore, setBasicInfo } = useProfileStore();
@@ -66,12 +66,6 @@ function UserInfoDialog({ payload }) {
     profileStore.name,
     profileStore.avatarUrl,
   );
-
-  useEffect(() => {
-    if (checkComplete()) {
-      onComplete();
-    }
-  }, [checkComplete, onComplete]);
 
   const handleDialogueButtonClick = () => {
     if (!name) {
@@ -111,6 +105,7 @@ function UserInfoDialog({ payload }) {
           sessionId: profileSessionId,
         });
         closeGlobalDialog();
+        onSuccess();
       },
       onErrorCb: (resp, showAlertCb) => {
         showAlertCb({
@@ -145,7 +140,13 @@ function UserInfoDialog({ payload }) {
         </DialogContent>
         <DialogActions>
           {profileStore.sessionId && (
-            <Button color="secondary" onClick={() => closeGlobalDialog()}>
+            <Button
+              color="secondary"
+              onClick={() => {
+                closeGlobalDialog();
+                onCancel();
+              }}
+            >
               Cancel
             </Button>
           )}
@@ -160,15 +161,15 @@ function UserInfoDialog({ payload }) {
 
 UserInfoDialog.propTypes = {
   payload: PropTypes.shape({
-    onComplete: PropTypes.func,
-    checkComplete: PropTypes.func,
+    onSuccess: PropTypes.func,
+    onCancel: PropTypes.func,
   }),
 };
 
 UserInfoDialog.defaultProps = {
   payload: {
-    onComplete: () => {},
-    checkComplete: () => true,
+    onSuccess: () => {},
+    onCancel: () => {},
   },
 };
 

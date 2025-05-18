@@ -17,16 +17,16 @@ const RoomType = Object.freeze({
 });
 
 const ChatStatus = Object.freeze({
-  NOT_STARTED: 0,
-  ONGOING: 1,
-  ENDED: 2,
-  NO_MATCH_FOUND: 3,
-  RECONNECTING: 4,
+  NOT_STARTED: 'NOT_STARTED',
+  ONGOING: 'ONGOING',
+  ENDED: 'ENDED',
+  NO_MATCH_FOUND: 'NO_MATCH_FOUND',
+  RECONNECTING: 'RECONNECTING',
 });
 
 const MessageSenderType = Object.freeze({
-  SELF: 0,
-  OTHER: 1,
+  SELF: 'SELF',
+  OTHER: 'OTHER',
 });
 
 const PlayerName = Object.freeze({
@@ -65,8 +65,6 @@ const BrowserStorageKeys = Object.freeze({
 
 const BrowserStorageKeysPrefix = 'mysterio-anon-chat-';
 
-const OngoingChatRegex = /^\/chat\/(?<roomType>\w+)\/(?<roomId>[0-9]+)(\/.*)?$/;
-
 const HydrationKeys = Object.freeze({
   USER: 'user',
   PROFILE: 'profile',
@@ -74,6 +72,13 @@ const HydrationKeys = Object.freeze({
 
 const GlobalDialogTypes = Object.freeze({
   USER_INFO: 'userInfo',
+  ROOM_PASSWORD: 'roomPwd',
+});
+
+const ChatInitializationStatus = Object.freeze({
+  LOADING: 'LOADING',
+  READY: 'READY',
+  FAILED: 'FAILED',
 });
 
 export {
@@ -90,7 +95,7 @@ export {
   renderPlayerName,
   BrowserStorageKeys,
   BrowserStorageKeysPrefix,
-  OngoingChatRegex,
   HydrationKeys,
   GlobalDialogTypes,
+  ChatInitializationStatus,
 };

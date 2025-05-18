@@ -380,7 +380,10 @@ class ChatWindowStore {
     return payload;
   };
 
-  addMessage = (payload) => this.messageList.push(payload);
+  addMessage = (payload) => {
+    const processedMessage = this.processMessage(payload);
+    !isEmptyObj(processedMessage) && this.messageList.push(payload);
+  };
 
   addInitMessageList = (messageList) => {
     this.messageList = messageList.concat(this.messageList);

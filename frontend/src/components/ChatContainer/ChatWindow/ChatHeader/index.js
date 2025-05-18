@@ -14,7 +14,7 @@ import Animation from 'components/Animation';
 import TooltipButton from 'components/TooltipButton';
 import playingJson from 'assets/animations/playing.json';
 import likeJson from 'assets/animations/like.json';
-import { useSearchParams } from 'hooks';
+import { useSearchParams, useStartChat } from 'hooks';
 import MoreMenu from './MoreMenu';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,6 +41,8 @@ function ChatHeader() {
   const history = useHistory();
   const theme = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
+  const startChat = useStartChat();
+
   const PlayingAnimation = useMemo(
     () => (
       <div>
@@ -70,7 +72,7 @@ function ChatHeader() {
   );
 
   const individualChatIcons = useMemo(() => {
-    const handleReconnect = () => history.replace('/chat/match/');
+    const handleReconnect = () => startChat();
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED;
     return (
       <TooltipButton title="Find match again">
@@ -85,7 +87,7 @@ function ChatHeader() {
         </IconButton>
       </TooltipButton>
     );
-  }, [chatStatus, classes.icon, history, theme.zIndex.snackbar]);
+  }, [chatStatus, classes.icon, startChat, theme.zIndex.snackbar]);
 
   const groupChatIcons = useMemo(() => {
     const shouldDisable = chatStatus === ChatStatus.NOT_STARTED || chatStatus === ChatStatus.ENDED;

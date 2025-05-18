@@ -1,7 +1,8 @@
-export default function withStorage(reducer, saveToStorage) {
+export default function withStorage(reducer, saveToStorage, transform = (s) => s) {
   return (state, action) => {
     const nextState = reducer(state, action);
-    saveToStorage(nextState);
+    const toSave = transform(nextState);
+    saveToStorage(toSave);
     return nextState;
   };
 }

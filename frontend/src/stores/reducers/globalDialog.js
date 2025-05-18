@@ -9,7 +9,12 @@ export const initialGlobalDialogState = {
 export const globalDialogReducer = (state, action) => {
   switch (action.type) {
     case GlobalDialogActions.OPENED:
-      return { ...state, type: action.payload.type, isOpen: true, payload: action.payload.payload };
+      return {
+        ...state,
+        type: action.payload.type,
+        isOpen: true,
+        payload: action.payload.payload || null,
+      };
     case GlobalDialogActions.CLOSED:
       return { ...state, type: undefined, isOpen: false, payload: null };
     default:

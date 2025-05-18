@@ -1,22 +1,29 @@
+import { useState, useEffect, useCallback } from 'react';
 import { GlobalDialogTypes } from 'appConstants';
-import { useHistory } from 'react-router-dom';
 import { useGlobalDialogStore, useProfileStore } from './useStore';
+import { useStartChat } from './chat';
 
 const useChatLauncher = () => {
-  const history = useHistory();
   // @ts-ignore
   const { profileStore } = useProfileStore();
   // @ts-ignore
   const { openGlobalDialog } = useGlobalDialogStore();
+  const startChat = useStartChat();
+  const [pendingLaunch, setPendingLaunch] = useState(null);
 
-  const launchChat = () => {
+  useEffect(() => {
+    if (pendingLaunch && profileStore.isReady) {
+      startChat(pendingLaunch);
+      setPendingLaunch(null);
+    }
+  }, [pendingLaunch, profileStore.isReady, startChat]);
+
+  const launchChat = (chatParams) => {
     if (!profileStore.isReady) {
-      openGlobalDialog(GlobalDialogTypes.USER_INFO, {
-        checkComplete: () => profileStore.isReady,
-        onComplete: launchChat,
-      });
+      const onSuccessCb = () => setPendingLaunch(chatParams);
+      openGlobalDialog(GlobalDialogTypes.USER_INFO, { onSuccess: onSuccessCb });
     } else {
-      history.push('/chat/match/');
+      startChat(chatParams);
     }
   };
 

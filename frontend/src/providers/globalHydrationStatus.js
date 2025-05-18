@@ -1,8 +1,8 @@
-import { HydrationContext } from 'contexts';
+import { GlobalHydrationStatusContext } from 'contexts';
 import PropTypes from 'prop-types';
 import React, { useCallback, useMemo, useState } from 'react';
 
-export default function HydrationProvider({ children }) {
+export default function GlobalHydrationStatusProvider({ children }) {
   const [keysToHydrate, setKeysToHydrate] = useState(new Set());
 
   const trackHydration = useCallback(
@@ -33,9 +33,13 @@ export default function HydrationProvider({ children }) {
     return { trackHydration, markHydrated, isHydrated, isAppReady };
   }, [keysToHydrate, markHydrated, trackHydration]);
 
-  return <HydrationContext.Provider value={value}>{children}</HydrationContext.Provider>;
+  return (
+    <GlobalHydrationStatusContext.Provider value={value}>
+      {children}
+    </GlobalHydrationStatusContext.Provider>
+  );
 }
 
-HydrationProvider.propTypes = {
+GlobalHydrationStatusProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };

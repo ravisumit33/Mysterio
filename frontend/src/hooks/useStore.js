@@ -5,6 +5,7 @@ import {
   UserContext,
   GlobalDialogContext,
   WaitScreenContext,
+  ChatInfoContext,
   ChatRoomInfoContext,
   ChatRoomDataContext,
   ChatMessageContext,
@@ -16,6 +17,7 @@ export const useProfileStore = () => useContext(ProfileContext);
 export const useUserStore = () => useContext(UserContext);
 export const useGlobalDialogStore = () => useContext(GlobalDialogContext);
 export const useWaitScreenStore = () => useContext(WaitScreenContext);
+export const useChatInfoStore = () => useContext(ChatInfoContext);
 export const useChatRoomInfoStore = () => useContext(ChatRoomInfoContext);
 export const useChatRoomDataStore = () => useContext(ChatRoomDataContext);
 export const useChatMessageStore = () => useContext(ChatMessageContext);

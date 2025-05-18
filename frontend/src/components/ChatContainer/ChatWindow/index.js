@@ -12,12 +12,20 @@ import { makeStyles } from '@mui/styles';
 import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { teal } from '@mui/material/colors';
-import { ChatStatus } from 'appConstants';
+import { ChatStatus, RoomType } from 'appConstants';
 import { ChatWindowStoreContext } from 'contexts';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
-import { useChatSound, useNewMessage, useSearchParams, useFullScreenChatWindow } from 'hooks';
-import { useHistory, useLocation } from 'react-router-dom';
+import {
+  useChatSound,
+  useNewMessage,
+  useSearchParams,
+  useFullScreenChatWindow,
+  useStartChat,
+  useChatRoomInfoStore,
+  useChatInfoStore,
+  useChatMessageStore,
+} from 'hooks';
 import { Replay } from '@mui/icons-material';
 import ChatHeader from './ChatHeader';
 import InputBar from './InputBar';
@@ -75,42 +83,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ChatWindow() {
-  const { pathname } = useLocation();
-  const chatWindowStore = useContext(ChatWindowStoreContext);
-  const {
-    messageList,
-    chatStatus,
-    isGroupChat,
-    initDone,
-    roomInfo: { roomId },
-    previousMessagesInfo,
-    roomType,
-  } = chatWindowStore;
-  const { fetchingPreviousMessages, previousMessagesCount } = previousMessagesInfo;
+  // @ts-ignore
+  const { chatInfoStore } = useChatInfoStore();
+  const { chatStatus, initDone } = chatInfoStore;
+  // @ts-ignore
+  const { chatRoomInfoStore } = useChatRoomInfoStore();
+  const { roomId, roomType, name } = chatRoomInfoStore;
+  // @ts-ignore
+  const { messageList, previousMessagesInfo } = useChatMessageStore();
+  const isGroupChat = roomType === RoomType.GROUP;
+
+  const { fetchingPreviousMessages } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];
 
   const classes = useStyles({ chatStatus });
-  const history = useHistory();
-
-  const ongoingChatUrl = `/chat/${roomType}/${roomId}/`;
-  const shouldRedirect = initDone && pathname !== ongoingChatUrl;
-  useEffect(() => {
-    if (shouldRedirect) {
-      history.replace(ongoingChatUrl);
-    }
-  }, [shouldRedirect, history, ongoingChatUrl]);
-
-  const [initialRenderingDone, setInitialRenderingDone] = useState(false);
-  useEffect(() => {
-    if (initDone) {
-      setInitialRenderingDone(true);
-    }
-  }, [initDone]);
+  const startChat = useStartChat();
 
   useFullScreenChatWindow();
 
   const { hasNewMessage, newMessageInfo } = useNewMessage({
-    initialRenderingDone,
+    initDone,
     lastMessage,
   });
 
@@ -124,13 +116,11 @@ function ChatWindow() {
   };
   if (!isGroupChat) {
     overlayContent.text =
-      chatStatus === ChatStatus.NO_MATCH_FOUND
-        ? 'Looks like no one is online'
-        : `${chatWindowStore.name} left`;
+      chatStatus === ChatStatus.NO_MATCH_FOUND ? 'Looks like no one is online' : `${name} left`;
     overlayContent.button = {
       text: 'Find match again',
       icon: <Replay />,
-      action: () => history.replace('/chat/match/'),
+      action: () => startChat(),
     };
   }
 
@@ -140,14 +130,9 @@ function ChatWindow() {
   // @ts-ignore
   const chatMinimized = searchParams.get('chatMinimized') === 'true';
   const shouldShowChatBubble = isNotLargeScreen && chatMinimized;
+  const ongoingChatUrl = `/chat/${roomType}/${roomId}/`;
 
-  return shouldRedirect ? (
-    <WaitScreen
-      className={classes.backdrop}
-      shouldOpen={shouldRedirect}
-      waitScreenText="Redirecting"
-    />
-  ) : (
+  return (
     <>
       <FloatingChatBubble
         shouldShow={shouldShowChatBubble}
@@ -194,11 +179,7 @@ function ChatWindow() {
                 shouldReplaceRoute
               />
 
-              <MessageBox
-                firstItemIndex={previousMessagesCount ? previousMessagesCount - 1 : 0}
-                newMessageInfo={newMessageInfo}
-                messageList={messageList}
-              />
+              <MessageBox newMessageInfo={newMessageInfo} hasNewMessage={hasNewMessage} />
             </Box>
           )}
           {(chatStatus === ChatStatus.NO_MATCH_FOUND || chatStatus === ChatStatus.ENDED) && (

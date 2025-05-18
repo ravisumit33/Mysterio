@@ -14,33 +14,33 @@ import {
   resetPasswordService,
 } from 'services';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useHydration } from 'hooks';
+import { useGlobalHydrationStatus } from 'hooks';
 import { HydrationKeys } from 'appConstants';
 
 export default function UserProvider({ children }) {
   const queryClient = useQueryClient();
   // @ts-ignore
-  const { trackHydration, markHydrated } = useHydration();
+  const { trackHydration, markHydrated, isHydrated } = useGlobalHydrationStatus();
 
   useEffect(() => trackHydration(HydrationKeys.USER), [trackHydration]);
 
-  const { data: userData } = useQuery({
+  const { data: userData, status: queryStatus } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
-      try {
-        const response = await getUserService();
-        // @ts-ignore
-        const { email, is_socially_registered: social } = response.data;
-        return { email, social };
-      } catch (error) {
-        return { email: '', social: false };
-      }
+      const response = await getUserService();
+      // @ts-ignore
+      const { email, is_socially_registered: social } = response.data;
+      return { email, social };
     },
     initialData: { email: '', social: false },
-    onSettled: (data, error, querClient) => {
-      markHydrated(HydrationKeys.USER);
-    },
+    retry: false,
   });
+
+  useEffect(() => {
+    if (!isHydrated(HydrationKeys.USER) && (queryStatus === 'success' || queryStatus === 'error')) {
+      markHydrated(HydrationKeys.USER);
+    }
+  }, [isHydrated, markHydrated, queryStatus]);
 
   const loginMutation = useMutation({
     mutationFn: loginService,

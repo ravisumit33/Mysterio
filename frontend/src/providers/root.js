@@ -3,7 +3,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AlertProvider from './alert';
 import GlobalDialogProvider from './globalDialog';
-import HydrationProvider from './hydration';
+import GlobalHydrationStatusProvider from './globalHydrationStatus';
 import ProfileProvider from './profile';
 import UserProvider from './user';
 import WaitScreenProvider from './waitScreen';
@@ -15,13 +15,13 @@ export default function RootProvider({ children }) {
     <QueryClientProvider client={queryClient}>
       <WaitScreenProvider>
         <AlertProvider>
-          <HydrationProvider>
+          <GlobalHydrationStatusProvider>
             <UserProvider>
               <ProfileProvider>
                 <GlobalDialogProvider>{children}</GlobalDialogProvider>
               </ProfileProvider>
             </UserProvider>
-          </HydrationProvider>
+          </GlobalHydrationStatusProvider>
         </AlertProvider>
       </WaitScreenProvider>
     </QueryClientProvider>

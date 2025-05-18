@@ -1,11 +1,11 @@
-import React, { useMemo, useEffect, useReducer, useCallback, useRef } from 'react';
+import React, { useMemo, useEffect, useReducer, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ProfileContext } from 'contexts';
 import { profileReducer, initialProfileState, ProfileActions } from 'stores';
 import { getStoredProfileData, updateStoredProfileData } from 'utils/browserStorageUtils';
-import { useHydration } from 'hooks';
+import { useConstant, useGlobalHydrationStatus } from 'hooks';
 import { HydrationKeys } from 'appConstants';
-import { ProfileManager } from 'managers';
+import { createDeferredPromiseObj } from 'utils';
 import withStorage from './withStorage';
 
 const profileReducerWithStorage = withStorage(profileReducer, updateStoredProfileData);
@@ -16,8 +16,8 @@ export default function ProfileProvider({ children }) {
     initialProfileState,
   );
   // @ts-ignore
-  const { trackHydration, markHydrated, isHydrated } = useHydration();
-  const profileManagerRef = useRef(new ProfileManager());
+  const { trackHydration, markHydrated, isHydrated } = useGlobalHydrationStatus();
+  const profileReadyPromise = useConstant(() => createDeferredPromiseObj());
 
   useEffect(() => trackHydration(HydrationKeys.PROFILE), [trackHydration]);
 
@@ -33,9 +33,9 @@ export default function ProfileProvider({ children }) {
 
   useEffect(() => {
     if (profileStore.isReady) {
-      profileManagerRef.current.markReady();
+      profileReadyPromise.current.resolve();
     }
-  }, [profileStore.isReady]);
+  }, [profileStore.isReady, profileReadyPromise]);
 
   const setBasicInfo = useCallback(
     // @ts-ignore
@@ -43,7 +43,10 @@ export default function ProfileProvider({ children }) {
     [],
   );
 
-  const waitUntilReady = useCallback(() => profileManagerRef.current.waitUntilReady(), []);
+  const waitUntilReady = useCallback(
+    () => profileReadyPromise.current.promise,
+    [profileReadyPromise],
+  );
 
   const value = useMemo(
     () => ({ profileStore, setBasicInfo, waitUntilReady }),

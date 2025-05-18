@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { makeStyles } from '@mui/styles';
-import { useHydration, useWaitScreenStore } from 'hooks';
+import { useGlobalHydrationStatus, useWaitScreenStore } from 'hooks';
 import WaitScreen from './WaitScreen';
 
 const useStyles = makeStyles(() => ({
@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
 function AppWait() {
   const classes = useStyles();
   // @ts-ignore
-  const { isAppReady } = useHydration();
+  const { isAppReady } = useGlobalHydrationStatus();
   // @ts-ignore
   const { waitScreenStore } = useWaitScreenStore();
   return (

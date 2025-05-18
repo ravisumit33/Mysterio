@@ -6,7 +6,7 @@ import { Box, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles } from '@mui/styles';
 import { ChatStatus, MessageSenderType, MessageType } from 'appConstants';
-import { useGoToBottom, useProfileStore } from 'hooks';
+import { useGoToBottom, useProfileStore, useChatMessageStore } from 'hooks';
 import ChatMessage from './ChatMessage';
 import BottomButton from './BottomButton';
 
@@ -37,11 +37,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 function MessageBox(props) {
-  const { firstItemIndex, newMessageInfo, messageList, hasNewMessage } = props;
+  // @ts-ignore
+  const { messageList, previousMessagesInfo } = useChatMessageStore();
+  const { previousMessagesCount } = previousMessagesInfo;
+  const { newMessageInfo, hasNewMessage } = props;
   // @ts-ignore
   const { profileStore } = useProfileStore();
 
-  const [firstItemIdx, setFirstItemIdx] = useState(firstItemIndex);
+  const [firstItemIdx, setFirstItemIdx] = useState(
+    previousMessagesCount ? previousMessagesCount - 1 : 0,
+  );
   const messageListRef = useRef(null);
   const chatWindowStore = useContext(ChatWindowStoreContext);
   const { loadPreviousMessages, chatStatus } = chatWindowStore;
@@ -140,17 +145,14 @@ function MessageBox(props) {
 }
 
 MessageBox.propTypes = {
-  firstItemIndex: PropTypes.number.isRequired,
   newMessageInfo: PropTypes.shape({
     senderType: PropTypes.oneOf(Object.values(MessageSenderType)),
   }),
-  messageList: PropTypes.arrayOf(PropTypes.shape({})),
   hasNewMessage: PropTypes.bool,
 };
 
 MessageBox.defaultProps = {
   newMessageInfo: undefined,
-  messageList: [],
   hasNewMessage: false,
 };
 

@@ -9,6 +9,10 @@ import {
   initialWaitScreenState,
   globalDialogReducer,
   initialGlobalDialogState,
+  chatRoomInfoReducer,
+  initialChatRoomInfoState,
+  chatMessageReducer,
+  initialChatMessageState,
 } from './reducers';
 import {
   ProfileActions,
@@ -16,6 +20,8 @@ import {
   AlertActions,
   WaitScreenActions,
   GlobalDialogActions,
+  ChatRoomInfoActions,
+  ChatMessageActions,
 } from './actions';
 
 export {
@@ -29,9 +35,15 @@ export {
   initialWaitScreenState,
   globalDialogReducer,
   initialGlobalDialogState,
+  chatRoomInfoReducer,
+  initialChatRoomInfoState,
+  chatMessageReducer,
+  initialChatMessageState,
   ProfileActions,
   UserActions,
   AlertActions,
   WaitScreenActions,
   GlobalDialogActions,
+  ChatRoomInfoActions,
+  ChatMessageActions,
 };

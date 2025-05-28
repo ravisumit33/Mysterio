@@ -13,7 +13,6 @@ import { observer } from 'mobx-react-lite';
 import clsx from 'clsx';
 import { teal } from '@mui/material/colors';
 import { ChatStatus, RoomType } from 'appConstants';
-import { ChatWindowStoreContext } from 'contexts';
 import WaitScreen from 'components/WaitScreen';
 import RouteLeavingGuard from 'components/RouteLeavingGuard';
 import {
@@ -83,15 +82,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ChatWindow() {
-  // @ts-ignore
-  const { chatInfoStore } = useChatInfoStore();
-  const { chatStatus, initDone } = chatInfoStore;
-  // @ts-ignore
-  const { chatRoomInfoStore } = useChatRoomInfoStore();
-  const { roomId, roomType, name } = chatRoomInfoStore;
+  const {
+    // @ts-ignore
+    chatInfoStore: { chatStatus, initDone },
+  } = useChatInfoStore();
+  const {
+    // @ts-ignore
+    chatRoomInfoStore: { roomId, roomType, name },
+  } = useChatRoomInfoStore();
+  const isGroupChat = roomType === RoomType.GROUP;
   // @ts-ignore
   const { messageList, previousMessagesInfo } = useChatMessageStore();
-  const isGroupChat = roomType === RoomType.GROUP;
 
   const { fetchingPreviousMessages } = previousMessagesInfo;
   const lastMessage = !messageList.length ? null : messageList[messageList.length - 1];

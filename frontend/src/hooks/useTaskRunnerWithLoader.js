@@ -5,8 +5,8 @@ const useTaskRunnerWithLoader = () => {
   // @ts-ignore
   const { showWaitScreen, hideWaitScreen } = useWaitScreenStore();
   const run = useCallback(
-    async ({ task, loadScreenText }) => {
-      showWaitScreen(loadScreenText);
+    async ({ task, loaderText }) => {
+      showWaitScreen(loaderText);
       try {
         return await task();
       } finally {

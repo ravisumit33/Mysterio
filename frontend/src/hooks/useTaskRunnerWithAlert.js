@@ -5,6 +5,7 @@ const useTaskRunnerWithAlert = () => {
   // @ts-ignore
   const { showAlert, hideAlert } = useAlertStore();
   const errorAlertIdRef = useRef(null);
+  // TODO: Send object as parameter instead of positional parameters in onSuccessCb/onErrorCb
   const run = useCallback(
     async ({ task, onSuccessCb, onErrorCb, onCompletionCb = () => {} }) => {
       try {

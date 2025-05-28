@@ -1,12 +1,12 @@
-from rest_framework import filters, viewsets
+from rest_framework import filters, mixins, viewsets
 
 from chat.models import Message
 from chat.paginations import MessagePagination
 from chat.permissions import MessagePermission
-from chat.serializers import ReadMessageSerializer
+from chat.serializers import MessageSerializer
 
 
-class MessageViewSet(viewsets.ReadOnlyModelViewSet):
+class MessageViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     Viewset for messages
     """
@@ -17,4 +17,4 @@ class MessageViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ["sent_at"]
     permission_classes = [MessagePermission]
     pagination_class = MessagePagination
-    serializer_class = ReadMessageSerializer
+    serializer_class = MessageSerializer

@@ -150,6 +150,8 @@ AUTH_USER_MODEL = "customauth.User"
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
+# TODO: Use Internationalization
+
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Asia/Kolkata"
@@ -219,6 +221,10 @@ REST_AUTH_SERIALIZERS = {
     "USER_DETAILS_SERIALIZER": "customauth.serializers.UserDetailsSerializer",
 }
 
+REST_AUTH_REGISTER_SERIALIZERS = {
+    "REGISTER_SERIALIZER": "customauth.serializers.RegisterSerializer",
+}
+
 
 REST_USE_JWT = True
 
@@ -286,6 +292,7 @@ CELERY_BEAT_SCHEDULE = {
         "task": "core.tasks.backup_db",
         "schedule": timedelta(days=1),
     },
+    # TODO: Check if 1 day make the session expire
     "clear_expired_sessions": {
         "task": "customauth.tasks.clear_sessions",
         "schedule": timedelta(days=1),

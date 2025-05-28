@@ -9,10 +9,9 @@ from chat.constants import (
     CHAT_SESSION_DELETION_DELAY,
     MATCH_DELAY,
     CacheKey,
-    GroupPrefix,
-    MessageType,
+    ChannelLayerPrefix,
 )
-from chat.models import MatchRequest
+from chat.models import MatchRequest, MessageType
 from chat.utils import channel_layer, get_inactive_individual_room_qs
 from mysterio.celery import app
 
@@ -53,8 +52,8 @@ def individual_room_timeout(room_id):
     delete_room_qs = get_inactive_individual_room_qs(room_id)
     if delete_room_qs.exists():
         delete_room_qs.delete()
-        channel_layer.group_send(
-            GroupPrefix.INDIVIDUAL_ROOM + str(room_id),
+        channel_layer.group_send_message(
+            ChannelLayerPrefix.INDIVIDUAL_ROOM + str(room_id),
             MessageType.CHAT_DELETE,
             {
                 "text": "Room is deleted",
@@ -75,7 +74,7 @@ class IndividualRoomDeletor:
         """
         Schedule room deletion after CHAT_SESSION_DELETION_DELAY seconds
         """
-        if cls.last_deletion_result:
+        if cls.last_deletion_result and not cls.last_deletion_result.successful():
             app.control.revoke(cls.last_deletion_result.id, terminate=True)
         cls.last_deletion_result = individual_room_timeout.apply_async(
             (room_id,), countdown=CHAT_SESSION_DELETION_DELAY

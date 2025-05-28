@@ -1,9 +1,8 @@
 import logging
 
-from chat.constants import MessageType
 from chat.consumers.handlers.message import add_text_message
 from chat.consumers.utils import create_instance
-from chat.models import Player
+from chat.models import MessageType, Player
 from chat.serializers import CreatePlayerSerializer
 from chat.utils import channel_layer
 
@@ -46,8 +45,8 @@ def handle_player_info(consumer, message_data):
         text=f"{consumer.profile['name']} started video player",
         msg_type=MessageType.PLAYER_INFO,
     )
-    channel_layer.group_send(
-        channel_layer_info["group_prefix"] + str(consumer.room_id),
+    channel_layer.group_send_message(
+        channel_layer_info["room_prefix"] + str(consumer.room_id),
         MessageType.PLAYER_INFO,
         {
             "name": message_data["name"],
@@ -77,8 +76,8 @@ def handle_player_end(consumer):
         text=f"{consumer.profile['name']} stopped video player",
         msg_type=MessageType.PLAYER_INFO,
     )
-    channel_layer.group_send(
-        channel_layer_info["group_prefix"] + str(consumer.room_id),
+    channel_layer.group_send_message(
+        channel_layer_info["room_prefix"] + str(consumer.room_id),
         MessageType.PLAYER_END,
         {
             "host": consumer.profile,

@@ -2,10 +2,8 @@ from rest_framework import serializers
 
 from chat.models import Channel, RoomType
 
-from .chat_session import ChatSessionSerializer
 
-
-class WriteChannelSerializer(serializers.ModelSerializer):
+class ChannelSerializer(serializers.ModelSerializer):
     """
     Serializer to create/update channels
     """
@@ -35,15 +33,3 @@ class WriteChannelSerializer(serializers.ModelSerializer):
             "is_active": {"write_only": True},
             "room": {"write_only": True},
         }
-
-
-class ReadChannelSerializer(serializers.ModelSerializer):
-    """
-    Serializer to read channels
-    """
-
-    chat_session = ChatSessionSerializer(read_only=True)
-
-    class Meta:
-        model = Channel
-        fields = ["chat_session"]

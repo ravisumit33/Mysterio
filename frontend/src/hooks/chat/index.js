@@ -5,7 +5,7 @@ import useFullScreenChatWindow from './useFullScreenChatWindow';
 import useChatRedirect from './useChatRedirect';
 import useStartChat from './useStartChat';
 import useChatHydration from './useChatHydration';
-import useInitalizeChatData from './useInitializeChatData';
+import useHydrateChatData from './useHydrateChatData';
 
 export {
   useChatSound,
@@ -15,5 +15,5 @@ export {
   useChatRedirect,
   useStartChat,
   useChatHydration,
-  useInitalizeChatData,
+  useHydrateChatData,
 };

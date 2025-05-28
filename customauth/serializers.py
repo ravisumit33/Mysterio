@@ -1,3 +1,4 @@
+from dj_rest_auth.registration.serializers import RegisterSerializer as RestAuthRegisterSerializer
 from dj_rest_auth.serializers import LoginSerializer as RestAuthLoginSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -28,3 +29,7 @@ class UserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ["pk", "email", "is_socially_registered"]
+
+
+class RegisterSerializer(RestAuthRegisterSerializer):
+    username = None

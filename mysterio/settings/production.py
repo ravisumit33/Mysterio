@@ -60,7 +60,7 @@ LOGGING["handlers"]["console"]["formatter"] = "verbose"
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = ("rest_framework.renderers.JSONRenderer",)
 
 
-# TODO Fix these after moving to native mobile app
+# TODO: Fix these after moving to native mobile app
 
 CSRF_COOKIE_SECURE = True
 
@@ -75,6 +75,7 @@ SESSION_COOKIE_SAMESITE = "None"
 
 EMAIL_USE_TLS = True
 
+# TODO: Move email host to secret key
 EMAIL_HOST = "smtp.gmail.com"
 
 EMAIL_PORT = 587

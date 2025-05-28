@@ -1,4 +1,6 @@
-import { MessageType, RoomType, ChatStatus, MatchTimeout } from 'appConstants';
+import log from 'loglevel';
+import { MessageType, RoomType, ChatStatus, MatchTimeout, ReconnectTimeout } from 'appConstants';
+import { isEmptyObj } from 'utils';
 import SocketManager from './socket';
 import BaseManager from './base';
 
@@ -9,14 +11,20 @@ class ChatManager extends BaseManager {
     this.socket = new SocketManager(this, this.getCtx);
   }
 
+  get isGroupChat() {
+    const { roomType } = this.stores.chatRoomInfoStore;
+    return roomType === RoomType.GROUP;
+  }
+
   processMessage = (payload, isInitMsg) => {
     const messageType = payload.type;
     const messageData = payload.data;
-    const { roomType, chatStatus } = this.stores.chatRoomStore;
-    const { setChatStatus } = this.actions;
+    const { chatStatus } = this.stores.chatInfoStore;
+    const { name } = this.stores.chatRoomInfoStore;
+    const { updateChatStatus, markChatRoomInitialized } = this.actions;
     switch (messageType) {
       case MessageType.USER_INFO:
-        if (roomType === RoomType.INDIVIDUAL) {
+        if (!this.isGroupChat) {
           const { roomId } = messageData;
           if (!roomId) {
             clearTimeout(this.matchTimeout);
@@ -32,7 +40,7 @@ class ChatManager extends BaseManager {
               MatchTimeout,
               this,
             );
-            setChatStatus(ChatStatus.NOT_STARTED);
+            updateChatStatus(ChatStatus.NOT_STARTED);
           }
         }
         return {};
@@ -44,18 +52,17 @@ class ChatManager extends BaseManager {
            * 1. User is joining a group chat
            * 2. User got match in an individual chat
            * 3. User is rejoining an individual chat
+           *    a. Match user has still not re-joined
+           *    b. Match user has already joined
            */
-          if (roomType === RoomType.GROUP) {
+          if (this.isGroupChat) {
             messageData.content = `${messageData.newJoinee.name} entered`;
           } else if ('match' in messageData) {
             clearTimeout(this.matchTimeout);
-            this.setName(messageData.match.name);
-            this.setAvatarUrl(messageData.match.avatarUrl);
-            updateStoredChatWindowData(RoomType.INDIVIDUAL, messageData.room_id, {
-              name: messageData.match.name,
-              avatarUrl: messageData.match.avatarUrl,
-            });
-            this.setRoomInfo({ ...this.roomInfo, roomId: messageData.room_id });
+            const { updateBasicInfo, updateChatRoomData } = this.actions;
+            const { name, avatarUrl, room_id: roomId } = messageData.match;
+            updateBasicInfo({ name, avatarUrl });
+            updateChatRoomData({ roomId });
             messageData.content = `You are matched to ${messageData.match.name}`;
           } else if (messageData.is_room_inactive) {
             messageData.content = 'Reconnecting...';
@@ -64,14 +71,14 @@ class ChatManager extends BaseManager {
           } else {
             messageData.content = 'Connection restored';
           }
-        } else if (this.chatStatus === ChatStatus.RECONNECTING) {
+        } else if (chatStatus === ChatStatus.RECONNECTING) {
           messageData.content = 'Connection restored';
-        } else if (this.chatStatus === ChatStatus.ONGOING && this.isGroupChat) {
+        } else if (chatStatus === ChatStatus.ONGOING && this.isGroupChat) {
           messageData.content = `${messageData.newJoinee.name} entered`;
         }
         if (!isInitMsg) {
-          this.setChatStatus(newChatStatus);
-          this.setInitDone(true);
+          updateChatStatus(newChatStatus);
+          markChatRoomInitialized();
         }
         break;
       }
@@ -79,8 +86,19 @@ class ChatManager extends BaseManager {
         if (this.isGroupChat) {
           messageData.content = `${messageData.resignee.name} left`;
         } else {
-          this.setChatStatus(ChatStatus.RECONNECTING);
+          updateChatStatus(ChatStatus.RECONNECTING);
           messageData.content = 'Reconnecting...';
+          clearTimeout(this.reconnectTimeout);
+          this.reconnectTimeout = setTimeout(
+            (chatManager) => {
+              const { chatStatus: cStatus } = chatManager.stores.chatRoomStore;
+              if (cStatus === ChatStatus.RECONNECTING) {
+                chatManager.closeChatSession();
+              }
+            },
+            ReconnectTimeout,
+            this,
+          );
         }
         break;
       case MessageType.TEXT: {
@@ -107,16 +125,16 @@ class ChatManager extends BaseManager {
         break;
       }
       case MessageType.CHAT_DELETE:
-        if (this.isGroupChat || this.chatStatus === ChatStatus.NOT_STARTED) {
+        if (this.isGroupChat || chatStatus === ChatStatus.NOT_STARTED) {
           messageData.content = 'Room no longer exists';
         } else {
-          messageData.content = `${this.name} left`;
+          messageData.content = `${name} left`;
         }
         this.closeChatSession();
         break;
       case MessageType.RECONNECTING:
         messageData.content = 'Reconnecting...';
-        this.setChatStatus(ChatStatus.RECONNECTING);
+        updateChatStatus(ChatStatus.RECONNECTING);
         break;
       case MessageType.DISCONNECTED:
         messageData.content = 'Disconnected';
@@ -128,6 +146,42 @@ class ChatManager extends BaseManager {
         return {};
     }
     return payload;
+  };
+
+  addMessage = (payload) => {
+    const processedMessage = this.processMessage(payload);
+    !isEmptyObj(processedMessage) && this.actions.addMessage(payload);
+  };
+
+  startPlayer = (playerName, videoId) => {
+    const playerData = { name: playerName, videoId };
+    this.socket?.send(MessageType.PLAYER_INFO, playerData);
+  };
+
+  deletePlayer = () => {
+    this.socket?.send(MessageType.PLAYER_END);
+  };
+
+  handlePlayerDelete = () => {
+    if (this.isHost) {
+      this.setPlayerExists(false);
+      this.deletePlayer();
+    }
+    this.setSyncedPlayerData(null);
+  };
+
+  closeChatSession = () => {
+    const { updateChatStatus } = this.actions;
+    updateChatStatus(ChatStatus.ENDED);
+    if (this.socket) {
+      this.handlePlayerDelete();
+      this.socket.close();
+      this.socket = null;
+    }
+  };
+
+  sendMessage = (msgType, msgData) => {
+    this.socket?.send(msgType, msgData);
   };
 }
 

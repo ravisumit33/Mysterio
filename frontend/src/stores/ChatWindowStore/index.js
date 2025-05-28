@@ -93,6 +93,7 @@ class ChatWindowStore {
           this.addInitMessageList([
             {
               type: MessageType.USER_JOINED,
+              // TODO: Does this.name exists here?
               data: { content: `You are matched to ${this.name}` },
             },
           ]);
@@ -294,6 +295,8 @@ class ChatWindowStore {
            * 1. User is joining a group chat
            * 2. User got match in an individual chat
            * 3. User is rejoining an individual chat
+           *    a. Other user has joined -> room has become active
+           *    b. Other user has not joined -> Room is still inactive
            */
           if (this.isGroupChat) {
             messageData.content = `${messageData.newJoinee.name} entered`;

@@ -7,17 +7,17 @@ import { useChatHydration } from 'hooks';
 import withStorage from '../../withStorage';
 
 const chatRoomInfoReducerWithStorage = withStorage(chatRoomInfoReducer, (chatRoomInfoStore) => {
-  const { roomType, roomId, ...roomData } = chatRoomInfoStore;
-  updateStoredChatWindowData(roomType, roomId, roomData);
+  const { roomType, roomId } = chatRoomInfoStore;
+  updateStoredChatWindowData(roomType, roomId, { roomInfo: chatRoomInfoStore });
 });
 
 export default function ChatRoomInfoProvider({ children }) {
   // @ts-ignore
-  const { initialChatRoomInfo } = useChatHydration();
+  const { roomInfo: hydratedRoomInfo } = useChatHydration();
 
   const [chatRoomInfoStore, chatRoomInfoDispatch] = useReducer(
     chatRoomInfoReducerWithStorage,
-    initialChatRoomInfo,
+    hydratedRoomInfo,
     (hydratedState) => ({
       ...initialChatRoomInfoState,
       ...hydratedState,

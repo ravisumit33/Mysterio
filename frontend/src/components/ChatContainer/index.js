@@ -8,8 +8,8 @@ import notFoundJson from 'assets/animations/not-found.json';
 import WaitScreen from 'components/WaitScreen';
 import { ChatProvider } from 'providers';
 import { ChatHydrationContext } from 'contexts';
-import { useInitalizeChatData } from 'hooks';
-import { ChatInitializationStatus } from 'appConstants';
+import { useHydrateChatData } from 'hooks';
+import { ChatHydrationStatus } from 'appConstants';
 import ChatExperience from './ChatExperience';
 
 const useStyles = makeStyles((theme) => ({
@@ -19,14 +19,14 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function ChatContainer() {
-  const { status, chatData } = useInitalizeChatData();
+  const { status, chatData } = useHydrateChatData();
   const classes = useStyles();
 
-  if (status === ChatInitializationStatus.LOADING) {
+  if (status === ChatHydrationStatus.LOADING) {
     return <WaitScreen shouldOpen />;
   }
 
-  if (status === ChatInitializationStatus.READY) {
+  if (status === ChatHydrationStatus.READY) {
     return (
       <ChatHydrationContext.Provider value={chatData}>
         <ChatProvider>

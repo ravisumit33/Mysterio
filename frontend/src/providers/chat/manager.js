@@ -2,19 +2,36 @@ import React, { useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ChatManager } from 'managers';
 import { ChatManagerContext } from 'contexts';
-import { useChatRoomInfoStore, useChatMessageStore, useManagerContext, useConstant } from 'hooks';
+import {
+  useChatRoomInfoStore,
+  useChatMessageStore,
+  useManagerContext,
+  useConstant,
+  useChatInfoStore,
+} from 'hooks';
 
 export default function ChatManagerProvider({ children }) {
   // @ts-ignore
-  const { chatRoomInfoStore } = useChatRoomInfoStore();
+  const { chatInfoStore, updateChatStatus, markChatRoomInitialized } = useChatInfoStore();
   // @ts-ignore
-  const { chatMessageStore } = useChatMessageStore();
+  const { chatRoomInfoStore, updateChatRoomData, updateBasicInfo } = useChatRoomInfoStore();
+  // @ts-ignore
+  const { chatMessageStore, addMessage } = useChatMessageStore();
 
   const stores = useMemo(
-    () => ({ chatRoomInfoStore, chatMessageStore }),
-    [chatRoomInfoStore, chatMessageStore],
+    () => ({ chatInfoStore, chatRoomInfoStore, chatMessageStore }),
+    [chatInfoStore, chatRoomInfoStore, chatMessageStore],
   );
-  const actions = useMemo(() => ({}), []);
+  const actions = useMemo(
+    () => ({
+      updateChatStatus,
+      markChatRoomInitialized,
+      updateChatRoomData,
+      updateBasicInfo,
+      addMessage,
+    }),
+    [updateChatStatus, markChatRoomInitialized, updateChatRoomData, updateBasicInfo, addMessage],
+  );
   const getChatManagerContext = useManagerContext({ stores, actions });
 
   const chatManager = useConstant(() => new ChatManager(getChatManagerContext));

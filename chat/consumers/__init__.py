@@ -1,3 +1,3 @@
-from .chat_consumer import ChatConsumer
+from .chat import ChatConsumer
 
 __all__ = ["ChatConsumer"]

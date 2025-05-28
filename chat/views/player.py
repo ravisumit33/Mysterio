@@ -1,7 +1,7 @@
 from rest_framework import filters, mixins, viewsets
 
-from chat.constants import GroupPrefix, MessageType
-from chat.models import Player
+from chat.constants import ChannelLayerPrefix
+from chat.models import MessageType, Player
 from chat.permissions import PlayerPermission
 from chat.serializers import ReadPlayerSerializer, UpdatePlayerSerializer
 from chat.utils import channel_layer
@@ -23,9 +23,11 @@ class PlayerViewSet(mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.Gen
             resp_data = resp.data
             room = self.get_object().room
             room_prefix = (
-                GroupPrefix.GROUP_ROOM if room.is_group_room else GroupPrefix.INDIVIDUAL_ROOM
+                ChannelLayerPrefix.GROUP_ROOM
+                if room.is_group_room
+                else ChannelLayerPrefix.INDIVIDUAL_ROOM
             )
-            channel_layer.group_send(
+            channel_layer.group_send_message(
                 room_prefix + str(room.id),
                 MessageType.PLAYER_SYNC,
                 {

@@ -1,6 +1,6 @@
 from email.mime.image import MIMEImage
 
-from allauth.account.adapter import DefaultAccountAdapter as RestAuthAccountAdapter
+from allauth.account.adapter import DefaultAccountAdapter as AllAuthAccountAdapter
 from allauth.utils import build_absolute_uri
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -9,10 +9,13 @@ from django.template.loader import render_to_string
 from django.urls.base import reverse
 
 
-class AccountAdapter(RestAuthAccountAdapter):
+class AccountAdapter(AllAuthAccountAdapter):
     """
     Custom account adapter to render email template
     """
+
+    # TODO: Check if sending email synchronously is taking time.
+    # If yes, override send email and forward sending task to celery
 
     def render_mail(self, template_prefix, email, context, headers=None):
         to_email = [email] if isinstance(email, str) else email

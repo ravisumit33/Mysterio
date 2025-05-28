@@ -1,71 +1,55 @@
+from drf_spectacular.utils import PolymorphicProxySerializer, extend_schema_field
 from rest_framework import serializers
 
-from chat.models import Message, TextData
-
-from .channel import ReadChannelSerializer
+from chat.models import TextData
+from chat.models.message import MessageDataType
+from chat.serializers.chat_session import ChatSessionSerializer
+from chat.serializers.polymorphic_field_serializer import PolymorphicFieldSerializer
 
 
 class TextDataSerializer(serializers.ModelSerializer):
     """
-    Serializer for text data
+    Serializer for creating text data of message
     """
+
+    type = serializers.CharField(default=MessageDataType.TEXT, read_only=True)
+
+    def create(self, validated_data):
+        message = validated_data.pop("message", None)
+        instance = super().create(validated_data)
+        instance.message = message
+        instance.save()
+        return instance
 
     class Meta:
         model = TextData
         fields = ["text"]
 
 
-class MessageContentField(serializers.Field):
-    """
-    A custom field to use for the content_object generic relationship on Message model
-    """
-
-    def to_representation(self, value):
-        if isinstance(value, TextData):
-            return TextDataSerializer(value, context=self.context).data
-        raise Exception("Unexpected type of message content_object")
-
-    def to_internal_value(self, data):
-        if data.get("text", None):
-            return TextDataSerializer(data=data, context=self.context).to_internal_value(data)
-        raise serializers.ValidationError("Invalid message content")
-
-    def get_queryset(self, data):
-        if data.get("text", None):
-            return TextData.objects.all()
-        raise serializers.ValidationError("Invalid message content")
+@extend_schema_field(
+    PolymorphicProxySerializer(
+        component_name="MessageData",
+        serializers=[TextDataSerializer],
+        resource_type_field_name="type",
+    )
+)
+class MessageDataSerializer(PolymorphicFieldSerializer):
+    discriminator_field = "type"
+    serializer_map = {MessageDataType.TEXT: TextDataSerializer}
 
 
-class CreateMessageSerializer(serializers.ModelSerializer):
-    """
-    Write serializer for messages
-    """
-
-    content = MessageContentField(source="content_object")
+class MessageSerializer(serializers.Serializer):
+    sender = ChatSessionSerializer()
+    message_data = MessageDataSerializer()
 
     def create(self, validated_data):
-        """
-        Create message object
-        """
-        content_data = validated_data.pop("content_object")
-        content_object_qs = self.fields["content"].get_queryset(content_data)
-        content_object = content_object_qs.create(**content_data)
-        message = Message.objects.create(**validated_data, content_object=content_object)
-        return message
+        message_data = validated_data.pop("message_data")
+        instance = super().create(validated_data)
+        self.fields.get("message_data").create({"message": instance, **message_data})
+        return instance
 
-    class Meta:
-        model = Message
-        fields = ["sender_channel", "room", "message_type", "content"]
-
-
-class ReadMessageSerializer(serializers.ModelSerializer):
-    """
-    Read serializer for messages
-    """
-
-    content = MessageContentField(source="content_object", read_only=True)
-    sender_channel = ReadChannelSerializer(read_only=True)
-
-    class Meta:
-        model = Message
-        fields = ["room", "message_type", "sender_channel", "content"]
+    def update(self, instance, validated_data):
+        message_data = validated_data.pop("message_data")
+        instance = super().update(instance, validated_data)
+        self.fields.get("message_data").update(instance.message_data, message_data)
+        return instance

@@ -25,6 +25,11 @@ export default function AlertProvider({ children }) {
     return id;
   }, []);
 
+  const hasNewAlert = useCallback(() => {
+    const { alertQueue } = alertStore;
+    return alertQueue.length > 0;
+  }, [alertStore]);
+
   const popAlert = useCallback(() => {
     const { alertQueue } = alertStore;
     if (alertQueue.length === 0) {
@@ -37,8 +42,8 @@ export default function AlertProvider({ children }) {
   }, [alertStore]);
 
   const value = useMemo(
-    () => ({ alertStore, showAlert, hideAlert, popAlert }),
-    [alertStore, showAlert, hideAlert, popAlert],
+    () => ({ alertStore, showAlert, hideAlert, hasNewAlert, popAlert }),
+    [alertStore, showAlert, hideAlert, hasNewAlert, popAlert],
   );
 
   return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;

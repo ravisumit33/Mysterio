@@ -2,8 +2,8 @@ import logging
 
 from django.db import transaction
 
-from chat.constants import GroupPrefix, MessageType
-from chat.models import Channel, MatchRequest, Room, RoomType
+from chat.constants import ChannelLayerPrefix
+from chat.models import Channel, MatchRequest, MessageType, Room, RoomType
 from chat.utils import channel_layer
 
 logger = logging.getLogger(__name__)
@@ -62,14 +62,14 @@ def process_unmatched_channels():
                 channel = unmatched_channels[channel_idx_pair[i]]
                 match_channel_idx = channel_idx_pair[1 - i]
                 channel_layer.group_add(
-                    GroupPrefix.INDIVIDUAL_ROOM + str(room_id),
+                    ChannelLayerPrefix.INDIVIDUAL_ROOM + str(room_id),
                     channel.name,
                 )
-                channel_layer.group_send(
-                    GroupPrefix.INDIVIDUAL_CHANNEL + str(channel.id),
+                channel_layer.send_match_room(channel.name, room_id)
+                channel_layer.send_message(
+                    channel.name,
                     MessageType.USER_JOINED,
                     {
-                        "room_id": room_id,
                         "match": {
                             "id": sessions_data[match_channel_idx].session_id,
                             "name": sessions_data[match_channel_idx].name,

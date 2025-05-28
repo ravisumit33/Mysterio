@@ -3,16 +3,16 @@ import { useLocation } from 'react-router-dom';
 import { getChatRouteInfo } from 'utils';
 import { getRoomProtectionService } from 'services';
 import { getStoredChatWindowData } from 'utils/browserStorageUtils';
-import { ChatInitializationStatus, GlobalDialogTypes, RoomType } from 'appConstants';
+import { ChatHydrationStatus, GlobalDialogTypes, RoomType } from 'appConstants';
 import { useGlobalDialogStore } from '../useStore';
 import useTaskRunnerWithAlert from '../useTaskRunnerWithAlert';
 
-const useInitalizeChatData = () => {
+const useHydrateChatData = () => {
   const { pathname } = useLocation();
   // @ts-ignore
   const { openGlobalDialog } = useGlobalDialogStore();
   const runTaskWithAlert = useTaskRunnerWithAlert();
-  const [status, setStatus] = useState(ChatInitializationStatus.LOADING);
+  const [status, setStatus] = useState(ChatHydrationStatus.LOADING);
   const [chatData, setChatData] = useState(null);
 
   useEffect(() => {
@@ -20,18 +20,17 @@ const useInitalizeChatData = () => {
 
     if (type === 'match') {
       setChatData({});
-      setStatus(ChatInitializationStatus.READY);
+      setStatus(ChatHydrationStatus.READY);
       return;
     }
 
     if (type === 'room' && roomType && roomId && Object.values(RoomType).includes(roomType)) {
-      const storedData = getStoredChatWindowData(roomType, roomId);
-      const hydratedChatData = { ...storedData, roomId, roomType };
+      const hydratedChatData = getStoredChatWindowData(roomType, roomId);
       const isGroupRoom = roomType === RoomType.GROUP;
 
       const proceed = (finalData) => {
         setChatData(finalData);
-        setStatus(ChatInitializationStatus.READY);
+        setStatus(ChatHydrationStatus.READY);
       };
 
       if (!isGroupRoom || hydratedChatData.password) {
@@ -51,7 +50,7 @@ const useInitalizeChatData = () => {
                 onSuccess: (pwd) => {
                   proceed({ ...hydratedChatData, password: pwd });
                 },
-                onCancel: () => setStatus(ChatInitializationStatus.FAILED),
+                onCancel: () => setStatus(ChatHydrationStatus.FAILED),
               });
             }
           },
@@ -60,16 +59,16 @@ const useInitalizeChatData = () => {
               text: 'Error occurred while connecting to server.',
               severity: 'error',
             });
-            setStatus(ChatInitializationStatus.FAILED);
+            setStatus(ChatHydrationStatus.FAILED);
           },
         });
       }
     } else {
-      setStatus(ChatInitializationStatus.FAILED);
+      setStatus(ChatHydrationStatus.FAILED);
     }
   }, [pathname, openGlobalDialog, runTaskWithAlert]);
 
   return { status, chatData };
 };
 
-export default useInitalizeChatData;
+export default useHydrateChatData;

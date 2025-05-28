@@ -84,6 +84,7 @@ function App() {
   const classes = useStyles();
 
   // TODO: Add an alert for internet connection down
+  // Add internationalization
   return (
     <Sentry.ErrorBoundary fallback={<ErrorUI />}>
       <CssBaseline>

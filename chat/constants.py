@@ -1,32 +1,14 @@
-from dataclasses import dataclass
+from enum import Enum
 
 
-@dataclass
-class MessageType:
-    """Message types"""
+class ChannelLayerPrefix(str, Enum):
+    """Prefix used in making channel layer group names"""
 
-    USER_JOINED = 1
-    USER_LEFT = 2
-    USER_INFO = 3
-    TEXT = 4
-    CHAT_DELETE = 5
-    PLAYER_INFO = 6
-    PLAYER_SYNC = 7
-    PLAYER_END = 8
-
-
-@dataclass
-class GroupPrefix:
-    """Prefix used in making group names"""
-
-    INDIVIDUAL_CHANNEL = "grp_IndividualChannel_"
-    GROUP_CHANNEL = "grp_GroupChannel_"
     GROUP_ROOM = "grp_GroupRoom_"
     INDIVIDUAL_ROOM = "grp_IndividualRoom_"
 
 
-@dataclass
-class CacheKey:
+class CacheKey(str, Enum):
     """Keys used to store data in cache"""
 
     LAST_MATCH_SCHEDULED_TIME = "last_match_scheduled_time"

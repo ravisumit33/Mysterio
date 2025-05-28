@@ -75,7 +75,7 @@ const GlobalDialogTypes = Object.freeze({
   ROOM_PASSWORD: 'roomPwd',
 });
 
-const ChatInitializationStatus = Object.freeze({
+const ChatHydrationStatus = Object.freeze({
   LOADING: 'LOADING',
   READY: 'READY',
   FAILED: 'FAILED',
@@ -97,5 +97,5 @@ export {
   BrowserStorageKeysPrefix,
   HydrationKeys,
   GlobalDialogTypes,
-  ChatInitializationStatus,
+  ChatHydrationStatus,
 };

@@ -9,7 +9,7 @@ import {
   useChatRedirect,
   useStartChat,
   useChatHydration,
-  useInitalizeChatData,
+  useHydrateChatData,
 } from './chat';
 import useOnScreen from './useOnScreen';
 import useBasicInfo from './useBasicInfo';
@@ -45,7 +45,7 @@ export {
   useChatRedirect,
   useStartChat,
   useChatHydration,
-  useInitalizeChatData,
+  useHydrateChatData,
   useBasicInfo,
   useSearchParams,
   useLocalStorage,

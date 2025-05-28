@@ -11,15 +11,13 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useTaskRunnerWithAlert, useTaskRunnerWithLoader, useGlobalDialogStore } from 'hooks';
+import { useTaskRunnerWithAlert, useTaskRunnerWithLoader } from 'hooks';
 import CustomAvatar from 'components/Avatar';
 import { verifyRoomPasswordService } from 'services';
 
 function RoomPasswordDialog({ payload }) {
   const { onSuccess, onCancel, chatData } = payload;
   const { roomId, name, avatarUrl } = chatData;
-  // @ts-ignore
-  const { globalDialogStore, closeGlobalDialog } = useGlobalDialogStore();
   const runTaskWithLoader = useTaskRunnerWithLoader();
   const runTaskWithAlert = useTaskRunnerWithAlert();
 
@@ -37,10 +35,7 @@ function RoomPasswordDialog({ payload }) {
       task: () =>
         runTaskWithAlert({
           task: () => verifyRoomPasswordService(roomId, selectedRoomPassword),
-          onSuccessCb: () => {
-            closeGlobalDialog();
-            onSuccess(selectedRoomPassword);
-          },
+          onSuccessCb: () => onSuccess(selectedRoomPassword),
           onErrorCb: (response, showAlertCb) => {
             showAlertCb({
               text: 'Invalid room password.',
@@ -55,7 +50,7 @@ function RoomPasswordDialog({ payload }) {
   };
 
   return (
-    <Dialog open={globalDialogStore.open}>
+    <Dialog open>
       <DialogTitle>Enter Password</DialogTitle>
       <form
         onSubmit={(evt) => {
@@ -94,13 +89,7 @@ function RoomPasswordDialog({ payload }) {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button
-            color="secondary"
-            onClick={() => {
-              closeGlobalDialog();
-              onCancel();
-            }}
-          >
+          <Button color="secondary" onClick={() => onCancel()}>
             Cancel
           </Button>
           <Button type="submit" color="primary">

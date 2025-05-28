@@ -3,8 +3,8 @@ from rest_framework.decorators import action, api_view
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chat.constants import GroupPrefix, MessageType
-from chat.models import Room
+from chat.constants import ChannelLayerPrefix
+from chat.models import MessageType, Room
 from chat.permissions import RoomPermission
 from chat.serializers import (
     DefaultRoomSerializer,
@@ -33,9 +33,13 @@ class RoomViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         room = self.get_object()
-        group_prefix = GroupPrefix.GROUP_ROOM if room.is_group_room else GroupPrefix.INDIVIDUAL_ROOM
-        channel_layer.group_send(
-            group_prefix + str(room.id),
+        room_prefix = (
+            ChannelLayerPrefix.GROUP_ROOM
+            if room.is_group_room
+            else ChannelLayerPrefix.INDIVIDUAL_ROOM
+        )
+        channel_layer.group_send_message(
+            room_prefix + str(room.id),
             MessageType.CHAT_DELETE,
             {
                 "text": "Room is deleted",

@@ -22,14 +22,6 @@ class Room(models.Model):
         """
         return self.room_type == RoomType.GROUP
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(room_type__in=[choice[0] for choice in RoomType.choices]),
-                name="valid_room_type_choice",
-            )
-        ]
-
 
 class GroupRoomData(models.Model):
     """Room data for group chat"""
@@ -38,7 +30,6 @@ class GroupRoomData(models.Model):
         "chat.Room",
         on_delete=models.CASCADE,
         related_name="room_data",
-        related_query_name="room_data",
     )
     name = models.CharField(max_length=20)
     avatar_url = models.URLField(blank=True)

@@ -4,7 +4,6 @@ import { Box, Button, IconButton, Snackbar, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import Alert from '@mui/material/Alert';
 import CloseIcon from '@mui/icons-material/Close';
-import { observer } from 'mobx-react-lite';
 import { useAlertStore, useUserStore } from 'hooks';
 import { isLoggedIn } from 'selectors';
 import PropTypes from 'prop-types';
@@ -45,22 +44,24 @@ LoginAction.propTypes = {
   hideAlert: PropTypes.func.isRequired,
 };
 
+// https://mui.com/material-ui/react-snackbar/#consecutive-snackbars
 function AppAlert() {
   const classes = useStyles();
   // @ts-ignore
-  const { popAlert } = useAlertStore();
+  const { hasNewAlert, popAlert } = useAlertStore();
   const [open, setOpen] = useState(false);
   const [currentAlert, setCurrentAlert] = useState(null);
 
   useEffect(() => {
-    const newAlert = popAlert();
-    if (newAlert && !currentAlert) {
+    const newAlertExist = hasNewAlert();
+    if (newAlertExist && !currentAlert) {
+      const newAlert = popAlert();
       setCurrentAlert({ ...newAlert });
       setOpen(true);
-    } else if (newAlert && currentAlert && open) {
+    } else if (newAlertExist && currentAlert && open) {
       setOpen(false);
     }
-  }, [currentAlert, open, popAlert]);
+  }, [currentAlert, open, hasNewAlert, popAlert]);
 
   const handleClose = (event, reason) => {
     if (reason === 'clickaway') {
@@ -101,4 +102,4 @@ function AppAlert() {
   );
 }
 
-export default observer(AppAlert);
+export default AppAlert;

@@ -23,6 +23,7 @@ class ReadPlayerSerializer(serializers.ModelSerializer):
             "current_time",
             "room",
         ]
+        read_only_fields = "__all__"
 
 
 class CreatePlayerSerializer(serializers.ModelSerializer):

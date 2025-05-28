@@ -70,3 +70,6 @@ def handle_user_info(consumer, message_data):
             {"newJoinee": consumer.profile},
         )
         add_text_message(consumer, text=f"{name} entered", msg_type=MessageType.USER_JOINED)
+    logger.info("User joined.")
+    logger.debug("User details:")
+    logger.debug(message_data)

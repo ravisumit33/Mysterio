@@ -1,9 +1,13 @@
+import logging
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.auth.hashers import check_password
 from django.db.models import Count, Q
 
 from chat.models import Room
+
+logger = logging.getLogger(__name__)
 
 
 class ChannelLayerOps:
@@ -12,7 +16,6 @@ class ChannelLayerOps:
     """
 
     def __init__(self):
-        self.type = "group_msg_receive"
         self.channel_layer = get_channel_layer()
 
     def group_add(self, group, channel_name):
@@ -27,18 +30,42 @@ class ChannelLayerOps:
         """
         async_to_sync(self.channel_layer.group_discard)(group, channel_name)
 
-    def group_send(self, group, message_type, data):
+    def group_send_message(self, group, message_type, data):
         """
-        Handle group send
+        Handle sending message to a group
         """
         async_to_sync(self.channel_layer.group_send)(
             group,
             {
-                "type": self.type,
+                "type": "chat.message",
                 "payload": {
                     "type": message_type,
                     "data": data,
                 },
+            },
+        )
+
+    def send_message(self, channel_name, message_type, data):
+        """
+        Handle sending message to a channel
+        """
+        async_to_sync(self.channel_layer.send)(
+            channel_name,
+            {
+                "type": "chat.message",
+                "payload": {
+                    "type": message_type,
+                    "data": data,
+                },
+            },
+        )
+
+    def send_match_room(self, channel_name, room_id):
+        async_to_sync(self.channel_layer.send)(
+            channel_name,
+            {
+                "type": "match.room",
+                "room_id": room_id,
             },
         )
 

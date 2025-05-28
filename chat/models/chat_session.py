@@ -16,3 +16,4 @@ class ChatSession(models.Model):
         related_name="chat_sessions",
         related_query_name="chat_session",
     )
+    channel = models.OneToOneField("chat.Channel", on_delete=models.CASCADE)

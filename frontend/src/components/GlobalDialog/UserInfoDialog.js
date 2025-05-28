@@ -1,5 +1,4 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
 import {
   Button,
   Dialog,
@@ -10,13 +9,7 @@ import {
 } from '@mui/material';
 import { Face } from '@mui/icons-material';
 import { makeStyles } from '@mui/styles';
-import {
-  useBasicInfo,
-  useProfileStore,
-  useGlobalDialogStore,
-  useAlertStore,
-  useTaskRunnerWithAlert,
-} from 'hooks';
+import { useBasicInfo, useProfileStore, useAlertStore, useTaskRunnerWithAlert } from 'hooks';
 import { uploadAvatarService } from 'services';
 import PropTypes from 'prop-types';
 import BasicInfo from '../BasicInfo';
@@ -58,8 +51,6 @@ function UserInfoDialog({ payload }) {
   const { profileStore, setBasicInfo } = useProfileStore();
   // @ts-ignore
   const { showAlert } = useAlertStore();
-  // @ts-ignore
-  const { globalDialogStore, closeGlobalDialog } = useGlobalDialogStore();
   const runTaskWithAlert = useTaskRunnerWithAlert();
 
   const { name, setName, avatarUrl, setAvatarUrl } = useBasicInfo(
@@ -104,7 +95,6 @@ function UserInfoDialog({ payload }) {
           avatarUrl: url,
           sessionId: profileSessionId,
         });
-        closeGlobalDialog();
         onSuccess();
       },
       onErrorCb: (resp, showAlertCb) => {
@@ -117,7 +107,7 @@ function UserInfoDialog({ payload }) {
   };
 
   return (
-    <Dialog open={globalDialogStore.isOpen} maxWidth="xs" fullWidth>
+    <Dialog open maxWidth="xs" fullWidth>
       <DialogTitle>Let&apos;s get started!</DialogTitle>
       <form
         onSubmit={(evt) => {
@@ -140,13 +130,7 @@ function UserInfoDialog({ payload }) {
         </DialogContent>
         <DialogActions>
           {profileStore.sessionId && (
-            <Button
-              color="secondary"
-              onClick={() => {
-                closeGlobalDialog();
-                onCancel();
-              }}
-            >
+            <Button color="secondary" onClick={() => onCancel()}>
               Cancel
             </Button>
           )}
@@ -173,4 +157,4 @@ UserInfoDialog.defaultProps = {
   },
 };
 
-export default observer(UserInfoDialog);
+export default UserInfoDialog;

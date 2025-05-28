@@ -108,6 +108,7 @@ function Player() {
       handleCue(syncedPlayerData);
       if (isHost) {
         syncIntervalRef.current = setInterval(() => {
+          // TODO: updatePlayer using websocket(chatManager) instead of HTTP(services)
           updatePlayer({ current_time: getPlayerTime(playerName) });
         }, 1000);
       }
